@@ -1,0 +1,144 @@
+---
+title: GenomicSEM of MDD symptoms
+author: Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard 
+output:
+  html_document:
+    toc: TRUE
+    code_folding: "show"
+    number_sections: TRUE
+    df_print: kable
+  md_document:
+    variant: markdown_github
+---
+
+Conduct SEM model of MDD symptom genomic correlation matrix
+
+```{r results='hide'}
+
+library(GenomicSEM)
+library(corrplot)
+
+```
+
+Read in LDSC structure for UKB CIDI symptoms
+```{r}
+
+cidi_covstruct <- dget('ldsc/ukb_mhq_cidi_covstruct.deparse.R')
+
+# the +/- in weight change column names doesn't play well with
+# lavaan model syntax
+dimnames(cidi_covstruct$S)[[2]][10:11] <- c('WeightInc', 'WeightDec')
+
+```
+
+Plot correlation matrix (truncate correlations > 1)
+
+```{r cidi_covstruct_corr}
+
+cidi_cor <- cov2cor(cidi_covstruct$S)
+cidi_cor[which(cidi_cor > 1)] <- 1
+rownames(cidi_cor) <- colnames(cidi_cor)
+
+corrplot(cidi_cor, 'square')
+
+```
+
+Fit common factor model (all symptoms)
+
+```{r}
+
+gfactor_fit <- commonfactor(cidi_covstruct)
+
+```
+
+```{r}
+
+gfactor_fit$results
+
+gfactor_fit$modelfit
+
+```
+
+Common factor model (excluding directional symptoms that have zero or negative genetic correlations with each other)
+
+```{r}
+
+symptomfactor_model <- "F1 =~ NA*Mood + Anhed + Cnctr + Death + Sleep + Tired + Worth + Weight
+F1 ~~ 1*F1"
+
+symptomfactor_fit <- usermodel(cidi_covstruct, model=symptomfactor_model)
+
+```
+
+```{r}
+
+symptomfactor_fit$results
+
+symptomfactor_fit$modelfit
+
+```
+
+Common factor model with directional symptoms but excluding their non-directional parent symptoms
+
+```{r}
+
+valencefactor_model <- "F1 =~ NA*Mood + Anhed + Cnctr + Death + Insomn + Hypersom + Tired + Worth + WeightInc + WeightDec
+F1 ~~ 1*F1"
+
+valencefactor_fit <- usermodel(cidi_covstruct, model=valencefactor_model)
+
+```
+
+```{r}
+
+valencefactor_fit$results
+
+valencefactor_fit$modelfit
+
+```
+
+Fit model close to Kendler…Neale (no psychomotor symptom).
+
+```{r}
+
+kendler...neale_model <- "
+F1 =~ NA*Mood + Anhed + Worth
+F2 =~ NA*Cnctr + Death + Worth
+F3 =~ NA*Sleep + Tired + Weight
+F1 ~~ 1*F1
+F2 ~~ 1*F2
+F3 ~~ 1*F3
+F1 ~~ F2 + F3
+F2 ~~ F3"
+kendler...neale_fit <- usermodel(cidi_covstruct, model=kendler...neale_model)
+
+```
+
+Add constraints to the model to limit factor correlations to < 1 and residual variances to > 0.
+
+```{r}
+
+kendler...neale_constrain_model <- "
+F1 =~ NA*Mood + Anhed + Worth
+F2 =~ NA*Cnctr + Death + Worth
+F3 =~ NA*Sleep + Tired + Weight
+F1 ~~ 1*F1
+F2 ~~ 1*F2
+F3 ~~ 1*F3
+F1 ~~ F2 + F3
+F2 ~~ b*F3
+Anhed~~a*Anhed
+a > .001
+b < 1"
+
+kendler...neale_constrain_fit <- usermodel(cidi_covstruct, estimation = "DWLS", model=kendler...neale_constrain_model)
+
+```
+
+```{r}
+
+kendler...neale_constrain_fit$modelfit
+
+kendler...neale_constrain_fit$results
+
+```
