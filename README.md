@@ -22,5 +22,5 @@ from publicly downloadable sumstats files.
 
 rmarkdown::render('commonfactor.Rmd', output_format='all')
 
-
+ 
 ```
