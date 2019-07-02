@@ -6,8 +6,12 @@
 #     # access config as a list...
 #     config$data$pgc_mdd_v1
 ## data location configuration
-# pgc_mdd_v1: input location of v1 PGC MDD cohorts on LISA
-# pgc_mdd_symptoms: output location to write PGC symptom .pheno files
+# pgc:mdd:v1: input location of v1 PGC MDD cohorts on LISA
+# pgc:mdd:pheno: output location to write PGC symptom .pheno files
+# pgc:mdd:ukb_remove: IDs of PGC participants who overlap with UK Biobank
 data:
-  pgc_mdd_v1: /home/PATH/v1
-  pgc_mdd_symptoms: /home/USER/mdd_symptoms
+  pgc:
+    mdd:
+      v1: /home/PATH/v1
+      pheno: /home/USER/mdd_symptoms
+      ukb_remove: /home/PATH/959_PGC_UKB_overlap.txt
