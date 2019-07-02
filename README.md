@@ -6,6 +6,11 @@
 - [GenomicSEM](https://github.com/MichelNivard/GenomicSEM)
 - [corrplot](https://cran.r-project.org/package=corrplot)
 - [rmarkdown](https://rmarkdown.rstudio.com)
+- [yaml](https://cran.r-project.org/web/packages/yaml/index.html)
+
+## Configuration
+
+System configuration is specified in a [YAML](https://yaml.org/) file. Make a copy of [`config-example.yaml`](config-example.yaml) to `config.yaml` and set the options up for the system each part of the analyis is run on.
 
 ## GWAS sumstats
 
