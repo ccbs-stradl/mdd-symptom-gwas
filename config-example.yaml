@@ -1,0 +1,13 @@
+# Runtime settings
+# Make a copy of this file as 'config.yaml', set the options to match
+# your system, and load into R with
+#     library(yaml)
+#     config <- load.yaml_file('config.yaml')
+#     # access config as a list...
+#     config$data$pgc_mdd_v1
+## data location configuration
+# pgc_mdd_v1: input location of v1 PGC MDD cohorts on LISA
+# pgc_mdd_symptoms: output location to write PGC symptom .pheno files
+data:
+  pgc_mdd_v1: /home/PATH/v1
+  pgc_mdd_symptoms: /home/USER/mdd_symptoms
