@@ -40,29 +40,29 @@ write.table(mddtab1,file.path(outputdirectory,filename),row=F,col=T,sep="\t",quo
 #Extract 9 pheno files - One for each symptom - for some reason passing a vector straight to the parameter 'variable' resulted in an error so set it up in a for loop instead.
 symptoms <- c("MDD1", "MDD2", "MDD3a", "MDD3b", "MDD4a", "MDD4b", "MDD5a", "MDD5b", "MDD6", "MDD7", "MDD8", "MDD9")
 
-dir.create(config$data$pgc$mdd$pheno, recursive=TRUE)
+dir.create(config$data$pgc$mdd$output, recursive=TRUE)
 
 for (i in symptoms) {
-selectpheno(variable=i, workingdirectory=file.path(config$data$pgc$mdd$v1, "secondary_phenotypes/1216_update"), outputdirectory=config$data$pgc$mdd$pheno)
+selectpheno(variable=i, workingdirectory=file.path(config$data$pgc$mdd$v1, "secondary_phenotypes/1216_update"), outputdirectory=config$data$pgc$mdd$output)
 }
 
 #Part 2
 ##Subset by study ID that is relevant to my cohorts - cases and controls
 symptoms <- c("MDD1", "MDD2", "MDD3a", "MDD3b", "MDD4a", "MDD4b", "MDD5a", "MDD5b", "MDD6", "MDD7", "MDD8", "MDD9")
 for (i in symptoms) {
-MDD <-read.table(file.path(config$data$pgc$mdd$pheno, paste0(i,"_PGCMDD2.tsv")), sep="\t", header=T)
+MDD <-read.table(file.path(config$data$pgc$mdd$output, paste0(i,"_PGCMDD2.tsv")), sep="\t", header=T)
 keepStudy <- c("COF", "Colaus", "NESDA/NTR", "ROTTERDAM", "SHIP-0", "RS")
 #Change pheno file for 1=controls, 2=cases and -9=unknowns as stated on RICOPILI
 MDD[,i][!MDD$Study %in% keepStudy] <- -9 #Remove cases and controls not in the correct cohort
 MDD[,i][is.na(MDD[,i])] <- -9  #Recode NAs to -9
 MDD[,i][MDD[,i]==1] <- 2 
 MDD[,i][MDD[,i]==0] <- 1 
-write.csv(MDD, file.path(config$data$pgc$mdd$pheno, paste0("symptom_",i,"_PGCMDD2_recoded.csv")), row.names=F)
+write.csv(MDD, file.path(config$data$pgc$mdd$output, paste0("symptom_",i,"_PGCMDD2_recoded.csv")), row.names=F)
 }
 
 #Check coding of phenos to see if any adjustments are required
 for (i in symptoms) {
-MDD <-read.csv(file.path(config$data$pgc$mdd$pheno, paste0("symptom_",i,"_PGCMDD2_recoded.csv")), header=T)
+MDD <-read.csv(file.path(config$data$pgc$mdd$output, paste0("symptom_",i,"_PGCMDD2_recoded.csv")), header=T)
 print(dim(MDD))
 print(table(MDD[[i]]))
 } #Everything seems to be working
@@ -72,7 +72,7 @@ print(table(MDD[[i]]))
 symptoms <- c("MDD1", "MDD2", "MDD3a", "MDD3b", "MDD4a", "MDD4b", "MDD5a", "MDD5b", "MDD6", "MDD7", "MDD8", "MDD9")
 UKB <- read.table(config$data$pgc$mdd$ukb_remove, sep="\t", header=F)
 for (i in symptoms) {
-MDD <-read.csv(file.path(config$data$pgc$mdd$pheno, paste0("symptom_",i,"_PGCMDD2_recoded.csv")), header=T)
+MDD <-read.csv(file.path(config$data$pgc$mdd$output, paste0("symptom_",i,"_PGCMDD2_recoded.csv")), header=T)
 print(table(MDD[[i]]))
 #MDD <- MDD[!MDD$ID1 %in% UKB$V2]
 print(sum(MDD$ID2 %in% UKB$V3)) #Matches with 315

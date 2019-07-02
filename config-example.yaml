@@ -4,14 +4,14 @@
 #     library(yaml)
 #     config <- load.yaml_file('config.yaml')
 #     # access config as a list...
-#     config$data$pgc_mdd_v1
+#     config$data$pgc$mdd$v1
 ## data location configuration
 # pgc:mdd:v1: input location of v1 PGC MDD cohorts on LISA
-# pgc:mdd:pheno: output location to write PGC symptom .pheno files
+# pgc:mdd:output: output location to write PGC symptom files
 # pgc:mdd:ukb_remove: IDs of PGC participants who overlap with UK Biobank
 data:
   pgc:
     mdd:
       v1: /home/PATH/v1
-      pheno: /home/USER/mdd_symptoms
+      output: /home/USER/mdd_symptoms
       ukb_remove: /home/PATH/959_PGC_UKB_overlap.txt
