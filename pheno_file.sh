@@ -31,7 +31,7 @@ config <- yaml.load_file('config.yaml')
 
 selectpheno = function(variable, workingdirectory, outputdirectory) {
 library(gdata)
-files <- list.files(path=workingdirectory, pattern="*.xls")
+files <- list.files(path=workingdirectory, pattern="*.xls", full.names=TRUE)
 res1 <- do.call(`rbind`,lapply(files, read.xls, header=T))
 mddtab1 <-as.matrix(res1[,c("ID1","ID2","Study","Sub.study",paste(variable))])
 filename <- paste(variable,"_PGCMDD2",sep="",".tsv")
@@ -51,19 +51,19 @@ selectpheno(variable=i, workingdirectory=file.path(config$data$pgc$mdd$v1, "seco
 }
 
 #Rotterdam dataset to be extracted separately
-rotterdam <- read.xls(file.path(config$data$pgc$mdd$output, "secondary_phenotypes/1216_update/ROTTERDAM_PGC2updated.xls", header=T)
+rotterdam <- read.xls(file.path(config$data$pgc$mdd$v1, "secondary_phenotypes/1216_update/ROTTERDAM_PGC2updated.xls"), header=T)
 
 #GSK dataset to be extracted separately
-gsk <- read.xls(file.path(config$data$pgc$mdd$output, "secondary_phenotypes/1216_update/GSK_PGC2updated.xls", header=T)
+gsk <- read.xls(file.path(config$data$pgc$mdd$v1, "secondary_phenotypes/1216_update/GSK_PGC2updated.xls"), header=T)
 
 
 #Save down these separately extracted files
 symptoms <- c("MDD1", "MDD2", "MDD3a", "MDD3b", "MDD4a", "MDD4b", "MDD5a", "MDD5b", "MDD6", "MDD7", "MDD8", "MDD9")
 for (i in symptoms) {
 rot <- rotterdam[,c('ID1','ID2','Study','Sub.study',i)]
-write.table(rot,paste(i,"rotterdam_PGC2.tsv",sep="_"),sep="\t")
+write.table(rot,file.path(config$data$pgc$mdd$output, paste(i,"rotterdam_PGC2.tsv",sep="_")),sep="\t")
 gs <- gsk[,c('ID1','ID2','Study','Sub.study',i)]
-write.table(gs,paste(i,"gsk_PGC2.tsv",sep="_"),sep="\t")
+write.table(gs,file.path(config$data$pgc$mdd$output, paste(i,"gsk_PGC2.tsv",sep="_")),sep="\t")
 }
 
 #Part 2
@@ -71,7 +71,7 @@ write.table(gs,paste(i,"gsk_PGC2.tsv",sep="_"),sep="\t")
 for (i in symptoms) {
 rotterdam1 <- read.table(file.path(config$data$pgc$mdd$output, paste0(i,'_rotterdam_PGC2.tsv', sep="")), sep="\t", header=T)
 gsk1 <- read.table(file.path(config$data$pgc$mdd$output,paste0(i,'_gsk_PGC2.tsv', sep="")), sep="\t", header=T)
-mdd1 <-read.table(file.path(config$data$pgc$mdd$output, paste0('symptom_',i,'_PGCMDD2.xls', sep="")), header=T)
+mdd1 <-read.table(file.path(config$data$pgc$mdd$output, paste0(i,'_PGCMDD2.tsv', sep="")), header=T)
 mdd1_norotgsk <- mdd1 %>% 
   				filter(!str_detect(ID1, '_rot4_eur_sr|_gsk2_eur_sr_'))
 MDD <- rbind.fill(mdd1_norotgsk, rotterdam1, gsk1)
@@ -89,7 +89,7 @@ write.table(MDD, file.path(config$data$pgc$mdd$output, paste0("symptom_",i,"_PGC
 
 #Check coding of phenos to see if any adjustments are required
 for (i in symptoms) {
-MDD <-read.table(file.path(config$data$pgc$mdd$output, paste0("symptom_",i,"_PGCMDD2_recoded.tsv", sep="")), sep="\t" header=T)
+MDD <-read.table(file.path(config$data$pgc$mdd$output, paste0("symptom_",i,"_PGCMDD2_recoded.tsv", sep="")), sep="\t", header=T)
 print(dim(MDD))
 print(table(MDD[[i]]))
 } #Everything seems to be working - 6th dataset needs a 9 recoded as -9
