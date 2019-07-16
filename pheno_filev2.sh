@@ -52,7 +52,7 @@ noupdate <- rbind.fill(noupdate, mdd)
 for (i in symptoms){
 full <- rbind.fill(updated,noupdate)
 full <- full[,c("ID1","ID2","Study","Sub.study", i)]
-write.table(full,file.path(output_dir, paste0(i,"_PGCMDD2.tsv", sep="")), sep="\t", row.names=F)
+write.table(full,file.path(output_dir, paste0(i,"_PGCMDD2.tsv", sep="")), sep="\t", row.names=F, quote=F)
 }
 
 #Part 2
@@ -67,7 +67,7 @@ MDD[,i][MDD[,i]==9] <- -9  #Recode 9 to -9
 MDD[,i][MDD[,i]==1] <- 2 
 MDD[,i][MDD[,i]==0] <- 1 
 print(table(MDD[[i]]))
-write.table(MDD, file.path(output_dir, paste0(i,"_PGCMDD2_recoded.tsv", sep="")), sep="\t", row.names=F)
+write.table(MDD, file.path(output_dir, paste0(i,"_PGCMDD2_recoded.tsv", sep="")), sep="\t", row.names=F, quote=F)
 }
 
 
@@ -88,7 +88,7 @@ print(MDD %>%
 filter(MDD$ID2 %in% UKB$V3 & MDD$ID1adj %in% UKB$ID1adj) %>% group_by(Study) %>% tally())
 #293 removed due to overlap with UKB - 205 from RADIANT which makes sense
 MDD2 <- MDD2[,-c(3,4,6)]
-write.table(MDD2, file.path(output_dir, paste0(i,"_PGCMDD2_final.tsv", sep="")), sep="\t", row.names=F)
+write.table(MDD2, file.path(output_dir, paste0(i,"_PGCMDD2_final.tsv", sep="")), sep="\t", row.names=F, quote=F)
 }
 
 
