@@ -107,8 +107,8 @@ MDD %>%
   group_by(Study) %>%
   tally()
 #293 removed due to overlap with UKB - 205 from RADIANT which makes sense
-MDD2 <- MDD2[,-c(3,4,6)]
-write.table(MDD2, file.path(output_dir, paste0(i,"_CasesControls_PGCMDD2_final.tsv", sep="")), sep="\t", row.names=F, quote=F)
+MDD_pheno <- MDD2[,c(1,2,5)]
+write.table(MDD_pheno, file.path(output_dir, paste0(i,"_CasesControls_PGCMDD2_final.tsv", sep="")), sep="\t", row.names=F, col.names=F, quote=F)
 }
 
 for (i in symptoms) {
@@ -125,8 +125,8 @@ MDD %>%
   group_by(Study) %>%
   tally()
 #293 removed due to overlap with UKB - 205 from RADIANT which makes sense
-MDD2 <- MDD2[,-c(3,4,6)]
-write.table(MDD2, file.path(output_dir, paste0(i,"_CasesOnly_PGCMDD2_final.tsv", sep="")), sep="\t", row.names=F, quote=F)
+MDD_pheno <- MDD2[,c(1,2,5)]
+write.table(MDD_pheno, file.path(output_dir, paste0(i,"_CasesOnly_PGCMDD2_final.tsv", sep="")), sep="\t", row.names=F, col.names=F, quote=F)
 }
 
 #COMPLETE
