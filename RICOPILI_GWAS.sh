@@ -7,9 +7,8 @@ tar -xvzf rp_bin.2019_Jun_25.001.tar.gz
 
 #Create custom installation file in ricopili
 
-#Softlink to testing datasets 
-ln -s //home/pgcdac/DWFV2CJb8Piv_0116_pgc_data/mdd/wave2/v1/* /home/jermy/
-ln -s //home/pgcdac/DWFV2CJb8Piv_0116_pgc_data/mdd/wave2/v1_shp/* /home/jermy/ 
+#Softlink to all files within the testing datasets - actual path replaced by PATH 
+ln -s //home/PATH/* /home/USER/ 
 
 #TEST!!!  Postimp RICOPILI code - run this from my home directory now all softlinks have been set-up
 postimp_navi --out MDD1_case_con --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --refiex refiex.mddw2v01
