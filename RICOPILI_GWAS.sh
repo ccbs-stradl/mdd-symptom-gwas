@@ -35,3 +35,30 @@ postimp_navi --out MDD6_CaseControl --mds MDD29.0515.nproj.menv.mds_cov --coco 1
 postimp_navi --out MDD7_CaseControl --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD7_PGCMDD2_final.txt
 postimp_navi --out MDD8_CaseControl --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD8_PGCMDD2_final.txt
 postimp_navi --out MDD0_CaseControl --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD9_PGCMDD2_final.txt
+
+# find names of datasets with case-only symptom data
+# parse ID1s and extract name of cohort
+cat MDD1_CasesOnly_PGCMDD2_final.tsv | awk '$3 != -9 {print $1}' | awk -F_ '{print $3}' | sort | uniq
+cat > datasets_info << EOF
+mdd_boma_eur_sr-qc.hg19.ch.fl
+mdd_gep3_eur_sr-qc.hg19.ch.fl
+mdd_grnd_eur_sr-qc.hg19.ch.fl
+mdd_gsk2_eur_sr-qc.hg19.ch.fl
+mdd_mmi2_eur_sr-qc.hg19.ch.fl
+mdd_mmo4_eur_sr-qc.hg19.ch.fl
+mdd_qi3c_eur_sr-qc.hg19.ch.fl
+mdd_qi6c_eur_sr-qc.hg19.ch.fl
+mdd_qio2_eur_sr-qc.hg19.ch.fl
+mdd_rad3_eur_sr-qc.hg19.ch.fl
+mdd_rage_eur_sr-qc.hg19.ch.fl
+mdd_rai2_eur_sr-qc.hg19.ch.fl
+mdd_rau2_eur_sr-qc.hg19.ch.fl
+mdd_rde4_eur_sr-qc2.hg19.ch.fl
+mdd_stm2_eur_sr-qc.hg19.ch.fl
+mdd_twg2_eur_sr-qc.hg19.ch.fl
+EOF
+
+# run case-only analyses
+postimp_navi --out MDD1_CaseOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD1_CasesOnly_PGCMDD2_final.tsv
+
+
