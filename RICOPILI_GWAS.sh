@@ -42,6 +42,7 @@ cat MDD1_CasesOnly_PGCMDD2_final.tsv | awk '$3 != -9 {print $1}' | awk -F_ '{pri
 cat > datasets_info << EOF
 mdd_boma_eur_sr-qc.hg19.ch.fl
 mdd_gep3_eur_sr-qc.hg19.ch.fl
+mdd_gens_eur_sr-qc.hg19.ch.fl
 mdd_grnd_eur_sr-qc.hg19.ch.fl
 mdd_gsk2_eur_sr-qc.hg19.ch.fl
 mdd_mmi2_eur_sr-qc.hg19.ch.fl
@@ -58,7 +59,21 @@ mdd_stm2_eur_sr-qc.hg19.ch.fl
 mdd_twg2_eur_sr-qc.hg19.ch.fl
 EOF
 
-# run case-only analyses
-postimp_navi --out MDD1_CaseOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD1_CasesOnly_PGCMDD2_final.tsv
+# run cases-only analyses
+# construct postimp_navi commands
+# extract "MDDn" from CasesOnly phenotype file names and use it to parameterize the postimputation pipeline
+# for mdd in $(ls MDD*_CasesOnly_PGCMDD2_final.tsv | awk -F_ '{print $1}'); do echo postimp_navi --out ${mdd}_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno ${mdd}_CasesOnly_PGCMDD2_final.tsv; done
+postimp_navi --out MDD1_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD1_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD2_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD2_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD3a_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD3a_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD3b_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD3b_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD4a_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD4a_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD4b_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD4b_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD5a_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD5a_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD5b_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD5b_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD6_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD6_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD7_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD7_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD8_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD8_CasesOnly_PGCMDD2_final.tsv
+postimp_navi --out MDD9_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD9_CasesOnly_PGCMDD2_final.tsv
 
 
