@@ -41,8 +41,8 @@ postimp_navi --out MDD0_CaseControl --mds MDD29.0515.nproj.menv.mds_cov --coco 1
 cat MDD1_CasesOnly_PGCMDD2_final.tsv | awk '$3 != -9 {print $1}' | awk -F_ '{print $3}' | sort | uniq
 cat > datasets_info_mdd1 << EOF
 mdd_boma_eur_sr-qc.hg19.ch.fl
-mdd_gep3_eur_sr-qc.hg19.ch.fl
 mdd_gens_eur_sr-qc.hg19.ch.fl
+mdd_gep3_eur_sr-qc.hg19.ch.fl
 mdd_grnd_eur_sr-qc.hg19.ch.fl
 mdd_gsk2_eur_sr-qc.hg19.ch.fl
 mdd_mmi2_eur_sr-qc.hg19.ch.fl
@@ -62,8 +62,8 @@ EOF
 cat MDD3b_CasesOnly_PGCMDD2_final.tsv | awk '$3 != -9 {print $1}' | awk -F_ '{print $3}' | sort | uniq
 cat > datasets_info_mdd3b << EOF
 mdd_boma_eur_sr-qc.hg19.ch.fl
-mdd_gep3_eur_sr-qc.hg19.ch.fl
 mdd_gens_eur_sr-qc.hg19.ch.fl
+mdd_gep3_eur_sr-qc.hg19.ch.fl
 mdd_grnd_eur_sr-qc.hg19.ch.fl
 mdd_gsk2_eur_sr-qc.hg19.ch.fl
 mdd_qi3c_eur_sr-qc.hg19.ch.fl
@@ -144,7 +144,11 @@ cp datasets_info_mdd1 datasets_info
 postimp_navi --out MDD6_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD6_CasesOnly_PGCMDD2_final.tsv
 
 postimp_navi --out MDD7_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD7_CasesOnly_PGCMDD2_final.tsv
+
+cp datasets_info_mdd3b datasets_info
 postimp_navi --out MDD8_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD8_CasesOnly_PGCMDD2_final.tsv
+
+cp datasets_info_mdd1 datasets_info
 postimp_navi --out MDD9_CasesOnly --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD9_CasesOnly_PGCMDD2_final.tsv
 
 
