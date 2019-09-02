@@ -20,6 +20,8 @@ library(corrplot)
 
 ```
 
+# UKB CIDI
+
 Read in LDSC structure for UKB CIDI symptoms
 ```{r}
 
@@ -140,5 +142,27 @@ kendler...neale_constrain_fit <- usermodel(cidi_covstruct, estimation = "DWLS", 
 kendler...neale_constrain_fit$modelfit
 
 kendler...neale_constrain_fit$results
+
+```
+
+# PGC Case-Only
+
+```{r}
+
+pgc_caseonly_covstruct <- dget('ldsc/pgc_mdd_dsm_caseonly_covstruct.deparse.R')
+
+```
+
+Identify symptoms with non-negative variances
+```{r pgc_caseonly_cor}
+
+pgc_caseonly_pos <- which(diag(pgc_caseonly_covstruct$S) > 0)
+
+pgc_caseonly_cor <- cov2cor(pgc_caseonly_covstruct$S[pgc_caseonly_pos,pgc_caseonly_pos])
+
+pgc_caseonly_cor[which(pgc_caseonly_cor > 1)] <- 1
+rownames(pgc_caseonly_cor) <- colnames(pgc_caseonly_cor)
+
+corrplot(pgc_caseonly_cor, 'square')
 
 ```
