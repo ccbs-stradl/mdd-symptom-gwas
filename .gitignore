@@ -2,4 +2,4 @@ config.yaml
 *.gz
 *.log
 *.rds
-sumstats/
+sumstats/reference
