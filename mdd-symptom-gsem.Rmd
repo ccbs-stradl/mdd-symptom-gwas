@@ -1,0 +1,78 @@
+---
+title: GenomicSEM of MDD symptoms
+author: Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard 
+output:
+  html_document:
+    toc: TRUE
+    code_folding: hide
+    number_sections: TRUE
+    df_print: kable
+    keep_md: true
+  md_document:
+    variant: markdown_github
+---
+
+# Sumstats munging
+
+## Setup
+
+The LDSC files first need to be downloaded and unpacked
+
+```{r, eval=FALSE}
+# LD Score reference files
+mkdir -p sumstats/reference
+curl https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2 > sumstats/reference/eur_w_ld_chr.tar.bz2
+curl https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2 > sumstats/reference/w_hm3.snplist.bz2
+
+tar -xjf sumstats/reference/eur_w_ld_chr.tar.bz2 -C sumstats/reference
+rm sumstats/reference/eur_w_ld_chr.tar.bz2
+bunzip2 sumstats/reference/w_hm3.snplist.bz2
+```
+
+## PGC
+
+PGC sumstats are output in the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) ("*D*osage *An*alyz*er*) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. We find all daner files in the PGC directory and loop them through the munge step.
+
+```{r, eval=FALSE}
+# Munge sumstats for all cohorts symptom GWASs
+
+for sumstats in $(ls sumstats/PGC/CasesAllCohorts/daner_MDD*.meta.gz); do
+
+        prefix=$(basename $sumstats .gz)
+
+        munge_sumstats.py --daner-n \
+        --sumstats $sumstats \
+        --merge-alleles sumstats/reference/w_hm3.snplist \
+        --out sumstats/PGC/CasesAllCohorts/${prefix}.ldsc
+
+done
+
+
+```
+
+## UKB
+
+UKB CIDI sumstats are in a format easily digestible by `munge_sumstats.py`.
+
+```{r, eval=FALSE}
+
+# Munge sumstats for UKB CIDI
+
+for sumstats in $(ls sumstats/UKB/CIDI/UKB_CIDI_MDD*.gz); do
+
+        prefix=$(basename $sumstats .gz)
+
+        munge_sumstats.py \
+        --sumstats $sumstats \
+        --N-cas-col Nca \
+        --N-con-col Nco \
+        --signed-sumstats OR,1 \
+        --p P \
+        --merge-alleles sumstats/reference/w_hm3.snplist \
+        --out sumstats/UKB/CIDI/${prefix}.ldsc
+
+done
+
+```
+
+# LDSC estimation
