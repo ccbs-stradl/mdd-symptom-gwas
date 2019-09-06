@@ -16,9 +16,9 @@ output:
 
 ## Setup
 
-The LDSC files first need to be downloaded and unpacked
+The LDSC support files first need to be downloaded and unpacked
 
-```{r, eval=FALSE}
+```{bash, eval=FALSE}
 # LD Score reference files
 mkdir -p sumstats/reference
 curl https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2 > sumstats/reference/eur_w_ld_chr.tar.bz2
@@ -31,9 +31,9 @@ bunzip2 sumstats/reference/w_hm3.snplist.bz2
 
 ## PGC
 
-PGC sumstats are output in the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) ("*D*osage *An*alyz*er*) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. We find all daner files in the PGC directory and loop them through the munge step.
+PGC sumstats are output in the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) ("**D**osage **An**alyz**er**) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. We find all daner files in the PGC directory and loop them through the munge step.
 
-```{r, eval=FALSE}
+```{bash, eval=FALSE}
 # Munge sumstats for all cohorts symptom GWASs
 
 for sumstats in $(ls sumstats/PGC/CasesAllCohorts/daner_MDD*.meta.gz); do
@@ -76,3 +76,178 @@ done
 ```
 
 # LDSC estimation
+
+
+### R packages
+
+R version
+
+```{r}
+
+R.version
+
+```
+
+Package installation
+
+```{r, output='hide', warning=FALSE, message=FALSE}
+
+required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr')
+for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.packages(pack)
+
+library(devtools)
+
+if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
+
+```
+
+GenomicSEM version
+```{r, warning=FALSE, messages=FALSE}
+
+require(readr)
+require(tidyr)
+require(stringr)
+require(dplyr)
+require(ggplot2)
+require(GenomicSEM)
+
+packageVersion("GenomicSEM")
+
+```
+
+## Symptom labels
+
+MDD DSM symptoms are numbered 1-9:
+
+```{r}
+
+dsm_mdd_symptoms_reference <-
+read_delim("
+MDD1;	Depressed mood most of the day, nearly every day
+MDD2;	Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
+MDD3a;	Significant weight loss or decrease in appetite
+MDD3b;	Significant weight gain or increase in appetite
+MDD4a;	Insomnia nearly every day
+MDD4b;	Hypersomnia nearly every day
+MDD5a;	Psychomotor agitation nearly every day
+MDD5b;	Psychomotor retardation nearly every day
+MDD6;	Fatigue or loss of energy nearly every day
+MDD7;	Feelings of worthlessness or excessive or inappropriate guilt
+MDD8;	Diminished ability to think or concentrate, or indecisiveness
+MDD9;	Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for committing suicide
+", col_names=c('Reference', 'Description'), delim=';')
+
+dsm_mdd_symptoms_reference
+
+```
+
+
+## Symptom prevalences
+
+Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output put population prevalences have to be estimated.
+
+### Population prevalences
+
+We include a table of counts of symptom presence and absence for PGC cohorts
+
+```{r, message=FALSE}
+
+pgc_symptom_counts <- read_table2('sumstats/PGC/CasesAllCohorts/pgc_dsm_symptom_counts.txt')
+
+pgc_symptom_counts %>%
+  spread(Status, N) %>%
+  unite(AbsentPresent, Absent, Present, sep=':') %>%
+  mutate(MDD_counts=paste(MDD, '(absent:present)')) %>%
+  select(-MDD) %>%
+  spread(MDD_counts, AbsentPresent)
+
+```
+
+Calculate symptom prevalences separately for cases and controls:
+
+```{r}
+
+pgc_symptom_prevalences <- 
+pgc_symptom_counts %>%
+  spread(Status, N) %>%
+  mutate(prev=Present / (Present + Absent)) %>%
+  select(-Absent, -Present) %>%
+  spread(MDD, prev)
+
+pgc_symptom_prevalences
+
+pgc_symptom_sample_sizes <- 
+pgc_symptom_counts %>%
+group_by(Symptom) %>%
+summarize(Ntotal=sum(N))
+
+```
+
+Estimation of population prevalence based on average case/control estimates depends on the prevalence of MDD (e.g., [15% in high income countries](https://www.annualreviews.org/doi/10.1146/annurev-publhealth-031912-114409))
+
+```{r pgc_symptom_prev}
+
+pgc_symptom_prev_size <- pgc_symptom_prevalences %>% 
+  left_join(pgc_symptom_sample_sizes, by='Symptom')
+
+case_control_prev_lm <- 
+lm(Case ~ Control, data=pgc_symptom_prev_size, weights=Ntotal)
+
+summary(case_control_prev_lm)
+
+ggplot(pgc_symptom_prev_size, aes(x=Control, y=Case, weight=Ntotal)) +
+  geom_point() +
+  geom_text(hjust=-0.1, aes(label=Symptom)) +
+  stat_smooth(method='lm') +
+  geom_abline() +
+  scale_x_continuous('Sympotom prevalence among contols') +
+  scale_y_continuous('Symptom prevalence among cases')
+
+```
+
+Symptoms are are more likely to be present in MDD cases also have higher prevalence in MDD controls. Calculate symptom population prevalences weighted by MDD prevalence 
+
+```{r}
+
+k <- 0.15
+pgc_symptoms_pop_prev <- 
+pgc_symptom_prevalences %>%
+  transmute(Symptom, pop_prev=k*Case + (1-k)*Control)
+ 
+pgc_symptoms_pop_prev
+
+```
+
+### Sample prevalences
+
+Read in headers from PGC daner files. The daner format contains headers for the frequency of the referenec allele in cases (A=Affected) and controls (U=Unaffected) where the column name includes the sample size (`FRQ_A_NNNN`, `FRQ_U_MMMM`)
+
+```{r, warning=FALSE}
+
+# list daner files
+pgc_daner_meta_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='meta.gz', full.names=TRUE)
+
+# pull out which symptom 'x' this is from the filename (daner_MDDx_*)
+names(pgc_daner_meta_gz) <- sapply(str_split(basename(pgc_daner_meta_gz), '_'), function(x) x[2])
+
+# read in header and pull out 6th and 7th columns
+pgc_daner_meta_frq_cols <- 
+bind_rows(
+lapply(pgc_daner_meta_gz, function(daner) {
+        daner_header <-read.table(daner, nrows=1, stringsAsFactors=F)
+        return(data.frame(frq_a_col=daner_header$V6, frq_u_col=daner_header$V7))
+}), .id='Symptom')
+
+# shape and unshape and extract N from column names
+pgc_daner_meta_frq_cols %>%
+gather(key='col', value='frq', frq_a_col:frq_u_col) %>%
+select(-col) %>%
+separate(frq, into=c('frq', 'status', 'Count')) %>%
+mutate(presence=recode(status, 'A'='Present', 'U'='Absent'),
+       N=as.integer(Count)) %>%
+select(-frq, -status, -Count) %>%
+spread(presence, N) %>%
+mutate(samp_prev=Present / (Present + Absent))
+
+
+```
