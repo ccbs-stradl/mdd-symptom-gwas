@@ -12,73 +12,53 @@ output:
     variant: markdown_github
 ---
 
-# Sumstats munging
+# Symptom labels
 
-## Setup
-
-The LDSC support files first need to be downloaded and unpacked
-
-
-```bash
-# LD Score reference files
-mkdir -p sumstats/reference
-curl https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2 > sumstats/reference/eur_w_ld_chr.tar.bz2
-curl https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2 > sumstats/reference/w_hm3.snplist.bz2
-
-tar -xjf sumstats/reference/eur_w_ld_chr.tar.bz2 -C sumstats/reference
-rm sumstats/reference/eur_w_ld_chr.tar.bz2
-bunzip2 sumstats/reference/w_hm3.snplist.bz2
-```
-
-## PGC
-
-PGC sumstats are output in the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) ("**D**osage **An**alyz**er**) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. We find all daner files in the PGC directory and loop them through the munge step.
-
-
-```bash
-# Munge sumstats for all cohorts symptom GWASs
-
-for sumstats in $(ls sumstats/PGC/CasesAllCohorts/daner_MDD*.meta.gz); do
-
-        prefix=$(basename $sumstats .gz)
-
-        munge_sumstats.py --daner-n \
-        --sumstats $sumstats \
-        --merge-alleles sumstats/reference/w_hm3.snplist \
-        --out sumstats/PGC/CasesAllCohorts/${prefix}.ldsc
-
-done
-
-```
-
-## UKB
-
-UKB CIDI sumstats are in a format easily digestible by `munge_sumstats.py`.
+MDD DSM symptoms are numbered 1-9:
 
 
 ```r
-# Munge sumstats for UKB CIDI
+dsm_mdd_symptoms_reference <-
+read_delim("
+MDD1;	Depressed mood most of the day, nearly every day
+MDD2;	Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
+MDD3a;	Significant weight loss or decrease in appetite
+MDD3b;	Significant weight gain or increase in appetite
+MDD4a;	Insomnia nearly every day
+MDD4b;	Hypersomnia nearly every day
+MDD5a;	Psychomotor agitation nearly every day
+MDD5b;	Psychomotor retardation nearly every day
+MDD6;	Fatigue or loss of energy nearly every day
+MDD7;	Feelings of worthlessness or excessive or inappropriate guilt
+MDD8;	Diminished ability to think or concentrate, or indecisiveness
+MDD9;	Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for committing suicide
+", col_names=c('Reference', 'Description'), delim=';')
 
-for sumstats in $(ls sumstats/UKB/CIDI/UKB_CIDI_MDD*.gz); do
-
-        prefix=$(basename $sumstats .gz)
-
-        munge_sumstats.py \
-        --sumstats $sumstats \
-        --N-cas-col Nca \
-        --N-con-col Nco \
-        --signed-sumstats OR,1 \
-        --p P \
-        --merge-alleles sumstats/reference/w_hm3.snplist \
-        --out sumstats/UKB/CIDI/${prefix}.ldsc
-
-done
+dsm_mdd_symptoms_reference
 ```
 
-# LDSC estimation
+<div class="kable-table">
 
+Reference   Description                                                                                                  
+----------  -------------------------------------------------------------------------------------------------------------
+MDD1        Depressed mood most of the day, nearly every day                                                             
+MDD2        Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day 
+MDD3a       Significant weight loss or decrease in appetite                                                              
+MDD3b       Significant weight gain or increase in appetite                                                              
+MDD4a       Insomnia nearly every day                                                                                    
+MDD4b       Hypersomnia nearly every day                                                                                 
+MDD5a       Psychomotor agitation nearly every day                                                                       
+MDD5b       Psychomotor retardation nearly every day                                                                     
+MDD6        Fatigue or loss of energy nearly every day                                                                   
+MDD7        Feelings of worthlessness or excessive or inappropriate guilt                                                
+MDD8        Diminished ability to think or concentrate, or indecisiveness                                                
+MDD9        Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for committing suicide        
 
-### R packages
+</div>
+
+# Setup
+
+## R packages
 
 R version
 
@@ -134,56 +114,75 @@ packageVersion("GenomicSEM")
 ## [1] '0.0.2'
 ```
 
-## Symptom labels
+## LD Score files
 
-MDD DSM symptoms are numbered 1-9:
+The LDSC support files first need to be downloaded and unpacked
+
+
+```bash
+# LD Score reference files
+mkdir -p sumstats/reference
+curl https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2 > sumstats/reference/eur_w_ld_chr.tar.bz2
+curl https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2 > sumstats/reference/w_hm3.snplist.bz2
+
+tar -xjf sumstats/reference/eur_w_ld_chr.tar.bz2 -C sumstats/reference
+rm sumstats/reference/eur_w_ld_chr.tar.bz2
+bunzip2 sumstats/reference/w_hm3.snplist.bz2
+```
+
+# Sumstats munging
+
+## PGC
+
+PGC sumstats are output in the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) ("**D**osage **An**alyz**er**) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. We find all daner files in the PGC directory and loop them through the munge step.
+
+
+```bash
+# Munge sumstats for all cohorts symptom GWASs
+
+for sumstats in $(ls sumstats/PGC/CasesAllCohorts/daner_MDD*.meta.gz); do
+
+        prefix=$(basename $sumstats .gz)
+
+        munge_sumstats.py --daner-n \
+        --sumstats $sumstats \
+        --merge-alleles sumstats/reference/w_hm3.snplist \
+        --out sumstats/PGC/CasesAllCohorts/${prefix}.ldsc
+
+done
+
+```
+
+## UKB
+
+UKB CIDI sumstats are in a format easily digestible by `munge_sumstats.py`.
 
 
 ```r
-dsm_mdd_symptoms_reference <-
-read_delim("
-MDD1;	Depressed mood most of the day, nearly every day
-MDD2;	Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
-MDD3a;	Significant weight loss or decrease in appetite
-MDD3b;	Significant weight gain or increase in appetite
-MDD4a;	Insomnia nearly every day
-MDD4b;	Hypersomnia nearly every day
-MDD5a;	Psychomotor agitation nearly every day
-MDD5b;	Psychomotor retardation nearly every day
-MDD6;	Fatigue or loss of energy nearly every day
-MDD7;	Feelings of worthlessness or excessive or inappropriate guilt
-MDD8;	Diminished ability to think or concentrate, or indecisiveness
-MDD9;	Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for committing suicide
-", col_names=c('Reference', 'Description'), delim=';')
+# Munge sumstats for UKB CIDI
 
-dsm_mdd_symptoms_reference
+for sumstats in $(ls sumstats/UKB/CIDI/UKB_CIDI_MDD*.gz); do
+
+        prefix=$(basename $sumstats .gz)
+
+        munge_sumstats.py \
+        --sumstats $sumstats \
+        --N-cas-col Nca \
+        --N-con-col Nco \
+        --signed-sumstats OR,1 \
+        --p P \
+        --merge-alleles sumstats/reference/w_hm3.snplist \
+        --out sumstats/UKB/CIDI/${prefix}.ldsc
+
+done
 ```
 
-<div class="kable-table">
 
-Reference   Description                                                                                                  
-----------  -------------------------------------------------------------------------------------------------------------
-MDD1        Depressed mood most of the day, nearly every day                                                             
-MDD2        Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day 
-MDD3a       Significant weight loss or decrease in appetite                                                              
-MDD3b       Significant weight gain or increase in appetite                                                              
-MDD4a       Insomnia nearly every day                                                                                    
-MDD4b       Hypersomnia nearly every day                                                                                 
-MDD5a       Psychomotor agitation nearly every day                                                                       
-MDD5b       Psychomotor retardation nearly every day                                                                     
-MDD6        Fatigue or loss of energy nearly every day                                                                   
-MDD7        Feelings of worthlessness or excessive or inappropriate guilt                                                
-MDD8        Diminished ability to think or concentrate, or indecisiveness                                                
-MDD9        Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for committing suicide        
-
-</div>
-
-
-## Symptom prevalences
+# Symptom prevalences
 
 Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output put population prevalences have to be estimated.
 
-### Population prevalences
+## Population prevalences
 
 We include a table of counts of symptom presence and absence for PGC cohorts
 
@@ -304,7 +303,7 @@ ggplot(pgc_symptom_prev_size, aes(x=Control, y=Case, weight=Ntotal)) +
 
 ![](mdd-symptom-gsem_files/figure-html/pgc_symptom_prev-1.png)<!-- -->
 
-Symptoms are are more likely to be present in MDD cases also have higher prevalence in MDD controls. Calculate symptom population prevalences weighted by MDD prevalence 
+Symptoms are are more likely to be present in MDD cases also have higher prevalence in MDD controls. Calculate symptom population prevalences weighted by MDD prevalence: $k_{\mathrm{MDD}N} = k_\mathrm{MDD} * k_{\mathrm{MDD}N,\mathrm{cases}} + (1 - k_\mathrm{MDD}) * k_{\mathrm{MDD}N,\mathrm{controls}}$.
 
 
 ```r
@@ -335,16 +334,19 @@ MDD9       0.0945824
 
 </div>
 
-### Sample prevalences
+## PGC sample prevalences
 
 Read in headers from PGC daner files. The daner format contains headers for the frequency of the referenec allele in cases (A=Affected) and controls (U=Unaffected) where the column name includes the sample size (`FRQ_A_NNNN`, `FRQ_U_MMMM`)
 
 
 ```r
+# list daner files
 pgc_daner_meta_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='meta.gz', full.names=TRUE)
 
+# pull out which symptom 'x' this is from the filename (daner_MDDx_*)
 names(pgc_daner_meta_gz) <- sapply(str_split(basename(pgc_daner_meta_gz), '_'), function(x) x[2])
 
+# read in header and pull out 6th and 7th columns
 pgc_daner_meta_frq_cols <- 
 bind_rows(
 lapply(pgc_daner_meta_gz, function(daner) {
@@ -352,6 +354,8 @@ lapply(pgc_daner_meta_gz, function(daner) {
         return(data.frame(frq_a_col=daner_header$V6, frq_u_col=daner_header$V7))
 }), .id='Symptom')
 
+# shape and unshape and extract N from column names
+pgc_symptoms_sample_prev <-
 pgc_daner_meta_frq_cols %>%
 gather(key='col', value='frq', frq_a_col:frq_u_col) %>%
 select(-col) %>%
@@ -361,6 +365,8 @@ mutate(presence=recode(status, 'A'='Present', 'U'='Absent'),
 select(-frq, -status, -Count) %>%
 spread(presence, N) %>%
 mutate(samp_prev=Present / (Present + Absent))
+
+pgc_symptoms_sample_prev
 ```
 
 <div class="kable-table">
@@ -381,3 +387,49 @@ MDD8         1421     10281   0.8785678
 MDD9         5631      6721   0.5441224
 
 </div>
+
+## UKB CIDI sample prevalences
+
+Symptom prevalences in the UKB CIDI assessment were calculated for the present/absent reponses and in reference to the whole MHQ sample (assuming particpants who were screened out do not have any symptoms)
+
+
+```r
+# read this in as a table.
+# TODO: incorporate the code for this, but need to pull in code
+# from a separate repository
+
+ukb_cidi_prevalences <- read_tsv('sumstats/UKB/CIDI/ukb_cidi_symptoms_prev.txt')
+```
+
+
+```r
+pgc_ukb_symptoms_prev <- 
+pgc_symptoms_sample_prev %>%
+full_join(pgc_symptoms_pop_prev, by='Symptom') %>%
+full_join(ukb_cidi_prevalences, by=c('Symptom'='reference'))
+
+ggplot(pgc_ukb_symptoms_prev, aes(x=samp_prev, y=cidi_sample)) +
+geom_abline(col='red') +
+geom_point() +
+geom_text(aes(label=Symptom), hjust=-0.1) +
+scale_x_continuous('PGC sample prevalence', limits=c(0, 1)) +
+scale_y_continuous('UKB sample prevalence', limits=c(0, 1)) +
+coord_fixed() 
+```
+
+![](mdd-symptom-gsem_files/figure-html/pgc_ukb_prevs-1.png)<!-- -->
+
+```r
+ggplot(pgc_ukb_symptoms_prev, aes(x=pop_prev, y=mhq_sample)) +
+geom_abline(col='red') +
+geom_point() +
+geom_text(aes(label=Symptom), hjust=-0.1) +
+scale_x_continuous('PGC pop prevalence', limits=c(0, 0.6)) +
+scale_y_continuous('UKB MHQ prevalence', limits=c(0, 0.6)) +
+coord_fixed() 
+```
+
+![](mdd-symptom-gsem_files/figure-html/pgc_ukb_prevs-2.png)<!-- -->
+
+
+# LDSC estimation

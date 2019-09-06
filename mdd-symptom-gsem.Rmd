@@ -12,9 +12,72 @@ output:
     variant: markdown_github
 ---
 
-# Sumstats munging
+# Symptom labels
 
-## Setup
+MDD DSM symptoms are numbered 1-9:
+
+```{r}
+
+dsm_mdd_symptoms_reference <-
+read_delim("
+MDD1;	Depressed mood most of the day, nearly every day
+MDD2;	Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
+MDD3a;	Significant weight loss or decrease in appetite
+MDD3b;	Significant weight gain or increase in appetite
+MDD4a;	Insomnia nearly every day
+MDD4b;	Hypersomnia nearly every day
+MDD5a;	Psychomotor agitation nearly every day
+MDD5b;	Psychomotor retardation nearly every day
+MDD6;	Fatigue or loss of energy nearly every day
+MDD7;	Feelings of worthlessness or excessive or inappropriate guilt
+MDD8;	Diminished ability to think or concentrate, or indecisiveness
+MDD9;	Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for committing suicide
+", col_names=c('Reference', 'Description'), delim=';')
+
+dsm_mdd_symptoms_reference
+
+```
+
+# Setup
+
+## R packages
+
+R version
+
+```{r}
+
+R.version
+
+```
+
+Package installation
+
+```{r, output='hide', warning=FALSE, message=FALSE}
+
+required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr')
+for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.packages(pack)
+
+library(devtools)
+
+if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
+
+```
+
+GenomicSEM version
+```{r, warning=FALSE, messages=FALSE}
+
+require(readr)
+require(tidyr)
+require(stringr)
+require(dplyr)
+require(ggplot2)
+require(GenomicSEM)
+
+packageVersion("GenomicSEM")
+
+```
+
+## LD Score files
 
 The LDSC support files first need to be downloaded and unpacked
 
@@ -28,6 +91,8 @@ tar -xjf sumstats/reference/eur_w_ld_chr.tar.bz2 -C sumstats/reference
 rm sumstats/reference/eur_w_ld_chr.tar.bz2
 bunzip2 sumstats/reference/w_hm3.snplist.bz2
 ```
+
+# Sumstats munging
 
 ## PGC
 
@@ -75,78 +140,12 @@ done
 
 ```
 
-# LDSC estimation
 
-
-### R packages
-
-R version
-
-```{r}
-
-R.version
-
-```
-
-Package installation
-
-```{r, output='hide', warning=FALSE, message=FALSE}
-
-required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr')
-for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.packages(pack)
-
-library(devtools)
-
-if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
-
-```
-
-GenomicSEM version
-```{r, warning=FALSE, messages=FALSE}
-
-require(readr)
-require(tidyr)
-require(stringr)
-require(dplyr)
-require(ggplot2)
-require(GenomicSEM)
-
-packageVersion("GenomicSEM")
-
-```
-
-## Symptom labels
-
-MDD DSM symptoms are numbered 1-9:
-
-```{r}
-
-dsm_mdd_symptoms_reference <-
-read_delim("
-MDD1;	Depressed mood most of the day, nearly every day
-MDD2;	Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
-MDD3a;	Significant weight loss or decrease in appetite
-MDD3b;	Significant weight gain or increase in appetite
-MDD4a;	Insomnia nearly every day
-MDD4b;	Hypersomnia nearly every day
-MDD5a;	Psychomotor agitation nearly every day
-MDD5b;	Psychomotor retardation nearly every day
-MDD6;	Fatigue or loss of energy nearly every day
-MDD7;	Feelings of worthlessness or excessive or inappropriate guilt
-MDD8;	Diminished ability to think or concentrate, or indecisiveness
-MDD9;	Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for committing suicide
-", col_names=c('Reference', 'Description'), delim=';')
-
-dsm_mdd_symptoms_reference
-
-```
-
-
-## Symptom prevalences
+# Symptom prevalences
 
 Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output put population prevalences have to be estimated.
 
-### Population prevalences
+## Population prevalences
 
 We include a table of counts of symptom presence and absence for PGC cohorts
 
@@ -205,7 +204,7 @@ ggplot(pgc_symptom_prev_size, aes(x=Control, y=Case, weight=Ntotal)) +
 
 ```
 
-Symptoms are are more likely to be present in MDD cases also have higher prevalence in MDD controls. Calculate symptom population prevalences weighted by MDD prevalence 
+Symptoms are are more likely to be present in MDD cases also have higher prevalence in MDD controls. Calculate symptom population prevalences weighted by MDD prevalence: $k_{\mathrm{MDD}N} = k_\mathrm{MDD} * k_{\mathrm{MDD}N,\mathrm{cases}} + (1 - k_\mathrm{MDD}) * k_{\mathrm{MDD}N,\mathrm{controls}}$.
 
 ```{r}
 
@@ -218,7 +217,7 @@ pgc_symptoms_pop_prev
 
 ```
 
-### Sample prevalences
+## PGC sample prevalences
 
 Read in headers from PGC daner files. The daner format contains headers for the frequency of the referenec allele in cases (A=Affected) and controls (U=Unaffected) where the column name includes the sample size (`FRQ_A_NNNN`, `FRQ_U_MMMM`)
 
@@ -239,6 +238,7 @@ lapply(pgc_daner_meta_gz, function(daner) {
 }), .id='Symptom')
 
 # shape and unshape and extract N from column names
+pgc_symptoms_sample_prev <-
 pgc_daner_meta_frq_cols %>%
 gather(key='col', value='frq', frq_a_col:frq_u_col) %>%
 select(-col) %>%
@@ -249,5 +249,48 @@ select(-frq, -status, -Count) %>%
 spread(presence, N) %>%
 mutate(samp_prev=Present / (Present + Absent))
 
+pgc_symptoms_sample_prev
 
 ```
+
+## UKB CIDI sample prevalences
+
+Symptom prevalences in the UKB CIDI assessment were calculated for the present/absent reponses and in reference to the whole MHQ sample (assuming particpants who were screened out do not have any symptoms)
+
+```{r, message=FALSE}
+
+# read this in as a table.
+# TODO: incorporate the code for this, but need to pull in code
+# from a separate repository
+
+ukb_cidi_prevalences <- read_tsv('sumstats/UKB/CIDI/ukb_cidi_symptoms_prev.txt')
+
+```
+
+```{r, pgc_ukb_prevs, warning=FALSE}
+
+pgc_ukb_symptoms_prev <- 
+pgc_symptoms_sample_prev %>%
+full_join(pgc_symptoms_pop_prev, by='Symptom') %>%
+full_join(ukb_cidi_prevalences, by=c('Symptom'='reference'))
+
+ggplot(pgc_ukb_symptoms_prev, aes(x=samp_prev, y=cidi_sample)) +
+geom_abline(col='red') +
+geom_point() +
+geom_text(aes(label=Symptom), hjust=-0.1) +
+scale_x_continuous('PGC sample prevalence', limits=c(0, 1)) +
+scale_y_continuous('UKB sample prevalence', limits=c(0, 1)) +
+coord_fixed() 
+
+ggplot(pgc_ukb_symptoms_prev, aes(x=pop_prev, y=mhq_sample)) +
+geom_abline(col='red') +
+geom_point() +
+geom_text(aes(label=Symptom), hjust=-0.1) +
+scale_x_continuous('PGC pop prevalence', limits=c(0, 0.6)) +
+scale_y_continuous('UKB MHQ prevalence', limits=c(0, 0.6)) +
+coord_fixed() 
+
+```
+
+
+# LDSC estimation
