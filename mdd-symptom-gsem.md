@@ -89,7 +89,7 @@ Package installation
 
 
 ```r
-required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr')
+required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr', 'corrplot')
 for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.packages(pack)
 
 library(devtools)
@@ -105,6 +105,7 @@ require(tidyr)
 require(stringr)
 require(dplyr)
 require(ggplot2)
+require(corrplot)
 require(GenomicSEM)
 
 packageVersion("GenomicSEM")
@@ -158,7 +159,8 @@ done
 UKB CIDI sumstats are in a format easily digestible by `munge_sumstats.py`.
 
 
-```r
+```bash
+
 # Munge sumstats for UKB CIDI
 
 for sumstats in $(ls sumstats/UKB/CIDI/UKB_CIDI_MDD*.gz); do
@@ -175,6 +177,7 @@ for sumstats in $(ls sumstats/UKB/CIDI/UKB_CIDI_MDD*.gz); do
         --out sumstats/UKB/CIDI/${prefix}.ldsc
 
 done
+
 ```
 
 
@@ -344,7 +347,7 @@ Read in headers from PGC daner files. The daner format contains headers for the 
 pgc_daner_meta_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='meta.gz', full.names=TRUE)
 
 # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
-names(pgc_daner_meta_gz) <- sapply(str_split(basename(pgc_daner_meta_gz), '_'), function(x) x[2])
+names(pgc_daner_meta_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
 
 # read in header and pull out 6th and 7th columns
 pgc_daner_meta_frq_cols <- 
@@ -432,4 +435,71 @@ coord_fixed()
 ![](mdd-symptom-gsem_files/figure-html/pgc_ukb_prevs-2.png)<!-- -->
 
 
-# LDSC estimation
+# Multivariable LDSC estimation
+
+We list out the munged sumstats for PGC and UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code. We use deparsed code instead of R data object serialization (`save()` or `saveRDS()`) so that the data can be inspected with a text editor to check that it does not contain individual-level data before being committed to the version control system. A simple caching strategy is employed to check whether the covariance structure already exists and, if so, to parse it rather than re-running the LD score calculation.
+
+
+```r
+pgc_dsm_ukb_cidi_covstruct_r <- 'ldsc/pgc_dsm.ukb_cidi.covstruct.deparse.R'
+
+if(!file.exists(pgc_dsm_ukb_cidi_covstruct_r)) {
+
+  # list sumstats files
+  pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz', full.names=TRUE)
+  
+  ukb_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz', full.names=TRUE)
+  
+  # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
+  # probably str_detect() a better option here
+  names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
+  
+  names(ukb_sumstats_gz) <- str_extract(ukb_sumstats_gz, 'MDD[:digit:](a|b)?')
+  
+  pgc_sumstats_prevs <- 
+  tibble(Symptom=names(pgc_sumstats_gz), filename=pgc_sumstats_gz, study='PGC') %>%
+  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
+  unite('trait_name', study, Symptom) %>%
+  select(trait_name, filename, samp_prev, pop_prev)
+  
+  ukb_sumstats_prevs <- 
+  tibble(Symptom=names(ukb_sumstats_gz), filename=ukb_sumstats_gz, study='UKB') %>%
+  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
+  unite('trait_name', study, Symptom) %>%
+  select(trait_name, filename, samp_prev=cidi_sample, pop_prev)
+  
+  sumstats_prevs <- bind_rows(pgc_sumstats_prevs, ukb_sumstats_prevs)
+
+  symptoms_covstruct <- ldsc(traits=sumstats_prevs$filename,
+                             sample.prev=sumstats_prevs$samp_prev,
+                             population.prev=sumstats_prevs$pop_prev,
+                             ld='sumstats/reference/eur_w_ld_chr/',
+                             wld='sumstats/reference/eur_w_ld_chr/',
+                             trait.names=sumstats_prevs$trait_name)
+
+
+  dput(symptoms_covstruct, pgc_dsm_ukb_cidi_covstruct_r, control=c('all', 'digits17'))
+  
+  # check for exact match of deparsed object
+  identical(dget(pgc_dsm_ukb_cidi_covstruct_r), symptoms_covstruct)
+
+} else {
+
+  symptoms_covstruct <- dget(pgc_dsm_ukb_cidi_covstruct_r)
+
+}
+```
+
+
+```r
+variance_is_positive <- diag(symptoms_covstruct$S) > 0
+
+symptoms_cor <- cov2cor(symptoms_covstruct$S[variance_is_positive,variance_is_positive])
+symptoms_cor[which(symptoms_cor > 1)] <- 1
+rownames(symptoms_cor) <- colnames(symptoms_cor)
+
+
+corrplot(symptoms_cor, 'square')
+```
+
+![](mdd-symptom-gsem_files/figure-html/pgc_ukb_corrplot-1.png)<!-- -->
