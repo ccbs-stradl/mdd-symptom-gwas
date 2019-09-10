@@ -287,8 +287,8 @@ ggplot(pgc_ukb_symptoms_prev, aes(x=pop_prev, y=mhq_sample)) +
 geom_abline(col='red') +
 geom_point() +
 geom_text(aes(label=Symptom), hjust=-0.1) +
-scale_x_continuous('PGC pop prevalence', limits=c(0, 0.6)) +
-scale_y_continuous('UKB MHQ prevalence', limits=c(0, 0.6)) +
+scale_x_continuous('PGC pop prevalence', limits=c(0, 1)) +
+scale_y_continuous('UKB MHQ prevalence', limits=c(0, 1)) +
 coord_fixed() 
 
 ```
