@@ -362,3 +362,23 @@ rownames(symptoms_cor) <- colnames(symptoms_cor)
 corrplot(symptoms_cor, 'square')
 
 ```
+
+## Multivariable LDSC Estimation - Using Case/Control Datasets
+
+To see the impact of conditioning on MDD cases the correlation matrix was created using the PGC datasets that have symptom level information on cases and controls. Correlation between symptoms is increased substantially. 
+
+```{r}
+
+pgc_dsm_ukb_cidi_covstruct_r_casecontrol <- 'ldsc/PGC_Case_Control_CovarianceMatrix_wUKB.RData'
+load(pgc_dsm_ukb_cidi_covstruct_r_casecontrol) #saved as symptoms_covstruct
+
+variance_is_positive <- diag(symptoms_covstruct$S) > 0
+
+symptoms_cor <- cov2cor(symptoms_covstruct$S[variance_is_positive,variance_is_positive])
+symptoms_cor[which(symptoms_cor > 1)] <- 1
+rownames(symptoms_cor) <- colnames(symptoms_cor)
+
+
+corrplot(symptoms_cor, 'square')
+
+```
