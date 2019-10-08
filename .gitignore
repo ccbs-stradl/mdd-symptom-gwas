@@ -4,4 +4,10 @@ config.yaml
 *.rds
 *.info
 *.csv
+*.enc
+*.enc_ukb
+encoding.ukb
+fields.ukb
+*.tab
+sumstats/UKB/*.r
 sumstats/reference
