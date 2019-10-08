@@ -6,6 +6,7 @@ library(readr)
 library(dplyr)
 library(yaml)
 library(stringr)
+library(psych)
 
 
 # load configuration file (see config-example.yaml')
@@ -86,8 +87,8 @@ cohort_status_symptoms %>%
 # convert to wide for display
 cohort_symptom_counts_wide <- 
 cohort_symptom_counts %>%
-  filter(!is.na(status)) %>%
-  spread(key=status, value=n, fill='---') %>%
+  filter(!is.na(Status)) %>%
+  spread(key=Status, value=n, fill='---') %>%
   unite(AbsentPresent, Absent, Present, sep=':') %>%
   mutate(Symptom=paste(mdd, symptom, sep=': ')) %>%
   select(STUDY, Symptom, AbsentPresent) %>%
@@ -132,3 +133,25 @@ dir.create('sumstats/PGC/CasesAllCohorts', recursive=TRUE, showWarnings=FALSE)
 
 write_tsv(cohort_symptom_counts, 'sumstats/PGC/CasesAllCohorts/pgc_dsm_cohort_symptom_counts.txt')
 write_tsv(symptom_counts, 'sumstats/PGC/CasesAllCohorts/pgc_dsm_symptom_counts.txt')
+
+# Symptom correlations
+
+# get cases and symptoms
+
+cases_symptoms <- 
+secondary_phenotypes %>%
+filter(DSMIVMDD == 1) %>%
+select(ID1, ID2, Study, starts_with('MDD'), -MDD0, -MDDscore) %>%
+gather(key='symptom', value='value', MDD1:MDD9) %>%
+filter(value %in% 0:1) %>%
+group_by(Study) %>%
+mutate(group_var=var(value)) %>%
+ungroup() %>%
+filter(group_var != 0) %>%
+select(-group_var) %>%
+spread(symptom, value) %>%
+select(-ID1, -ID2, -Study)
+
+cases_symptoms_cor <- tetrachoric(cases_symptoms)
+
+dput(cases_symptoms_cor, 'sumstats/PGC/CasesAllCohorts/pgc_cases_tetra_cor.deprase.R', control=c('all', 'digits17'))
