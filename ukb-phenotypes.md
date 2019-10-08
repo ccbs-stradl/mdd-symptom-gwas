@@ -36,12 +36,14 @@ source('sumstats/UKB/ukb_mdd.r')
 library(dplyr)
 library(readr)
 library(psych)
+library(corrplot)
 ```
 
 # Fields
 
 ## DSM lifetime symptoms (CIDI)
 
+Depression symptoms from the Composite International Diagnostic Interview.
 
 
 ```r
@@ -83,6 +85,8 @@ MDD9        f.20437.0.0   Thoughts of death during worst depression
 
 
 ## Current symptoms (PHQ)
+
+Depression symptoms from the Patient Health Questionnaire. 
 
 
 ```r
@@ -208,8 +212,8 @@ screen_symptom_507 <- function(symptom_field, depression_field, anhedonia_field)
 # code weight 'gain'/'loss' as a symptom
 screen_weight_507 <- function(symptom_field, present_levels, absent_levels, depression_field, anhedonia_field) {
         case_when(symptom_field %in% c(resp_prefer, resp_know) ~ 'Declined',
-                  symptom_field %in% present_levels ~ 'Absent',
-                  symptom_field %in% absent_levels ~ 'Present',
+                  symptom_field %in% absent_levels ~ 'Absent',
+                  symptom_field %in% present_levels ~ 'Present',
                   depression_field %in% 'No' | anhedonia_field %in% 'No' ~ 'Screened',
                   depression_field %in% resp_prefer & anhedonia_field %in% resp_prefer ~ 'Missing',
                   TRUE ~ 'Not assessed')
@@ -307,14 +311,58 @@ mutate(CIDI1=Ab0Pr1(cidi1),
        CIDI9=Ab0Pr1(cidi9))
 ```
 
+## PHQ
+
+Question form: "Over the last 2 weeks, how often have you been bothered by any of the following problems?"
+
+- "Feeling down, depressed, or hopeless"
+- etc.
+
+
+```r
+# Coding
+# -818	Prefer not to answer
+# 1	Not at all
+# 2	Several days
+# 3	More than half the days
+# 4	Nearly every day
+
+# recode responses as integers 0:3
+
+recode_phq <- function(x) recode(x, `Not at all`=0L,
+                                    `Several days`=1L,
+                                    `More than half the days`=2L,
+                                    `Nearly every day`=3L,
+                                    .default=NA_integer_)
+
+phq <- bd %>%
+select(f.eid, f.20510.0.0, f.20514.0.0, f.20511.0.0, f.20517.0.0, f.20518.0.0, f.20519.0.0, f.20507.0.0, f.20508.0.0, f.20513.0.0) %>%
+mutate(PHQ1=recode_phq(f.20510.0.0),
+       PHQ2=recode_phq(f.20514.0.0),
+       PHQ3=recode_phq(f.20511.0.0),
+       PHQ4=recode_phq(f.20517.0.0),
+       PHQ5=recode_phq(f.20518.0.0),
+       PHQ6=recode_phq(f.20519.0.0),
+       PHQ7=recode_phq(f.20507.0.0),
+       PHQ8=recode_phq(f.20508.0.0),
+       PHQ9=recode_phq(f.20513.0.0))
+```
+
 # Phenotypic correlations
 
 Calculate tetrachoric correlations for binary data
 
 
 ```r
+cidi_phq <- CIDI_binary %>%
+inner_join(phq, by='f.eid') %>%
+select(starts_with('CIDI', ignore.case=FALSE),
+       starts_with('PHQ', ignore.case=FALSE))
+
+
 options('mc.cores'=4)
-cidi_cor <- tetrachoric(CIDI_binary %>% select(starts_with('CIDI', ignore.case=FALSE)))
+
+cidi_phq_cor <- mixedCor(cidi_phq, p=13:21, d=1:12)
 ```
 
 ```
@@ -323,32 +371,11 @@ cidi_cor <- tetrachoric(CIDI_binary %>% select(starts_with('CIDI', ignore.case=F
 ```
 
 ```r
-cidi_cor
+corrplot(cidi_phq_cor$rho, 'square')
 ```
 
-```
-## Call: tetrachoric(x = CIDI_binary %>% select(starts_with("CIDI", ignore.case = FALSE)))
-## tetrachoric correlation 
-##        CIDI1 CIDI2 CIDI3 CIDI3a CIDI3b CIDI4 CIDI4a CIDI4b CIDI6 CIDI7
-## CIDI1   1.00                                                          
-## CIDI2   0.90  1.00                                                    
-## CIDI3  -0.02 -0.22  1.00                                              
-## CIDI3a -0.03 -0.13  0.67  1.00                                        
-## CIDI3b  0.01 -0.18  0.65 -0.13   1.00                                 
-## CIDI4   0.04  0.25 -0.35 -0.28  -0.19   1.00                          
-## CIDI4a  0.05  0.17 -0.31 -0.28  -0.13   0.76  1.00                    
-## CIDI4b  0.01  0.25 -0.18 -0.01  -0.25   0.66  0.04   1.00             
-## CIDI6   0.00  0.39 -0.33 -0.16  -0.33   0.47  0.35   0.46   1.00      
-## CIDI7   0.05  0.33 -0.21 -0.06  -0.25   0.26  0.19   0.30   0.41  1.00
-## CIDI8   0.02  0.39 -0.33 -0.24  -0.23   0.51  0.46   0.34   0.63  0.44
-## CIDI9   0.05  0.17 -0.21 -0.16  -0.13   0.18  0.17   0.12   0.19  0.25
-##       CIDI8 CIDI9
-## CIDI8  1.00      
-## CIDI9  0.23  1.00
-## 
-##  with tau of 
-##  CIDI1  CIDI2  CIDI3 CIDI3a CIDI3b  CIDI4 CIDI4a CIDI4b  CIDI6  CIDI7 
-## -0.120  0.265  0.247 -0.195 -0.708 -0.834 -0.678  0.967 -0.912 -0.024 
-##  CIDI8  CIDI9 
-## -0.795 -0.052
+![](ukb-phenotypes_files/figure-html/ukb_pheno_cidi_phq_cor-1.png)<!-- -->
+
+```r
+dput(cidi_phq_cor, 'ukb_cidi_mixed_cor.deparse.R', control=c('all', 'digits17'))
 ```

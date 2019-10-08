@@ -36,6 +36,7 @@ source('sumstats/UKB/ukb_mdd.r')
 library(dplyr)
 library(readr)
 library(psych)
+library(corrplot)
 
 ```
 
@@ -43,6 +44,7 @@ library(psych)
 
 ## DSM lifetime symptoms (CIDI)
 
+Depression symptoms from the Composite International Diagnostic Interview.
 
 ```{r}
 
@@ -68,6 +70,8 @@ mhq_cidi_fields
 
 
 ## Current symptoms (PHQ)
+
+Depression symptoms from the Patient Health Questionnaire. 
 
 ```{r}
 
@@ -178,8 +182,8 @@ screen_symptom_507 <- function(symptom_field, depression_field, anhedonia_field)
 # code weight 'gain'/'loss' as a symptom
 screen_weight_507 <- function(symptom_field, present_levels, absent_levels, depression_field, anhedonia_field) {
         case_when(symptom_field %in% c(resp_prefer, resp_know) ~ 'Declined',
-                  symptom_field %in% present_levels ~ 'Absent',
-                  symptom_field %in% absent_levels ~ 'Present',
+                  symptom_field %in% absent_levels ~ 'Absent',
+                  symptom_field %in% present_levels ~ 'Present',
                   depression_field %in% 'No' | anhedonia_field %in% 'No' ~ 'Screened',
                   depression_field %in% resp_prefer & anhedonia_field %in% resp_prefer ~ 'Missing',
                   TRUE ~ 'Not assessed')
@@ -281,15 +285,63 @@ mutate(CIDI1=Ab0Pr1(cidi1),
 
 ```
 
+## PHQ
+
+Question form: "Over the last 2 weeks, how often have you been bothered by any of the following problems?"
+
+- "Feeling down, depressed, or hopeless"
+- etc.
+
+```{r}
+
+# Coding
+# -818	Prefer not to answer
+# 1	Not at all
+# 2	Several days
+# 3	More than half the days
+# 4	Nearly every day
+
+# recode responses as integers 0:3
+
+recode_phq <- function(x) recode(x, `Not at all`=0L,
+                                    `Several days`=1L,
+                                    `More than half the days`=2L,
+                                    `Nearly every day`=3L,
+                                    .default=NA_integer_)
+
+phq <- bd %>%
+select(f.eid, f.20510.0.0, f.20514.0.0, f.20511.0.0, f.20517.0.0, f.20518.0.0, f.20519.0.0, f.20507.0.0, f.20508.0.0, f.20513.0.0) %>%
+mutate(PHQ1=recode_phq(f.20510.0.0),
+       PHQ2=recode_phq(f.20514.0.0),
+       PHQ3=recode_phq(f.20511.0.0),
+       PHQ4=recode_phq(f.20517.0.0),
+       PHQ5=recode_phq(f.20518.0.0),
+       PHQ6=recode_phq(f.20519.0.0),
+       PHQ7=recode_phq(f.20507.0.0),
+       PHQ8=recode_phq(f.20508.0.0),
+       PHQ9=recode_phq(f.20513.0.0))
+
+```
+
 # Phenotypic correlations
 
 Calculate tetrachoric correlations for binary data
 
-```{r}
+```{r ukb_pheno_cidi_phq_cor}
+
+cidi_phq <- CIDI_binary %>%
+inner_join(phq, by='f.eid') %>%
+select(starts_with('CIDI', ignore.case=FALSE),
+       starts_with('PHQ', ignore.case=FALSE))
+
 
 options('mc.cores'=4)
-cidi_cor <- tetrachoric(CIDI_binary %>% select(starts_with('CIDI', ignore.case=FALSE)))
 
-cidi_cor
+cidi_phq_cor <- mixedCor(cidi_phq, p=13:21, d=1:12)
+
+corrplot(cidi_phq_cor$rho, 'square')
+
+dput(cidi_phq_cor, 'sumstats/UKB/ukb_cidi_phq_mixed_cor.deparse.R', control=c('all', 'digits17'))
+
 
 ```
