@@ -118,6 +118,8 @@ done
 
 ## UKB
 
+### CIDI
+
 UKB CIDI sumstats are in a format easily digestible by `munge_sumstats.py`.
 
 ```{bash, eval=FALSE}
@@ -136,6 +138,33 @@ for sumstats in $(ls sumstats/UKB/CIDI/UKB_CIDI_MDD*.gz); do
         --p P \
         --merge-alleles sumstats/reference/w_hm3.snplist \
         --out sumstats/UKB/CIDI/${prefix}.ldsc
+
+done
+
+```
+
+### PHQ
+
+The PHQ9 and PHQ-like items were assessed at 4 timepoints: 0 = initial assessment, 1 = repeate assessment, 2 = imaging assessment, M = Mental Health Questionnaire online followup
+
+```{bash, eval=FALSE}
+
+for sumstats in $(ls sumstats/UKB/PHQ/UKB_PHQ_MDD*.gz); do
+
+        prefix=$(basename $sumstats .gz)
+
+        munge_sumstats.py \
+        --sumstats $sumstats \
+        --a1 a_1 \
+        --a2 a_0 \
+        --signed-sumstats beta,0 \
+        --N-col N \
+        --p p \
+        --info info \
+        --frq af \
+        --snp rsid \
+        --merge-alleles sumstats/reference/w_hm3.snplist \
+        --out sumstats/UKB/PHQ/${prefix}.ldsc
 
 done
 
@@ -228,7 +257,7 @@ Read in headers from PGC daner files. The daner format contains headers for the 
 pgc_daner_meta_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='meta.gz', full.names=TRUE)
 
 # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
-names(pgc_daner_meta_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
+names(pgc_daner_meta_gz) <- str_extract(pgc_daner_meta_gz, 'MDD[:digit:](a|b)?')
 
 # read in header and pull out 6th and 7th columns
 pgc_daner_meta_frq_cols <- 
@@ -300,34 +329,49 @@ We list out the munged sumstats for PGC and UKB and unify them with sample and p
 
 ```{r, results='hide'}
 
-pgc_dsm_ukb_cidi_covstruct_r <- 'ldsc/pgc_dsm.ukb_cidi.covstruct.deparse.R'
+pgc_ukb_covstruct_r <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.deparse.R'
+pgc_ukb_covstruct_rds <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.rds'
 
-if(!file.exists(pgc_dsm_ukb_cidi_covstruct_r)) {
+# list sumstats files
+pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz', full.names=TRUE)
 
-  # list sumstats files
-  pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz', full.names=TRUE)
-  
-  ukb_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz', full.names=TRUE)
-  
-  # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
-  # probably str_detect() a better option here
-  names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
-  
-  names(ukb_sumstats_gz) <- str_extract(ukb_sumstats_gz, 'MDD[:digit:](a|b)?')
-  
-  pgc_sumstats_prevs <- 
-  tibble(Symptom=names(pgc_sumstats_gz), filename=pgc_sumstats_gz, study='PGC') %>%
-  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
-  unite('trait_name', study, Symptom) %>%
-  select(trait_name, filename, samp_prev, pop_prev)
-  
-  ukb_sumstats_prevs <- 
-  tibble(Symptom=names(ukb_sumstats_gz), filename=ukb_sumstats_gz, study='UKB') %>%
-  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
-  unite('trait_name', study, Symptom) %>%
-  select(trait_name, filename, samp_prev=cidi_sample, pop_prev)
-  
-  sumstats_prevs <- bind_rows(pgc_sumstats_prevs, ukb_sumstats_prevs)
+ukb_cidi_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz', full.names=TRUE)
+
+ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ', pattern='ldsc.sumstats.gz', full.names=TRUE)
+
+# pull out which symptom 'x' this is from the filename (daner_MDDx_*)
+names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
+
+names(ukb_cidi_sumstats_gz) <- str_extract(ukb_cidi_sumstats_gz, 'MDD[:digit:](a|b)?')
+
+names(ukb_phq_sumstats_gz) <- str_extract(ukb_phq_sumstats_gz, 'MDD[:digit:]_[:alnum:]')
+
+pgc_sumstats_prevs <- 
+tibble(Symptom=names(pgc_sumstats_gz),
+       filename=pgc_sumstats_gz,
+       study='PGC') %>%
+left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
+mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
+select(trait_name, filename, samp_prev, pop_prev)
+
+ukb_cidi_sumstats_prevs <- 
+tibble(Symptom=names(ukb_cidi_sumstats_gz), 
+       filename=ukb_cidi_sumstats_gz,
+       study='UKB_CIDI') %>%
+left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
+mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
+select(trait_name, filename, samp_prev=cidi_sample, pop_prev)
+
+ukb_phq_sumstats_prevs <- tibble(Symptom=names(ukb_phq_sumstats_gz),
+       filename=ukb_phq_sumstats_gz,
+       study='UKB_PHQ') %>%
+mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
+select(trait_name, filename)
+
+sumstats_prevs <- bind_rows(pgc_sumstats_prevs, ukb_cidi_sumstats_prevs, ukb_phq_sumstats_prevs)
+
+if(!file.exists(pgc_ukb_covstruct_r)) {
+
 
   symptoms_covstruct <- ldsc(traits=sumstats_prevs$filename,
                              sample.prev=sumstats_prevs$samp_prev,
@@ -337,14 +381,15 @@ if(!file.exists(pgc_dsm_ukb_cidi_covstruct_r)) {
                              trait.names=sumstats_prevs$trait_name)
 
 
-  dput(symptoms_covstruct, pgc_dsm_ukb_cidi_covstruct_r, control=c('all', 'digits17'))
+  dput(symptoms_covstruct, pgc_ukb_covstruct_r, control=c('all', 'digits17'))
+  saveRDS(symptoms_covstruct, pgc_ukb_covstruct_rds)
   
   # check for exact match of deparsed object
-  identical(dget(pgc_dsm_ukb_cidi_covstruct_r), symptoms_covstruct)
+  identical(dget(pgc_ukb_covstruct_r), symptoms_covstruct)
 
 } else {
 
-  symptoms_covstruct <- dget(pgc_dsm_ukb_cidi_covstruct_r)
+  symptoms_covstruct <- dget(pgc_ukb_covstruct_r)
 
 }
 
@@ -352,13 +397,410 @@ if(!file.exists(pgc_dsm_ukb_cidi_covstruct_r)) {
 
 ```{r pgc_ukb_corrplot}
 
-variance_is_positive <- diag(symptoms_covstruct$S) > 0
 
+variance_is_positive <- diag(symptoms_covstruct$S) > 0
 symptoms_cor <- cov2cor(symptoms_covstruct$S[variance_is_positive,variance_is_positive])
 symptoms_cor[which(symptoms_cor > 1)] <- 1
 rownames(symptoms_cor) <- colnames(symptoms_cor)
 
 
 corrplot(symptoms_cor, 'square')
+
+```
+
+```{r, pgc_ukb_corrplot_clust}
+
+c('UKB_CIDI1', 'UKB_PHQ1_M', 'UKB_CIDI2', 'UKB_PHQ2_M',     'PGC3a', 'UKB_CIDI3a', 'UKB_CIDI3b', 'UKB_PHQ3_M', 'UKB_CIDI4a', 'UKB_CIDI4b', 'UKB_PHQ4_M', 'PGC5a', 'PGC5b', 'UKB_PHQ5_M', 'UKB_PHQ6_M', 'UKB_CIDI7', UKB_PHQ7_M', 'UKB_CIDI8','UKB_PHQ8_M','UKB_CIDI9', 'UKB_PHQ9_M')                                               
+
+```
+
+```{r pgc_ukb_corrplot_items}
+
+mdd1 <- c('UKB_CIDI1', 'UKB_PHQ1_0', 'UKB_PHQ1_1', 'UKB_PHQ1_2', 'UKB_PHQ1_M')
+mdd2 <- c('UKB_CIDI2', 'UKB_PHQ2_0', 'UKB_PHQ2_1', 'UKB_PHQ2_2', 'UKB_PHQ2_M')
+mdd3 <- c('PGC3a', 'UKB_CIDI3a', 'UKB_CIDI3b', 'UKB_PHQ3_M')
+mdd4 <- c('UKB_CIDI4a', 'UKB_CIDI4b', 'UKB_PHQ4_M')
+mdd5 <- c('PGC5a', 'PGC5b', 'UKB_PHQ5_0', 'UKB_PHQ5_1', 'UKB_PHQ5_2', 'UKB_PHQ5_M')
+mdd6 <- c('UKB_PHQ6_0', 'UKB_PHQ6_1', 'UKB_PHQ6_2', 'UKB_PHQ6_M')
+mdd7 <- c('UKB_CIDI7', 'UKB_PHQ7_M')
+mdd8 <- c('UKB_CIDI8', 'UKB_PHQ8_M')
+mdd9 <- c('PGC9', 'UKB_CIDI9', 'UKB_PHQ9_M')
+
+corrplot(symptoms_cor[c(mdd1, mdd2, mdd3, mdd4, mdd5, mdd6, mdd7, mdd8, mdd9),
+                      c(mdd1, mdd2, mdd3, mdd4, mdd5, mdd6, mdd7, mdd8, mdd9)],
+                      'square')
+
+corrplot(symptoms_cor[mdd1,mdd1], 'square')
+
+corrplot(symptoms_cor[mdd3,mdd3], 'square')
+
+```
+
+# Structural models
+
+## PGC
+
+### Common factor
+
+Common factor model
+
+```{r pgc_commonfactor, cache=TRUE}
+
+pgc_commonfactor_model <- "
+F_PGC =~ NA*PGC3a + PGC5a + PGC5b + PGC9
+F_PGC ~~ 1*F_PGC
+"
+
+pgc_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor_model)
+
+```
+
+```{r pgc_commonfactor_constr, cache=TRUE}
+
+pgc_commonfactor_constr_model <- "
+F_PGC =~ NA*PGC3a + PGC5a + PGC9
+F_PGC ~~ 1*F_PGC
+"
+
+pgc_commonfactor_constr_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor_constr_model)
+
+pgc_commonfactor_constr_fit$modelfit
+pgc_commonfactor_constr_fit$results[c(1, 2, 3, 6, 7)]
+
+
+```
+## UKB CIDI
+
+### Common factor
+
+Common factor model
+
+```{r ukb_cidi_commonfactor, cache=TRUE}
+
+ukb_cidi_commonfactor_model <- "
+F_UKB_CIDI =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI6 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+F_UKB_CIDI ~~ 1*F_UKB_CIDI
+"
+
+ukb_cidi_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_commonfactor_model)
+
+ukb_cidi_commonfactor_fit$modelfit
+ukb_cidi_commonfactor_fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+## UKB PHQ
+
+### Assessment factors
+
+#### Common factor (Baseline)
+
+Common factor model at baseline assessment
+
+
+```{r ukb_phq_0_commonfactor, cache=TRUE}
+
+ukb_phq_0_commonfactor_model <- "
+F_UKB_PHQ_0 =~ NA*UKB_PHQ1_0 + UKB_PHQ2_0 + UKB_PHQ5_0 + UKB_PHQ6_0
+F_UKB_PHQ_0 ~~ 1*F_UKB_PHQ_0
+"
+
+ukb_phq_0_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_0_commonfactor_model)
+
+ukb_phq_0_commonfactor_fit$modelfit
+ukb_phq_0_commonfactor_fit$results[c(1, 2, 3, 6, 7)]
+
+```
+#### Common factor (Followup)
+
+Common factor model at first followup assessment
+
+
+```{r ukb_phq_1_commonfactor, cache=TRUE}
+
+ukb_phq_1_commonfactor_model <- "
+F_UKB_PHQ_1 =~ NA*UKB_PHQ1_1 + UKB_PHQ2_1 + UKB_PHQ5_1 + UKB_PHQ6_1
+F_UKB_PHQ_1 ~~ 1*F_UKB_PHQ_1
+"
+
+ukb_phq_1_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_1_commonfactor_model)
+
+```
+
+```{r ukb_phq_1_commonfactor_constr, cache=TRUE}
+
+ukb_phq_1_commonfactor_constr_model <- "
+F_UKB_PHQ_1 =~ NA*UKB_PHQ1_1 + UKB_PHQ2_1 + UKB_PHQ5_1 + UKB_PHQ6_1
+F_UKB_PHQ_1 ~~ 1*F_UKB_PHQ_1
+UKB_PHQ2_1 ~~ c2*UKB_PHQ2_1
+c2 > .001
+"
+
+ukb_phq_1_commonfactor_constr_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_1_commonfactor_constr_model)
+
+ukb_phq_1_commonfactor_constr_fit$modelfit
+ukb_phq_1_commonfactor_constr_fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+#### Common factor (imaging)
+
+Common factor model at imaging assessment
+
+
+```{r ukb_phq_2_commonfactor, cache=TRUE}
+
+ukb_phq_2_commonfactor_model <- "
+F_UKB_PHQ_2 =~ NA*UKB_PHQ1_2 + UKB_PHQ2_2 + UKB_PHQ5_2 + UKB_PHQ6_2
+F_UKB_PHQ_2 ~~ 1*F_UKB_PHQ_2
+"
+
+ukb_phq_2_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_2_commonfactor_model)
+
+ukb_phq_2_commonfactor_fit$modelfit
+ukb_phq_2_commonfactor_fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+
+```{r ukb_phq_2_commonfactor_constr, cache=TRUE}
+
+ukb_phq_2_commonfactor_constr_model <- "
+F_UKB_PHQ_2 =~ NA*UKB_PHQ1_2 + UKB_PHQ2_2 + UKB_PHQ5_2 + UKB_PHQ6_2
+F_UKB_PHQ_2 ~~ 1*F_UKB_PHQ_2
+UKB_PHQ1_2 ~~ c2*UKB_PHQ1_2
+UKB_PHQ6_2 ~~ c6*UKB_PHQ6_2
+c2 > .001
+c6 > .001
+"
+
+ukb_phq_2_commonfactor_constr_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_2_commonfactor_constr_model)
+
+ukb_phq_2_commonfactor_constr_fit$modelfit
+ukb_phq_2_commonfactor_constr_fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+
+#### Common factor (MHQ)
+
+Common factor model at MHQ assessment
+
+
+```{r ukb_phq_m_commonfactor, cache=TRUE}
+
+ukb_phq_m_commonfactor_model <- "
+F_UKB_PHQ_M =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ3_M + UKB_PHQ5_M + UKB_PHQ6_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
+F_UKB_PHQ_M ~~ 1*F_UKB_PHQ_M
+"
+
+ukb_phq_m_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_m_commonfactor_model)
+
+ukb_phq_m_commonfactor_fit$modelfit
+ukb_phq_m_commonfactor_fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+
+
+## Full
+
+The first model full has a latent factor for each symptom with unconstrained covariance structure
+
+```{r symptom_model, cache=TRUE}
+
+symptom_model <- "
+MDD1  =~ NA*UKB_CIDI1 + UKB_PHQ1_0 + UKB_PHQ1_1 + UKB_PHQ1_2 + UKB_PHQ1_M
+MDD2  =~ NA*UKB_CIDI2 + UKB_PHQ2_0 + UKB_PHQ2_1 + UKB_PHQ2_2 + UKB_PHQ2_M
+MDD3a =~ NA*PGC3a + UKB_CIDI3a
+MDD3b =~ NA*UKB_CIDI3b + UKB_PHQ3_M
+MDD4a =~ NA*UKB_CIDI4a + UKB_PHQ4_M
+MDD5b =~ NA*PGC5b + UKB_PHQ5_0 + UKB_PHQ5_1 + UKB_PHQ5_2 + UKB_PHQ5_M
+MDD6  =~ NA*PGC6 + UKB_PHQ6_0 + UKB_PHQ6_1 + UKB_PHQ6_2 + UKB_PHQ6_M
+MDD7  =~ NA*UKB_CIDI7 + UKB_PHQ7_M
+MDD8  =~ NA*UKB_CIDI8 + UKB_PHQ8_M
+MDD9  =~ NA*PGC9 + UKB_CIDI9 + UKB_PHQ9_M
+MDD1  ~~ 1*MDD1
+MDD2  ~~ 1*MDD2
+MDD3a ~~ 1*MDD3a
+MDD3b ~~ 1*MDD3b
+MDD4a ~~ 1*MDD4a
+MDD5b ~~ 1*MDD5b
+MDD6  ~~ 1*MDD6
+MDD7  ~~ 1*MDD7
+MDD8  ~~ 1*MDD8
+MDD9  ~~ 1*MDD9
+"
+
+symptom_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=symptom_model)
+
+```
+
+Several of the latent correlations are outside the bound $[-1, 1]$, so we will add constraints to these
+
+```{r symptom_c_model, cache=TRUE}
+
+symptom_c_model <- "
+MDD1  =~ NA*PGC1 + UKB_CIDI1 + UKB_PHQ1_0 + UKB_PHQ1_1 + UKB_PHQ1_2 + UKB_PHQ1_M
+MDD2  =~ NA*PGC2 + UKB_CIDI2 + UKB_PHQ2_0 + UKB_PHQ2_1 + UKB_PHQ2_2 + UKB_PHQ2_M
+MDD3a =~ NA*PGC3a + UKB_CIDI3a
+MDD3b =~ NA*UKB_CIDI3b + UKB_PHQ3_M
+MDD4a =~ NA*UKB_CIDI4a + UKB_PHQ4_M
+MDD5b =~ NA*PGC5b + UKB_PHQ5_0 + UKB_PHQ5_1 + UKB_PHQ5_2 + UKB_PHQ5_M
+MDD6  =~ NA*PGC6 + UKB_PHQ6_0 + UKB_PHQ6_1 + UKB_PHQ6_2 + UKB_PHQ6_M
+MDD7  =~ NA*UKB_CIDI7 + UKB_PHQ7_M
+MDD8  =~ NA*UKB_CIDI8 + UKB_PHQ8_M
+MDD9  =~ NA*PGC9 + UKB_CIDI9 + UKB_PHQ9_M
+MDD1  ~~ 1*MDD1
+MDD2  ~~ 1*MDD2
+MDD3a ~~ 1*MDD3a
+MDD3b ~~ 1*MDD3b
+MDD4a ~~ 1*MDD4a
+MDD5b ~~ 1*MDD5b
+MDD6  ~~ 1*MDD6
+MDD7  ~~ 1*MDD7
+MDD8  ~~ 1*MDD8
+MDD9  ~~ 1*MDD9
+c1_2 < 1
+MDD1 ~~ c1_2*MDD2
+c1_7 < 1
+MDD1 ~~ c1_7*MDD7
+c2_8 < 1
+MDD2 ~~ c2_8*MDD8
+uc1 > 0.001
+UKB_CIDI1 ~~ uc1*UKB_CIDI1
+uc2 > 0.001
+UKB_CIDI2 ~~ uc2*UKB_CIDI2
+uc3a > 0.001
+UKB_CIDI3a ~~ uc3a*UKB_CIDI3a
+uc3b > 0.001
+UKB_CIDI3b ~~ uc3b*UKB_CIDI3b
+uc7 > 0.001
+UKB_CIDI7 ~~ uc7*UKB_CIDI7
+uc9 > 0.001
+UKB_CIDI9 ~~ uc9*UKB_CIDI9
+up10 > 0.001
+UKB_PHQ1_0 ~~ up10*UKB_PHQ1_0
+up1M > 0.001
+UKB_PHQ1_M ~~ up1M*UKB_PHQ1_M
+up20 > 0.001
+UKB_PHQ2_0 ~~ up20*UKB_PHQ2_0
+up2M > 0.001
+UKB_PHQ2_M ~~ up2M*UKB_PHQ2_M
+up3M > 0.001
+UKB_PHQ3_M ~~ up3M*UKB_PHQ3_M
+up4M > 0.001
+UKB_PHQ4_M ~~ up4M*UKB_PHQ4_M
+up50 > 0.001
+UKB_PHQ5_0 ~~ up50*UKB_PHQ5_0
+up5M > 0.001
+UKB_PHQ5_M ~~ up5M*UKB_PHQ5_M
+up60 > 0.001
+UKB_PHQ6_0 ~~ up60*UKB_PHQ6_0
+up6M > 0.001
+UKB_PHQ6_M ~~ up6M*UKB_PHQ6_M
+up7M > 0.001
+UKB_PHQ7_M ~~ up7M*UKB_PHQ7_M
+up8M > 0.001
+UKB_PHQ8_M ~~ up8M*UKB_PHQ8_M
+up9M > 0.001
+UKB_PHQ9_M ~~ up9M*UKB_PHQ9_M
+"
+
+symptom_c_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=symptom_c_model)
+
+symptom_c_fit$modelfit
+symptom_c_fit$results[,c(1,2,3,8)]
+
+```
+
+```{r phq_item, cache=TRUE}
+
+phq_item_model <- "
+PHQ1 =~ NA*UKB_PHQ1_0 + UKB_PHQ1_1 + UKB_PHQ1_2 + UKB_PHQ1_M
+PHQ2 =~ NA*UKB_PHQ2_0 + UKB_PHQ2_1 + UKB_PHQ2_2 + UKB_PHQ2_M
+PHQ5 =~ NA*UKB_PHQ5_0 + UKB_PHQ5_1 + UKB_PHQ5_2 + UKB_PHQ5_M
+PHQ6 =~ NA*UKB_PHQ6_0 + UKB_PHQ6_1 + UKB_PHQ6_2 + UKB_PHQ6_M
+PHQ1 ~~ 1*PHQ1
+PHQ2 ~~ 1*PHQ2
+PHQ5 ~~ 1*PHQ5
+PHQ6 ~~ 1*PHQ6
+PHQ1 ~~ c12*PHQ2
+PHQ1 ~~ c15*PHQ5
+PHQ2 ~~ c25*PHQ5
+c12 < 1
+c15 < 1
+c25 < 1
+"
+
+phq_item_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=phq_item_model)
+
+phq_item_fit$modelfit
+
+phq_item_fit$results[c(1,2,3,8)]
+
+```
+
+```{r phq_instance, cache=TRUE}
+
+phq_instance_model <- "
+PHQ_0 =~ NA*UKB_PHQ1_0 + UKB_PHQ2_0 + UKB_PHQ5_0 + UKB_PHQ6_0
+PHQ_1 =~ NA*UKB_PHQ1_1 + UKB_PHQ2_1 + UKB_PHQ5_1 + UKB_PHQ6_1
+PHQ_2 =~ NA*UKB_PHQ1_2 + UKB_PHQ2_2 + UKB_PHQ5_2 + UKB_PHQ6_2
+PHQ_M =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ3_M + UKB_PHQ5_M + UKB_PHQ6_M + UKB_PHQ7_M + UKB_PHQ9_M + UKB_PHQ9_M
+PHQ_0 ~~ 1*PHQ_0
+PHQ_1 ~~ 1*PHQ_1
+PHQ_2 ~~ 1*PHQ_2
+PHQ_M ~~ 1*PHQ_M
+"
+
+phq_instance_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=phq_instance_model)
+
+phq_instance_fit$modelfit
+phq_instance_fit$results[c(1,2,3,8)]
+
+```
+
+
+```{r phq_item_instance, cache=TRUE}
+
+phq_item_instance_model <- "
+PHQ_0 =~ NA*UKB_PHQ1_0 + UKB_PHQ2_0 + UKB_PHQ5_0 + UKB_PHQ6_0
+PHQ_1 =~ NA*UKB_PHQ1_1 + UKB_PHQ2_1 + UKB_PHQ5_1 + UKB_PHQ6_1
+PHQ_2 =~ NA*UKB_PHQ1_2 + UKB_PHQ2_2 + UKB_PHQ5_2 + UKB_PHQ6_2
+PHQ_M =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ3_M + UKB_PHQ5_M + UKB_PHQ6_M + UKB_PHQ7_M + UKB_PHQ9_M + UKB_PHQ9_M
+PHQ1 =~ NA*UKB_PHQ1_0 + UKB_PHQ1_1 + UKB_PHQ1_2 + UKB_PHQ1_M
+PHQ2 =~ NA*UKB_PHQ2_0 + UKB_PHQ2_1 + UKB_PHQ2_2 + UKB_PHQ2_M
+PHQ5 =~ NA*UKB_PHQ5_0 + UKB_PHQ5_1 + UKB_PHQ5_2 + UKB_PHQ5_M
+PHQ6 =~ NA*UKB_PHQ6_0 + UKB_PHQ6_1 + UKB_PHQ6_2 + UKB_PHQ6_M
+PHQ1 ~~ 1*PHQ1
+PHQ2 ~~ 1*PHQ2
+PHQ5 ~~ 1*PHQ5
+PHQ6 ~~ 1*PHQ6
+PHQ_0 ~~ 1*PHQ_0
+PHQ_1 ~~ 1*PHQ_1
+PHQ_2 ~~ 1*PHQ_2
+PHQ_M ~~ 1*PHQ_M
+PHQ1 ~~ 0*PHQ_0
+PHQ1 ~~ 0*PHQ_1
+PHQ1 ~~ 0*PHQ_2
+PHQ1 ~~ 0*PHQ_M
+PHQ2 ~~ 0*PHQ_0
+PHQ2 ~~ 0*PHQ_1
+PHQ2 ~~ 0*PHQ_2
+PHQ2 ~~ 0*PHQ_M
+PHQ5 ~~ 0*PHQ_0
+PHQ5 ~~ 0*PHQ_1
+PHQ5 ~~ 0*PHQ_2
+PHQ5 ~~ 0*PHQ_M
+PHQ6 ~~ 0*PHQ_0
+PHQ6 ~~ 0*PHQ_1
+PHQ6 ~~ 0*PHQ_2
+PHQ6 ~~ 0*PHQ_M
+"
+
+
+phq_item_instance_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=phq_item_instance_model)
+
 
 ```
