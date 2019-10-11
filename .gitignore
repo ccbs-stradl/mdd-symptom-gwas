@@ -11,3 +11,4 @@ fields.ukb
 *.tab
 sumstats/UKB/*.r
 sumstats/reference
+*_cache/

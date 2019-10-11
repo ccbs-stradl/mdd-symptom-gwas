@@ -12,31 +12,6 @@ output:
     variant: markdown_github
 ---
 
-# Symptom labels
-
-MDD DSM symptoms are numbered 1-9:
-
-```{r}
-
-dsm_mdd_symptoms_reference <-
-read_delim("
-MDD1;	Depressed mood most of the day, nearly every day
-MDD2;	Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
-MDD3a;	Significant weight loss or decrease in appetite
-MDD3b;	Significant weight gain or increase in appetite
-MDD4a;	Insomnia nearly every day
-MDD4b;	Hypersomnia nearly every day
-MDD5a;	Psychomotor agitation nearly every day
-MDD5b;	Psychomotor retardation nearly every day
-MDD6;	Fatigue or loss of energy nearly every day
-MDD7;	Feelings of worthlessness or excessive or inappropriate guilt
-MDD8;	Diminished ability to think or concentrate, or indecisiveness
-MDD9;	Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for committing suicide
-", col_names=c('Reference', 'Description'), delim=';')
-
-dsm_mdd_symptoms_reference
-
-```
 
 # Setup
 
@@ -91,6 +66,63 @@ curl https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2 > sums
 tar -xjf sumstats/reference/eur_w_ld_chr.tar.bz2 -C sumstats/reference
 rm sumstats/reference/eur_w_ld_chr.tar.bz2
 bunzip2 sumstats/reference/w_hm3.snplist.bz2
+```
+
+# Symptom labels
+
+MDD DSM symptoms are numbered 1-9:
+
+```{r}
+
+# plot labels
+
+dsm_mdd_symptoms_labels <-
+read_delim("
+MDD1;Mood;Mood
+MDD2;Interest;Interest
+MDD3;Weight⇅;Weight⇆
+MDD3a;Weight⇈;Weight⇉
+MDD3b;Weight⇊;Weight⇇
+MDD4;Sleep⇅;Sleep⇆
+MDD4a;Sleep⇊;Sleep⇇
+MDD4b;Sleep⇈;Sleep⇉
+MDD5;Motor⇅;Motor⇆
+MDD5a;Motor⇈;Motor⇉
+MDD5b;Motor⇊;Motor⇇
+MDD6;Fatigue;Fatigue
+MDD7;Guilt;Guilt
+MDD8;Concentrate;Concentrate
+MDD9;Suicidality;Suicidality
+", col_names=c('ref', 'h', 'v'), delim=';')
+
+dsm_mdd_symptoms_reference <-
+read_delim("
+MDD1;Depressed mood most of the day, nearly every day
+MDD2;Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
+MDD3;Significant change in weight or appetite
+MDD3a;Significant weight loss or decrease in appetite
+MDD3b;Significant weight gain or increase in appetite
+MDD4;Sleeping too much or not sleeping enough
+MDD4a;Insomnia nearly every day
+MDD4b;Hypersomnia nearly every day
+MDD5;Changes in speed/amount of moving or speaking
+MDD5a;Psychomotor agitation nearly every day
+MDD5b;Psychomotor retardation nearly every day
+MDD6;Fatigue or loss of energy nearly every day
+MDD7;Feelings of worthlessness or excessive or inappropriate guilt
+MDD8;Diminished ability to think or concentrate, or indecisiveness
+MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide
+", col_names=c('Reference', 'Description'), delim=';')
+
+dsm_mdd_symptoms_reference %>%
+left_join(dsm_mdd_symptoms_labels, by=c('Reference'='ref')) %>%
+select(Reference, Label=h, Description)
+
+```
+
+```{r}
+
+
 ```
 
 # Sumstats munging
@@ -203,7 +235,9 @@ pgc_symptom_counts %>%
   select(-Absent, -Present) %>%
   spread(MDD, prev)
 
-pgc_symptom_prevalences
+pgc_symptom_prevalences %>%
+  left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref')) %>%
+  select(Symptom=h, Case, Control)
 
 pgc_symptom_sample_sizes <- 
 pgc_symptom_counts %>%
@@ -224,13 +258,13 @@ lm(Case ~ Control, data=pgc_symptom_prev_size, weights=Ntotal)
 
 summary(case_control_prev_lm)
 
-ggplot(pgc_symptom_prev_size, aes(x=Control, y=Case, weight=Ntotal)) +
+ggplot(pgc_symptom_prev_size %>% left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref')), aes(x=Control, y=Case, weight=Ntotal)) +
   geom_point() +
-  geom_text(hjust=-0.1, aes(label=Symptom)) +
-  stat_smooth(method='lm') +
-  geom_abline() +
-  scale_x_continuous('Sympotom prevalence among contols') +
-  scale_y_continuous('Symptom prevalence among cases')
+  stat_smooth(method='lm', fullrange=TRUE) +
+  geom_text(hjust=-0.1, aes(label=h)) +
+  scale_x_continuous('Sympotom prevalence among contols', limits=c(0, 0.15)) +
+  scale_y_continuous('Symptom prevalence among cases') +
+  coord_cartesian(xlim=c(0, 0.13), ylim=c(0, 1))
 
 ```
 
@@ -243,7 +277,9 @@ pgc_symptoms_pop_prev <-
 pgc_symptom_prevalences %>%
   transmute(Symptom, pop_prev=k*Case + (1-k)*Control)
  
-pgc_symptoms_pop_prev
+pgc_symptoms_pop_prev %>%
+  left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref')) %>%
+  select(Symptom=h, pop_prev)
 
 ```
 
@@ -279,7 +315,9 @@ select(-frq, -status, -Count) %>%
 spread(presence, N) %>%
 mutate(samp_prev=Present / (Present + Absent))
 
-pgc_symptoms_sample_prev
+pgc_symptoms_sample_prev %>%
+  left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref')) %>%
+  select(Symptom=h, Absent, Present, `Sample prevalence`=samp_prev)
 
 ```
 
@@ -302,12 +340,13 @@ ukb_cidi_prevalences <- read_tsv('sumstats/UKB/CIDI/ukb_cidi_symptoms_prev.txt')
 pgc_ukb_symptoms_prev <- 
 pgc_symptoms_sample_prev %>%
 full_join(pgc_symptoms_pop_prev, by='Symptom') %>%
-full_join(ukb_cidi_prevalences, by=c('Symptom'='reference'))
+full_join(ukb_cidi_prevalences, by=c('Symptom'='reference')) %>%
+left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref'))
 
 ggplot(pgc_ukb_symptoms_prev, aes(x=samp_prev, y=cidi_sample)) +
 geom_abline(col='red') +
 geom_point() +
-geom_text(aes(label=Symptom), hjust=-0.1) +
+geom_text(aes(label=h), hjust=-0.1) +
 scale_x_continuous('PGC sample prevalence', limits=c(0, 1)) +
 scale_y_continuous('UKB sample prevalence', limits=c(0, 1)) +
 coord_fixed() 
@@ -315,7 +354,7 @@ coord_fixed()
 ggplot(pgc_ukb_symptoms_prev, aes(x=pop_prev, y=mhq_sample)) +
 geom_abline(col='red') +
 geom_point() +
-geom_text(aes(label=Symptom), hjust=-0.1) +
+geom_text(aes(label=h), hjust=-0.1) +
 scale_x_continuous('PGC pop prevalence', limits=c(0, 1)) +
 scale_y_continuous('UKB MHQ prevalence', limits=c(0, 1)) +
 coord_fixed() 
@@ -395,23 +434,66 @@ if(!file.exists(pgc_ukb_covstruct_r)) {
 
 ```
 
-```{r pgc_ukb_corrplot}
+Load phenotypic correlations 
+
+```{r}
+
+ukb_cidi_phq_cor <- dget('sumstats/UKB/ukb_cidi_phq_mixed_cor.deparse.R')
+
+pgc_dsm_cor <- dget('sumstats/PGC/CasesAllCohorts/pgc_cases_tetra_cor.deprase.R')
 
 
-variance_is_positive <- diag(symptoms_covstruct$S) > 0
-symptoms_cor <- cov2cor(symptoms_covstruct$S[variance_is_positive,variance_is_positive])
-symptoms_cor[which(symptoms_cor > 1)] <- 1
-rownames(symptoms_cor) <- colnames(symptoms_cor)
+symptoms_pgc_cidi_phqm <- 
+c("PGC1", "PGC2", "PGC3a", "PGC3b", "PGC4a", "PGC4b", "PGC5a", 
+"PGC5b", "PGC6", "PGC7", "PGC8", "PGC9", "UKB_CIDI1", "UKB_CIDI2", 
+"UKB_CIDI3a", "UKB_CIDI3b", "UKB_CIDI4a", "UKB_CIDI4b", "UKB_CIDI6", 
+"UKB_CIDI7", "UKB_CIDI8", "UKB_CIDI9",  "UKB_PHQ1_M", "UKB_PHQ2_M", "UKB_PHQ3_M", 
+"UKB_PHQ4_M", "UKB_PHQ5_M",  "UKB_PHQ6_M", "UKB_PHQ7_M", "UKB_PHQ8_M", "UKB_PHQ9_M")
+
+pheno_cor <- matrix(NA, nrow=length(symptoms_pgc_cidi_phqm), ncol=length(symptoms_pgc_cidi_phqm), dimnames=list(symptoms_pgc_cidi_phqm, symptoms_pgc_cidi_phqm))
 
 
-corrplot(symptoms_cor, 'square')
+pheno_cor[13:31,13:31] <- ukb_cidi_phq_cor$rho[c(-3,-6), c(-3, -6)]
+
+pheno_cor[1:12,1:12] <- pgc_dsm_cor$rho
 
 ```
 
-<<<<<<< HEAD
+```{r pgc_ukb_corrplot, fig.width=9, fig.height=9}
+
+symptoms_cor <- cov2cor(symptoms_covstruct$S)
+symptoms_cor[which(symptoms_cor > 1)] <- 1
+rownames(symptoms_cor) <- colnames(symptoms_cor)
+
+symptoms_pgc_cidi_phqm_cor <- symptoms_cor[symptoms_pgc_cidi_phqm,symptoms_pgc_cidi_phqm]
+
+# phenotypic correlations in upper diagonal
+
+symptoms_pgc_cidi_phqm_cor[upper.tri(symptoms_pgc_cidi_phqm_cor)] <- pheno_cor[upper.tri(pheno_cor)]
+
+corrplot(symptoms_pgc_cidi_phqm_cor, 'square', na.label='.')
+
+# output for presentation
+dsm_horizontal_labels <- dsm_mdd_symptoms_labels$h
+dsm_vertical_labels <- dsm_mdd_symptoms_labels$v
+names(dsm_horizontal_labels) <- names(dsm_vertical_labels) <- dsm_mdd_symptoms_labels$ref
+
+symptoms_pgc_cidi_phqm_cor_refs <- paste0('MDD', str_extract(colnames(symptoms_pgc_cidi_phqm_cor), '[:digit:](a|b)?'))
+
+symptoms_pgc_cidi_phqm_cor_present <- symptoms_pgc_cidi_phqm_cor
+
+rownames(symptoms_pgc_cidi_phqm_cor_present) <- dsm_horizontal_labels[symptoms_pgc_cidi_phqm_cor_refs]
+colnames(symptoms_pgc_cidi_phqm_cor_present) <- dsm_vertical_labels[symptoms_pgc_cidi_phqm_cor_refs]
+
+png('mdd-symptom-gsem_files/symptoms_pgc_cidi_phqm_cor.png', width=3000, height=3000, pointsize=60)
+corrplot(symptoms_pgc_cidi_phqm_cor_present, 'square', na.label='.')
+dev.off()
+
+```
+
 ```{r, pgc_ukb_corrplot_clust}
 
-c('UKB_CIDI1', 'UKB_PHQ1_M', 'UKB_CIDI2', 'UKB_PHQ2_M',     'PGC3a', 'UKB_CIDI3a', 'UKB_CIDI3b', 'UKB_PHQ3_M', 'UKB_CIDI4a', 'UKB_CIDI4b', 'UKB_PHQ4_M', 'PGC5a', 'PGC5b', 'UKB_PHQ5_M', 'UKB_PHQ6_M', 'UKB_CIDI7', UKB_PHQ7_M', 'UKB_CIDI8','UKB_PHQ8_M','UKB_CIDI9', 'UKB_PHQ9_M')                                               
+c('UKB_CIDI1', 'UKB_PHQ1_M', 'UKB_CIDI2', 'UKB_PHQ2_M',     'PGC3a', 'UKB_CIDI3a', 'UKB_CIDI3b', 'UKB_PHQ3_M', 'UKB_CIDI4a', 'UKB_CIDI4b', 'UKB_PHQ4_M', 'PGC5a', 'PGC5b', 'UKB_PHQ5_M', 'UKB_PHQ6_M', 'UKB_CIDI7', 'UKB_PHQ7_M', 'UKB_CIDI8','UKB_PHQ8_M','UKB_CIDI9', 'UKB_PHQ9_M')                                               
 
 ```
 
@@ -639,7 +721,7 @@ symptom_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=symptom_mo
 
 Several of the latent correlations are outside the bound $[-1, 1]$, so we will add constraints to these
 
-```{r symptom_c_model, cache=TRUE}
+```{r symptom_c_model, cache=TRUE, eval=FALSE}
 
 symptom_c_model <- "
 MDD1  =~ NA*PGC1 + UKB_CIDI1 + UKB_PHQ1_0 + UKB_PHQ1_1 + UKB_PHQ1_2 + UKB_PHQ1_M
@@ -803,7 +885,8 @@ PHQ6 ~~ 0*PHQ_M
 
 phq_item_instance_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=phq_item_instance_model)
 
-=======
+```
+
 ## Multivariable LDSC Estimation - Using Case/Control Datasets
 
 To see the impact of conditioning on MDD cases the correlation matrix was created using the PGC datasets that have symptom level information on cases and controls. Correlation between symptoms is increased substantially. 
@@ -821,6 +904,5 @@ rownames(symptoms_cor) <- colnames(symptoms_cor)
 
 
 corrplot(symptoms_cor, 'square')
->>>>>>> 0570c9a42d69b55fb60e81fa77d9e287781d6c14
 
 ```
