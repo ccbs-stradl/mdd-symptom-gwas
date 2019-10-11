@@ -45,14 +45,18 @@ postimp_navi --out MDD1_case_con --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,
 Launch an interactive session
 
 ```{bash,  eval=FALSE}
+
 #Go into interactive mode
 srun -n 16 -t 1:00:00 --pty bash -il
 
 #Load R
 
+module load pre2019
+
 module load R/3.4.3
 
 R
+
 ```
 
 Load libraries and configure input directories
