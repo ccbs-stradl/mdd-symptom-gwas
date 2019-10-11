@@ -104,8 +104,8 @@ MDD3;Weight⇅;Weight⇆
 MDD3a;Weight⇈;Weight⇉
 MDD3b;Weight⇊;Weight⇇
 MDD4;Sleep⇅;Sleep⇆
-MDD4a;Sleep⇈;Sleep⇉
-MDD4b;Sleep⇊;Sleep⇇
+MDD4a;Sleep⇊;Sleep⇇
+MDD4b;Sleep⇈;Sleep⇉
 MDD5;Motor⇅;Motor⇆
 MDD5a;Motor⇈;Motor⇉
 MDD5b;Motor⇊;Motor⇇
@@ -149,8 +149,8 @@ MDD3        Weight⇅       Significant change in weight or appetite
 MDD3a       Weight⇈       Significant weight loss or decrease in appetite                                                              
 MDD3b       Weight⇊       Significant weight gain or increase in appetite                                                              
 MDD4        Sleep⇅        Sleeping too much or not sleeping enough                                                                     
-MDD4a       Sleep⇈        Insomnia nearly every day                                                                                    
-MDD4b       Sleep⇊        Hypersomnia nearly every day                                                                                 
+MDD4a       Sleep⇊        Insomnia nearly every day                                                                                    
+MDD4b       Sleep⇈        Hypersomnia nearly every day                                                                                 
 MDD5        Motor⇅        Changes in speed/amount of moving or speaking                                                                
 MDD5a       Motor⇈        Psychomotor agitation nearly every day                                                                       
 MDD5b       Motor⇊        Psychomotor retardation nearly every day                                                                     
@@ -306,8 +306,8 @@ Mood           0.9328089   0.1147179
 Interest       0.8894223   0.0828319
 Weight⇈        0.5256888   0.0293805
 Weight⇊        0.2372278   0.0074336
-Sleep⇈         0.7534873   0.0658407
-Sleep⇊         0.3044517   0.0113274
+Sleep⇊         0.7534873   0.0658407
+Sleep⇈         0.3044517   0.0113274
 Motor⇈         0.4989586   0.0307965
 Motor⇊         0.4758592   0.0244248
 Fatigue        0.8720613   0.0789381
@@ -392,8 +392,8 @@ Mood           0.2374316
 Interest       0.2038204
 Weight⇈        0.1038268
 Weight⇊        0.0419027
-Sleep⇈         0.1689877
-Sleep⇊         0.0552961
+Sleep⇊         0.1689877
+Sleep⇈         0.0552961
 Motor⇈         0.1010208
 Motor⇊         0.0921399
 Fatigue        0.1979065
@@ -448,8 +448,8 @@ Mood             1152     11669           0.9101474
 Interest         1456     10887           0.8820384
 Weight⇈          5873      6520           0.5261034
 Weight⇊          8688      2684           0.2360183
-Sleep⇈           3141      9332           0.7481761
-Sleep⇊           7163      3210           0.3094572
+Sleep⇊           3141      9332           0.7481761
+Sleep⇈           7163      3210           0.3094572
 Motor⇈           5032      5072           0.5019794
 Motor⇊           5911      5295           0.4725147
 Fatigue          1579     10913           0.8735991
@@ -514,11 +514,11 @@ pgc_ukb_covstruct_r <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.deparse.R'
 pgc_ukb_covstruct_rds <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.rds'
 
 # list sumstats files
-pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz', full.names=TRUE)
+pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz$', full.names=TRUE)
 
-ukb_cidi_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz', full.names=TRUE)
+ukb_cidi_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz$', full.names=TRUE)
 
-ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ', pattern='ldsc.sumstats.gz', full.names=TRUE)
+ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ', pattern='ldsc.sumstats.gz$', full.names=TRUE)
 
 # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
 names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
@@ -575,6 +575,36 @@ if(!file.exists(pgc_ukb_covstruct_r)) {
 }
 ```
 
+# Heritabilities
+
+Run LDSC, using sumstats filenames and estimated prevalences to construct command line arguments for `ldsc.py`.
+
+
+```r
+for(i in seq.int(nrow(sumstats_prevs))) {
+  
+  filename <- sumstats_prevs$filename[i]
+  samp_prev <- sumstats_prevs$samp_prev[i]
+  pop_prev <- sumstats_prevs$pop_prev[i]
+  outname <- paste(filename, 'h2', sep='.')
+  logfile <- paste(outname, 'log', sep='.')
+
+
+  if(!file.exists(logfile)) {
+  if(!is.na(samp_prev)) {
+     ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev, '--pop-prev', pop_prev)
+  } else {
+     ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname)
+  }
+  system(ldsc_command)
+  }
+
+
+}
+```
+
+# Correlation matrix
+
 Load phenotypic correlations 
 
 
@@ -627,6 +657,29 @@ corrplot(symptoms_pgc_cidi_phqm_cor, 'square', na.label='.')
 ```
 
 ![](mdd-symptom-gsem_files/figure-html/pgc_ukb_corrplot-1.png)<!-- -->
+
+```r
+# output for presentation
+dsm_horizontal_labels <- dsm_mdd_symptoms_labels$h
+dsm_vertical_labels <- dsm_mdd_symptoms_labels$v
+names(dsm_horizontal_labels) <- names(dsm_vertical_labels) <- dsm_mdd_symptoms_labels$ref
+
+symptoms_pgc_cidi_phqm_cor_refs <- paste0('MDD', str_extract(colnames(symptoms_pgc_cidi_phqm_cor), '[:digit:](a|b)?'))
+
+symptoms_pgc_cidi_phqm_cor_present <- symptoms_pgc_cidi_phqm_cor
+
+rownames(symptoms_pgc_cidi_phqm_cor_present) <- dsm_horizontal_labels[symptoms_pgc_cidi_phqm_cor_refs]
+colnames(symptoms_pgc_cidi_phqm_cor_present) <- dsm_vertical_labels[symptoms_pgc_cidi_phqm_cor_refs]
+
+png('mdd-symptom-gsem_files/symptoms_pgc_cidi_phqm_cor.png', width=3000, height=3000, pointsize=60)
+corrplot(symptoms_pgc_cidi_phqm_cor_present, 'square', na.label='.')
+dev.off()
+```
+
+```
+## png 
+##   2
+```
 
 
 ```r
