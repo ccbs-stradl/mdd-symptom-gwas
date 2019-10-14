@@ -484,14 +484,18 @@ ggplot(pgc_ukb_symptoms_prev, aes(x=samp_prev, y=cidi_sample)) +
 geom_abline(col='red') +
 geom_point() +
 geom_text(aes(label=h), hjust=-0.1) +
-scale_x_continuous('PGC sample prevalence', limits=c(0, 1)) +
-scale_y_continuous('UKB sample prevalence', limits=c(0, 1)) +
-coord_fixed() 
+scale_x_continuous('PGC sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
+scale_y_continuous('UKB sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
+coord_fixed(clip='off') +
+theme_bw() +
+theme(plot.margin=unit(c(1, 1, 1, 1), 'cm'))
 ```
 
 ![](mdd-symptom-gsem_files/figure-html/pgc_ukb_prevs-1.png)<!-- -->
 
 ```r
+ggsave('mdd-symptom-gsem_files/pgc_ukb_symptoms_prev.png', width=5.5, height=5.5)
+
 ggplot(pgc_ukb_symptoms_prev, aes(x=pop_prev, y=mhq_sample)) +
 geom_abline(col='red') +
 geom_point() +
@@ -502,6 +506,25 @@ coord_fixed()
 ```
 
 ![](mdd-symptom-gsem_files/figure-html/pgc_ukb_prevs-2.png)<!-- -->
+
+Correlation (Spearman's rho) between sample prevalences in UKB CIDI and PGC DSM:
+
+
+```r
+with(pgc_ukb_symptoms_prev, cor.test(samp_prev, cidi_sample, method='spearman', use='pair'))
+```
+
+```
+## 
+## 	Spearman's rank correlation rho
+## 
+## data:  samp_prev and cidi_sample
+## S = 72, p-value = 0.09579
+## alternative hypothesis: true rho is not equal to 0
+## sample estimates:
+##       rho 
+## 0.5636364
+```
 
 
 # Multivariable LDSC estimation
@@ -2022,4 +2045,4 @@ rownames(symptoms_cor) <- colnames(symptoms_cor)
 corrplot(symptoms_cor, 'square')
 ```
 
-![](mdd-symptom-gsem_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
+![](mdd-symptom-gsem_files/figure-html/unnamed-chunk-20-1.png)<!-- -->

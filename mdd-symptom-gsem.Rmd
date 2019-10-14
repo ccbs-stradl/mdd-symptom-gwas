@@ -347,9 +347,13 @@ ggplot(pgc_ukb_symptoms_prev, aes(x=samp_prev, y=cidi_sample)) +
 geom_abline(col='red') +
 geom_point() +
 geom_text(aes(label=h), hjust=-0.1) +
-scale_x_continuous('PGC sample prevalence', limits=c(0, 1)) +
-scale_y_continuous('UKB sample prevalence', limits=c(0, 1)) +
-coord_fixed() 
+scale_x_continuous('PGC sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
+scale_y_continuous('UKB sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
+coord_fixed(clip='off') +
+theme_bw() +
+theme(plot.margin=unit(c(1, 1, 1, 1), 'cm'))
+
+ggsave('mdd-symptom-gsem_files/pgc_ukb_symptoms_prev.png', width=5.5, height=5.5)
 
 ggplot(pgc_ukb_symptoms_prev, aes(x=pop_prev, y=mhq_sample)) +
 geom_abline(col='red') +
@@ -358,6 +362,14 @@ geom_text(aes(label=h), hjust=-0.1) +
 scale_x_continuous('PGC pop prevalence', limits=c(0, 1)) +
 scale_y_continuous('UKB MHQ prevalence', limits=c(0, 1)) +
 coord_fixed() 
+
+```
+
+Correlation (Spearman's rho) between sample prevalences in UKB CIDI and PGC DSM:
+
+```{r}
+
+with(pgc_ukb_symptoms_prev, cor.test(samp_prev, cidi_sample, method='spearman', use='pair'))
 
 ```
 
