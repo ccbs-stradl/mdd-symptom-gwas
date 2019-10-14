@@ -575,7 +575,7 @@ if(!file.exists(pgc_ukb_covstruct_r)) {
 }
 ```
 
-# Heritabilities
+## Heritabilities
 
 Run LDSC, using sumstats filenames and estimated prevalences to construct command line arguments for `ldsc.py`. Symptoms with negative heritabilities in PGC cohorts are plotted in a separate facet with its own scale.
 
@@ -636,13 +636,15 @@ bind_rows(tibble(study_est=rep(c('PGC (-)', 'PGC (+)', 'UKB CIDI', 'UKB PHQ'), t
                  se=0.0))
 
 ggplot(sumstats_h2_labels, aes(x=h, y=h2, ymin=h2+se*qnorm(0.025), ymax=h2+se*qnorm(0.975))) +
+geom_hline(yintercept=0, col='grey') +
 geom_pointrange(aes(alpha=a)) + 
 facet_grid(cols=vars(study_est), scale='free') +
 scale_x_discrete('Symptom', limits=rev(dsm_mdd_symptoms_labels$h)) +
 scale_y_continuous(expression(h[SNP]^2)) +
 scale_alpha_identity() +
 coord_flip() +
-theme_bw()
+theme_bw() + 
+theme(axis.text.y=element_text(size=12))
 ```
 
 ![](mdd-symptom-gsem_files/figure-html/mdd_symptom_gsem_h2-1.png)<!-- -->
@@ -651,7 +653,128 @@ theme_bw()
 ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=10, height=4)
 ```
 
-# Correlation matrix
+## Genetic correlation with MDD
+
+Examine how each symptom genetically correlates with MDD case/control status. Positive correlation may suggest the presence of a symptom is a more extreme form of caseness while a negative or zero correlation suggests it is a primary feature of caseness. Use sumstast from PGC cohorts so that phenotype is diagnosed depression. 
+
+
+
+```bash
+# Munge sumstats for other MDD sumstats
+
+for sumstats in $(ls sumstats/PGC/OtherMDD/daner_*.gz); do
+
+        prefix=$(basename $sumstats .gz)
+
+        munge_sumstats.py --daner-n \
+        --sumstats $sumstats \
+        --merge-alleles sumstats/reference/w_hm3.snplist \
+        --out sumstats/PGC/OtherMDD/${prefix}.ldsc
+
+done
+
+```
+
+
+```r
+other_mdd_gz <- list.files('sumstats/PGC/OtherMDD', pattern='daner_.+sumstats.gz$', full.names=TRUE)
+
+names(other_mdd_gz) <- sapply(str_split(sapply(str_split(other_mdd_gz, '/'), last), '\\.'), first)
+
+other_mdd_rg <-
+plyr::adply(other_mdd_gz, 1, function(gz) {
+  
+  filename_gz <- str_replace(gz, 'ldsc.sumstats.gz', 'gz') 
+  outname <- paste(gz, 'rg', sep='.')
+  logfile <- paste(outname, 'log', sep='.')
+
+
+  if(!file.exists(logfile)) {
+
+    # get sample prevalence
+    sumstats_gz <- read_tsv(filename_gz, n_max=1)
+
+    # calculate sample prevalences from daner columns
+    sumstats_frq <- sumstats_gz %>% select(starts_with('FRQ_A'), starts_with('FRQ_U'))
+
+    frq_a_col <- names(sumstats_frq)[1]
+    frq_u_col <- names(sumstats_frq)[2]
+
+    frq_a <- as.numeric(str_extract(frq_a_col, '[:digit:]+'))
+    frq_u <- as.numeric(str_extract(frq_u_col, '[:digit:]+'))
+
+    samp_prev <- frq_a / (frq_a + frq_u)
+
+    # string together rg and prevalence arguments, separated by commas
+    rg_arg <- paste(c(gz, sumstats_prevs$filename), collapse=',')
+    samp_prev_list <- c(samp_prev, sumstats_prevs$samp_prev)
+    # use 'nan' for prevalences of quantitative traits 
+    samp_prev_arg <- paste(ifelse(is.na(samp_prev_list), yes='nan', no=as.character(samp_prev_list)), collapse=',')
+    pop_prev_list <- c(0.15, sumstats_prevs$pop_prev)
+    pop_prev_arg <- paste(ifelse(is.na(pop_prev_list), yes='nan', no=as.character(pop_prev_list)), collapse=',')
+
+    ldsc_command <- paste('ldsc.py --rg', rg_arg, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev_arg, '--pop-prev', pop_prev_arg)
+
+    system(ldsc_command)
+
+  }
+
+  rg_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
+
+  start_of_results <- which(str_detect(rg_log[,1], 'Summary of Genetic Correlation Results')) + 1
+  end_of_results <- which(str_detect(rg_log[,1], 'Analysis finished at'))-1
+
+  rg_results <- rg_log[start_of_results:end_of_results,1]
+
+  rgs <- read_table2(paste(rg_results, collapse='\n'))
+
+  return(rgs)
+
+})
+```
+
+
+```r
+other_mdd_rg_refs <- 
+as_tibble(other_mdd_rg) %>%
+left_join(sumstats_prevs, by=c('p2'='filename')) %>%
+mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
+       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', ' '),
+       sub_study=str_extract(trait_name, '_[012M]$')) %>%
+# split negative estimates into their own facet
+mutate(study_est=case_when(study == 'PGC' & h2 > 0 ~ 'PGC (+)',
+                           study == 'PGC' & h2 <= 0 ~ 'PGC (-)',
+                           TRUE ~ study)) %>%
+filter(is.na(sub_study) | sub_study == '_M') %>%
+left_join(dsm_mdd_symptoms_labels, by='ref')
+
+ggplot(other_mdd_rg_refs %>% filter(X1 == 'daner_pgc_mdd_meta_no23andMe_noUKBB'),
+      aes(x=h, y=rg, ymin=rg+se*qnorm(0.025), ymax=rg+se*qnorm(0.975))) +
+geom_hline(yintercept=0, col='grey') +
+geom_hline(yintercept=1, col='grey') +
+geom_pointrange() +
+facet_grid(cols=vars(study)) +
+scale_x_discrete('Symptoms', limits=c(rev(dsm_mdd_symptoms_labels$h))) +
+coord_flip() +
+theme_bw() + 
+theme(axis.text.y=element_text(size=12))
+```
+
+```
+## Warning: Removed 8 rows containing missing values (geom_pointrange).
+```
+
+![](mdd-symptom-gsem_files/figure-html/mdd_symptom_gsem_rg-1.png)<!-- -->
+
+```r
+ggsave('mdd-symptom-gsem_files/symptoms_mdd_rg_snp.png', width=10, height=4)
+```
+
+```
+## Warning: Removed 8 rows containing missing values (geom_pointrange).
+```
+
+## Correlation matrix
 
 Load phenotypic correlations 
 
@@ -1899,4 +2022,4 @@ rownames(symptoms_cor) <- colnames(symptoms_cor)
 corrplot(symptoms_cor, 'square')
 ```
 
-![](mdd-symptom-gsem_files/figure-html/unnamed-chunk-17-1.png)<!-- -->
+![](mdd-symptom-gsem_files/figure-html/unnamed-chunk-19-1.png)<!-- -->
