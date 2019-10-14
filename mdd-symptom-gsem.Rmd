@@ -432,19 +432,20 @@ if(!file.exists(pgc_ukb_covstruct_r)) {
 
 }
 
+
 ```
 
 # Heritabilities
 
-Run LDSC, using sumstats filenames and estimated prevalences to construct command line arguments for `ldsc.py`.
+Run LDSC, using sumstats filenames and estimated prevalences to construct command line arguments for `ldsc.py`. Symptoms with negative heritabilities in PGC cohorts are plotted in a separate facet with its own scale.
 
 ```{r mdd_symptom_gsem_ldsc_h2, results='hide'}
 
-for(i in seq.int(nrow(sumstats_prevs))) {
+sumstats_h2 <- plyr::adply(sumstats_prevs, 1, function(x) {
   
-  filename <- sumstats_prevs$filename[i]
-  samp_prev <- sumstats_prevs$samp_prev[i]
-  pop_prev <- sumstats_prevs$pop_prev[i]
+  filename <- x$filename
+  samp_prev <- x$samp_prev
+  pop_prev <- x$pop_prev
   outname <- paste(filename, 'h2', sep='.')
   logfile <- paste(outname, 'log', sep='.')
 
@@ -458,8 +459,55 @@ for(i in seq.int(nrow(sumstats_prevs))) {
   system(ldsc_command)
   }
 
+  h2_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
 
-}
+  h2_row <- h2_log$V1[str_detect(h2_log$V1, 'h2:')]
+
+  h2_est_str <- str_extract_all(str_split(h2_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+
+  h2 <- as.numeric(h2_est_str[1])
+  se <- as.numeric(h2_est_str[2])
+
+  return(data.frame(h2, se))
+
+})
+
+
+
+```
+
+```{r mdd_symptom_gsem_h2}
+
+sumstats_h2_labels <-
+as_tibble(sumstats_h2) %>%
+mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
+       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', ' '),
+       sub_study=str_extract(trait_name, '_[012M]$')) %>%
+# split negative estimates into their own facet
+mutate(study_est=case_when(study == 'PGC' & h2 > 0 ~ 'PGC (+)',
+                           study == 'PGC' & h2 <= 0 ~ 'PGC (-)',
+                           TRUE ~ study)) %>%
+filter(is.na(sub_study) | sub_study == '_M') %>%
+left_join(dsm_mdd_symptoms_labels, by='ref') %>%
+mutate(a=1) %>%
+# insert invisible placeholder estimates so that the positive estimates are
+# all plotted on common scale even though the facet has `scale='free'`
+bind_rows(tibble(study_est=rep(c('PGC (-)', 'PGC (+)', 'UKB CIDI', 'UKB PHQ'), times=2),
+                 h='Mood',
+                 a=0,
+                 h2=rep(c(0, 0.26), each=4),
+                 se=0.0))
+
+ggplot(sumstats_h2_labels, aes(x=h, y=h2, ymin=h2+se*qnorm(0.025), ymax=h2+se*qnorm(0.975))) +
+geom_pointrange(aes(alpha=a)) + 
+facet_grid(cols=vars(study_est), scale='free') +
+scale_x_discrete('Symptom', limits=rev(dsm_mdd_symptoms_labels$h)) +
+scale_y_continuous(expression(h[SNP]^2)) +
+scale_alpha_identity() +
+coord_flip() +
+theme_bw()
+
+ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=10, height=4)
 
 ```
 
