@@ -101,8 +101,8 @@ read_delim("
 MDD1;Mood;Mood
 MDD2;Interest;Interest
 MDD3;Weight⇅;Weight⇆
-MDD3a;Weight⇈;Weight⇉
-MDD3b;Weight⇊;Weight⇇
+MDD3a;Weight⇊;Weight⇇
+MDD3b;Weight⇈;Weight⇉
 MDD4;Sleep⇅;Sleep⇆
 MDD4a;Sleep⇊;Sleep⇇
 MDD4b;Sleep⇈;Sleep⇉
@@ -146,8 +146,8 @@ Reference   Label         Description
 MDD1        Mood          Depressed mood most of the day, nearly every day                                                             
 MDD2        Interest      Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day 
 MDD3        Weight⇅       Significant change in weight or appetite                                                                     
-MDD3a       Weight⇈       Significant weight loss or decrease in appetite                                                              
-MDD3b       Weight⇊       Significant weight gain or increase in appetite                                                              
+MDD3a       Weight⇊       Significant weight loss or decrease in appetite                                                              
+MDD3b       Weight⇈       Significant weight gain or increase in appetite                                                              
 MDD4        Sleep⇅        Sleeping too much or not sleeping enough                                                                     
 MDD4a       Sleep⇊        Insomnia nearly every day                                                                                    
 MDD4b       Sleep⇈        Hypersomnia nearly every day                                                                                 
@@ -304,8 +304,8 @@ Symptom             Case     Control
 ------------  ----------  ----------
 Mood           0.9328089   0.1147179
 Interest       0.8894223   0.0828319
-Weight⇈        0.5256888   0.0293805
-Weight⇊        0.2372278   0.0074336
+Weight⇊        0.5256888   0.0293805
+Weight⇈        0.2372278   0.0074336
 Sleep⇊         0.7534873   0.0658407
 Sleep⇈         0.3044517   0.0113274
 Motor⇈         0.4989586   0.0307965
@@ -390,8 +390,8 @@ Symptom         pop_prev
 ------------  ----------
 Mood           0.2374316
 Interest       0.2038204
-Weight⇈        0.1038268
-Weight⇊        0.0419027
+Weight⇊        0.1038268
+Weight⇈        0.0419027
 Sleep⇊         0.1689877
 Sleep⇈         0.0552961
 Motor⇈         0.1010208
@@ -446,8 +446,8 @@ Symptom        Absent   Present   Sample prevalence
 ------------  -------  --------  ------------------
 Mood             1152     11669           0.9101474
 Interest         1456     10887           0.8820384
-Weight⇈          5873      6520           0.5261034
-Weight⇊          8688      2684           0.2360183
+Weight⇊          5873      6520           0.5261034
+Weight⇈          8688      2684           0.2360183
 Sleep⇊           3141      9332           0.7481761
 Sleep⇈           7163      3210           0.3094572
 Motor⇈           5032      5072           0.5019794
@@ -764,10 +764,6 @@ left_join(sumstats_prevs, by=c('p2'='filename')) %>%
 mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
        study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', ' '),
        sub_study=str_extract(trait_name, '_[012M]$')) %>%
-# split negative estimates into their own facet
-mutate(study_est=case_when(study == 'PGC' & h2 > 0 ~ 'PGC (+)',
-                           study == 'PGC' & h2 <= 0 ~ 'PGC (-)',
-                           TRUE ~ study)) %>%
 filter(is.na(sub_study) | sub_study == '_M') %>%
 left_join(dsm_mdd_symptoms_labels, by='ref')
 
@@ -986,7 +982,7 @@ pgc_commonfactor_constr_fit <- usermodel(symptoms_covstruct, estimation='DWLS', 
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   0.392
+##   0.432
 ```
 
 ```r
@@ -1018,6 +1014,35 @@ PGC5a   ~~   PGC5a       0.9375805  0.579010344657521
 PGC9    ~~   PGC9        0.9830987  0.390501757325279 
 
 </div>
+
+
+```r
+psych::principal(symptoms_cor[c('PGC3a', 'PGC5a', 'PGC5b', 'PGC9'),c('PGC3a', 'PGC5a', 'PGC5b', 'PGC9')], 1)
+```
+
+```
+## Principal Components Analysis
+## Call: psych::principal(r = symptoms_cor[c("PGC3a", "PGC5a", "PGC5b", 
+##     "PGC9"), c("PGC3a", "PGC5a", "PGC5b", "PGC9")], nfactors = 1)
+## Standardized loadings (pattern matrix) based upon correlation matrix
+##         PC1    h2   u2 com
+## PGC3a  0.11 0.013 0.99   1
+## PGC5a  0.67 0.443 0.56   1
+## PGC5b -0.75 0.567 0.43   1
+## PGC9   0.56 0.315 0.69   1
+## 
+##                 PC1
+## SS loadings    1.34
+## Proportion Var 0.33
+## 
+## Mean item complexity =  1
+## Test of the hypothesis that 1 component is sufficient.
+## 
+## The root mean square of the residuals (RMSR) is  0.24 
+## 
+## Fit based upon off diagonal values = -0.67
+```
+
 ## UKB CIDI
 
 ### Common factor
@@ -1086,6 +1111,80 @@ UKB_CIDI8    ~~   UKB_CIDI8        0.5060126  0.221187103957889
 UKB_CIDI9    ~~   UKB_CIDI9        0.6213185  0.258690896267572  
 
 </div>
+
+### Kendler Neale model
+
+
+```r
+ukb_cidi_kendler...neale_model <- "
+F1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7
+F2 =~ NA*UKB_CIDI8 + UKB_CIDI9 + UKB_CIDI7
+F3 =~ NA*UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI3a
+F1 ~~ 1*F1
+F2 ~~ 1*F2
+F3 ~~ 1*F3
+F1 ~~ F2 + F3
+F2 ~~ F3"
+ukb_cidi_kendler...neale_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_kendler...neale_model)
+```
+
+```
+## [1] "Running primary model"
+## [1] "The model as initially specified failed to converge. A lower bound of 0 on residual variances has been automatically added to try and troubleshoot this."
+## [1] "Calculating model chi-square"
+## [1] "Calculating CFI"
+## [1] "Calculating Standardized Results"
+## [1] "Calculating SRMR"
+## elapsed 
+##   3.326
+```
+
+```r
+ukb_cidi_kendler...neale_fit$modelfit
+```
+
+<div class="kable-table">
+
+         chisq   df   p_chisq        AIC         CFI        SRMR
+---  ---------  ---  --------  ---------  ----------  ----------
+df    29.61747   16   0.02009   69.61747   0.9938792   0.0782135
+
+</div>
+
+```r
+ukb_cidi_kendler...neale_fit$results
+```
+
+<div class="kable-table">
+
+lhs          op   rhs           Unstand_Est  Unstand_SE             STD_Genotype  STD_Genotype_SE          STD_All
+-----------  ---  -----------  ------------  --------------------  -------------  -------------------  -----------
+F1           =~   UKB_CIDI1       0.2484723  0.0162211437517512        0.9025688  0.0589693968973722     0.9025689
+F1           =~   UKB_CIDI2       0.2938665  0.0156164661334818        1.0080595  0.0534777846273945     0.9995081
+F1           =~   UKB_CIDI7      -0.3432345  1.6079019077395          -1.4999169  7.02903301816354      -1.4961001
+F1           ~~   F1              1.0000000                            1.0000000                         1.0000000
+F1           ~~   F2             -0.9295531  0.22032192037547          0.9298670  0.221031326594971      0.9298670
+F1           ~~   F3              0.7943715  0.143182342235304         0.7935763  0.142989128776192      0.7935763
+F2           =~   UKB_CIDI7      -0.5143349  1.61017512400429          2.2311509  7.03869879597126       2.2254733
+F2           =~   UKB_CIDI8      -0.1657120  0.0428060592946351        0.6808324  0.17628878453757       0.6808323
+F2           =~   UKB_CIDI9      -0.0989957  0.0272982804354496        0.6103097  0.168720548331471      0.6103095
+F2           ~~   F2              1.0000000                            1.0000000                         1.0000000
+F2           ~~   F3             -0.7643783  0.167677063057046         0.7640187  0.167332669853837      0.7640187
+F3           =~   UKB_CIDI3a      0.0327320  0.0210042705299439        0.1893126  0.121479145577616      0.1893125
+F3           =~   UKB_CIDI4b      0.1499980  0.0330317874649118        0.7211793  0.15879192122687       0.7211793
+F3           =~   UKB_CIDI6       0.2028671  0.0385229332059085        0.8765165  0.166424363869953      0.8765164
+F3           ~~   F3              1.0000000                            1.0000000                         1.0000000
+UKB_CIDI1    ~~   UKB_CIDI1       0.0137779  0.00689777709525635       0.1853693  0.0911753005618773     0.1853693
+UKB_CIDI2    ~~   UKB_CIDI2       0.0009993  0.00712769465036966       0.0010004  0.083956761442846      0.0009835
+UKB_CIDI3a   ~~   UKB_CIDI3a      0.0287989  0.00868467674311237       0.9641608  0.290747019499842      0.9641608
+UKB_CIDI4b   ~~   UKB_CIDI4b      0.0207686  0.0128940524038658        0.4799004  0.298006231047401      0.4799005
+UKB_CIDI6    ~~   UKB_CIDI6       0.0124096  0.0206904267218396        0.2317192  0.386246753399344      0.2317191
+UKB_CIDI7    ~~   UKB_CIDI7       0.0010000  0.120484585304741         0.0010000  2.27236636488067       0.0009949
+UKB_CIDI8    ~~   UKB_CIDI8       0.0315916  0.0157380045841806        0.5364675  0.266340379329723      0.5364674
+UKB_CIDI9    ~~   UKB_CIDI9       0.0164126  0.00769444001205901       0.6275226  0.293437282742112      0.6275223
+
+</div>
+
 
 ## UKB PHQ
 
@@ -2045,4 +2144,4 @@ rownames(symptoms_cor) <- colnames(symptoms_cor)
 corrplot(symptoms_cor, 'square')
 ```
 
-![](mdd-symptom-gsem_files/figure-html/unnamed-chunk-20-1.png)<!-- -->
+![](mdd-symptom-gsem_files/figure-html/unnamed-chunk-21-1.png)<!-- -->

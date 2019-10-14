@@ -81,8 +81,8 @@ read_delim("
 MDD1;Mood;Mood
 MDD2;Interest;Interest
 MDD3;Weight⇅;Weight⇆
-MDD3a;Weight⇈;Weight⇉
-MDD3b;Weight⇊;Weight⇇
+MDD3a;Weight⇊;Weight⇇
+MDD3b;Weight⇈;Weight⇉
 MDD4;Sleep⇅;Sleep⇆
 MDD4a;Sleep⇊;Sleep⇇
 MDD4b;Sleep⇈;Sleep⇉
@@ -616,10 +616,6 @@ left_join(sumstats_prevs, by=c('p2'='filename')) %>%
 mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
        study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', ' '),
        sub_study=str_extract(trait_name, '_[012M]$')) %>%
-# split negative estimates into their own facet
-mutate(study_est=case_when(study == 'PGC' & h2 > 0 ~ 'PGC (+)',
-                           study == 'PGC' & h2 <= 0 ~ 'PGC (-)',
-                           TRUE ~ study)) %>%
 filter(is.na(sub_study) | sub_study == '_M') %>%
 left_join(dsm_mdd_symptoms_labels, by='ref')
 
@@ -757,8 +753,14 @@ pgc_commonfactor_constr_fit <- usermodel(symptoms_covstruct, estimation='DWLS', 
 pgc_commonfactor_constr_fit$modelfit
 pgc_commonfactor_constr_fit$results[c(1, 2, 3, 6, 7)]
 
+```
+
+```{r}
+
+psych::principal(symptoms_cor[c('PGC3a', 'PGC5a', 'PGC5b', 'PGC9'),c('PGC3a', 'PGC5a', 'PGC5b', 'PGC9')], 1)
 
 ```
+
 ## UKB CIDI
 
 ### Common factor
@@ -778,6 +780,28 @@ ukb_cidi_commonfactor_fit$modelfit
 ukb_cidi_commonfactor_fit$results[c(1, 2, 3, 6, 7)]
 
 ```
+
+### Kendler Neale model
+
+```{r ukb_cidi_kendler_neale, cache=TRUE}
+
+ukb_cidi_kendler...neale_model <- "
+F1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7
+F2 =~ NA*UKB_CIDI8 + UKB_CIDI9 + UKB_CIDI7
+F3 =~ NA*UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI3a
+F1 ~~ 1*F1
+F2 ~~ 1*F2
+F3 ~~ 1*F3
+F1 ~~ F2 + F3
+F2 ~~ F3"
+ukb_cidi_kendler...neale_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_kendler...neale_model)
+
+ukb_cidi_kendler...neale_fit$modelfit
+
+ukb_cidi_kendler...neale_fit$results
+
+```
+
 
 ## UKB PHQ
 
