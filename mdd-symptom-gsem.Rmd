@@ -736,10 +736,14 @@ tibble(trait=colnames(symptoms_covstruct$S)) %>%
 mutate(symptom_ref=str_extract(trait, '[:digit:][ab]?'),
       study=str_extract(trait, '[A-Z_]+')) %>%
 mutate(ref=paste0('MDD', symptom_ref)) %>%
-left_join(dsm_mdd_symptoms_labels, by='ref')
+left_join(dsm_mdd_symptoms_labels, by='ref') %>%
+mutate(color=recode(study, PGC='#7570b3', UKB_CIDI='#1b9e77', UKB_PHQ='#d95f02'))
 
 node_labels <- c(trait_symptom_labels$h, paste0('A', 1:3))
 names(node_labels) <- c(trait_symptom_labels$trait, paste0('A', 1:3))
+
+node_colors <- c(trait_symptom_labels$color, rep('white', times=3))
+names(node_colors) <- c(trait_symptom_labels$trait, paste0('A', 1:3))
 
 edge_dir <- c('forward', 'back', 'both')
 names(edge_dir) <- c('=~', '~', '~~')
@@ -787,10 +791,13 @@ fit_graph <- function(results, ...) {
   graph <- create_graph(
     nodes_df=create_node_df(n=length(node_names),
                             label=node_labels[node_names], 
-                            shape='oval', width=1),
+                            shape='oval', width=1,
+                            fillcolor=node_colors[node_names],
+                            fontcolor='black'),
     edges_df=create_edge_df(from=node_idx[results_sort$lhs],
                             to=node_idx[results_sort$rhs],
                             label=round(results_sort$STD_Genotype, 2),
+                            penwidth=abs(3*results_sort$STD_Genotype),
                             dir=edge_dir[results_sort$op]),
     attr_theme="tb")
   
@@ -801,6 +808,12 @@ fit_graph <- function(results, ...) {
 render_fit <- function(results) render_graph(fit_graph(results))
 
 render_fit(pgc_commonfactor_constr.fit$results)
+
+pgc_commonfactor_constr.gv <- generate_dot(fit_graph(pgc_commonfactor_constr.fit$results))
+
+# output as a GraphViz dot file. Replace single quotes with double quotes 
+# as that's what the command line utility expects
+cat(str_replace_all(pgc_commonfactor_constr.gv, "'", '"'), file='mdd-symptom-gsem_files/pgc_commonfactor_constr.gv')
 
 ```
 
@@ -824,6 +837,10 @@ ukb_cidi_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
 
 render_fit(ukb_cidi_commonfactor.fit$results)
 
+ukb_cidi_commonfactor.gv <- generate_dot(fit_graph(ukb_cidi_commonfactor.fit$results))
+
+cat(str_replace_all(ukb_cidi_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_commonfactor.gv')
+
 ```
 
 ### Kendler Neale model
@@ -845,7 +862,7 @@ ukb_cidi_kendler_neale.fit$results[c(1,2,3,6,7)]
 #render_fit(ukb_cidi_kendler_neale.fit$results)
 # cat(generate_dot(fit_graph(ukb_cidi_kendler_neale.fit$results)))
 
-grViz("digraph {
+ukb_cidi_kendler_neale.gv = "digraph {
 graph [layout = 'dot',
        outputorder = 'edgesfirst',
        bgcolor = 'white']
@@ -864,44 +881,46 @@ edge [fontname = 'Helvetica',
      color = 'gray80',
      arrowsize = '0.5']
    {rank=same '1' '2' '3'}
-   {rank=same '4' '5' '6' '7' '8' '9'}
+   {rank=same '4' '5' '6' '7' '8' '9' '10' '11'}
+  '1' [label = 'A1', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '2' [label = 'A2', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '3' [label = 'A3', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '4' [label = 'Mood', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '5' [label = 'Interest', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '6' [label = 'Weight⇈', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '7' [label = 'Sleep⇈', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '8' [label = 'Fatigue', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '9' [label = 'Guilt', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '10' [label = 'Concentrate', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '11' [label = 'Suicidality', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+'1'->'1' [label = '1', penwidth = '3', dir = 'both'] 
+'1'->'2' [label = '0.86', penwidth = '2.57313926883652', dir = 'both'] 
+'1'->'3' [label = '0.96', penwidth = '2.86555000253985', dir = 'both'] 
+'1'->'9' [label = '0.87', penwidth = '2.62053014038791', dir = 'forward'] 
+'1'->'10' [label = '0.75', penwidth = '2.24655479397468', dir = 'forward'] 
+'1'->'11' [label = '0.65', penwidth = '1.9527533612875', dir = 'forward'] 
+'2'->'2' [label = '1', penwidth = '3', dir = 'both'] 
+'2'->'3' [label = '0.92', penwidth = '2.7475431120308', dir = 'both'] 
+'2'->'4' [label = '0.89', penwidth = '2.6811728629236', dir = 'forward'] 
+'2'->'5' [label = '1.01', penwidth = '3.0320871595494', dir = 'forward'] 
+'2'->'9' [label = '-0.18', penwidth = '0.53874357120299', dir = 'forward'] 
+'3'->'3' [label = '1', penwidth = '3', dir = 'both'] 
+'3'->'6' [label = '0.43', penwidth = '1.29993955197882', dir = 'forward'] 
+'3'->'7' [label = '0.6', penwidth = '1.81382901038483', dir = 'forward'] 
+'3'->'8' [label = '0.75', penwidth = '2.24911126852839', dir = 'forward'] 
+'4'->'4' [label = '0.2', penwidth = '0.603769543318233', dir = 'both'] 
+'5'->'5' [label = '0', penwidth = '0.00300095489528763', dir = 'both'] 
+'6'->'6' [label = '0.81', penwidth = '2.43671933713735', dir = 'both'] 
+'7'->'7' [label = '0.63', penwidth = '1.90334363858575', dir = 'both'] 
+'8'->'8' [label = '0.44', penwidth = '1.31383408561682', dir = 'both'] 
+'9'->'9' [label = '0.47', penwidth = '1.42146789832965', dir = 'both'] 
+'10'->'10' [label = '0.44', penwidth = '1.31766748689992', dir = 'both'] 
+'11'->'11' [label = '0.58', penwidth = '1.72891475448148', dir = 'both'] 
+ }"
 
-  '1' [label = 'A1', shape = 'oval', width = '1'] 
-  '2' [label = 'A2', shape = 'oval', width = '1'] 
-  '3' [label = 'A3', shape = 'oval', width = '1'] 
+grViz(ukb_cidi_kendler_neale.gv)
 
-  '4' [label = 'Mood', shape = 'oval', width = '1'] 
-  '5' [label = 'Interest', shape = 'oval', width = '1'] 
-  '6' [label = 'Weight⇈', shape = 'oval', width = '1'] 
-  '7' [label = 'Sleep⇈', shape = 'oval', width = '1'] 
-  '8' [label = 'Fatigue', shape = 'oval', width = '1'] 
-  '9' [label = 'Guilt', shape = 'oval', width = '1'] 
-  '10' [label = 'Concentrate', shape = 'oval', width = '1'] 
-  '11' [label = 'Suicidality', shape = 'oval', width = '1'] 
-'1'->'1' [label = '1', dir = 'both'] 
-'1'->'2' [label = '0.86', dir = 'both'] 
-'2'->'2' [label = '1', dir = 'both'] 
-'1'->'3' [label = '0.96', dir = 'both'] 
-'2'->'3' [label = '0.92', dir = 'both'] 
-'3'->'3' [label = '1', dir = 'both'] 
-'1'->'9' [label = '0.87', dir = 'forward'] 
-'1'->'10' [label = '0.75', dir = 'forward'] 
-'1'->'11' [label = '0.65', dir = 'forward'] 
-'2'->'4' [label = '0.89', dir = 'forward'] 
-'2'->'5' [label = '1.01', dir = 'forward'] 
-'2'->'9' [label = '-0.18', dir = 'forward'] 
-'3'->'6' [label = '0.43', dir = 'forward'] 
-'3'->'7' [label = '0.6', dir = 'forward'] 
-'3'->'8' [label = '0.75', dir = 'forward'] 
-'4'->'4' [label = '0.2', dir = 'both'] 
-'5'->'5' [label = '0', dir = 'both'] 
-'6'->'6' [label = '0.81', dir = 'both'] 
-'7'->'7' [label = '0.63', dir = 'both'] 
-'8'->'8' [label = '0.44', dir = 'both'] 
-'9'->'9' [label = '0.47', dir = 'both'] 
-'10'->'10' [label = '0.44', dir = 'both'] 
-'11'->'11' [label = '0.58', dir = 'both'] 
-}")
+cat(str_replace_all(ukb_cidi_kendler_neale.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_kendler_neale.gv')
 
 ```
 
@@ -950,6 +969,10 @@ ukb_phq_m_commonfactor.fit$modelfit
 ukb_phq_m_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
 
 render_fit(ukb_phq_m_commonfactor.fit$results)
+
+ukb_phq_m_commonfactor.gv <- generate_dot(fit_graph(ukb_phq_m_commonfactor.fit$results))
+
+cat(str_replace_all(ukb_phq_m_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_m_commonfactor.gv')
 
 ```
 
@@ -1011,9 +1034,9 @@ ukb_phq_kendler_neale_constr.fit$modelfit
 ukb_phq_kendler_neale_constr.fit$results[c(1,2,3,6,7)]
 
 #render_fit(ukb_phq_kendler_neale_constr.fit$results)
-cat(generate_dot(fit_graph(ukb_phq_kendler_neale_constr.fit$results)))
+#cat(generate_dot(fit_graph(ukb_phq_kendler_neale_constr.fit$results)))
 
-grViz("digraph {
+ukb_phq_kendler_neale_constr.gv <- "digraph {
 graph [layout = 'dot',
        rankdir = 'TB',
        outputorder = 'edgesfirst',
@@ -1034,44 +1057,48 @@ edge [fontname = 'Helvetica',
      arrowsize = '0.5']
    {rank=same '1' '2' '3'}
    {rank=same '4' '5' '6' '7' '8' '9' '10' '11' '12'}
-  '1' [label = 'A1', shape = 'oval', width = '1'] 
-  '2' [label = 'A2', shape = 'oval', width = '1'] 
-  '3' [label = 'A3', shape = 'oval', width = '1'] 
-  '4' [label = 'Mood', shape = 'oval', width = '1'] 
-  '5' [label = 'Interest', shape = 'oval', width = '1'] 
-  '6' [label = 'Weight⇅', shape = 'oval', width = '1'] 
-  '7' [label = 'Sleep⇅', shape = 'oval', width = '1'] 
-  '8' [label = 'Motor⇅', shape = 'oval', width = '1'] 
-  '9' [label = 'Fatigue', shape = 'oval', width = '1'] 
-  '10' [label = 'Guilt', shape = 'oval', width = '1'] 
-  '11' [label = 'Concentrate', shape = 'oval', width = '1'] 
-  '12' [label = 'Suicidality', shape = 'oval', width = '1'] 
-'1'->'1' [label = '1', dir = 'both'] 
-'1'->'2' [label = '1', dir = 'both'] 
-'1'->'3' [label = '0.94', dir = 'both'] 
-'1'->'8' [label = '0.92', dir = 'forward'] 
-'1'->'10' [label = '-0.81', dir = 'forward'] 
-'1'->'11' [label = '0.96', dir = 'forward'] 
-'1'->'12' [label = '0.85', dir = 'forward'] 
-'2'->'2' [label = '1', dir = 'both'] 
-'2'->'3' [label = '0.91', dir = 'both'] 
-'2'->'4' [label = '0.97', dir = 'forward'] 
-'2'->'5' [label = '0.98', dir = 'forward'] 
-'2'->'10' [label = '1.73', dir = 'forward'] 
-'3'->'3' [label = '1', dir = 'both'] 
-'3'->'6' [label = '0.89', dir = 'forward'] 
-'3'->'7' [label = '0.78', dir = 'forward'] 
-'3'->'9' [label = '0.97', dir = 'forward'] 
-'4'->'4' [label = '0.07', dir = 'both'] 
-'5'->'5' [label = '0.04', dir = 'both'] 
-'6'->'6' [label = '0.21', dir = 'both'] 
-'7'->'7' [label = '0.39', dir = 'both'] 
-'8'->'8' [label = '0.16', dir = 'both'] 
-'9'->'9' [label = '0.05', dir = 'both'] 
-'10'->'10' [label = '0.16', dir = 'both'] 
-'11'->'11' [label = '0.08', dir = 'both'] 
-'12'->'12' [label = '0.27', dir = 'both']
-}")
+  '1' [label = 'A1', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '2' [label = 'A2', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '3' [label = 'A3', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '4' [label = 'Mood', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '5' [label = 'Interest', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '6' [label = 'Weight⇅', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '7' [label = 'Sleep⇅', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '8' [label = 'Motor⇅', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '9' [label = 'Fatigue', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '10' [label = 'Guilt', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '11' [label = 'Concentrate', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '12' [label = 'Suicidality', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+'1'->'1' [label = '1', penwidth = '3', dir = 'both'] 
+'1'->'2' [label = '1', penwidth = '2.99999893624105', dir = 'both'] 
+'1'->'3' [label = '0.94', penwidth = '2.81514948902217', dir = 'both'] 
+'1'->'8' [label = '0.92', penwidth = '2.74883598824507', dir = 'forward'] 
+'1'->'10' [label = '-0.81', penwidth = '2.43150481798024', dir = 'forward'] 
+'1'->'11' [label = '0.96', penwidth = '2.87702465245791', dir = 'forward'] 
+'1'->'12' [label = '0.85', penwidth = '2.56107899510458', dir = 'forward'] 
+'2'->'2' [label = '1', penwidth = '3', dir = 'both'] 
+'2'->'3' [label = '0.91', penwidth = '2.72545942132963', dir = 'both'] 
+'2'->'4' [label = '0.97', penwidth = '2.89786200288234', dir = 'forward'] 
+'2'->'5' [label = '0.98', penwidth = '2.93791705880638', dir = 'forward'] 
+'2'->'10' [label = '1.73', penwidth = '5.17619146332342', dir = 'forward'] 
+'3'->'3' [label = '1', penwidth = '3', dir = 'both'] 
+'3'->'6' [label = '0.89', penwidth = '2.66005248283014', dir = 'forward'] 
+'3'->'7' [label = '0.78', penwidth = '2.33828161316177', dir = 'forward'] 
+'3'->'9' [label = '0.97', penwidth = '2.92260342501939', dir = 'forward'] 
+'4'->'4' [label = '0.07', penwidth = '0.200798897912759', dir = 'both'] 
+'5'->'5' [label = '0.04', penwidth = '0.122881480927526', dir = 'both'] 
+'6'->'6' [label = '0.21', penwidth = '0.641373287143108', dir = 'both'] 
+'7'->'7' [label = '0.39', penwidth = '1.17747950435927', dir = 'both'] 
+'8'->'8' [label = '0.16', penwidth = '0.481295815280143', dir = 'both'] 
+'9'->'9' [label = '0.05', penwidth = '0.152796365234247', dir = 'both'] 
+'10'->'10' [label = '0.16', penwidth = '0.488893810833311', dir = 'both'] 
+'11'->'11' [label = '0.08', penwidth = '0.240907469405615', dir = 'both'] 
+'12'->'12' [label = '0.27', penwidth = '0.813617617865407', dir = 'both'] 
+}"
+
+grViz(ukb_phq_kendler_neale_constr.gv)
+
+cat(str_replace_all(ukb_phq_kendler_neale_constr.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_kendler_neale_constr.gv')
 
 ```
 
@@ -1173,11 +1200,52 @@ abline(1, 0, col='red')
 
 ```
 
-```{r}
+```{r symptoms_efa}
 
 symptoms_efa <- factanal(covmat=symptoms_cov_pd, factors=2, rotation='promax')
 
 symptoms_efa
+
+node_names <- c('A1', 'A2', rownames(symptoms_efa$loadings))
+node_idx <- seq_along(node_names)
+
+highpass <- function(x, a=0.4) ifelse(x >= a, yes=x, no=0)
+
+symptoms_efa.graph <-
+create_graph(nodes_df=create_node_df(n=length(node_names), 
+                                     label=node_labels[node_names],
+                                     width=1,
+                                     fontcolor='black',
+                                     fillcolor=node_colors[node_names]),
+             edges_df=create_edge_df(from=rep(c(1, 2), each=nrow(symptoms_efa$loadings)),
+                                     to=rep(node_idx[c(-1, -2)], times=2),
+                                     penwidth=highpass(c(symptoms_efa$loadings[,1],
+                                                symptoms_efa$loadings[,2]),
+                                                       a=0.15)) %>%
+                      filter(penwidth > 0) %>% mutate(penwidth=4*penwidth),
+            attr_theme='tb')
+render_graph(symptoms_efa.graph)
+
+export_graph(symptoms_efa.graph, file_name='mdd-symptoms-gsem_files/symptoms_efa.svg', file_type='svg')
+
+symptoms_efa.gv <- generate_dot(symptoms_efa.graph)
+
+cat(str_replace_all(symptoms_efa.gv, "'", '"'), file='mdd-symptom-gsem_files/symptoms_efa.gv')
+
+
+```
+
+### Graphviz
+
+Render SEM plots out to PDF
+
+```{bash}
+
+for gv in $(ls mdd-symptom-gsem_files/*.gv); do
+        out=$(dirname $gv)/$(basename $gv .gv)
+        dot -Tpdf -o${out}.pdf $gv
+done
+
 
 ```
 

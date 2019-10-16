@@ -1,0 +1,77 @@
+digraph {
+
+graph [layout = "dot",
+       rankdir = "TB",
+       outputorder = "edgesfirst",
+       bgcolor = "white"]
+
+node [fontname = "Helvetica",
+      fontsize = "10",
+      shape = "circle",
+      fixedsize = "true",
+      width = "0.5",
+      style = "filled",
+      fillcolor = "aliceblue",
+      color = "gray70",
+      fontcolor = "gray50"]
+
+edge [fontname = "Helvetica",
+     fontsize = "8",
+     len = "1.5",
+     color = "gray80",
+     arrowsize = "0.5"]
+
+  "1" [label = "A1", width = "1", fontcolor = "black", fillcolor = "white"] 
+  "2" [label = "A2", width = "1", fontcolor = "black", fillcolor = "white"] 
+  "3" [label = "Weight⇊", width = "1", fontcolor = "black", fillcolor = "#7570b3"] 
+  "4" [label = "Motor⇈", width = "1", fontcolor = "black", fillcolor = "#7570b3"] 
+  "5" [label = "Motor⇊", width = "1", fontcolor = "black", fillcolor = "#7570b3"] 
+  "6" [label = "Suicidality", width = "1", fontcolor = "black", fillcolor = "#7570b3"] 
+  "7" [label = "Mood", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "8" [label = "Interest", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "9" [label = "Weight⇊", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "10" [label = "Weight⇈", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "11" [label = "Sleep⇊", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "12" [label = "Sleep⇈", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "13" [label = "Fatigue", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "14" [label = "Guilt", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "15" [label = "Concentrate", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "16" [label = "Suicidality", width = "1", fontcolor = "black", fillcolor = "#1b9e77"] 
+  "17" [label = "Mood", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
+  "18" [label = "Interest", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
+  "19" [label = "Weight⇅", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
+  "20" [label = "Sleep⇅", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
+  "21" [label = "Motor⇅", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
+  "22" [label = "Fatigue", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
+  "23" [label = "Guilt", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
+  "24" [label = "Concentrate", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
+  "25" [label = "Suicidality", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
+"1"->"6" [penwidth = "1.62244268872947"] 
+"1"->"7" [penwidth = "3.04353567041099"] 
+"1"->"8" [penwidth = "3.11897772798293"] 
+"1"->"10" [penwidth = "2.38498843016525"] 
+"1"->"11" [penwidth = "1.73732679672606"] 
+"1"->"12" [penwidth = "1.79914820763346"] 
+"1"->"13" [penwidth = "1.68578337306743"] 
+"1"->"14" [penwidth = "2.46081098202301"] 
+"1"->"15" [penwidth = "2.04050907681188"] 
+"1"->"16" [penwidth = "2.375933221593"] 
+"1"->"17" [penwidth = "3.77519287148625"] 
+"1"->"18" [penwidth = "3.67095912919635"] 
+"1"->"19" [penwidth = "3.25052189556413"] 
+"1"->"20" [penwidth = "2.88092886952725"] 
+"1"->"21" [penwidth = "3.2597817199889"] 
+"1"->"22" [penwidth = "3.42170369313828"] 
+"1"->"23" [penwidth = "4.0665015034711"] 
+"1"->"24" [penwidth = "3.58185570115017"] 
+"1"->"25" [penwidth = "3.43422503039626"] 
+"2"->"3" [penwidth = "1.6482052872024"] 
+"2"->"4" [penwidth = "0.62432594718815"] 
+"2"->"5" [penwidth = "2.19857048814461"] 
+"2"->"9" [penwidth = "1.85510815263036"] 
+"2"->"11" [penwidth = "0.802075683333857"] 
+"2"->"12" [penwidth = "1.0603063625551"] 
+"2"->"13" [penwidth = "1.46994787473968"] 
+"2"->"15" [penwidth = "0.830362100257246"] 
+"2"->"22" [penwidth = "0.98699974805709"] 
+}

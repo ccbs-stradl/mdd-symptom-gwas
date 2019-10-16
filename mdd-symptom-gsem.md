@@ -52,6 +52,8 @@ for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.p
 library(devtools)
 
 if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
+
+if(!require(DiagrammeR)) install_github('rich-iannone/DiagrammeR')
 ```
 
 GenomicSEM version
@@ -63,6 +65,7 @@ require(stringr)
 require(dplyr)
 require(ggplot2)
 require(corrplot)
+require(DiagrammeR)
 require(GenomicSEM)
 
 packageVersion("GenomicSEM")
@@ -917,6 +920,28 @@ corrplot(symptoms_cor[mdd3,mdd3], 'square')
 
 # Structural models
 
+
+
+```r
+trait_symptom_labels <- 
+tibble(trait=colnames(symptoms_covstruct$S)) %>%
+mutate(symptom_ref=str_extract(trait, '[:digit:][ab]?'),
+      study=str_extract(trait, '[A-Z_]+')) %>%
+mutate(ref=paste0('MDD', symptom_ref)) %>%
+left_join(dsm_mdd_symptoms_labels, by='ref') %>%
+mutate(color=recode(study, PGC='#7570b3', UKB_CIDI='#1b9e77', UKB_PHQ='#d95f02'))
+
+node_labels <- c(trait_symptom_labels$h, paste0('A', 1:3))
+names(node_labels) <- c(trait_symptom_labels$trait, paste0('A', 1:3))
+
+node_colors <- c(trait_symptom_labels$color, rep('white', times=3))
+names(node_colors) <- c(trait_symptom_labels$trait, paste0('A', 1:3))
+
+edge_dir <- c('forward', 'back', 'both')
+names(edge_dir) <- c('=~', '~', '~~')
+```
+
+
 ## PGC
 
 ### Common factor
@@ -925,12 +950,12 @@ Common factor model
 
 
 ```r
-pgc_commonfactor_model <- "
+pgc_commonfactor.model <- "
 F_PGC =~ NA*PGC3a + PGC5a + PGC5b + PGC9
 F_PGC ~~ 1*F_PGC
 "
 
-pgc_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor_model)
+pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor.model)
 ```
 
 ```
@@ -967,12 +992,11 @@ pgc_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
 
 
 ```r
-pgc_commonfactor_constr_model <- "
-F_PGC =~ NA*PGC3a + PGC5a + PGC9
-F_PGC ~~ 1*F_PGC
+pgc_commonfactor_constr.model <- "
+A1 =~ NA*PGC3a + PGC5a + PGC9
+A1 ~~ 1*A1
 "
-
-pgc_commonfactor_constr_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor_constr_model)
+pgc_commonfactor_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor_constr.model)
 ```
 
 ```
@@ -982,11 +1006,11 @@ pgc_commonfactor_constr_fit <- usermodel(symptoms_covstruct, estimation='DWLS', 
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   0.432
+##   0.657
 ```
 
 ```r
-pgc_commonfactor_constr_fit$modelfit
+pgc_commonfactor_constr.fit$modelfit
 ```
 
 <div class="kable-table">
@@ -998,50 +1022,66 @@ df   NA        0  NA        NA       1      0
 </div>
 
 ```r
-pgc_commonfactor_constr_fit$results[c(1, 2, 3, 6, 7)]
+pgc_commonfactor_constr.fit$results[c(1, 2, 3, 6, 7)]
 ```
 
 <div class="kable-table">
 
 lhs     op   rhs      STD_Genotype  STD_Genotype_SE   
 ------  ---  ------  -------------  ------------------
-F_PGC   =~   PGC3a       0.8178062  3.31868323673634  
-F_PGC   =~   PGC5a       0.2498389  1.04289399886056  
-F_PGC   =~   PGC9        0.1300049  0.575322423772372 
-F_PGC   ~~   F_PGC       1.0000000                    
+A1      =~   PGC3a       0.8178062  3.31868323673634  
+A1      =~   PGC5a       0.2498389  1.04289399886056  
+A1      =~   PGC9        0.1300049  0.575322423772372 
+A1      ~~   A1          1.0000000                    
 PGC3a   ~~   PGC3a       0.3311929  5.43124953771812  
 PGC5a   ~~   PGC5a       0.9375805  0.579010344657521 
 PGC9    ~~   PGC9        0.9830987  0.390501757325279 
 
 </div>
 
+```r
+fit_graph <- function(results, ...) {
+
+  results_sort <- results %>% arrange(lhs, rhs)
+
+  node_names <- unique(c(results_sort$lhs, results_sort$rhs))
+  
+  node_idx <- seq_along(node_names)
+  names(node_idx) <- node_names
+  
+  graph <- create_graph(
+    nodes_df=create_node_df(n=length(node_names),
+                            label=node_labels[node_names], 
+                            shape='oval', width=1,
+                            fillcolor=node_colors[node_names],
+                            fontcolor='black'),
+    edges_df=create_edge_df(from=node_idx[results_sort$lhs],
+                            to=node_idx[results_sort$rhs],
+                            label=round(results_sort$STD_Genotype, 2),
+                            penwidth=abs(3*results_sort$STD_Genotype),
+                            dir=edge_dir[results_sort$op]),
+    attr_theme="tb")
+  
+  return(graph)
+
+}
+
+render_fit <- function(results) render_graph(fit_graph(results))
+
+render_fit(pgc_commonfactor_constr.fit$results)
+```
+
+<!--html_preserve--><div id="htmlwidget-de11100a2a317ff69878" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-de11100a2a317ff69878">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"A1\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"2\" [label = \"Weight⇊\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"3\" [label = \"Motor⇈\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"4\" [label = \"Suicidality\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n\"1\"->\"1\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"1\"->\"2\" [label = \"0.82\", penwidth = \"2.45341874946995\", dir = \"forward\"] \n\"1\"->\"3\" [label = \"0.25\", penwidth = \"0.749516591454706\", dir = \"forward\"] \n\"1\"->\"4\" [label = \"0.13\", penwidth = \"0.390014569360628\", dir = \"forward\"] \n\"2\"->\"2\" [label = \"0.33\", penwidth = \"0.993578803453168\", dir = \"both\"] \n\"3\"->\"3\" [label = \"0.94\", penwidth = \"2.81274163173063\", dir = \"both\"] \n\"4\"->\"4\" [label = \"0.98\", penwidth = \"2.94929620878518\", dir = \"both\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
 
 ```r
-psych::principal(symptoms_cor[c('PGC3a', 'PGC5a', 'PGC5b', 'PGC9'),c('PGC3a', 'PGC5a', 'PGC5b', 'PGC9')], 1)
+pgc_commonfactor_constr.gv <- generate_dot(fit_graph(pgc_commonfactor_constr.fit$results))
+
+# output as a GraphViz dot file. Replace single quotes with double quotes 
+# as that's what the command line utility expects
+cat(str_replace_all(pgc_commonfactor_constr.gv, "'", '"'), file='mdd-symptom-gsem_files/pgc_commonfactor_constr.gv')
 ```
 
-```
-## Principal Components Analysis
-## Call: psych::principal(r = symptoms_cor[c("PGC3a", "PGC5a", "PGC5b", 
-##     "PGC9"), c("PGC3a", "PGC5a", "PGC5b", "PGC9")], nfactors = 1)
-## Standardized loadings (pattern matrix) based upon correlation matrix
-##         PC1    h2   u2 com
-## PGC3a  0.11 0.013 0.99   1
-## PGC5a  0.67 0.443 0.56   1
-## PGC5b -0.75 0.567 0.43   1
-## PGC9   0.56 0.315 0.69   1
-## 
-##                 PC1
-## SS loadings    1.34
-## Proportion Var 0.33
-## 
-## Mean item complexity =  1
-## Test of the hypothesis that 1 component is sufficient.
-## 
-## The root mean square of the residuals (RMSR) is  0.24 
-## 
-## Fit based upon off diagonal values = -0.67
-```
 
 ## UKB CIDI
 
@@ -1051,81 +1091,11 @@ Common factor model
 
 
 ```r
-ukb_cidi_commonfactor_model <- "
-F_UKB_CIDI =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI6 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
-F_UKB_CIDI ~~ 1*F_UKB_CIDI
+ukb_cidi_commonfactor.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+A1 ~~ 1*A1
 "
-
-ukb_cidi_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_commonfactor_model)
-```
-
-```
-## [1] "Running primary model"
-## [1] "Calculating model chi-square"
-## [1] "Calculating CFI"
-## [1] "Calculating Standardized Results"
-## [1] "Calculating SRMR"
-## elapsed 
-##   0.778 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00131902246367886"
-```
-
-```r
-ukb_cidi_commonfactor_fit$modelfit
-```
-
-<div class="kable-table">
-
-         chisq   df     p_chisq        AIC         CFI        SRMR
----  ---------  ---  ----------  ---------  ----------  ----------
-df    58.94845   27   0.0003617   94.94845   0.9867045   0.1139731
-
-</div>
-
-```r
-ukb_cidi_commonfactor_fit$results[c(1, 2, 3, 6, 7)]
-```
-
-<div class="kable-table">
-
-lhs          op   rhs           STD_Genotype  STD_Genotype_SE    
------------  ---  -----------  -------------  -------------------
-F_UKB_CIDI   =~   UKB_CIDI1        0.8769735  0.0597300497157408 
-F_UKB_CIDI   =~   UKB_CIDI2        0.9665378  0.0470338364496451 
-F_UKB_CIDI   =~   UKB_CIDI3a       0.1730714  0.0973195842396839 
-F_UKB_CIDI   =~   UKB_CIDI3b       0.4348407  0.0820936503904488 
-F_UKB_CIDI   =~   UKB_CIDI4a       0.6070118  0.0998201645165306 
-F_UKB_CIDI   =~   UKB_CIDI6        0.6972188  0.0991747747686025 
-F_UKB_CIDI   =~   UKB_CIDI7        0.6504070  0.0758443013852876 
-F_UKB_CIDI   =~   UKB_CIDI8        0.7028429  0.091302659537442  
-F_UKB_CIDI   =~   UKB_CIDI9        0.6153714  0.10827454221332   
-F_UKB_CIDI   ~~   F_UKB_CIDI       1.0000000                     
-UKB_CIDI1    ~~   UKB_CIDI1        0.2309172  0.0936110232447038 
-UKB_CIDI2    ~~   UKB_CIDI2        0.0658051  0.0644089419983044 
-UKB_CIDI3a   ~~   UKB_CIDI3a       0.9700456  0.287904666707737  
-UKB_CIDI3b   ~~   UKB_CIDI3b       0.8109145  0.157710039763617  
-UKB_CIDI4a   ~~   UKB_CIDI4a       0.6315398  0.311625139275458  
-UKB_CIDI6    ~~   UKB_CIDI6        0.5138847  0.355960828439626  
-UKB_CIDI7    ~~   UKB_CIDI7        0.5769720  0.158825170453834  
-UKB_CIDI8    ~~   UKB_CIDI8        0.5060126  0.221187103957889  
-UKB_CIDI9    ~~   UKB_CIDI9        0.6213185  0.258690896267572  
-
-</div>
-
-### Kendler Neale model
-
-
-```r
-ukb_cidi_kendler...neale_model <- "
-F1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7
-F2 =~ NA*UKB_CIDI8 + UKB_CIDI9 + UKB_CIDI7
-F3 =~ NA*UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI3a
-F1 ~~ 1*F1
-F2 ~~ 1*F2
-F3 ~~ 1*F3
-F1 ~~ F2 + F3
-F2 ~~ F3"
-ukb_cidi_kendler...neale_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_kendler...neale_model)
+ukb_cidi_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_commonfactor.model)
 ```
 
 ```
@@ -1136,129 +1106,227 @@ ukb_cidi_kendler...neale_fit <- usermodel(symptoms_covstruct, estimation='DWLS',
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   3.326
+##   2.221 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00210653588796324"
 ```
 
 ```r
-ukb_cidi_kendler...neale_fit$modelfit
-```
-
-<div class="kable-table">
-
-         chisq   df   p_chisq        AIC         CFI        SRMR
----  ---------  ---  --------  ---------  ----------  ----------
-df    29.61747   16   0.02009   69.61747   0.9938792   0.0782135
-
-</div>
-
-```r
-ukb_cidi_kendler...neale_fit$results
-```
-
-<div class="kable-table">
-
-lhs          op   rhs           Unstand_Est  Unstand_SE             STD_Genotype  STD_Genotype_SE          STD_All
------------  ---  -----------  ------------  --------------------  -------------  -------------------  -----------
-F1           =~   UKB_CIDI1       0.2484723  0.0162211437517512        0.9025688  0.0589693968973722     0.9025689
-F1           =~   UKB_CIDI2       0.2938665  0.0156164661334818        1.0080595  0.0534777846273945     0.9995081
-F1           =~   UKB_CIDI7      -0.3432345  1.6079019077395          -1.4999169  7.02903301816354      -1.4961001
-F1           ~~   F1              1.0000000                            1.0000000                         1.0000000
-F1           ~~   F2             -0.9295531  0.22032192037547          0.9298670  0.221031326594971      0.9298670
-F1           ~~   F3              0.7943715  0.143182342235304         0.7935763  0.142989128776192      0.7935763
-F2           =~   UKB_CIDI7      -0.5143349  1.61017512400429          2.2311509  7.03869879597126       2.2254733
-F2           =~   UKB_CIDI8      -0.1657120  0.0428060592946351        0.6808324  0.17628878453757       0.6808323
-F2           =~   UKB_CIDI9      -0.0989957  0.0272982804354496        0.6103097  0.168720548331471      0.6103095
-F2           ~~   F2              1.0000000                            1.0000000                         1.0000000
-F2           ~~   F3             -0.7643783  0.167677063057046         0.7640187  0.167332669853837      0.7640187
-F3           =~   UKB_CIDI3a      0.0327320  0.0210042705299439        0.1893126  0.121479145577616      0.1893125
-F3           =~   UKB_CIDI4b      0.1499980  0.0330317874649118        0.7211793  0.15879192122687       0.7211793
-F3           =~   UKB_CIDI6       0.2028671  0.0385229332059085        0.8765165  0.166424363869953      0.8765164
-F3           ~~   F3              1.0000000                            1.0000000                         1.0000000
-UKB_CIDI1    ~~   UKB_CIDI1       0.0137779  0.00689777709525635       0.1853693  0.0911753005618773     0.1853693
-UKB_CIDI2    ~~   UKB_CIDI2       0.0009993  0.00712769465036966       0.0010004  0.083956761442846      0.0009835
-UKB_CIDI3a   ~~   UKB_CIDI3a      0.0287989  0.00868467674311237       0.9641608  0.290747019499842      0.9641608
-UKB_CIDI4b   ~~   UKB_CIDI4b      0.0207686  0.0128940524038658        0.4799004  0.298006231047401      0.4799005
-UKB_CIDI6    ~~   UKB_CIDI6       0.0124096  0.0206904267218396        0.2317192  0.386246753399344      0.2317191
-UKB_CIDI7    ~~   UKB_CIDI7       0.0010000  0.120484585304741         0.0010000  2.27236636488067       0.0009949
-UKB_CIDI8    ~~   UKB_CIDI8       0.0315916  0.0157380045841806        0.5364675  0.266340379329723      0.5364674
-UKB_CIDI9    ~~   UKB_CIDI9       0.0164126  0.00769444001205901       0.6275226  0.293437282742112      0.6275223
-
-</div>
-
-
-## UKB PHQ
-
-### Assessment factors
-
-#### Common factor (Baseline)
-
-Common factor model at baseline assessment
-
-
-
-```r
-ukb_phq_0_commonfactor_model <- "
-F_UKB_PHQ_0 =~ NA*UKB_PHQ1_0 + UKB_PHQ2_0 + UKB_PHQ5_0 + UKB_PHQ6_0
-F_UKB_PHQ_0 ~~ 1*F_UKB_PHQ_0
-"
-
-ukb_phq_0_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_0_commonfactor_model)
-```
-
-```
-## [1] "Running primary model"
-## [1] "Calculating model chi-square"
-## [1] "Calculating CFI"
-## [1] "Calculating Standardized Results"
-## [1] "Calculating SRMR"
-## elapsed 
-##   0.455
-```
-
-```r
-ukb_phq_0_commonfactor_fit$modelfit
+ukb_cidi_commonfactor.fit$modelfit
 ```
 
 <div class="kable-table">
 
          chisq   df     p_chisq        AIC         CFI        SRMR
 ---  ---------  ---  ----------  ---------  ----------  ----------
-df    2.997285    2   0.2234333   18.99728   0.9999051   0.0059381
+df    73.24112   35   0.0001621   113.2411   0.9852652   0.1230814
 
 </div>
 
 ```r
-ukb_phq_0_commonfactor_fit$results[c(1, 2, 3, 6, 7)]
+ukb_cidi_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
 ```
 
 <div class="kable-table">
 
-lhs           op   rhs            STD_Genotype  STD_Genotype_SE    
-------------  ---  ------------  -------------  -------------------
-F_UKB_PHQ_0   =~   UKB_PHQ1_0        0.9835003  0.029378657774844  
-F_UKB_PHQ_0   =~   UKB_PHQ2_0        0.9624485  0.0287060014142641 
-F_UKB_PHQ_0   =~   UKB_PHQ5_0        0.9205787  0.0303227069249924 
-F_UKB_PHQ_0   =~   UKB_PHQ6_0        0.8468142  0.0265782972273556 
-F_UKB_PHQ_0   ~~   F_UKB_PHQ_0       1.0000000                     
-UKB_PHQ1_0    ~~   UKB_PHQ1_0        0.0327272  0.0196424289078989 
-UKB_PHQ2_0    ~~   UKB_PHQ2_0        0.0736929  0.0232666658434055 
-UKB_PHQ5_0    ~~   UKB_PHQ5_0        0.1525349  0.023734519712491  
-UKB_PHQ6_0    ~~   UKB_PHQ6_0        0.2829057  0.0238685036563371 
+lhs          op   rhs           STD_Genotype  STD_Genotype_SE    
+-----------  ---  -----------  -------------  -------------------
+A1           =~   UKB_CIDI1        0.8704875  0.05826398889932   
+A1           =~   UKB_CIDI9        0.6098945  0.106226362693508  
+A1           =~   UKB_CIDI2        0.9877271  0.0470902179094761 
+A1           =~   UKB_CIDI3a       0.1673369  0.0984537120911675 
+A1           =~   UKB_CIDI3b       0.4246263  0.0811112304149095 
+A1           =~   UKB_CIDI4a       0.5697511  0.0991012052532406 
+A1           =~   UKB_CIDI4b       0.5532670  0.109518534730284  
+A1           =~   UKB_CIDI6        0.7121426  0.0975266039629619 
+A1           =~   UKB_CIDI7        0.6332052  0.075484415797212  
+A1           =~   UKB_CIDI8        0.7005428  0.0892927930117068 
+A1           ~~   A1               1.0000000                     
+UKB_CIDI1    ~~   UKB_CIDI1        0.2422517  0.08973623514996   
+UKB_CIDI9    ~~   UKB_CIDI9        0.6280293  0.25573053454608   
+UKB_CIDI2    ~~   UKB_CIDI2        0.0243952  0.0659942901065309 
+UKB_CIDI3a   ~~   UKB_CIDI3a       0.9720001  0.288395960840524  
+UKB_CIDI3b   ~~   UKB_CIDI3b       0.8196921  0.15610082568216   
+UKB_CIDI4a   ~~   UKB_CIDI4a       0.6753799  0.307544707892769  
+UKB_CIDI4b   ~~   UKB_CIDI4b       0.6938966  0.26292611486907   
+UKB_CIDI6    ~~   UKB_CIDI6        0.4928531  0.35434830914567   
+UKB_CIDI7    ~~   UKB_CIDI7        0.5990512  0.155913628187352  
+UKB_CIDI8    ~~   UKB_CIDI8        0.5092401  0.21799205413804   
 
 </div>
-#### Common factor (Followup)
 
-Common factor model at first followup assessment
+```r
+render_fit(ukb_cidi_commonfactor.fit$results)
+```
+
+<!--html_preserve--><div id="htmlwidget-66e7b1ebaa53a9ffc55a" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-66e7b1ebaa53a9ffc55a">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"A1\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"2\" [label = \"Mood\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"3\" [label = \"Interest\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"4\" [label = \"Weight⇊\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"5\" [label = \"Weight⇈\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"6\" [label = \"Sleep⇊\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"7\" [label = \"Sleep⇈\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"8\" [label = \"Fatigue\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"9\" [label = \"Guilt\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"10\" [label = \"Concentrate\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"11\" [label = \"Suicidality\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n\"1\"->\"1\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"1\"->\"2\" [label = \"0.87\", penwidth = \"2.61146236862217\", dir = \"forward\"] \n\"1\"->\"3\" [label = \"0.99\", penwidth = \"2.96318128531284\", dir = \"forward\"] \n\"1\"->\"4\" [label = \"0.17\", penwidth = \"0.502010762736211\", dir = \"forward\"] \n\"1\"->\"5\" [label = \"0.42\", penwidth = \"1.27387893873277\", dir = \"forward\"] \n\"1\"->\"6\" [label = \"0.57\", penwidth = \"1.70925336911864\", dir = \"forward\"] \n\"1\"->\"7\" [label = \"0.55\", penwidth = \"1.65980087869007\", dir = \"forward\"] \n\"1\"->\"8\" [label = \"0.71\", penwidth = \"2.13642794349472\", dir = \"forward\"] \n\"1\"->\"9\" [label = \"0.63\", penwidth = \"1.89961552177294\", dir = \"forward\"] \n\"1\"->\"10\" [label = \"0.7\", penwidth = \"2.10162845516194\", dir = \"forward\"] \n\"1\"->\"11\" [label = \"0.61\", penwidth = \"1.82968337755774\", dir = \"forward\"] \n\"2\"->\"2\" [label = \"0.24\", penwidth = \"0.72675497267186\", dir = \"both\"] \n\"3\"->\"3\" [label = \"0.02\", penwidth = \"0.0731855443883617\", dir = \"both\"] \n\"4\"->\"4\" [label = \"0.97\", penwidth = \"2.91600044510908\", dir = \"both\"] \n\"5\"->\"5\" [label = \"0.82\", penwidth = \"2.4590763552315\", dir = \"both\"] \n\"6\"->\"6\" [label = \"0.68\", penwidth = \"2.02613969686873\", dir = \"both\"] \n\"7\"->\"7\" [label = \"0.69\", penwidth = \"2.08168973477537\", dir = \"both\"] \n\"8\"->\"8\" [label = \"0.49\", penwidth = \"1.47855915371992\", dir = \"both\"] \n\"9\"->\"9\" [label = \"0.6\", penwidth = \"1.79715362889942\", dir = \"both\"] \n\"10\"->\"10\" [label = \"0.51\", penwidth = \"1.52772032471201\", dir = \"both\"] \n\"11\"->\"11\" [label = \"0.63\", penwidth = \"1.88408783763102\", dir = \"both\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+
+```r
+ukb_cidi_commonfactor.gv <- generate_dot(fit_graph(ukb_cidi_commonfactor.fit$results))
+
+cat(str_replace_all(ukb_cidi_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_commonfactor.gv')
+```
+
+### Kendler Neale model
+
+
+```r
+ukb_cidi_kendler_neale.model <- "
+A1 =~ NA*UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7
+A3 =~ NA*UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI3b
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3"
+ukb_cidi_kendler_neale.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_kendler_neale.model)
+```
+
+```
+## [1] "Running primary model"
+## [1] "The model as initially specified failed to converge. A lower bound of 0 on residual variances has been automatically added to try and troubleshoot this."
+## [1] "Calculating model chi-square"
+## [1] "Calculating CFI"
+## [1] "Calculating Standardized Results"
+## [1] "Calculating SRMR"
+## elapsed 
+##   4.705 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00022213202890202"
+```
+
+```r
+ukb_cidi_kendler_neale.fit$modelfit
+```
+
+<div class="kable-table">
+
+         chisq   df     p_chisq        AIC         CFI        SRMR
+---  ---------  ---  ----------  ---------  ----------  ----------
+df    34.47754   16   0.0046824   74.47754   0.9919566   0.0965179
+
+</div>
+
+```r
+ukb_cidi_kendler_neale.fit$results[c(1,2,3,6,7)]
+```
+
+<div class="kable-table">
+
+lhs          op   rhs           STD_Genotype  STD_Genotype_SE    
+-----------  ---  -----------  -------------  -------------------
+A1           =~   UKB_CIDI7        0.8735100  0.880174390828624  
+A1           =~   UKB_CIDI8        0.7488516  0.141081729992726  
+A1           =~   UKB_CIDI9        0.6509178  0.139382860734067  
+A1           ~~   A1               1.0000000                     
+A1           ~~   A2               0.8577131  0.148118335037063  
+A1           ~~   A3               0.9551833  0.166822183974794  
+A2           =~   UKB_CIDI1        0.8937243  0.0567872610556046 
+A2           =~   UKB_CIDI2        1.0106957  0.0534145543062442 
+A2           =~   UKB_CIDI7       -0.1795812  0.869328853492586  
+A2           ~~   A2               1.0000000                     
+A2           ~~   A3               0.9158477  0.168730500634498  
+A3           =~   UKB_CIDI3b       0.4333132  0.103755361040968  
+A3           =~   UKB_CIDI4b       0.6046097  0.146509568076983  
+A3           =~   UKB_CIDI6        0.7497038  0.140790105961394  
+A3           ~~   A3               1.0000000                     
+UKB_CIDI1    ~~   UKB_CIDI1        0.2012565  0.0877538197904724 
+UKB_CIDI2    ~~   UKB_CIDI2        0.0010003  0.0828667798701586 
+UKB_CIDI3b   ~~   UKB_CIDI3b       0.8122398  0.158187782041239  
+UKB_CIDI4b   ~~   UKB_CIDI4b       0.6344479  0.265478959728263  
+UKB_CIDI6    ~~   UKB_CIDI6        0.4379447  0.400290959992422  
+UKB_CIDI7    ~~   UKB_CIDI7        0.4738226  0.284179325500644  
+UKB_CIDI8    ~~   UKB_CIDI8        0.4392225  0.238993564544708  
+UKB_CIDI9    ~~   UKB_CIDI9        0.5763049  0.271514616206492  
+
+</div>
+
+```r
+#render_fit(ukb_cidi_kendler_neale.fit$results)
+# cat(generate_dot(fit_graph(ukb_cidi_kendler_neale.fit$results)))
+
+ukb_cidi_kendler_neale.gv = "digraph {
+graph [layout = 'dot',
+       outputorder = 'edgesfirst',
+       bgcolor = 'white']
+node [fontname = 'Helvetica',
+      fontsize = '10',
+      shape = 'circle',
+      fixedsize = 'true',
+      width = '0.5',
+      style = 'filled',
+      fillcolor = 'aliceblue',
+      color = 'gray70',
+      fontcolor = 'gray50']
+edge [fontname = 'Helvetica',
+     fontsize = '8',
+     len = '1.5',
+     color = 'gray80',
+     arrowsize = '0.5']
+   {rank=same '1' '2' '3'}
+   {rank=same '4' '5' '6' '7' '8' '9' '10' '11'}
+  '1' [label = 'A1', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '2' [label = 'A2', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '3' [label = 'A3', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '4' [label = 'Mood', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '5' [label = 'Interest', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '6' [label = 'Weight⇈', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '7' [label = 'Sleep⇈', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '8' [label = 'Fatigue', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '9' [label = 'Guilt', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '10' [label = 'Concentrate', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+  '11' [label = 'Suicidality', shape = 'oval', width = '1', fillcolor = '#1b9e77', fontcolor = 'black'] 
+'1'->'1' [label = '1', penwidth = '3', dir = 'both'] 
+'1'->'2' [label = '0.86', penwidth = '2.57313926883652', dir = 'both'] 
+'1'->'3' [label = '0.96', penwidth = '2.86555000253985', dir = 'both'] 
+'1'->'9' [label = '0.87', penwidth = '2.62053014038791', dir = 'forward'] 
+'1'->'10' [label = '0.75', penwidth = '2.24655479397468', dir = 'forward'] 
+'1'->'11' [label = '0.65', penwidth = '1.9527533612875', dir = 'forward'] 
+'2'->'2' [label = '1', penwidth = '3', dir = 'both'] 
+'2'->'3' [label = '0.92', penwidth = '2.7475431120308', dir = 'both'] 
+'2'->'4' [label = '0.89', penwidth = '2.6811728629236', dir = 'forward'] 
+'2'->'5' [label = '1.01', penwidth = '3.0320871595494', dir = 'forward'] 
+'2'->'9' [label = '-0.18', penwidth = '0.53874357120299', dir = 'forward'] 
+'3'->'3' [label = '1', penwidth = '3', dir = 'both'] 
+'3'->'6' [label = '0.43', penwidth = '1.29993955197882', dir = 'forward'] 
+'3'->'7' [label = '0.6', penwidth = '1.81382901038483', dir = 'forward'] 
+'3'->'8' [label = '0.75', penwidth = '2.24911126852839', dir = 'forward'] 
+'4'->'4' [label = '0.2', penwidth = '0.603769543318233', dir = 'both'] 
+'5'->'5' [label = '0', penwidth = '0.00300095489528763', dir = 'both'] 
+'6'->'6' [label = '0.81', penwidth = '2.43671933713735', dir = 'both'] 
+'7'->'7' [label = '0.63', penwidth = '1.90334363858575', dir = 'both'] 
+'8'->'8' [label = '0.44', penwidth = '1.31383408561682', dir = 'both'] 
+'9'->'9' [label = '0.47', penwidth = '1.42146789832965', dir = 'both'] 
+'10'->'10' [label = '0.44', penwidth = '1.31766748689992', dir = 'both'] 
+'11'->'11' [label = '0.58', penwidth = '1.72891475448148', dir = 'both'] 
+ }"
+
+grViz(ukb_cidi_kendler_neale.gv)
+```
+
+<!--html_preserve--><div id="htmlwidget-d924ac5ea2adf7429b24" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-d924ac5ea2adf7429b24">{"x":{"diagram":"digraph {\ngraph [layout = \"dot\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n   {rank=same \"1\" \"2\" \"3\"}\n   {rank=same \"4\" \"5\" \"6\" \"7\" \"8\" \"9\" \"10\" \"11\"}\n  \"1\" [label = \"A1\", shape = \"oval\", width = \"1\", fillcolor = \"white\", fontcolor = \"black\"] \n  \"2\" [label = \"A2\", shape = \"oval\", width = \"1\", fillcolor = \"white\", fontcolor = \"black\"] \n  \"3\" [label = \"A3\", shape = \"oval\", width = \"1\", fillcolor = \"white\", fontcolor = \"black\"] \n  \"4\" [label = \"Mood\", shape = \"oval\", width = \"1\", fillcolor = \"#1b9e77\", fontcolor = \"black\"] \n  \"5\" [label = \"Interest\", shape = \"oval\", width = \"1\", fillcolor = \"#1b9e77\", fontcolor = \"black\"] \n  \"6\" [label = \"Weight⇈\", shape = \"oval\", width = \"1\", fillcolor = \"#1b9e77\", fontcolor = \"black\"] \n  \"7\" [label = \"Sleep⇈\", shape = \"oval\", width = \"1\", fillcolor = \"#1b9e77\", fontcolor = \"black\"] \n  \"8\" [label = \"Fatigue\", shape = \"oval\", width = \"1\", fillcolor = \"#1b9e77\", fontcolor = \"black\"] \n  \"9\" [label = \"Guilt\", shape = \"oval\", width = \"1\", fillcolor = \"#1b9e77\", fontcolor = \"black\"] \n  \"10\" [label = \"Concentrate\", shape = \"oval\", width = \"1\", fillcolor = \"#1b9e77\", fontcolor = \"black\"] \n  \"11\" [label = \"Suicidality\", shape = \"oval\", width = \"1\", fillcolor = \"#1b9e77\", fontcolor = \"black\"] \n\"1\"->\"1\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"1\"->\"2\" [label = \"0.86\", penwidth = \"2.57313926883652\", dir = \"both\"] \n\"1\"->\"3\" [label = \"0.96\", penwidth = \"2.86555000253985\", dir = \"both\"] \n\"1\"->\"9\" [label = \"0.87\", penwidth = \"2.62053014038791\", dir = \"forward\"] \n\"1\"->\"10\" [label = \"0.75\", penwidth = \"2.24655479397468\", dir = \"forward\"] \n\"1\"->\"11\" [label = \"0.65\", penwidth = \"1.9527533612875\", dir = \"forward\"] \n\"2\"->\"2\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"2\"->\"3\" [label = \"0.92\", penwidth = \"2.7475431120308\", dir = \"both\"] \n\"2\"->\"4\" [label = \"0.89\", penwidth = \"2.6811728629236\", dir = \"forward\"] \n\"2\"->\"5\" [label = \"1.01\", penwidth = \"3.0320871595494\", dir = \"forward\"] \n\"2\"->\"9\" [label = \"-0.18\", penwidth = \"0.53874357120299\", dir = \"forward\"] \n\"3\"->\"3\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"3\"->\"6\" [label = \"0.43\", penwidth = \"1.29993955197882\", dir = \"forward\"] \n\"3\"->\"7\" [label = \"0.6\", penwidth = \"1.81382901038483\", dir = \"forward\"] \n\"3\"->\"8\" [label = \"0.75\", penwidth = \"2.24911126852839\", dir = \"forward\"] \n\"4\"->\"4\" [label = \"0.2\", penwidth = \"0.603769543318233\", dir = \"both\"] \n\"5\"->\"5\" [label = \"0\", penwidth = \"0.00300095489528763\", dir = \"both\"] \n\"6\"->\"6\" [label = \"0.81\", penwidth = \"2.43671933713735\", dir = \"both\"] \n\"7\"->\"7\" [label = \"0.63\", penwidth = \"1.90334363858575\", dir = \"both\"] \n\"8\"->\"8\" [label = \"0.44\", penwidth = \"1.31383408561682\", dir = \"both\"] \n\"9\"->\"9\" [label = \"0.47\", penwidth = \"1.42146789832965\", dir = \"both\"] \n\"10\"->\"10\" [label = \"0.44\", penwidth = \"1.31766748689992\", dir = \"both\"] \n\"11\"->\"11\" [label = \"0.58\", penwidth = \"1.72891475448148\", dir = \"both\"] \n }","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+
+```r
+cat(str_replace_all(ukb_cidi_kendler_neale.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_kendler_neale.gv')
+```
 
 
 
 ```r
-ukb_phq_1_commonfactor_model <- "
-F_UKB_PHQ_1 =~ NA*UKB_PHQ1_1 + UKB_PHQ2_1 + UKB_PHQ5_1 + UKB_PHQ6_1
-F_UKB_PHQ_1 ~~ 1*F_UKB_PHQ_1
+ukb_cidi_kendler_neale_orth.model <- "
+A1 =~ NA*UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7
+A3 =~ NA*UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI3b
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3
+A1 ~~ 0*A2 + 0*A3
+A2 ~~ 0*A3
+c6 > 0.001
+c7 > 0.001
+UKB_CIDI6 ~~ c6*UKB_CIDI6
+UKB_CIDI7 ~~ c7*UKB_CIDI7
 "
-
-ukb_phq_1_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_1_commonfactor_model)
+ukb_cidi_kendler_neale_orth.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_kendler_neale_orth.model)
 ```
 
 ```
@@ -1266,235 +1334,71 @@ ukb_phq_1_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', m
 ## [1] "Calculating model chi-square"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
-```
-
-```
-## Warning in lav_object_post_check(object): lavaan WARNING: some estimated ov
-## variances are negative
-```
-
-```
-## [1] "Calculating SRMR"
-```
-
-```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## ukb_phq_1_commonfactor_model): CFI estimates below 0 should not be trusted,
-## and indicate that the other model fit estimates should be interpreted
-## with caution. A negative CFI estimates typically appears due to negative
-## residual variances.
-```
-
-```
-## elapsed 
-##   0.466 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.0106266721983036"
-```
-
-
-```r
-ukb_phq_1_commonfactor_constr_model <- "
-F_UKB_PHQ_1 =~ NA*UKB_PHQ1_1 + UKB_PHQ2_1 + UKB_PHQ5_1 + UKB_PHQ6_1
-F_UKB_PHQ_1 ~~ 1*F_UKB_PHQ_1
-UKB_PHQ2_1 ~~ c2*UKB_PHQ2_1
-c2 > .001
-"
-
-ukb_phq_1_commonfactor_constr_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_1_commonfactor_constr_model)
-```
-
-```
-## [1] "Running primary model"
-## [1] "Calculating model chi-square"
-## [1] "Calculating CFI"
-## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   0.921 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.0106266721983036"
+##   4.455 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00022213202890202"
 ```
 
 ```r
-ukb_phq_1_commonfactor_constr_fit$modelfit
-```
-
-<div class="kable-table">
-
-          chisq   df     p_chisq        AIC   CFI        SRMR
----  ----------  ---  ----------  ---------  ----  ----------
-df    0.3880608    2   0.8236329   16.38806     1   0.0307217
-
-</div>
-
-```r
-ukb_phq_1_commonfactor_constr_fit$results[c(1, 2, 3, 6, 7)]
-```
-
-<div class="kable-table">
-
-lhs           op   rhs            STD_Genotype  STD_Genotype_SE   
-------------  ---  ------------  -------------  ------------------
-F_UKB_PHQ_1   =~   UKB_PHQ1_1        0.8500405  0.206026685122531 
-F_UKB_PHQ_1   =~   UKB_PHQ2_1        1.0315678  0.200225168179619 
-F_UKB_PHQ_1   =~   UKB_PHQ5_1        0.8416589  0.174912086220269 
-F_UKB_PHQ_1   =~   UKB_PHQ6_1        0.8485032  0.190345650767916 
-F_UKB_PHQ_1   ~~   F_UKB_PHQ_1       1.0000000                    
-UKB_PHQ1_1    ~~   UKB_PHQ1_1        0.2774310  0.253324749811609 
-UKB_PHQ2_1    ~~   UKB_PHQ2_1        0.0010000  0.294839535410217 
-UKB_PHQ5_1    ~~   UKB_PHQ5_1        0.2916096  0.236219815793684 
-UKB_PHQ6_1    ~~   UKB_PHQ6_1        0.2800423  0.269665904489352 
-
-</div>
-
-#### Common factor (imaging)
-
-Common factor model at imaging assessment
-
-
-
-```r
-ukb_phq_2_commonfactor_model <- "
-F_UKB_PHQ_2 =~ NA*UKB_PHQ1_2 + UKB_PHQ2_2 + UKB_PHQ5_2 + UKB_PHQ6_2
-F_UKB_PHQ_2 ~~ 1*F_UKB_PHQ_2
-"
-
-ukb_phq_2_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_2_commonfactor_model)
-```
-
-```
-## [1] "Running primary model"
-## [1] "Calculating model chi-square"
-## [1] "Calculating CFI"
-## [1] "Calculating Standardized Results"
-```
-
-```
-## Warning in lav_object_post_check(object): lavaan WARNING: some estimated ov
-## variances are negative
-```
-
-```
-## [1] "Calculating SRMR"
-```
-
-```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## ukb_phq_2_commonfactor_model): CFI estimates below 0 should not be trusted,
-## and indicate that the other model fit estimates should be interpreted
-## with caution. A negative CFI estimates typically appears due to negative
-## residual variances.
-```
-
-```
-## elapsed 
-##    0.45 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.0420986724005914"
-```
-
-```r
-ukb_phq_2_commonfactor_fit$modelfit
+ukb_cidi_kendler_neale_orth.fit$modelfit
 ```
 
 <div class="kable-table">
 
          chisq   df   p_chisq        AIC         CFI        SRMR
 ---  ---------  ---  --------  ---------  ----------  ----------
-df    4473.568    2         0   4489.568   -47.55062   0.0227197
+df    247.6764   19         0   281.6764   0.9004559   0.3661284
 
 </div>
 
 ```r
-ukb_phq_2_commonfactor_fit$results[c(1, 2, 3, 6, 7)]
+ukb_cidi_kendler_neale_orth.fit$results[c(1,2,3,6,7)]
 ```
 
 <div class="kable-table">
 
-lhs           op   rhs            STD_Genotype  STD_Genotype_SE   
-------------  ---  ------------  -------------  ------------------
-F_UKB_PHQ_2   =~   UKB_PHQ1_2        1.0117135  0.260903343508155 
-F_UKB_PHQ_2   =~   UKB_PHQ2_2        0.8966944  0.194528870785643 
-F_UKB_PHQ_2   =~   UKB_PHQ5_2        0.9317710  0.223229575177861 
-F_UKB_PHQ_2   =~   UKB_PHQ6_2        1.0196845  0.211354757571518 
-F_UKB_PHQ_2   ~~   F_UKB_PHQ_2       1.0000000                    
-UKB_PHQ1_2    ~~   UKB_PHQ1_2       -0.0235642  0.349632638474599 
-UKB_PHQ2_2    ~~   UKB_PHQ2_2        0.1959392  0.191362873542112 
-UKB_PHQ5_2    ~~   UKB_PHQ5_2        0.1318028  0.348014026462096 
-UKB_PHQ6_2    ~~   UKB_PHQ6_2       -0.0397565  0.354509647886822 
+lhs          op   rhs           STD_Genotype  STD_Genotype_SE    
+-----------  ---  -----------  -------------  -------------------
+A1           =~   UKB_CIDI7        0.8452126  0.248509909627164  
+A1           =~   UKB_CIDI8        0.6483455  0.207793386391245  
+A1           =~   UKB_CIDI9        0.5699512  0.201367697514899  
+A1           ~~   A1               1.0000000                     
+A2           =~   UKB_CIDI1        0.9535986  0.0748451770189896 
+A2           =~   UKB_CIDI2        0.9736163  0.0669539952644244 
+A2           =~   UKB_CIDI7        0.5684532  0.0794489600473408 
+A2           ~~   A2               1.0000000                     
+A3           =~   UKB_CIDI3b       0.2546259  0.166167664668762  
+A3           =~   UKB_CIDI4b       0.6260953  0.383483907075251  
+A3           =~   UKB_CIDI6        1.0208174  0.541013077597159  
+A3           ~~   A3               1.0000000                     
+UKB_CIDI1    ~~   UKB_CIDI1        0.0906503  0.128978426669033  
+UKB_CIDI2    ~~   UKB_CIDI2        0.0520716  0.124730073725171  
+UKB_CIDI3b   ~~   UKB_CIDI3b       0.9351684  0.162164492651298  
+UKB_CIDI4b   ~~   UKB_CIDI4b       0.6079912  0.488043268527906  
+UKB_CIDI6    ~~   UKB_CIDI6        0.0010009  1.14661629062681   
+UKB_CIDI7    ~~   UKB_CIDI7        0.0010002  0.437712585329919  
+UKB_CIDI8    ~~   UKB_CIDI8        0.5796384  0.294142571829342  
+UKB_CIDI9    ~~   UKB_CIDI9        0.6751568  0.307981650140958  
 
 </div>
 
 
 
-```r
-ukb_phq_2_commonfactor_constr_model <- "
-F_UKB_PHQ_2 =~ NA*UKB_PHQ1_2 + UKB_PHQ2_2 + UKB_PHQ5_2 + UKB_PHQ6_2
-F_UKB_PHQ_2 ~~ 1*F_UKB_PHQ_2
-UKB_PHQ1_2 ~~ c2*UKB_PHQ1_2
-UKB_PHQ6_2 ~~ c6*UKB_PHQ6_2
-c2 > .001
-c6 > .001
-"
+## UKB PHQ
 
-ukb_phq_2_commonfactor_constr_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_2_commonfactor_constr_model)
-```
-
-```
-## [1] "Running primary model"
-## [1] "Calculating model chi-square"
-## [1] "Calculating CFI"
-## [1] "Calculating Standardized Results"
-## [1] "Calculating SRMR"
-## elapsed 
-##   1.146 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.0420986724005914"
-```
-
-```r
-ukb_phq_2_commonfactor_constr_fit$modelfit
-```
-
-<div class="kable-table">
-
-          chisq   df     p_chisq       AIC   CFI        SRMR
----  ----------  ---  ----------  --------  ----  ----------
-df    0.3473014    2   0.8405904   16.3473     1   0.0250039
-
-</div>
-
-```r
-ukb_phq_2_commonfactor_constr_fit$results[c(1, 2, 3, 6, 7)]
-```
-
-<div class="kable-table">
-
-lhs           op   rhs            STD_Genotype  STD_Genotype_SE   
-------------  ---  ------------  -------------  ------------------
-F_UKB_PHQ_2   =~   UKB_PHQ1_2        1.0093584  0.261280177443822 
-F_UKB_PHQ_2   =~   UKB_PHQ2_2        0.9014118  0.194868775030664 
-F_UKB_PHQ_2   =~   UKB_PHQ5_2        0.9357984  0.223719195734359 
-F_UKB_PHQ_2   =~   UKB_PHQ6_2        1.0069684  0.210505910758997 
-F_UKB_PHQ_2   ~~   F_UKB_PHQ_2       1.0000000                    
-UKB_PHQ1_2    ~~   UKB_PHQ1_2        0.0010000  0.349130996239482 
-UKB_PHQ2_2    ~~   UKB_PHQ2_2        0.1874568  0.192685015672835 
-UKB_PHQ5_2    ~~   UKB_PHQ5_2        0.1242808  0.349210235216346 
-UKB_PHQ6_2    ~~   UKB_PHQ6_2        0.0010001  0.348558500791889 
-
-</div>
-
-
-#### Common factor (MHQ)
+### Common factor (MHQ)
 
 Common factor model at MHQ assessment
 
 
-
 ```r
-ukb_phq_m_commonfactor_model <- "
-F_UKB_PHQ_M =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ3_M + UKB_PHQ5_M + UKB_PHQ6_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
-F_UKB_PHQ_M ~~ 1*F_UKB_PHQ_M
+ukb_phq_m_commonfactor.model <- "
+A1 =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ3_M + UKB_PHQ5_M + UKB_PHQ6_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
+A1 ~~ 1*A1
 "
 
-ukb_phq_m_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_m_commonfactor_model)
+ukb_phq_m_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_m_commonfactor.model)
 ```
 
 ```
@@ -1504,12 +1408,12 @@ ukb_phq_m_commonfactor_fit <- usermodel(symptoms_covstruct, estimation='DWLS', m
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   0.605 
+##   0.886 
 ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00107494949801306"
 ```
 
 ```r
-ukb_phq_m_commonfactor_fit$modelfit
+ukb_phq_m_commonfactor.fit$modelfit
 ```
 
 <div class="kable-table">
@@ -1521,282 +1425,138 @@ df    36.03128   20   0.0152514   68.03128   0.9957031   0.0433932
 </div>
 
 ```r
-ukb_phq_m_commonfactor_fit$results[c(1, 2, 3, 6, 7)]
+ukb_phq_m_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
 ```
 
 <div class="kable-table">
 
-lhs           op   rhs            STD_Genotype  STD_Genotype_SE    
-------------  ---  ------------  -------------  -------------------
-F_UKB_PHQ_M   =~   UKB_PHQ1_M        0.9697603  0.057006787982467  
-F_UKB_PHQ_M   =~   UKB_PHQ2_M        0.9737592  0.054609223322085  
-F_UKB_PHQ_M   =~   UKB_PHQ3_M        0.8414785  0.0595036926129076 
-F_UKB_PHQ_M   =~   UKB_PHQ5_M        0.9170546  0.0940149397296949 
-F_UKB_PHQ_M   =~   UKB_PHQ6_M        0.9078230  0.0515780981418909 
-F_UKB_PHQ_M   =~   UKB_PHQ7_M        0.8956600  0.0566974330876182 
-F_UKB_PHQ_M   =~   UKB_PHQ8_M        0.9540304  0.0682940049588863 
-F_UKB_PHQ_M   =~   UKB_PHQ9_M        0.8724061  0.094062870273096  
-F_UKB_PHQ_M   ~~   F_UKB_PHQ_M       1.0000000                     
-UKB_PHQ1_M    ~~   UKB_PHQ1_M        0.0595649  0.0441530236515604 
-UKB_PHQ2_M    ~~   UKB_PHQ2_M        0.0517932  0.0437309841388319 
-UKB_PHQ3_M    ~~   UKB_PHQ3_M        0.2919139  0.0614476188621677 
-UKB_PHQ5_M    ~~   UKB_PHQ5_M        0.1590106  0.1417137595344    
-UKB_PHQ6_M    ~~   UKB_PHQ6_M        0.1758577  0.0522221880907813 
-UKB_PHQ7_M    ~~   UKB_PHQ7_M        0.1977933  0.0587159130428195 
-UKB_PHQ8_M    ~~   UKB_PHQ8_M        0.0898261  0.0760620276738579 
-UKB_PHQ9_M    ~~   UKB_PHQ9_M        0.2389079  0.196953967058746  
+lhs          op   rhs           STD_Genotype  STD_Genotype_SE    
+-----------  ---  -----------  -------------  -------------------
+A1           =~   UKB_PHQ1_M       0.9697603  0.057006787982467  
+A1           =~   UKB_PHQ2_M       0.9737592  0.054609223322085  
+A1           =~   UKB_PHQ3_M       0.8414785  0.0595036926129076 
+A1           =~   UKB_PHQ5_M       0.9170546  0.0940149397296949 
+A1           =~   UKB_PHQ6_M       0.9078230  0.0515780981418909 
+A1           =~   UKB_PHQ7_M       0.8956600  0.0566974330876182 
+A1           =~   UKB_PHQ8_M       0.9540304  0.0682940049588863 
+A1           =~   UKB_PHQ9_M       0.8724061  0.094062870273096  
+A1           ~~   A1               1.0000000                     
+UKB_PHQ1_M   ~~   UKB_PHQ1_M       0.0595649  0.0441530236515604 
+UKB_PHQ2_M   ~~   UKB_PHQ2_M       0.0517932  0.0437309841388319 
+UKB_PHQ3_M   ~~   UKB_PHQ3_M       0.2919139  0.0614476188621677 
+UKB_PHQ5_M   ~~   UKB_PHQ5_M       0.1590106  0.1417137595344    
+UKB_PHQ6_M   ~~   UKB_PHQ6_M       0.1758577  0.0522221880907813 
+UKB_PHQ7_M   ~~   UKB_PHQ7_M       0.1977933  0.0587159130428195 
+UKB_PHQ8_M   ~~   UKB_PHQ8_M       0.0898261  0.0760620276738579 
+UKB_PHQ9_M   ~~   UKB_PHQ9_M       0.2389079  0.196953967058746  
 
 </div>
 
+```r
+render_fit(ukb_phq_m_commonfactor.fit$results)
+```
 
+<!--html_preserve--><div id="htmlwidget-f474d6d97ca048d1f26e" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-f474d6d97ca048d1f26e">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"A1\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"2\" [label = \"Mood\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"3\" [label = \"Interest\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"4\" [label = \"Weight⇅\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"5\" [label = \"Motor⇅\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"6\" [label = \"Fatigue\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"7\" [label = \"Guilt\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"8\" [label = \"Concentrate\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"9\" [label = \"Suicidality\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n\"1\"->\"1\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"1\"->\"2\" [label = \"0.97\", penwidth = \"2.9092808901666\", dir = \"forward\"] \n\"1\"->\"3\" [label = \"0.97\", penwidth = \"2.92127763375998\", dir = \"forward\"] \n\"1\"->\"4\" [label = \"0.84\", penwidth = \"2.5244354239918\", dir = \"forward\"] \n\"1\"->\"5\" [label = \"0.92\", penwidth = \"2.75116371972891\", dir = \"forward\"] \n\"1\"->\"6\" [label = \"0.91\", penwidth = \"2.72346889876166\", dir = \"forward\"] \n\"1\"->\"7\" [label = \"0.9\", penwidth = \"2.68698010616003\", dir = \"forward\"] \n\"1\"->\"8\" [label = \"0.95\", penwidth = \"2.86209130504019\", dir = \"forward\"] \n\"1\"->\"9\" [label = \"0.87\", penwidth = \"2.61721815953266\", dir = \"forward\"] \n\"2\"->\"2\" [label = \"0.06\", penwidth = \"0.178694779899995\", dir = \"both\"] \n\"3\"->\"3\" [label = \"0.05\", penwidth = \"0.155379735983715\", dir = \"both\"] \n\"4\"->\"4\" [label = \"0.29\", penwidth = \"0.875741621880832\", dir = \"both\"] \n\"5\"->\"5\" [label = \"0.16\", penwidth = \"0.477031753460664\", dir = \"both\"] \n\"6\"->\"6\" [label = \"0.18\", penwidth = \"0.527573117844097\", dir = \"both\"] \n\"7\"->\"7\" [label = \"0.2\", penwidth = \"0.593379767384402\", dir = \"both\"] \n\"8\"->\"8\" [label = \"0.09\", penwidth = \"0.269478266432161\", dir = \"both\"] \n\"9\"->\"9\" [label = \"0.24\", penwidth = \"0.716723610078435\", dir = \"both\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
 
-## Full
+```r
+ukb_phq_m_commonfactor.gv <- generate_dot(fit_graph(ukb_phq_m_commonfactor.fit$results))
 
-The first model full has a latent factor for each symptom with unconstrained covariance structure
+cat(str_replace_all(ukb_phq_m_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_m_commonfactor.gv')
+```
+
+### Kendler Neale model
 
 
 ```r
-symptom_model <- "
-MDD1  =~ NA*UKB_CIDI1 + UKB_PHQ1_0 + UKB_PHQ1_1 + UKB_PHQ1_2 + UKB_PHQ1_M
-MDD2  =~ NA*UKB_CIDI2 + UKB_PHQ2_0 + UKB_PHQ2_1 + UKB_PHQ2_2 + UKB_PHQ2_M
-MDD3a =~ NA*PGC3a + UKB_CIDI3a
-MDD3b =~ NA*UKB_CIDI3b + UKB_PHQ3_M
-MDD4a =~ NA*UKB_CIDI4a + UKB_PHQ4_M
-MDD5b =~ NA*PGC5b + UKB_PHQ5_0 + UKB_PHQ5_1 + UKB_PHQ5_2 + UKB_PHQ5_M
-MDD6  =~ NA*PGC6 + UKB_PHQ6_0 + UKB_PHQ6_1 + UKB_PHQ6_2 + UKB_PHQ6_M
-MDD7  =~ NA*UKB_CIDI7 + UKB_PHQ7_M
-MDD8  =~ NA*UKB_CIDI8 + UKB_PHQ8_M
-MDD9  =~ NA*PGC9 + UKB_CIDI9 + UKB_PHQ9_M
-MDD1  ~~ 1*MDD1
-MDD2  ~~ 1*MDD2
-MDD3a ~~ 1*MDD3a
-MDD3b ~~ 1*MDD3b
-MDD4a ~~ 1*MDD4a
-MDD5b ~~ 1*MDD5b
-MDD6  ~~ 1*MDD6
-MDD7  ~~ 1*MDD7
-MDD8  ~~ 1*MDD8
-MDD9  ~~ 1*MDD9
-"
-
-symptom_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=symptom_model)
+ukb_phq_kendler_neale.model <- "
+A1 =~ NA*UKB_PHQ5_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
+A2 =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ7_M
+A3 =~ NA*UKB_PHQ4_M + UKB_PHQ6_M + UKB_PHQ3_M
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3"
+ukb_phq_kendler_neale.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_kendler_neale.model)
 ```
 
 ```
 ## [1] "Running primary model"
 ## [1] "The model as initially specified failed to converge. A lower bound of 0 on residual variances has been automatically added to try and troubleshoot this."
 ## [1] "Error: The primary model produced correlations among your latent variables that are either greater than 1 or less than -1. \n              Consquently, model fit estimates could not be computed and results should likely not be interpreted. Results are provided below \n              to enable troubleshooting. A model constraint that constrains the latent correlations to be above -1 or less than 1 is suggested."
-##             lhs op        rhs Unstandardized_Estimate           SE
-## 1          MDD1 =~  UKB_CIDI1            0.1982642884  0.010527613
-## 2          MDD1 =~ UKB_PHQ1_0            0.1947245502  0.007331563
-## 3          MDD1 =~ UKB_PHQ1_1            0.1869356989  0.024967215
-## 4          MDD1 =~ UKB_PHQ1_2            0.1874778179  0.033495571
-## 5          MDD1 =~ UKB_PHQ1_M            0.1915728358  0.008967055
-## 6          MDD2 =~  UKB_CIDI2            0.2371995447  0.011318323
-## 7          MDD2 =~ UKB_PHQ2_0            0.1794894106  0.006503784
-## 8          MDD2 =~ UKB_PHQ2_1            0.1788786713  0.023227761
-## 9          MDD2 =~ UKB_PHQ2_2            0.1844136052  0.031481718
-## 10         MDD2 =~ UKB_PHQ2_M            0.1829339736  0.009066250
-## 11        MDD3a =~      PGC3a           -0.1095874069  2.163227954
-## 12        MDD3a =~ UKB_CIDI3a            0.0032590490  0.062089281
-## 13        MDD3b =~ UKB_CIDI3b            0.1913740321  0.017948512
-## 14        MDD3b =~ UKB_PHQ3_M            0.2453661564  0.013497197
-## 15        MDD4a =~ UKB_CIDI4a            0.1242257525  0.021940544
-## 16        MDD4a =~ UKB_PHQ4_M            0.1980106894  0.022380139
-## 17        MDD5b =~      PGC5b            0.0480194270  0.031646411
-## 18        MDD5b =~ UKB_PHQ5_0            0.1809472146  0.008879128
-## 19        MDD5b =~ UKB_PHQ5_1            0.2135393033  0.023185428
-## 20        MDD5b =~ UKB_PHQ5_2            0.2526669558  0.028970412
-## 21        MDD5b =~ UKB_PHQ5_M            0.1202259054  0.009843995
-## 22         MDD6 =~       PGC6            0.0596385685  0.054516719
-## 23         MDD6 =~ UKB_PHQ6_0            0.2353057659  0.007543976
-## 24         MDD6 =~ UKB_PHQ6_1            0.2566066138  0.024501535
-## 25         MDD6 =~ UKB_PHQ6_2            0.2698716570  0.035162376
-## 26         MDD6 =~ UKB_PHQ6_M            0.2446022426  0.009815517
-## 27         MDD7 =~  UKB_CIDI7            0.1533932484  0.016578433
-## 28         MDD7 =~ UKB_PHQ7_M            0.1933353580  0.014075056
-## 29         MDD8 =~  UKB_CIDI8            0.1478260157  0.022982276
-## 30         MDD8 =~ UKB_PHQ8_M            0.1759241767  0.017307783
-## 31         MDD9 =~       PGC9            0.1235446805  0.036901450
-## 32         MDD9 =~  UKB_CIDI9            0.1187759302  0.017658233
-## 33         MDD9 =~ UKB_PHQ9_M            0.1305570351  0.014662700
-## 1265      PGC3a ~~      PGC3a            0.1033874530  0.475172888
-## 1266      PGC5b ~~      PGC5b            0.1382199806  0.043444286
-## 1267       PGC6 ~~       PGC6            0.0030473226  0.133252808
-## 1268       PGC9 ~~       PGC9            0.1189505931  0.044507532
-## 1269  UKB_CIDI1 ~~  UKB_CIDI1            0.0394240272  0.004777576
-## 1270  UKB_CIDI2 ~~  UKB_CIDI2            0.0319744357  0.004578722
-## 1271 UKB_CIDI3a ~~ UKB_CIDI3a            0.0343710335  0.008670528
-## 1272 UKB_CIDI3b ~~ UKB_CIDI3b            0.0275780511  0.007997046
-## 1273 UKB_CIDI4a ~~ UKB_CIDI4a            0.0375320586  0.015338512
-## 1274  UKB_CIDI7 ~~  UKB_CIDI7            0.0414062824  0.008185532
-## 1275  UKB_CIDI8 ~~  UKB_CIDI8            0.0505453257  0.014942968
-## 1276  UKB_CIDI9 ~~  UKB_CIDI9            0.0201547717  0.006926483
-## 1277 UKB_PHQ1_0 ~~ UKB_PHQ1_0            0.0094732530  0.001806262
-## 1278 UKB_PHQ1_1 ~~ UKB_PHQ1_1            0.0488443297  0.026166948
-## 1279 UKB_PHQ1_2 ~~ UKB_PHQ1_2            0.0794804067  0.054695974
-## 1280 UKB_PHQ1_M ~~ UKB_PHQ1_M            0.0093007500  0.002833375
-## 1281 UKB_PHQ2_0 ~~ UKB_PHQ2_0            0.0087344388  0.001727287
-## 1282 UKB_PHQ2_1 ~~ UKB_PHQ2_1            0.0487193936  0.028371539
-## 1283 UKB_PHQ2_2 ~~ UKB_PHQ2_2            0.1505132803  0.057616043
-## 1284 UKB_PHQ2_M ~~ UKB_PHQ2_M            0.0115944498  0.002768822
-## 1285 UKB_PHQ3_M ~~ UKB_PHQ3_M            0.0009999941  0.005637509
-## 1286 UKB_PHQ4_M ~~ UKB_PHQ4_M            0.0136728048  0.008436208
-## 1287 UKB_PHQ5_0 ~~ UKB_PHQ5_0            0.0130531795  0.002300706
-## 1288 UKB_PHQ5_1 ~~ UKB_PHQ5_1            0.0605907587  0.025679621
-## 1289 UKB_PHQ5_2 ~~ UKB_PHQ5_2            0.0719916584  0.054456939
-## 1290 UKB_PHQ5_M ~~ UKB_PHQ5_M            0.0087079185  0.003172504
-## 1291 UKB_PHQ6_0 ~~ UKB_PHQ6_0            0.0061678948  0.002438097
-## 1292 UKB_PHQ6_1 ~~ UKB_PHQ6_1            0.0061679087  0.026594801
-## 1293 UKB_PHQ6_2 ~~ UKB_PHQ6_2            0.0061679045  0.045311662
-## 1294 UKB_PHQ6_M ~~ UKB_PHQ6_M            0.0061679501  0.003127878
-## 1295 UKB_PHQ7_M ~~ UKB_PHQ7_M            0.0061679113  0.004425020
-## 1296 UKB_PHQ8_M ~~ UKB_PHQ8_M            0.0061679212  0.005546899
-## 1297 UKB_PHQ9_M ~~ UKB_PHQ9_M            0.0061678413  0.004393297
-## 1859       MDD1 ~~       MDD2            1.0301696598  0.013284742
-## 1860       MDD1 ~~      MDD3a            0.2447620910  4.838416904
-## 1861       MDD1 ~~      MDD3b            0.6632555739  0.053532410
-## 1862       MDD1 ~~      MDD4a            0.7651744624  0.083463166
-## 1863       MDD1 ~~      MDD5b            1.0313753967  0.030739098
-## 1864       MDD1 ~~       MDD6            0.8918391841  0.021991153
-## 1865       MDD1 ~~       MDD7            0.9871041137  0.065692768
-## 1866       MDD1 ~~       MDD8            0.9304301365  0.083545086
-## 1867       MDD1 ~~       MDD9            0.8783999364  0.097602871
-## 1868       MDD2 ~~      MDD3a            0.3196901402  6.298017957
-## 1869       MDD2 ~~      MDD3b            0.7556445682  0.048401473
-## 1870       MDD2 ~~      MDD4a            0.8117593397  0.086789781
-## 1871       MDD2 ~~      MDD5b            1.0078076412  0.029026499
-## 1872       MDD2 ~~       MDD6            0.9154306115  0.018418573
-## 1873       MDD2 ~~       MDD7            0.8535419423  0.055373241
-## 1874       MDD2 ~~       MDD8            1.0379796776  0.087100343
-## 1875       MDD2 ~~       MDD9            0.8461402362  0.092574176
-## 1876      MDD3a ~~      MDD3b            0.4473824796  8.910147878
-## 1877      MDD3a ~~      MDD4a            0.5078048676  9.969213485
-## 1878      MDD3a ~~      MDD5b           -0.0862177454  1.743576355
-## 1879      MDD3a ~~       MDD6            0.2145463636  4.208597528
-## 1880      MDD3a ~~       MDD7            0.9400606593 18.565737496
-## 1881      MDD3a ~~       MDD8            0.5362401586 10.557215364
-## 1882      MDD3a ~~       MDD9            0.4548537339  8.952015858
-## 1883      MDD3b ~~      MDD4a            0.7061516972  0.098058893
-## 1884      MDD3b ~~      MDD5b            0.6338231315  0.055804780
-## 1885      MDD3b ~~       MDD6            0.7408698653  0.043835441
-## 1886      MDD3b ~~       MDD7            0.7079404334  0.070538666
-## 1887      MDD3b ~~       MDD8            0.7533489081  0.084089674
-## 1888      MDD3b ~~       MDD9            0.5982083463  0.102476309
-## 1889      MDD4a ~~      MDD5b            0.8744250390  0.097777773
-## 1890      MDD4a ~~       MDD6            0.8429709345  0.089054111
-## 1891      MDD4a ~~       MDD7            0.7153346051  0.090040247
-## 1892      MDD4a ~~       MDD8            0.8613620300  0.107018000
-## 1893      MDD4a ~~       MDD9            0.6450420432  0.115029780
-## 1894      MDD5b ~~       MDD6            0.9384977065  0.027428839
-## 1895      MDD5b ~~       MDD7            0.8904780921  0.068361199
-## 1896      MDD5b ~~       MDD8            0.9458075490  0.090112408
-## 1897      MDD5b ~~       MDD9            0.8273185642  0.101547712
-## 1898       MDD6 ~~       MDD7            0.7500254775  0.057577226
-## 1899       MDD6 ~~       MDD8            0.8937586439  0.077518630
-## 1900       MDD6 ~~       MDD9            0.7734870391  0.094959425
-## 1901       MDD7 ~~       MDD8            0.8081117313  0.088855031
-## 1902       MDD7 ~~       MDD9            0.8646128865  0.113220591
-## 1903       MDD8 ~~       MDD9            0.7096658889  0.106242268
+##            lhs op        rhs Unstandardized_Estimate          SE
+## 1           A1 =~ UKB_PHQ5_M             0.127575624 0.013629750
+## 2           A1 =~ UKB_PHQ7_M            -0.090950375 0.237502507
+## 3           A1 =~ UKB_PHQ8_M             0.174806423 0.014134027
+## 4           A1 =~ UKB_PHQ9_M             0.101312712 0.011308085
+## 5           A2 =~ UKB_PHQ1_M             0.194361529 0.011538895
+## 6           A2 =~ UKB_PHQ2_M             0.199639450 0.011303434
+## 7           A2 =~ UKB_PHQ7_M             0.267678622 0.241022849
+## 8           A3 =~ UKB_PHQ4_M             0.172299134 0.012771888
+## 9           A3 =~ UKB_PHQ6_M             0.241319743 0.012573285
+## 10          A3 =~ UKB_PHQ3_M             0.200065257 0.013220031
+## 113 UKB_PHQ1_M ~~ UKB_PHQ1_M             0.002643438 0.001734217
+## 114 UKB_PHQ2_M ~~ UKB_PHQ2_M             0.001605094 0.001956643
+## 115 UKB_PHQ3_M ~~ UKB_PHQ3_M             0.010879575 0.003104207
+## 116 UKB_PHQ4_M ~~ UKB_PHQ4_M             0.019178914 0.003409095
+## 117 UKB_PHQ5_M ~~ UKB_PHQ5_M             0.003516448 0.002786983
+## 118 UKB_PHQ6_M ~~ UKB_PHQ6_M             0.003131400 0.003154925
+## 119 UKB_PHQ7_M ~~ UKB_PHQ7_M             0.007007541 0.002694794
+## 120 UKB_PHQ8_M ~~ UKB_PHQ8_M             0.003418700 0.002758272
+## 121 UKB_PHQ9_M ~~ UKB_PHQ9_M             0.004065826 0.002953121
+## 167         A1 ~~         A2             1.015258384 0.031720602
+## 168         A1 ~~         A3             0.948431586 0.047268240
+## 169         A2 ~~         A3             0.906765986 0.028106559
 ```
 
-Several of the latent correlations are outside the bound $[-1, 1]$, so we will add constraints to these
+```r
+ukb_phq_kendler_neale.fit$modelfit
+```
 
+```
+## NULL
+```
 
 ```r
-symptom_c_model <- "
-MDD1  =~ NA*PGC1 + UKB_CIDI1 + UKB_PHQ1_0 + UKB_PHQ1_1 + UKB_PHQ1_2 + UKB_PHQ1_M
-MDD2  =~ NA*PGC2 + UKB_CIDI2 + UKB_PHQ2_0 + UKB_PHQ2_1 + UKB_PHQ2_2 + UKB_PHQ2_M
-MDD3a =~ NA*PGC3a + UKB_CIDI3a
-MDD3b =~ NA*UKB_CIDI3b + UKB_PHQ3_M
-MDD4a =~ NA*UKB_CIDI4a + UKB_PHQ4_M
-MDD5b =~ NA*PGC5b + UKB_PHQ5_0 + UKB_PHQ5_1 + UKB_PHQ5_2 + UKB_PHQ5_M
-MDD6  =~ NA*PGC6 + UKB_PHQ6_0 + UKB_PHQ6_1 + UKB_PHQ6_2 + UKB_PHQ6_M
-MDD7  =~ NA*UKB_CIDI7 + UKB_PHQ7_M
-MDD8  =~ NA*UKB_CIDI8 + UKB_PHQ8_M
-MDD9  =~ NA*PGC9 + UKB_CIDI9 + UKB_PHQ9_M
-MDD1  ~~ 1*MDD1
-MDD2  ~~ 1*MDD2
-MDD3a ~~ 1*MDD3a
-MDD3b ~~ 1*MDD3b
-MDD4a ~~ 1*MDD4a
-MDD5b ~~ 1*MDD5b
-MDD6  ~~ 1*MDD6
-MDD7  ~~ 1*MDD7
-MDD8  ~~ 1*MDD8
-MDD9  ~~ 1*MDD9
-c1_2 < 1
-MDD1 ~~ c1_2*MDD2
-c1_7 < 1
-MDD1 ~~ c1_7*MDD7
-c2_8 < 1
-MDD2 ~~ c2_8*MDD8
-uc1 > 0.001
-UKB_CIDI1 ~~ uc1*UKB_CIDI1
-uc2 > 0.001
-UKB_CIDI2 ~~ uc2*UKB_CIDI2
-uc3a > 0.001
-UKB_CIDI3a ~~ uc3a*UKB_CIDI3a
-uc3b > 0.001
-UKB_CIDI3b ~~ uc3b*UKB_CIDI3b
-uc7 > 0.001
-UKB_CIDI7 ~~ uc7*UKB_CIDI7
-uc9 > 0.001
-UKB_CIDI9 ~~ uc9*UKB_CIDI9
-up10 > 0.001
-UKB_PHQ1_0 ~~ up10*UKB_PHQ1_0
-up1M > 0.001
-UKB_PHQ1_M ~~ up1M*UKB_PHQ1_M
-up20 > 0.001
-UKB_PHQ2_0 ~~ up20*UKB_PHQ2_0
-up2M > 0.001
-UKB_PHQ2_M ~~ up2M*UKB_PHQ2_M
-up3M > 0.001
-UKB_PHQ3_M ~~ up3M*UKB_PHQ3_M
-up4M > 0.001
-UKB_PHQ4_M ~~ up4M*UKB_PHQ4_M
-up50 > 0.001
-UKB_PHQ5_0 ~~ up50*UKB_PHQ5_0
-up5M > 0.001
-UKB_PHQ5_M ~~ up5M*UKB_PHQ5_M
-up60 > 0.001
-UKB_PHQ6_0 ~~ up60*UKB_PHQ6_0
-up6M > 0.001
-UKB_PHQ6_M ~~ up6M*UKB_PHQ6_M
-up7M > 0.001
-UKB_PHQ7_M ~~ up7M*UKB_PHQ7_M
-up8M > 0.001
-UKB_PHQ8_M ~~ up8M*UKB_PHQ8_M
-up9M > 0.001
-UKB_PHQ9_M ~~ up9M*UKB_PHQ9_M
-"
+ukb_phq_kendler_neale.fit$results[c(1,2,3,6,7)]
+```
 
-symptom_c_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=symptom_c_model)
-
-symptom_c_fit$modelfit
-symptom_c_fit$results[,c(1,2,3,8)]
+```
+## NULL
 ```
 
 
-```r
-phq_item_model <- "
-PHQ1 =~ NA*UKB_PHQ1_0 + UKB_PHQ1_1 + UKB_PHQ1_2 + UKB_PHQ1_M
-PHQ2 =~ NA*UKB_PHQ2_0 + UKB_PHQ2_1 + UKB_PHQ2_2 + UKB_PHQ2_M
-PHQ5 =~ NA*UKB_PHQ5_0 + UKB_PHQ5_1 + UKB_PHQ5_2 + UKB_PHQ5_M
-PHQ6 =~ NA*UKB_PHQ6_0 + UKB_PHQ6_1 + UKB_PHQ6_2 + UKB_PHQ6_M
-PHQ1 ~~ 1*PHQ1
-PHQ2 ~~ 1*PHQ2
-PHQ5 ~~ 1*PHQ5
-PHQ6 ~~ 1*PHQ6
-PHQ1 ~~ c12*PHQ2
-PHQ1 ~~ c15*PHQ5
-PHQ2 ~~ c25*PHQ5
-c12 < 1
-c15 < 1
-c25 < 1
-"
 
-phq_item_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=phq_item_model)
+```r
+ukb_phq_kendler_neale_constr.model <- "
+A1 =~ NA*UKB_PHQ5_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
+A2 =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ7_M
+A3 =~ NA*UKB_PHQ4_M + UKB_PHQ6_M + UKB_PHQ3_M
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3
+ca12 < 1
+ca12 > -1
+A1 ~~ ca12*A2
+c1 > 0.001
+UKB_PHQ1_M ~~ c1*UKB_PHQ1_M
+c2 > 0.001
+UKB_PHQ2_M ~~ c2*UKB_PHQ2_M
+c3 > 0.001
+UKB_PHQ3_M ~~ c3*UKB_PHQ3_M
+c4 > 0.001
+UKB_PHQ4_M ~~ c4*UKB_PHQ4_M
+c5 > 0.001
+UKB_PHQ5_M ~~ c5*UKB_PHQ5_M
+c6 > 0.001
+UKB_PHQ6_M ~~ c6*UKB_PHQ6_M
+c7 > 0.001
+UKB_PHQ7_M ~~ c7*UKB_PHQ7_M
+c8 > 0.001
+UKB_PHQ8_M ~~ c8*UKB_PHQ8_M
+c9 > 0.001
+UKB_PHQ9_M ~~ c9*UKB_PHQ9_M
+"
+ukb_phq_kendler_neale_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_kendler_neale_constr.model)
 ```
 
 ```
@@ -1815,89 +1575,144 @@ phq_item_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=phq_item_
 ```
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  25.264 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.0656839633522303"
+##  11.535 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00110427527212622"
 ```
 
 ```r
-phq_item_fit$modelfit
-```
-
-<div class="kable-table">
-
-         chisq   df   p_chisq        AIC         CFI        SRMR
----  ---------  ---  --------  ---------  ----------  ----------
-df    691.2635   98         0   767.2635   0.9865208   0.1894418
-
-</div>
-
-```r
-phq_item_fit$results[c(1,2,3,8)]
+ukb_phq_kendler_neale_constr.fit$modelfit
 ```
 
 <div class="kable-table">
 
-lhs          op   rhs             STD_All
------------  ---  -----------  ----------
-PHQ1         =~   UKB_PHQ1_0    0.9427630
-PHQ1         =~   UKB_PHQ1_1    0.7128530
-PHQ1         =~   UKB_PHQ1_2    0.5975192
-PHQ1         =~   UKB_PHQ1_M    0.9037451
-PHQ1         ~~   PHQ1          1.0000000
-PHQ1         ~~   PHQ2          0.9949590
-PHQ1         ~~   PHQ5          0.9999997
-PHQ1         ~~   PHQ6          0.9048709
-PHQ2         =~   UKB_PHQ2_0    0.9176009
-PHQ2         =~   UKB_PHQ2_1    0.7385384
-PHQ2         =~   UKB_PHQ2_2    0.4642920
-PHQ2         =~   UKB_PHQ2_M    0.8713251
-PHQ2         ~~   PHQ2          1.0000000
-PHQ2         ~~   PHQ5          0.9999992
-PHQ2         ~~   PHQ6          0.9188578
-PHQ5         =~   UKB_PHQ5_1    0.6978291
-PHQ5         =~   UKB_PHQ5_2    0.7369376
-PHQ5         =~   UKB_PHQ5_M    0.8221559
-PHQ5         =~   UKB_PHQ5_0    0.8595373
-PHQ5         ~~   PHQ5          1.0000000
-PHQ5         ~~   PHQ6          0.9446895
-PHQ6         =~   UKB_PHQ6_0    0.9247254
-PHQ6         =~   UKB_PHQ6_1    0.7232937
-PHQ6         =~   UKB_PHQ6_2    0.7079777
-PHQ6         =~   UKB_PHQ6_M    0.9437024
-PHQ6         ~~   PHQ6          1.0000000
-UKB_PHQ1_0   ~~   UKB_PHQ1_0    0.1111979
-UKB_PHQ5_1   ~~   UKB_PHQ5_1    0.5130345
-UKB_PHQ5_2   ~~   UKB_PHQ5_2    0.4569230
-UKB_PHQ5_M   ~~   UKB_PHQ5_M    0.3240596
-UKB_PHQ6_0   ~~   UKB_PHQ6_0    0.1448829
-UKB_PHQ6_1   ~~   UKB_PHQ6_1    0.4768463
-UKB_PHQ6_2   ~~   UKB_PHQ6_2    0.4987675
-UKB_PHQ6_M   ~~   UKB_PHQ6_M    0.1094257
-UKB_PHQ1_1   ~~   UKB_PHQ1_1    0.4918406
-UKB_PHQ1_2   ~~   UKB_PHQ1_2    0.6429708
-UKB_PHQ1_M   ~~   UKB_PHQ1_M    0.1832448
-UKB_PHQ2_0   ~~   UKB_PHQ2_0    0.1580086
-UKB_PHQ2_1   ~~   UKB_PHQ2_1    0.4545610
-UKB_PHQ2_2   ~~   UKB_PHQ2_2    0.7844329
-UKB_PHQ2_M   ~~   UKB_PHQ2_M    0.2407925
-UKB_PHQ5_0   ~~   UKB_PHQ5_0    0.2611956
+         chisq   df     p_chisq        AIC         CFI        SRMR
+---  ---------  ---  ----------  ---------  ----------  ----------
+df    54.83104   23   0.0002057   98.83104   0.9928025   0.0421241
 
 </div>
 
+```r
+ukb_phq_kendler_neale_constr.fit$results[c(1,2,3,6,7)]
+```
+
+<div class="kable-table">
+
+lhs          op   rhs           STD_Genotype  STD_Genotype_SE    
+-----------  ---  -----------  -------------  -------------------
+A1           =~   UKB_PHQ5_M       0.9162787  0.096253903671435  
+A1           =~   UKB_PHQ7_M      -0.8105016  2.34459780085582   
+A1           =~   UKB_PHQ8_M       0.9590082  0.0749693461001077 
+A1           =~   UKB_PHQ9_M       0.8536930  0.0943355356404081 
+A1           ~~   A1               1.0000000                     
+A1           ~~   A2               0.9999996  0.0200521729532533 
+A1           ~~   A3               0.9383832  0.0450051797430297 
+A2           =~   UKB_PHQ1_M       0.9659540  0.0579780836675552 
+A2           =~   UKB_PHQ2_M       0.9793057  0.0557167629070285 
+A2           =~   UKB_PHQ7_M       1.7253972  2.35559820018406   
+A2           ~~   A2               1.0000000                     
+A2           ~~   A3               0.9084865  0.029852080941025  
+A3           =~   UKB_PHQ3_M       0.8866842  0.0585918004394335 
+A3           =~   UKB_PHQ4_M       0.7794272  0.057776586716439  
+A3           =~   UKB_PHQ6_M       0.9742011  0.0507439456265393 
+A3           ~~   A3               1.0000000                     
+UKB_PHQ1_M   ~~   UKB_PHQ1_M       0.0669330  0.0447987484785612 
+UKB_PHQ2_M   ~~   UKB_PHQ2_M       0.0409605  0.0456827830537356 
+UKB_PHQ3_M   ~~   UKB_PHQ3_M       0.2137911  0.0609748519377269 
+UKB_PHQ4_M   ~~   UKB_PHQ4_M       0.3924932  0.0697631914530952 
+UKB_PHQ5_M   ~~   UKB_PHQ5_M       0.1604319  0.14112444299186   
+UKB_PHQ6_M   ~~   UKB_PHQ6_M       0.0509321  0.0513904822577897 
+UKB_PHQ7_M   ~~   UKB_PHQ7_M       0.1629646  0.0827530997861663 
+UKB_PHQ8_M   ~~   UKB_PHQ8_M       0.0803025  0.0804081736676185 
+UKB_PHQ9_M   ~~   UKB_PHQ9_M       0.2712059  0.204579888532634  
+
+</div>
 
 ```r
-phq_instance_model <- "
-PHQ_0 =~ NA*UKB_PHQ1_0 + UKB_PHQ2_0 + UKB_PHQ5_0 + UKB_PHQ6_0
-PHQ_1 =~ NA*UKB_PHQ1_1 + UKB_PHQ2_1 + UKB_PHQ5_1 + UKB_PHQ6_1
-PHQ_2 =~ NA*UKB_PHQ1_2 + UKB_PHQ2_2 + UKB_PHQ5_2 + UKB_PHQ6_2
-PHQ_M =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ3_M + UKB_PHQ5_M + UKB_PHQ6_M + UKB_PHQ7_M + UKB_PHQ9_M + UKB_PHQ9_M
-PHQ_0 ~~ 1*PHQ_0
-PHQ_1 ~~ 1*PHQ_1
-PHQ_2 ~~ 1*PHQ_2
-PHQ_M ~~ 1*PHQ_M
-"
+#render_fit(ukb_phq_kendler_neale_constr.fit$results)
+#cat(generate_dot(fit_graph(ukb_phq_kendler_neale_constr.fit$results)))
 
-phq_instance_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=phq_instance_model)
+ukb_phq_kendler_neale_constr.gv <- "digraph {
+graph [layout = 'dot',
+       rankdir = 'TB',
+       outputorder = 'edgesfirst',
+       bgcolor = 'white']
+node [fontname = 'Helvetica',
+      fontsize = '10',
+      shape = 'circle',
+      fixedsize = 'true',
+      width = '0.5',
+      style = 'filled',
+      fillcolor = 'aliceblue',
+      color = 'gray70',
+      fontcolor = 'gray50']
+edge [fontname = 'Helvetica',
+     fontsize = '8',
+     len = '1.5',
+     color = 'gray80',
+     arrowsize = '0.5']
+   {rank=same '1' '2' '3'}
+   {rank=same '4' '5' '6' '7' '8' '9' '10' '11' '12'}
+  '1' [label = 'A1', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '2' [label = 'A2', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '3' [label = 'A3', shape = 'oval', width = '1', fillcolor = 'white', fontcolor = 'black'] 
+  '4' [label = 'Mood', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '5' [label = 'Interest', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '6' [label = 'Weight⇅', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '7' [label = 'Sleep⇅', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '8' [label = 'Motor⇅', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '9' [label = 'Fatigue', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '10' [label = 'Guilt', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '11' [label = 'Concentrate', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+  '12' [label = 'Suicidality', shape = 'oval', width = '1', fillcolor = '#d95f02', fontcolor = 'black'] 
+'1'->'1' [label = '1', penwidth = '3', dir = 'both'] 
+'1'->'2' [label = '1', penwidth = '2.99999893624105', dir = 'both'] 
+'1'->'3' [label = '0.94', penwidth = '2.81514948902217', dir = 'both'] 
+'1'->'8' [label = '0.92', penwidth = '2.74883598824507', dir = 'forward'] 
+'1'->'10' [label = '-0.81', penwidth = '2.43150481798024', dir = 'forward'] 
+'1'->'11' [label = '0.96', penwidth = '2.87702465245791', dir = 'forward'] 
+'1'->'12' [label = '0.85', penwidth = '2.56107899510458', dir = 'forward'] 
+'2'->'2' [label = '1', penwidth = '3', dir = 'both'] 
+'2'->'3' [label = '0.91', penwidth = '2.72545942132963', dir = 'both'] 
+'2'->'4' [label = '0.97', penwidth = '2.89786200288234', dir = 'forward'] 
+'2'->'5' [label = '0.98', penwidth = '2.93791705880638', dir = 'forward'] 
+'2'->'10' [label = '1.73', penwidth = '5.17619146332342', dir = 'forward'] 
+'3'->'3' [label = '1', penwidth = '3', dir = 'both'] 
+'3'->'6' [label = '0.89', penwidth = '2.66005248283014', dir = 'forward'] 
+'3'->'7' [label = '0.78', penwidth = '2.33828161316177', dir = 'forward'] 
+'3'->'9' [label = '0.97', penwidth = '2.92260342501939', dir = 'forward'] 
+'4'->'4' [label = '0.07', penwidth = '0.200798897912759', dir = 'both'] 
+'5'->'5' [label = '0.04', penwidth = '0.122881480927526', dir = 'both'] 
+'6'->'6' [label = '0.21', penwidth = '0.641373287143108', dir = 'both'] 
+'7'->'7' [label = '0.39', penwidth = '1.17747950435927', dir = 'both'] 
+'8'->'8' [label = '0.16', penwidth = '0.481295815280143', dir = 'both'] 
+'9'->'9' [label = '0.05', penwidth = '0.152796365234247', dir = 'both'] 
+'10'->'10' [label = '0.16', penwidth = '0.488893810833311', dir = 'both'] 
+'11'->'11' [label = '0.08', penwidth = '0.240907469405615', dir = 'both'] 
+'12'->'12' [label = '0.27', penwidth = '0.813617617865407', dir = 'both'] 
+}"
+
+grViz(ukb_phq_kendler_neale_constr.gv)
+```
+
+<!--html_preserve--><div id="htmlwidget-978f49a5570eba1bd8eb" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-978f49a5570eba1bd8eb">{"x":{"diagram":"digraph {\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n   {rank=same \"1\" \"2\" \"3\"}\n   {rank=same \"4\" \"5\" \"6\" \"7\" \"8\" \"9\" \"10\" \"11\" \"12\"}\n  \"1\" [label = \"A1\", shape = \"oval\", width = \"1\", fillcolor = \"white\", fontcolor = \"black\"] \n  \"2\" [label = \"A2\", shape = \"oval\", width = \"1\", fillcolor = \"white\", fontcolor = \"black\"] \n  \"3\" [label = \"A3\", shape = \"oval\", width = \"1\", fillcolor = \"white\", fontcolor = \"black\"] \n  \"4\" [label = \"Mood\", shape = \"oval\", width = \"1\", fillcolor = \"#d95f02\", fontcolor = \"black\"] \n  \"5\" [label = \"Interest\", shape = \"oval\", width = \"1\", fillcolor = \"#d95f02\", fontcolor = \"black\"] \n  \"6\" [label = \"Weight⇅\", shape = \"oval\", width = \"1\", fillcolor = \"#d95f02\", fontcolor = \"black\"] \n  \"7\" [label = \"Sleep⇅\", shape = \"oval\", width = \"1\", fillcolor = \"#d95f02\", fontcolor = \"black\"] \n  \"8\" [label = \"Motor⇅\", shape = \"oval\", width = \"1\", fillcolor = \"#d95f02\", fontcolor = \"black\"] \n  \"9\" [label = \"Fatigue\", shape = \"oval\", width = \"1\", fillcolor = \"#d95f02\", fontcolor = \"black\"] \n  \"10\" [label = \"Guilt\", shape = \"oval\", width = \"1\", fillcolor = \"#d95f02\", fontcolor = \"black\"] \n  \"11\" [label = \"Concentrate\", shape = \"oval\", width = \"1\", fillcolor = \"#d95f02\", fontcolor = \"black\"] \n  \"12\" [label = \"Suicidality\", shape = \"oval\", width = \"1\", fillcolor = \"#d95f02\", fontcolor = \"black\"] \n\"1\"->\"1\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"1\"->\"2\" [label = \"1\", penwidth = \"2.99999893624105\", dir = \"both\"] \n\"1\"->\"3\" [label = \"0.94\", penwidth = \"2.81514948902217\", dir = \"both\"] \n\"1\"->\"8\" [label = \"0.92\", penwidth = \"2.74883598824507\", dir = \"forward\"] \n\"1\"->\"10\" [label = \"-0.81\", penwidth = \"2.43150481798024\", dir = \"forward\"] \n\"1\"->\"11\" [label = \"0.96\", penwidth = \"2.87702465245791\", dir = \"forward\"] \n\"1\"->\"12\" [label = \"0.85\", penwidth = \"2.56107899510458\", dir = \"forward\"] \n\"2\"->\"2\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"2\"->\"3\" [label = \"0.91\", penwidth = \"2.72545942132963\", dir = \"both\"] \n\"2\"->\"4\" [label = \"0.97\", penwidth = \"2.89786200288234\", dir = \"forward\"] \n\"2\"->\"5\" [label = \"0.98\", penwidth = \"2.93791705880638\", dir = \"forward\"] \n\"2\"->\"10\" [label = \"1.73\", penwidth = \"5.17619146332342\", dir = \"forward\"] \n\"3\"->\"3\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"3\"->\"6\" [label = \"0.89\", penwidth = \"2.66005248283014\", dir = \"forward\"] \n\"3\"->\"7\" [label = \"0.78\", penwidth = \"2.33828161316177\", dir = \"forward\"] \n\"3\"->\"9\" [label = \"0.97\", penwidth = \"2.92260342501939\", dir = \"forward\"] \n\"4\"->\"4\" [label = \"0.07\", penwidth = \"0.200798897912759\", dir = \"both\"] \n\"5\"->\"5\" [label = \"0.04\", penwidth = \"0.122881480927526\", dir = \"both\"] \n\"6\"->\"6\" [label = \"0.21\", penwidth = \"0.641373287143108\", dir = \"both\"] \n\"7\"->\"7\" [label = \"0.39\", penwidth = \"1.17747950435927\", dir = \"both\"] \n\"8\"->\"8\" [label = \"0.16\", penwidth = \"0.481295815280143\", dir = \"both\"] \n\"9\"->\"9\" [label = \"0.05\", penwidth = \"0.152796365234247\", dir = \"both\"] \n\"10\"->\"10\" [label = \"0.16\", penwidth = \"0.488893810833311\", dir = \"both\"] \n\"11\"->\"11\" [label = \"0.08\", penwidth = \"0.240907469405615\", dir = \"both\"] \n\"12\"->\"12\" [label = \"0.27\", penwidth = \"0.813617617865407\", dir = \"both\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+
+```r
+cat(str_replace_all(ukb_phq_kendler_neale_constr.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_kendler_neale_constr.gv')
+```
+
+
+```r
+ukb_phq_kendler_neale_ortho.model <- "
+A1 =~ NA*UKB_PHQ5_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
+A2 =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ7_M
+A3 =~ NA*UKB_PHQ4_M + UKB_PHQ6_M + UKB_PHQ3_M
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3
+A1 ~~ 0*A2 + 0*A3
+A2 ~~ 0*A3"
+ukb_phq_kendler_neale_ortho.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_kendler_neale_ortho.model)
 ```
 
 ```
@@ -1906,132 +1721,88 @@ phq_instance_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=phq_i
 ## [1] "Calculating model chi-square"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
-```
-
-```
-## Warning in lav_object_post_check(object): lavaan WARNING: covariance matrix of latent variables
-##                 is not positive definite;
-##                 use lavInspect(fit, "cov.lv") to investigate.
-```
-
-```
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  28.719 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.0666502802079734"
+##   4.299 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00110427527212622"
 ```
 
 ```r
-phq_instance_fit$modelfit
-```
-
-<div class="kable-table">
-
-         chisq    df   p_chisq        AIC         CFI        SRMR
----  ---------  ----  --------  ---------  ----------  ----------
-df    4456.043   146         0   4544.043   0.9838762   0.0770663
-
-</div>
-
-```r
-phq_instance_fit$results[c(1,2,3,8)]
+ukb_phq_kendler_neale_ortho.fit$modelfit
 ```
 
 <div class="kable-table">
 
-lhs          op   rhs             STD_All
------------  ---  -----------  ----------
-PHQ_0        =~   UKB_PHQ1_0    0.9449766
-PHQ_0        =~   UKB_PHQ5_0    0.8687686
-PHQ_0        =~   UKB_PHQ6_0    0.8955492
-PHQ_0        =~   UKB_PHQ2_0    0.9156634
-PHQ_0        ~~   PHQ_0         1.0000000
-PHQ_0        ~~   PHQ_1         0.7463494
-PHQ_0        ~~   PHQ_2         0.6197529
-PHQ_0        ~~   PHQ_M         0.9587076
-PHQ_1        =~   UKB_PHQ5_1    0.8485896
-PHQ_1        =~   UKB_PHQ6_1    0.8768332
-PHQ_1        =~   UKB_PHQ1_1    0.8471187
-PHQ_1        =~   UKB_PHQ2_1    0.8959447
-PHQ_1        ~~   PHQ_1         1.0000000
-PHQ_1        ~~   PHQ_2         0.9912712
-PHQ_1        ~~   PHQ_M         0.6944971
-PHQ_2        =~   UKB_PHQ5_2    0.9995701
-PHQ_2        =~   UKB_PHQ6_2    0.9995090
-PHQ_2        =~   UKB_PHQ1_2    0.8739605
-PHQ_2        =~   UKB_PHQ2_2    0.6917900
-PHQ_2        ~~   PHQ_2         1.0000000
-PHQ_2        ~~   PHQ_M         0.5944080
-PHQ_M        =~   UKB_PHQ5_M    0.8484820
-PHQ_M        =~   UKB_PHQ6_M    0.9148120
-PHQ_M        =~   UKB_PHQ7_M    0.8402799
-PHQ_M        =~   UKB_PHQ9_M    0.8398450
-PHQ_M        =~   UKB_PHQ1_M    0.9355205
-PHQ_M        =~   UKB_PHQ2_M    0.8999175
-PHQ_M        =~   UKB_PHQ3_M    0.7659222
-PHQ_M        ~~   PHQ_M         1.0000000
-UKB_PHQ1_0   ~~   UKB_PHQ1_0    0.1070193
-UKB_PHQ5_0   ~~   UKB_PHQ5_0    0.2452411
-UKB_PHQ5_1   ~~   UKB_PHQ5_1    0.2798957
-UKB_PHQ5_2   ~~   UKB_PHQ5_2    0.0008596
-UKB_PHQ5_M   ~~   UKB_PHQ5_M    0.2800783
-UKB_PHQ6_0   ~~   UKB_PHQ6_0    0.1979916
-UKB_PHQ6_1   ~~   UKB_PHQ6_1    0.2311636
-UKB_PHQ6_2   ~~   UKB_PHQ6_2    0.0009817
-UKB_PHQ6_M   ~~   UKB_PHQ6_M    0.1631190
-UKB_PHQ7_M   ~~   UKB_PHQ7_M    0.2939297
-UKB_PHQ9_M   ~~   UKB_PHQ9_M    0.2946603
-UKB_PHQ1_1   ~~   UKB_PHQ1_1    0.2823898
-UKB_PHQ1_2   ~~   UKB_PHQ1_2    0.2361930
-UKB_PHQ1_M   ~~   UKB_PHQ1_M    0.1248014
-UKB_PHQ2_0   ~~   UKB_PHQ2_0    0.1615605
-UKB_PHQ2_1   ~~   UKB_PHQ2_1    0.1972831
-UKB_PHQ2_2   ~~   UKB_PHQ2_2    0.5214266
-UKB_PHQ2_M   ~~   UKB_PHQ2_M    0.1901485
-UKB_PHQ3_M   ~~   UKB_PHQ3_M    0.4133631
+         chisq   df   p_chisq        AIC         CFI        SRMR
+---  ---------  ---  --------  ---------  ----------  ----------
+df    3497.808   26         0   3535.808   0.2149642   0.5846889
 
 </div>
 
+```r
+ukb_phq_kendler_neale_ortho.fit$results[c(1,2,3,6,7)]
+```
+
+<div class="kable-table">
+
+lhs          op   rhs           STD_Genotype  STD_Genotype_SE    
+-----------  ---  -----------  -------------  -------------------
+A1           =~   UKB_PHQ5_M       0.9632201  0.113582216567121  
+A1           =~   UKB_PHQ7_M       0.7600303  0.0739509917808485 
+A1           =~   UKB_PHQ8_M       1.0095007  0.0865026224861048 
+A1           =~   UKB_PHQ9_M       0.8462050  0.109600861265973  
+A1           ~~   A1               1.0000000                     
+A2           =~   UKB_PHQ1_M       1.0122192  0.0601238750000697 
+A2           =~   UKB_PHQ2_M       1.0009887  0.0619338121770366 
+A2           =~   UKB_PHQ7_M       0.7783011  0.0605484234860655 
+A2           ~~   A2               1.0000000                     
+A3           =~   UKB_PHQ3_M       0.8359525  0.0584279397744037 
+A3           =~   UKB_PHQ4_M       0.8461570  0.0596463545264564 
+A3           =~   UKB_PHQ6_M       0.9663396  0.0572498332356932 
+A3           ~~   A3               1.0000000                     
+UKB_PHQ1_M   ~~   UKB_PHQ1_M       0.0009999  0.0506793046252111 
+UKB_PHQ2_M   ~~   UKB_PHQ2_M       0.0010000  0.059311933697394  
+UKB_PHQ3_M   ~~   UKB_PHQ3_M       0.3011835  0.0673323241887039 
+UKB_PHQ4_M   ~~   UKB_PHQ4_M       0.2840183  0.0723842640855544 
+UKB_PHQ5_M   ~~   UKB_PHQ5_M       0.0721600  0.16346904117722   
+UKB_PHQ6_M   ~~   UKB_PHQ6_M       0.0661880  0.0640428837788284 
+UKB_PHQ7_M   ~~   UKB_PHQ7_M       0.0010002  0.114466069511504  
+UKB_PHQ8_M   ~~   UKB_PHQ8_M       0.0010000  0.119293040790217  
+UKB_PHQ9_M   ~~   UKB_PHQ9_M       0.2838702  0.21199910104614   
+
+</div>
+
+## Symptom factors
 
 
 ```r
-phq_item_instance_model <- "
-PHQ_0 =~ NA*UKB_PHQ1_0 + UKB_PHQ2_0 + UKB_PHQ5_0 + UKB_PHQ6_0
-PHQ_1 =~ NA*UKB_PHQ1_1 + UKB_PHQ2_1 + UKB_PHQ5_1 + UKB_PHQ6_1
-PHQ_2 =~ NA*UKB_PHQ1_2 + UKB_PHQ2_2 + UKB_PHQ5_2 + UKB_PHQ6_2
-PHQ_M =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ3_M + UKB_PHQ5_M + UKB_PHQ6_M + UKB_PHQ7_M + UKB_PHQ9_M + UKB_PHQ9_M
-PHQ1 =~ NA*UKB_PHQ1_0 + UKB_PHQ1_1 + UKB_PHQ1_2 + UKB_PHQ1_M
-PHQ2 =~ NA*UKB_PHQ2_0 + UKB_PHQ2_1 + UKB_PHQ2_2 + UKB_PHQ2_M
-PHQ5 =~ NA*UKB_PHQ5_0 + UKB_PHQ5_1 + UKB_PHQ5_2 + UKB_PHQ5_M
-PHQ6 =~ NA*UKB_PHQ6_0 + UKB_PHQ6_1 + UKB_PHQ6_2 + UKB_PHQ6_M
-PHQ1 ~~ 1*PHQ1
-PHQ2 ~~ 1*PHQ2
-PHQ5 ~~ 1*PHQ5
-PHQ6 ~~ 1*PHQ6
-PHQ_0 ~~ 1*PHQ_0
-PHQ_1 ~~ 1*PHQ_1
-PHQ_2 ~~ 1*PHQ_2
-PHQ_M ~~ 1*PHQ_M
-PHQ1 ~~ 0*PHQ_0
-PHQ1 ~~ 0*PHQ_1
-PHQ1 ~~ 0*PHQ_2
-PHQ1 ~~ 0*PHQ_M
-PHQ2 ~~ 0*PHQ_0
-PHQ2 ~~ 0*PHQ_1
-PHQ2 ~~ 0*PHQ_2
-PHQ2 ~~ 0*PHQ_M
-PHQ5 ~~ 0*PHQ_0
-PHQ5 ~~ 0*PHQ_1
-PHQ5 ~~ 0*PHQ_2
-PHQ5 ~~ 0*PHQ_M
-PHQ6 ~~ 0*PHQ_0
-PHQ6 ~~ 0*PHQ_1
-PHQ6 ~~ 0*PHQ_2
-PHQ6 ~~ 0*PHQ_M
+pgc_ukb_cidi_phq_symptom.model <- "
+A1  =~ NA*UKB_CIDI1 + UKB_PHQ1_M
+A2  =~ NA*UKB_CIDI2 + UKB_PHQ1_M
+A3a =~ NA*PGC3a + UKB_CIDI3a + UKB_PHQ3_M
+A3b =~ NA*UKB_CIDI3b + UKB_PHQ3_M
+A4a =~ NA*UKB_CIDI4a + UKB_PHQ4_M
+A4b =~ NA*UKB_CIDI4b + UKB_PHQ4_M
+A5a =~ NA*PGC5a + UKB_PHQ5_M
+A5b =~ NA*PGC5b + UKB_PHQ5_M
+A6  =~ NA*UKB_CIDI6 + UKB_PHQ6_M
+A7  =~ NA*UKB_CIDI7 + UKB_PHQ7_M
+A8  =~ NA*UKB_CIDI8 + UKB_PHQ8_M
+A9  =~ NA*PGC9 + UKB_CIDI9 + UKB_PHQ9_M
+A1  ~~ 1*A1
+A2  ~~ 1*A2
+A3a ~~ 1*A3a
+A3b ~~ 1*A3b
+A4a ~~ 1*A4a
+A4b ~~ 1*A4b
+A5a ~~ 1*A5a
+A5b ~~ 1*A5b
+A6  ~~ 1*A6
+A7  ~~ 1*A7
+A8  ~~ 1*A8
+A9  ~~ 1*A9
 "
-
-
-phq_item_instance_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=phq_item_instance_model)
+pgc_ukb_cidi_phq_symptom.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_ukb_cidi_phq_symptom.model) 
 ```
 
 ```
@@ -2046,73 +1817,121 @@ phq_item_instance_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
 
 ```
 ## [1] "Error: The primary model did not converge! Additional warnings or errors are likely being printed by lavaan. \n            The model output is also printed below (without standard errors) in case this is helpful for troubleshooting. Please note\n            that these results should not be interpreted."
-##            lhs op        rhs Unstandardized_Estimate
-## 1        PHQ_0 =~ UKB_PHQ1_0            2.113428e-01
-## 2        PHQ_0 =~ UKB_PHQ2_0            1.949026e-01
-## 3        PHQ_0 =~ UKB_PHQ5_0            1.901775e-01
-## 4        PHQ_0 =~ UKB_PHQ6_0            2.452132e-01
-## 5        PHQ_1 =~ UKB_PHQ1_1            2.423900e-01
-## 6        PHQ_1 =~ UKB_PHQ2_1            2.374274e-01
-## 7        PHQ_1 =~ UKB_PHQ5_1            2.694983e-01
-## 8        PHQ_1 =~ UKB_PHQ6_1            3.274944e-01
-## 9        PHQ_2 =~ UKB_PHQ1_2            2.812415e-01
-## 10       PHQ_2 =~ UKB_PHQ2_2            2.787896e-01
-## 11       PHQ_2 =~ UKB_PHQ5_2            3.855404e-01
-## 12       PHQ_2 =~ UKB_PHQ6_2            3.965508e-01
-## 13       PHQ_M =~ UKB_PHQ1_M            2.015982e-01
-## 14       PHQ_M =~ UKB_PHQ2_M            1.897533e-01
-## 15       PHQ_M =~ UKB_PHQ3_M            1.769319e-01
-## 16       PHQ_M =~ UKB_PHQ5_M            1.210473e-01
-## 17       PHQ_M =~ UKB_PHQ6_M            2.402641e-01
-## 18       PHQ_M =~ UKB_PHQ7_M            1.701629e-01
-## 19       PHQ_M =~ UKB_PHQ9_M            1.111839e-01
-## 20        PHQ1 =~ UKB_PHQ1_0           -5.576211e-03
-## 21        PHQ1 =~ UKB_PHQ1_1           -4.185682e-03
-## 22        PHQ1 =~ UKB_PHQ1_2            1.713302e-03
-## 23        PHQ1 =~ UKB_PHQ1_M           -3.682107e-03
-## 24        PHQ2 =~ UKB_PHQ2_0           -4.676641e-02
-## 25        PHQ2 =~ UKB_PHQ2_1           -1.299728e-02
-## 26        PHQ2 =~ UKB_PHQ2_2            1.266247e-02
-## 27        PHQ2 =~ UKB_PHQ2_M           -2.501234e-02
-## 28        PHQ5 =~ UKB_PHQ5_0            8.815992e-02
-## 29        PHQ5 =~ UKB_PHQ5_1            5.703041e-02
-## 30        PHQ5 =~ UKB_PHQ5_2            5.460105e-03
-## 31        PHQ5 =~ UKB_PHQ5_M            6.938832e-04
-## 32        PHQ6 =~ UKB_PHQ6_0            1.523642e-04
-## 33        PHQ6 =~ UKB_PHQ6_1            1.551225e-04
-## 34        PHQ6 =~ UKB_PHQ6_2            7.023571e-05
-## 35        PHQ6 =~ UKB_PHQ6_M            3.768819e-05
-## 554 UKB_PHQ1_0 ~~ UKB_PHQ1_0            9.994656e-04
-## 555 UKB_PHQ1_1 ~~ UKB_PHQ1_1            1.974797e-02
-## 556 UKB_PHQ1_2 ~~ UKB_PHQ1_2            3.092658e-02
-## 557 UKB_PHQ1_M ~~ UKB_PHQ1_M            3.214455e-03
-## 558 UKB_PHQ2_0 ~~ UKB_PHQ2_0            9.994738e-04
-## 559 UKB_PHQ2_1 ~~ UKB_PHQ2_1            1.508011e-02
-## 560 UKB_PHQ2_2 ~~ UKB_PHQ2_2            9.461430e-02
-## 561 UKB_PHQ2_M ~~ UKB_PHQ2_M            6.204030e-03
-## 562 UKB_PHQ3_M ~~ UKB_PHQ3_M            2.375878e-02
-## 563 UKB_PHQ5_0 ~~ UKB_PHQ5_0            9.999851e-04
-## 564 UKB_PHQ5_1 ~~ UKB_PHQ5_1            2.717008e-02
-## 565 UKB_PHQ5_2 ~~ UKB_PHQ5_2            1.000165e-03
-## 566 UKB_PHQ5_M ~~ UKB_PHQ5_M            6.319139e-03
-## 567 UKB_PHQ6_0 ~~ UKB_PHQ6_0            9.996391e-04
-## 568 UKB_PHQ6_1 ~~ UKB_PHQ6_1            1.536304e-02
-## 569 UKB_PHQ6_2 ~~ UKB_PHQ6_2            9.997071e-04
-## 570 UKB_PHQ6_M ~~ UKB_PHQ6_M            9.180532e-03
-## 571 UKB_PHQ7_M ~~ UKB_PHQ7_M            1.349200e-02
-## 572 UKB_PHQ9_M ~~ UKB_PHQ9_M            5.695337e-03
-## 763      PHQ_0 ~~      PHQ_1            7.324996e-01
-## 764      PHQ_0 ~~      PHQ_2            5.925404e-01
-## 765      PHQ_0 ~~      PHQ_M            9.187300e-01
-## 766      PHQ_1 ~~      PHQ_2            9.775841e-01
-## 767      PHQ_1 ~~      PHQ_M            6.938890e-01
-## 768      PHQ_2 ~~      PHQ_M            5.981056e-01
-## 769       PHQ1 ~~       PHQ2           -6.683262e+00
-## 770       PHQ1 ~~       PHQ5            1.658198e+00
-## 771       PHQ1 ~~       PHQ6            1.184079e+04
-## 772       PHQ2 ~~       PHQ5            3.891422e-01
-## 773       PHQ2 ~~       PHQ6            1.334370e+03
-## 774       PHQ5 ~~       PHQ6           -4.991974e+02
+##             lhs op        rhs Unstandardized_Estimate
+## 1            A1 =~  UKB_CIDI1            2.770827e-01
+## 2            A1 =~ UKB_PHQ1_M           -2.741186e-01
+## 3            A2 =~  UKB_CIDI2            2.715662e-01
+## 4            A2 =~ UKB_PHQ1_M            4.277450e-01
+## 5           A3a =~      PGC3a            1.470265e-01
+## 6           A3a =~ UKB_CIDI3a            4.525576e-02
+## 7           A3a =~ UKB_PHQ3_M            4.450027e-02
+## 8           A3b =~ UKB_CIDI3b            1.989946e-01
+## 9           A3b =~ UKB_PHQ3_M            2.570371e-01
+## 10          A4a =~ UKB_CIDI4a            1.424816e-01
+## 11          A4a =~ UKB_PHQ4_M            1.767691e-01
+## 12          A4b =~ UKB_CIDI4b            2.173248e-01
+## 13          A4b =~ UKB_PHQ4_M            3.556451e-02
+## 14          A5a =~      PGC5a            3.023686e-03
+## 15          A5a =~ UKB_PHQ5_M           -1.381113e-02
+## 16          A5b =~      PGC5b            2.633989e-02
+## 17          A5b =~ UKB_PHQ5_M            2.232863e-01
+## 18           A6 =~  UKB_CIDI6            1.523645e-01
+## 19           A6 =~ UKB_PHQ6_M            2.436353e-01
+## 20           A7 =~  UKB_CIDI7            1.494314e-01
+## 21           A7 =~ UKB_PHQ7_M            1.872124e-01
+## 22           A8 =~  UKB_CIDI8            1.446024e-01
+## 23           A8 =~ UKB_PHQ8_M            1.533519e-01
+## 24           A9 =~       PGC9            1.767653e-01
+## 25           A9 =~  UKB_CIDI9            1.188383e-01
+## 26           A9 =~ UKB_PHQ9_M            1.240047e-01
+## 820       PGC3a ~~      PGC3a            7.578793e-02
+## 821       PGC5a ~~      PGC5a            1.648417e-01
+## 822       PGC5b ~~      PGC5b            1.284282e-01
+## 823        PGC9 ~~       PGC9            9.425855e-02
+## 824   UKB_CIDI1 ~~  UKB_CIDI1            9.999828e-04
+## 825   UKB_CIDI2 ~~  UKB_CIDI2            1.439352e-02
+## 826  UKB_CIDI3a ~~ UKB_CIDI3a            2.846281e-02
+## 827  UKB_CIDI3b ~~ UKB_CIDI3b            2.501102e-02
+## 828  UKB_CIDI4a ~~ UKB_CIDI4a            2.994713e-02
+## 829  UKB_CIDI4b ~~ UKB_CIDI4b            1.000002e-03
+## 830   UKB_CIDI6 ~~  UKB_CIDI6            3.938969e-02
+## 831   UKB_CIDI7 ~~  UKB_CIDI7            3.393169e-02
+## 832   UKB_CIDI8 ~~  UKB_CIDI8            4.281337e-02
+## 833   UKB_CIDI9 ~~  UKB_CIDI9            1.720030e-02
+## 834  UKB_PHQ1_M ~~ UKB_PHQ1_M            1.066677e-02
+## 835  UKB_PHQ3_M ~~ UKB_PHQ3_M            1.000000e-03
+## 836  UKB_PHQ4_M ~~ UKB_PHQ4_M            1.597575e-02
+## 837  UKB_PHQ5_M ~~ UKB_PHQ5_M            9.999890e-04
+## 838  UKB_PHQ6_M ~~ UKB_PHQ6_M            3.279307e-03
+## 839  UKB_PHQ7_M ~~ UKB_PHQ7_M            3.690480e-03
+## 840  UKB_PHQ8_M ~~ UKB_PHQ8_M            1.350015e-02
+## 841  UKB_PHQ9_M ~~ UKB_PHQ9_M            1.694895e-03
+## 1095         A1 ~~         A2            9.626419e-01
+## 1096         A1 ~~        A3a            2.525271e-01
+## 1097         A1 ~~        A3b            4.200701e-01
+## 1098         A1 ~~        A4a            5.378759e-01
+## 1099         A1 ~~        A4b            4.854579e-01
+## 1100         A1 ~~        A5a           -1.731556e+00
+## 1101         A1 ~~        A5b            2.689702e-01
+## 1102         A1 ~~         A6            6.016447e-01
+## 1103         A1 ~~         A7            7.423040e-01
+## 1104         A1 ~~         A8            8.069778e-01
+## 1105         A1 ~~         A9            7.304882e-01
+## 1106         A2 ~~        A3a            9.473561e-02
+## 1107         A2 ~~        A3b            6.080489e-01
+## 1108         A2 ~~        A4a            6.721775e-01
+## 1109         A2 ~~        A4b            5.625756e-01
+## 1110         A2 ~~        A5a           -5.752456e+00
+## 1111         A2 ~~        A5b            1.229661e-01
+## 1112         A2 ~~         A6            8.071730e-01
+## 1113         A2 ~~         A7            8.816669e-01
+## 1114         A2 ~~         A8            9.735007e-01
+## 1115         A2 ~~         A9            8.328365e-01
+## 1116        A3a ~~        A3b           -4.923778e-01
+## 1117        A3a ~~        A4a            3.800392e-02
+## 1118        A3a ~~        A4b            1.802431e-01
+## 1119        A3a ~~        A5a            6.785673e+01
+## 1120        A3a ~~        A5b            4.172712e+00
+## 1121        A3a ~~         A6           -1.816646e-02
+## 1122        A3a ~~         A7           -5.774896e-01
+## 1123        A3a ~~         A8           -3.561817e-01
+## 1124        A3a ~~         A9           -2.678484e-01
+## 1125        A3b ~~        A4a            6.558110e-01
+## 1126        A3b ~~        A4b            3.038769e-01
+## 1127        A3b ~~        A5a            1.086521e+01
+## 1128        A3b ~~        A5b            1.076864e+00
+## 1129        A3b ~~         A6            7.005867e-01
+## 1130        A3b ~~         A7            7.539116e-01
+## 1131        A3b ~~         A8            8.514936e-01
+## 1132        A3b ~~         A9            6.043553e-01
+## 1133        A4a ~~        A4b            1.630371e-01
+## 1134        A4a ~~        A5a            3.316203e+01
+## 1135        A4a ~~        A5b            2.497362e+00
+## 1136        A4a ~~         A6            8.214831e-01
+## 1137        A4a ~~         A7            7.281408e-01
+## 1138        A4a ~~         A8            9.576206e-01
+## 1139        A4a ~~         A9            6.497765e-01
+## 1140        A4b ~~        A5a            1.747298e+01
+## 1141        A4b ~~        A5b            1.407162e+00
+## 1142        A4b ~~         A6            6.006140e-01
+## 1143        A4b ~~         A7            3.581954e-01
+## 1144        A4b ~~         A8            4.991952e-01
+## 1145        A4b ~~         A9            2.195698e-01
+## 1146        A5a ~~        A5b            4.366540e+00
+## 1147        A5a ~~         A6            2.057393e+01
+## 1148        A5a ~~         A7           -1.668606e+01
+## 1149        A5a ~~         A8            2.362495e+01
+## 1150        A5a ~~         A9           -3.175583e+01
+## 1151        A5b ~~         A6            1.767600e+00
+## 1152        A5b ~~         A7           -5.850893e-01
+## 1153        A5b ~~         A8            2.117815e+00
+## 1154        A5b ~~         A9           -1.517994e+00
+## 1155         A6 ~~         A7            7.413591e-01
+## 1156         A6 ~~         A8            9.880761e-01
+## 1157         A6 ~~         A9            7.741927e-01
+## 1158         A7 ~~         A8            9.874008e-01
+## 1159         A7 ~~         A9            9.460454e-01
+## 1160         A8 ~~         A9            7.834128e-01
 ```
 
 ```
@@ -2123,6 +1942,174 @@ phq_item_instance_fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
 ```
 ## Warning in if (class(bread2$value) == "matrix" & check == 2) {: the
 ## condition has length > 1 and only the first element will be used
+```
+
+```r
+pgc_ukb_cidi_phq_symptom.fit$modelfit
+```
+
+```
+## NULL
+```
+
+```r
+pgc_ukb_cidi_phq_symptom.fit$results[c(1, 2, 3, 6, 7)]
+```
+
+```
+## NULL
+```
+
+
+
+
+# Exploratory factor analysis
+
+Get the genetic covariance matrix for symptoms with a positive heritability
+
+
+```r
+symptoms_cov <- symptoms_covstruct$S
+k <- nrow(symptoms_cov)
+symptoms_se <- matrix(0, k, k)
+symptoms_se[lower.tri(symptoms_se, diag=TRUE)] <- sqrt(diag(symptoms_covstruct$V))
+
+symptoms_se[upper.tri(symptoms_se)] <- t(symptoms_se)[upper.tri(symptoms_se)]
+
+
+
+symptoms_cov_keep <- which(diag(symptoms_cov > 0) & colnames(symptoms_cov) %in% symptoms_pgc_cidi_phqm)
+
+symptoms_cov_pos <- symptoms_cov[symptoms_cov_keep,symptoms_cov_keep]
+```
+
+Smooth the genetic covariance matrix so that it is positive definite
+
+```r
+# smooth the covariance matrix
+symptoms_cov_pd <- as.matrix(Matrix::nearPD(symptoms_cov_pos, corr=FALSE)$mat)
+
+corrplot(cov2cor(symptoms_cov_pd))
+```
+
+![](mdd-symptom-gsem_files/figure-html/mdd_symptom_gsem_efa_pd-1.png)<!-- -->
+
+Check eigen values of the correlation matrix
+
+```r
+plot(eigen(cov2cor(symptoms_cov_pd))$values, ylab='Eigenvalue')
+lines(eigen(cov2cor(symptoms_cov_pd))$values)
+abline(1, 0, col='red')
+```
+
+![](mdd-symptom-gsem_files/figure-html/mdd_symptom_gsem_efa_eigen-1.png)<!-- -->
+
+
+```r
+symptoms_efa <- factanal(covmat=symptoms_cov_pd, factors=2, rotation='promax')
+
+symptoms_efa
+```
+
+```
+## 
+## Call:
+## factanal(factors = 2, covmat = symptoms_cov_pd, rotation = "promax")
+## 
+## Uniquenesses:
+##      PGC3a      PGC5a      PGC5b       PGC9  UKB_CIDI1  UKB_CIDI2 
+##      0.825      0.974      0.718      0.834      0.462      0.349 
+## UKB_CIDI3a UKB_CIDI3b UKB_CIDI4a UKB_CIDI4b  UKB_CIDI6  UKB_CIDI7 
+##      0.800      0.636      0.724      0.664      0.604      0.641 
+##  UKB_CIDI8  UKB_CIDI9 UKB_PHQ1_M UKB_PHQ2_M UKB_PHQ3_M UKB_PHQ4_M 
+##      0.640      0.669      0.145      0.177      0.332      0.416 
+## UKB_PHQ5_M UKB_PHQ6_M UKB_PHQ7_M UKB_PHQ8_M UKB_PHQ9_M 
+##      0.340      0.094      0.005      0.228      0.315 
+## 
+## Loadings:
+##            Factor1 Factor2
+## PGC3a      -0.242   0.412 
+## PGC5a               0.156 
+## PGC5b      -0.108   0.550 
+## PGC9        0.406         
+## UKB_CIDI1   0.761  -0.172 
+## UKB_CIDI2   0.780         
+## UKB_CIDI3a -0.152   0.464 
+## UKB_CIDI3b  0.596         
+## UKB_CIDI4a  0.434   0.201 
+## UKB_CIDI4b  0.450   0.265 
+## UKB_CIDI6   0.421   0.367 
+## UKB_CIDI7   0.615  -0.251 
+## UKB_CIDI8   0.510   0.208 
+## UKB_CIDI9   0.594         
+## UKB_PHQ1_M  0.944         
+## UKB_PHQ2_M  0.918         
+## UKB_PHQ3_M  0.813         
+## UKB_PHQ4_M  0.720   0.127 
+## UKB_PHQ5_M  0.815         
+## UKB_PHQ6_M  0.855   0.247 
+## UKB_PHQ7_M  1.017  -0.461 
+## UKB_PHQ8_M  0.895         
+## UKB_PHQ9_M  0.859  -0.255 
+## 
+##                Factor1 Factor2
+## SS loadings     10.241   1.479
+## Proportion Var   0.445   0.064
+## Cumulative Var   0.445   0.510
+## 
+## Factor Correlations:
+##         Factor1 Factor2
+## Factor1   1.000  -0.268
+## Factor2  -0.268   1.000
+## 
+## The degrees of freedom for the model is 208 and the fit was 105.3971
+```
+
+```r
+node_names <- c('A1', 'A2', rownames(symptoms_efa$loadings))
+node_idx <- seq_along(node_names)
+
+highpass <- function(x, a=0.4) ifelse(x >= a, yes=x, no=0)
+
+symptoms_efa.graph <-
+create_graph(nodes_df=create_node_df(n=length(node_names), 
+                                     label=node_labels[node_names],
+                                     width=1,
+                                     fontcolor='black',
+                                     fillcolor=node_colors[node_names]),
+             edges_df=create_edge_df(from=rep(c(1, 2), each=nrow(symptoms_efa$loadings)),
+                                     to=rep(node_idx[c(-1, -2)], times=2),
+                                     penwidth=highpass(c(symptoms_efa$loadings[,1],
+                                                symptoms_efa$loadings[,2]),
+                                                       a=0.15)) %>%
+                      filter(penwidth > 0) %>% mutate(penwidth=4*penwidth),
+            attr_theme='tb')
+render_graph(symptoms_efa.graph)
+```
+
+<!--html_preserve--><div id="htmlwidget-ab176c7edae60d67d90a" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-ab176c7edae60d67d90a">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"A1\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"2\" [label = \"A2\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"3\" [label = \"Weight⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"4\" [label = \"Motor⇈\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"5\" [label = \"Motor⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"6\" [label = \"Suicidality\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"7\" [label = \"Mood\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"8\" [label = \"Interest\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"9\" [label = \"Weight⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"10\" [label = \"Weight⇈\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"11\" [label = \"Sleep⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"12\" [label = \"Sleep⇈\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"13\" [label = \"Fatigue\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"14\" [label = \"Guilt\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"15\" [label = \"Concentrate\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"16\" [label = \"Suicidality\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"17\" [label = \"Mood\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"18\" [label = \"Interest\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"19\" [label = \"Weight⇅\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"20\" [label = \"Sleep⇅\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"21\" [label = \"Motor⇅\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"22\" [label = \"Fatigue\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"23\" [label = \"Guilt\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"24\" [label = \"Concentrate\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"25\" [label = \"Suicidality\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n\"1\"->\"6\" [penwidth = \"1.62244268872947\"] \n\"1\"->\"7\" [penwidth = \"3.04353567041099\"] \n\"1\"->\"8\" [penwidth = \"3.11897772798293\"] \n\"1\"->\"10\" [penwidth = \"2.38498843016525\"] \n\"1\"->\"11\" [penwidth = \"1.73732679672606\"] \n\"1\"->\"12\" [penwidth = \"1.79914820763346\"] \n\"1\"->\"13\" [penwidth = \"1.68578337306743\"] \n\"1\"->\"14\" [penwidth = \"2.46081098202301\"] \n\"1\"->\"15\" [penwidth = \"2.04050907681188\"] \n\"1\"->\"16\" [penwidth = \"2.375933221593\"] \n\"1\"->\"17\" [penwidth = \"3.77519287148625\"] \n\"1\"->\"18\" [penwidth = \"3.67095912919635\"] \n\"1\"->\"19\" [penwidth = \"3.25052189556413\"] \n\"1\"->\"20\" [penwidth = \"2.88092886952725\"] \n\"1\"->\"21\" [penwidth = \"3.2597817199889\"] \n\"1\"->\"22\" [penwidth = \"3.42170369313828\"] \n\"1\"->\"23\" [penwidth = \"4.0665015034711\"] \n\"1\"->\"24\" [penwidth = \"3.58185570115017\"] \n\"1\"->\"25\" [penwidth = \"3.43422503039626\"] \n\"2\"->\"3\" [penwidth = \"1.6482052872024\"] \n\"2\"->\"4\" [penwidth = \"0.62432594718815\"] \n\"2\"->\"5\" [penwidth = \"2.19857048814461\"] \n\"2\"->\"9\" [penwidth = \"1.85510815263036\"] \n\"2\"->\"11\" [penwidth = \"0.802075683333857\"] \n\"2\"->\"12\" [penwidth = \"1.0603063625551\"] \n\"2\"->\"13\" [penwidth = \"1.46994787473968\"] \n\"2\"->\"15\" [penwidth = \"0.830362100257246\"] \n\"2\"->\"22\" [penwidth = \"0.98699974805709\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+
+```r
+export_graph(symptoms_efa.graph, file_name='mdd-symptoms-gsem_files/symptoms_efa.svg', file_type='svg')
+
+symptoms_efa.gv <- generate_dot(symptoms_efa.graph)
+
+cat(str_replace_all(symptoms_efa.gv, "'", '"'), file='mdd-symptom-gsem_files/symptoms_efa.gv')
+```
+
+### Graphviz
+
+Render SEM plots out to PDF
+
+
+```bash
+
+for gv in $(ls mdd-symptom-gsem_files/*.gv); do
+        out=$(dirname $gv)/$(basename $gv .gv)
+        dot -Tpdf -o${out}.pdf $gv
+done
+
 ```
 
 ## Multivariable LDSC Estimation - Using Case/Control Datasets
@@ -2144,4 +2131,4 @@ rownames(symptoms_cor) <- colnames(symptoms_cor)
 corrplot(symptoms_cor, 'square')
 ```
 
-![](mdd-symptom-gsem_files/figure-html/unnamed-chunk-21-1.png)<!-- -->
+![](mdd-symptom-gsem_files/figure-html/unnamed-chunk-23-1.png)<!-- -->
