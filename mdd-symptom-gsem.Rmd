@@ -1355,6 +1355,16 @@ cat(str_replace_all(symptoms_efa.gv, "'", '"'), file='mdd-symptom-gsem_files/sym
 
 ```
 
+```{r}
+
+as.data.frame(loadings(symptoms_efa)[,1:2]) %>%
+transmute(trait=rownames(loadings(symptoms_efa)), A1=round(Factor1, 2), A2=round(Factor2, 2)) %>%
+left_join(trait_symptom_labels, by='trait') %>%
+select(study, h, A1, A2)
+
+
+```
+
 ### Graphviz
 
 Render SEM plots out to PDF
