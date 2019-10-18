@@ -1,10 +1,9 @@
-digraph {
 
+digraph {
 graph [layout = "dot",
        rankdir = "TB",
        outputorder = "edgesfirst",
        bgcolor = "white"]
-
 node [fontname = "Helvetica",
       fontsize = "10",
       shape = "circle",
@@ -14,13 +13,13 @@ node [fontname = "Helvetica",
       fillcolor = "aliceblue",
       color = "gray70",
       fontcolor = "gray50"]
-
 edge [fontname = "Helvetica",
      fontsize = "8",
      len = "1.5",
      color = "gray80",
      arrowsize = "0.5"]
 
+   {rank=same "1" "2"}
   "1" [label = "A1", width = "1", fontcolor = "black", fillcolor = "white"] 
   "2" [label = "A2", width = "1", fontcolor = "black", fillcolor = "white"] 
   "3" [label = "Weight⇊", width = "1", fontcolor = "black", fillcolor = "#7570b3"] 
@@ -46,32 +45,40 @@ edge [fontname = "Helvetica",
   "23" [label = "Guilt", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
   "24" [label = "Concentrate", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
   "25" [label = "Suicidality", width = "1", fontcolor = "black", fillcolor = "#d95f02"] 
-"1"->"6" [penwidth = "1.62244268872947"] 
-"1"->"7" [penwidth = "3.04353567041099"] 
-"1"->"8" [penwidth = "3.11897772798293"] 
-"1"->"10" [penwidth = "2.38498843016525"] 
-"1"->"11" [penwidth = "1.73732679672606"] 
-"1"->"12" [penwidth = "1.79914820763346"] 
-"1"->"13" [penwidth = "1.68578337306743"] 
-"1"->"14" [penwidth = "2.46081098202301"] 
-"1"->"15" [penwidth = "2.04050907681188"] 
-"1"->"16" [penwidth = "2.375933221593"] 
-"1"->"17" [penwidth = "3.77519287148625"] 
-"1"->"18" [penwidth = "3.67095912919635"] 
-"1"->"19" [penwidth = "3.25052189556413"] 
-"1"->"20" [penwidth = "2.88092886952725"] 
-"1"->"21" [penwidth = "3.2597817199889"] 
-"1"->"22" [penwidth = "3.42170369313828"] 
-"1"->"23" [penwidth = "4.0665015034711"] 
-"1"->"24" [penwidth = "3.58185570115017"] 
-"1"->"25" [penwidth = "3.43422503039626"] 
-"2"->"3" [penwidth = "1.6482052872024"] 
-"2"->"4" [penwidth = "0.62432594718815"] 
-"2"->"5" [penwidth = "2.19857048814461"] 
-"2"->"9" [penwidth = "1.85510815263036"] 
-"2"->"11" [penwidth = "0.802075683333857"] 
-"2"->"12" [penwidth = "1.0603063625551"] 
-"2"->"13" [penwidth = "1.46994787473968"] 
-"2"->"15" [penwidth = "0.830362100257246"] 
-"2"->"22" [penwidth = "0.98699974805709"] 
+
+"1"->"3" [label = "-0.24", penwidth = "0.966609884185723"] 
+"1"->"6" [label = "0.41", penwidth = "1.62244268872947"] 
+"1"->"7" [label = "0.76", penwidth = "3.04353567041099"] 
+"1"->"8" [label = "0.78", penwidth = "3.11897772798293"] 
+"1"->"9" [label = "-0.15", penwidth = "0.609562716468333"] 
+"1"->"10" [label = "0.6", penwidth = "2.38498843016525"] 
+"1"->"11" [label = "0.43", penwidth = "1.73732679672606"] 
+"1"->"12" [label = "0.45", penwidth = "1.79914820763346"] 
+"1"->"13" [label = "0.42", penwidth = "1.68578337306743"] 
+"1"->"14" [label = "0.62", penwidth = "2.46081098202301"] 
+"1"->"15" [label = "0.51", penwidth = "2.04050907681188"] 
+"1"->"16" [label = "0.59", penwidth = "2.375933221593"] 
+"1"->"17" [label = "0.94", penwidth = "3.77519287148625"] 
+"1"->"18" [label = "0.92", penwidth = "3.67095912919635"] 
+"1"->"19" [label = "0.81", penwidth = "3.25052189556413"] 
+"1"->"20" [label = "0.72", penwidth = "2.88092886952725"] 
+"1"->"21" [label = "0.81", penwidth = "3.2597817199889"] 
+"1"->"22" [label = "0.86", penwidth = "3.42170369313828"] 
+"1"->"23" [label = "1.02", penwidth = "4.0665015034711"] 
+"1"->"24" [label = "0.9", penwidth = "3.58185570115017"] 
+"1"->"25" [label = "0.86", penwidth = "3.43422503039626"] 
+"2"->"3" [label = "0.41", penwidth = "1.6482052872024"] 
+"2"->"4" [label = "0.16", penwidth = "0.62432594718815"] 
+"2"->"5" [label = "0.55", penwidth = "2.19857048814461"] 
+"2"->"7" [label = "-0.17", penwidth = "0.687682717740456"] 
+"2"->"9" [label = "0.46", penwidth = "1.85510815263036"] 
+"2"->"11" [label = "0.2", penwidth = "0.802075683333857"] 
+"2"->"12" [label = "0.27", penwidth = "1.0603063625551"] 
+"2"->"13" [label = "0.37", penwidth = "1.46994787473968"] 
+"2"->"14" [label = "-0.25", penwidth = "1.00255587573466"] 
+"2"->"15" [label = "0.21", penwidth = "0.830362100257246"] 
+"2"->"22" [label = "0.25", penwidth = "0.98699974805709"] 
+"2"->"23" [label = "-0.46", penwidth = "1.84304958050374"] 
+"2"->"25" [label = "-0.26", penwidth = "1.02168689057729"] 
+"1"->"2" [label = "-0.27", penwidth = "1.072"] 
 }

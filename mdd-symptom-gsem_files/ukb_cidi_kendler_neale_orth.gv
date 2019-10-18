@@ -1,0 +1,55 @@
+digraph {
+
+graph [layout = "dot",
+       rankdir = "TB",
+       outputorder = "edgesfirst",
+       bgcolor = "white"]
+
+node [fontname = "Helvetica",
+      fontsize = "10",
+      shape = "circle",
+      fixedsize = "true",
+      width = "0.5",
+      style = "filled",
+      fillcolor = "aliceblue",
+      color = "gray70",
+      fontcolor = "gray50"]
+
+edge [fontname = "Helvetica",
+     fontsize = "8",
+     len = "1.5",
+     color = "gray80",
+     arrowsize = "0.5"]
+
+  "1" [label = "A1", shape = "oval", width = "1", fillcolor = "white", fontcolor = "black"] 
+  "2" [label = "A2", shape = "oval", width = "1", fillcolor = "white", fontcolor = "black"] 
+  "3" [label = "A3", shape = "oval", width = "1", fillcolor = "white", fontcolor = "black"] 
+  "4" [label = "Mood", shape = "oval", width = "1", fillcolor = "#1b9e77", fontcolor = "black"] 
+  "5" [label = "Interest", shape = "oval", width = "1", fillcolor = "#1b9e77", fontcolor = "black"] 
+  "6" [label = "Weight⇈", shape = "oval", width = "1", fillcolor = "#1b9e77", fontcolor = "black"] 
+  "7" [label = "Sleep⇈", shape = "oval", width = "1", fillcolor = "#1b9e77", fontcolor = "black"] 
+  "8" [label = "Fatigue", shape = "oval", width = "1", fillcolor = "#1b9e77", fontcolor = "black"] 
+  "9" [label = "Guilt", shape = "oval", width = "1", fillcolor = "#1b9e77", fontcolor = "black"] 
+  "10" [label = "Concentrate", shape = "oval", width = "1", fillcolor = "#1b9e77", fontcolor = "black"] 
+  "11" [label = "Suicidality", shape = "oval", width = "1", fillcolor = "#1b9e77", fontcolor = "black"] 
+"1"->"1" [label = "1", penwidth = "3", dir = "both"] 
+"1"->"9" [label = "0.85", penwidth = "2.53563788781856", dir = "forward"] 
+"1"->"10" [label = "0.65", penwidth = "1.94503644397938", dir = "forward"] 
+"1"->"11" [label = "0.57", penwidth = "1.70985358573493", dir = "forward"] 
+"2"->"2" [label = "1", penwidth = "3", dir = "both"] 
+"2"->"4" [label = "0.95", penwidth = "2.86079578445163", dir = "forward"] 
+"2"->"5" [label = "0.97", penwidth = "2.92084894954738", dir = "forward"] 
+"2"->"9" [label = "0.57", penwidth = "1.70535947365613", dir = "forward"] 
+"3"->"3" [label = "1", penwidth = "3", dir = "both"] 
+"3"->"6" [label = "0.25", penwidth = "0.763877789421455", dir = "forward"] 
+"3"->"7" [label = "0.63", penwidth = "1.87828603424745", dir = "forward"] 
+"3"->"8" [label = "1.02", penwidth = "3.06245211331807", dir = "forward"] 
+"4"->"4" [label = "0.09", penwidth = "0.271950819115332", dir = "both"] 
+"5"->"5" [label = "0.05", penwidth = "0.156214887022649", dir = "both"] 
+"6"->"6" [label = "0.94", penwidth = "2.8055051549425", dir = "both"] 
+"7"->"7" [label = "0.61", penwidth = "1.82397358176609", dir = "both"] 
+"8"->"8" [label = "0", penwidth = "0.00300278495315029", dir = "both"] 
+"9"->"9" [label = "0", penwidth = "0.00300061899314795", dir = "both"] 
+"10"->"10" [label = "0.58", penwidth = "1.7389153079133", dir = "both"] 
+"11"->"11" [label = "0.68", penwidth = "2.02547028350552", dir = "both"] 
+}

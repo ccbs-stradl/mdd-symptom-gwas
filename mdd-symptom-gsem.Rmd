@@ -225,6 +225,12 @@ pgc_symptom_counts %>%
   select(-MDD) %>%
   spread(MDD_counts, AbsentPresent)
 
+pgc_symptom_counts %>% 
+spread(Status, N) %>%
+mutate(Total=Absent+Present) %>%
+filter(MDD == 'Case') %>%
+arrange(Total)
+
 ```
 
 Calculate symptom prevalences separately for cases and controls:
@@ -739,11 +745,11 @@ mutate(ref=paste0('MDD', symptom_ref)) %>%
 left_join(dsm_mdd_symptoms_labels, by='ref') %>%
 mutate(color=recode(study, PGC='#7570b3', UKB_CIDI='#1b9e77', UKB_PHQ='#d95f02'))
 
-node_labels <- c(trait_symptom_labels$h, paste0('A', 1:3))
-names(node_labels) <- c(trait_symptom_labels$trait, paste0('A', 1:3))
+node_labels <- c(trait_symptom_labels$h, paste0('A', 1:3), 'S1')
+names(node_labels) <- c(trait_symptom_labels$trait, paste0('A', 1:3), 'S1')
 
-node_colors <- c(trait_symptom_labels$color, rep('white', times=3))
-names(node_colors) <- c(trait_symptom_labels$trait, paste0('A', 1:3))
+node_colors <- c(trait_symptom_labels$color, rep('white', times=3), 'grey')
+names(node_colors) <- c(trait_symptom_labels$trait, paste0('A', 1:3), 'S1')
 
 edge_dir <- c('forward', 'back', 'both')
 names(edge_dir) <- c('=~', '~', '~~')
@@ -822,13 +828,17 @@ cat(str_replace_all(pgc_commonfactor_constr.gv, "'", '"'), file='mdd-symptom-gse
 
 ### Common factor
 
-Common factor model
+Common factor model. Remove common variance shared between the gating items (Mood: `UKB_CIDI1`, Interest: `UKB_CIDI2`) that is uncorrelated with the common factor variance, to recover the genetic structure among gated items.
 
 ```{r ukb_cidi_commonfactor, cache=TRUE}
 
 ukb_cidi_commonfactor.model <- "
 A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+S1 =~ sc1*UKB_CIDI1 + sc1*UKB_CIDI2
 A1 ~~ 1*A1
+A1 ~~ 0*S1
+c2 > 0.001
+UKB_CIDI2 ~~ c2*UKB_CIDI2
 "
 ukb_cidi_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_commonfactor.model)
 
@@ -838,7 +848,6 @@ ukb_cidi_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
 render_fit(ukb_cidi_commonfactor.fit$results)
 
 ukb_cidi_commonfactor.gv <- generate_dot(fit_graph(ukb_cidi_commonfactor.fit$results))
-
 cat(str_replace_all(ukb_cidi_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_commonfactor.gv')
 
 ```
@@ -945,6 +954,11 @@ ukb_cidi_kendler_neale_orth.fit <- usermodel(symptoms_covstruct, estimation='DWL
 
 ukb_cidi_kendler_neale_orth.fit$modelfit
 ukb_cidi_kendler_neale_orth.fit$results[c(1,2,3,6,7)]
+
+render_fit(ukb_cidi_kendler_neale_orth.fit$results)
+
+ukb_cidi_kendler_neale_orth.gv <- generate_dot(fit_graph(ukb_cidi_kendler_neale_orth.fit$results))
+cat(str_replace_all(ukb_cidi_kendler_neale_orth.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_kendler_neale_orth.gv')
 
 ```
 
@@ -1118,6 +1132,11 @@ ukb_phq_kendler_neale_ortho.fit <- usermodel(symptoms_covstruct, estimation='DWL
 ukb_phq_kendler_neale_ortho.fit$modelfit
 ukb_phq_kendler_neale_ortho.fit$results[c(1,2,3,6,7)]
 
+render_fit(ukb_phq_kendler_neale_ortho.fit$results)
+
+ukb_phq_kendler_neale_ortho.gv <- generate_dot(fit_graph(ukb_phq_kendler_neale_ortho.fit$results))
+cat(str_replace_all(ukb_phq_kendler_neale_ortho.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_kendler_neale_ortho.gv')
+
 ```
 
 ## Symptom factors
@@ -1209,7 +1228,7 @@ symptoms_efa
 node_names <- c('A1', 'A2', rownames(symptoms_efa$loadings))
 node_idx <- seq_along(node_names)
 
-highpass <- function(x, a=0.4) ifelse(x >= a, yes=x, no=0)
+highpass <- function(x, a=0.4) ifelse(abs(x) >= a, yes=abs(x), no=0)
 
 symptoms_efa.graph <-
 create_graph(nodes_df=create_node_df(n=length(node_names), 
@@ -1217,18 +1236,107 @@ create_graph(nodes_df=create_node_df(n=length(node_names),
                                      width=1,
                                      fontcolor='black',
                                      fillcolor=node_colors[node_names]),
-             edges_df=create_edge_df(from=rep(c(1, 2), each=nrow(symptoms_efa$loadings)),
-                                     to=rep(node_idx[c(-1, -2)], times=2),
+             edges_df=create_edge_df(from=c(rep(c(1, 2), each=nrow(symptoms_efa$loadings)), 1),
+                                     to=c(rep(node_idx[c(-1, -2)], times=2), 2),
+                                     label=round(c(symptoms_efa$loadings[,1],
+                                                   symptoms_efa$loadings[,2],
+                                                -0.268), 2),
                                      penwidth=highpass(c(symptoms_efa$loadings[,1],
-                                                symptoms_efa$loadings[,2]),
+                                                symptoms_efa$loadings[,2], -0.268),
                                                        a=0.15)) %>%
                       filter(penwidth > 0) %>% mutate(penwidth=4*penwidth),
             attr_theme='tb')
-render_graph(symptoms_efa.graph)
+#render_graph(symptoms_efa.graph)
 
-export_graph(symptoms_efa.graph, file_name='mdd-symptoms-gsem_files/symptoms_efa.svg', file_type='svg')
+# cat(generate_dot(symptoms_efa.graph))
 
-symptoms_efa.gv <- generate_dot(symptoms_efa.graph)
+symptoms_efa.gv <- 
+"
+digraph {
+graph [layout = 'dot',
+       rankdir = 'TB',
+       outputorder = 'edgesfirst',
+       bgcolor = 'white']
+node [fontname = 'Helvetica',
+      fontsize = '10',
+      shape = 'circle',
+      fixedsize = 'true',
+      width = '0.5',
+      style = 'filled',
+      fillcolor = 'aliceblue',
+      color = 'gray70',
+      fontcolor = 'gray50']
+edge [fontname = 'Helvetica',
+     fontsize = '8',
+     len = '1.5',
+     color = 'gray80',
+     arrowsize = '0.5']
+
+   {rank=same '1' '2'}
+  '1' [label = 'A1', width = '1', fontcolor = 'black', fillcolor = 'white'] 
+  '2' [label = 'A2', width = '1', fontcolor = 'black', fillcolor = 'white'] 
+  '3' [label = 'Weight⇊', width = '1', fontcolor = 'black', fillcolor = '#7570b3'] 
+  '4' [label = 'Motor⇈', width = '1', fontcolor = 'black', fillcolor = '#7570b3'] 
+  '5' [label = 'Motor⇊', width = '1', fontcolor = 'black', fillcolor = '#7570b3'] 
+  '6' [label = 'Suicidality', width = '1', fontcolor = 'black', fillcolor = '#7570b3'] 
+  '7' [label = 'Mood', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '8' [label = 'Interest', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '9' [label = 'Weight⇊', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '10' [label = 'Weight⇈', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '11' [label = 'Sleep⇊', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '12' [label = 'Sleep⇈', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '13' [label = 'Fatigue', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '14' [label = 'Guilt', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '15' [label = 'Concentrate', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '16' [label = 'Suicidality', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '17' [label = 'Mood', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '18' [label = 'Interest', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '19' [label = 'Weight⇅', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '20' [label = 'Sleep⇅', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '21' [label = 'Motor⇅', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '22' [label = 'Fatigue', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '23' [label = 'Guilt', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '24' [label = 'Concentrate', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '25' [label = 'Suicidality', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+
+'1'->'3' [label = '-0.24', penwidth = '0.966609884185723'] 
+'1'->'6' [label = '0.41', penwidth = '1.62244268872947'] 
+'1'->'7' [label = '0.76', penwidth = '3.04353567041099'] 
+'1'->'8' [label = '0.78', penwidth = '3.11897772798293'] 
+'1'->'9' [label = '-0.15', penwidth = '0.609562716468333'] 
+'1'->'10' [label = '0.6', penwidth = '2.38498843016525'] 
+'1'->'11' [label = '0.43', penwidth = '1.73732679672606'] 
+'1'->'12' [label = '0.45', penwidth = '1.79914820763346'] 
+'1'->'13' [label = '0.42', penwidth = '1.68578337306743'] 
+'1'->'14' [label = '0.62', penwidth = '2.46081098202301'] 
+'1'->'15' [label = '0.51', penwidth = '2.04050907681188'] 
+'1'->'16' [label = '0.59', penwidth = '2.375933221593'] 
+'1'->'17' [label = '0.94', penwidth = '3.77519287148625'] 
+'1'->'18' [label = '0.92', penwidth = '3.67095912919635'] 
+'1'->'19' [label = '0.81', penwidth = '3.25052189556413'] 
+'1'->'20' [label = '0.72', penwidth = '2.88092886952725'] 
+'1'->'21' [label = '0.81', penwidth = '3.2597817199889'] 
+'1'->'22' [label = '0.86', penwidth = '3.42170369313828'] 
+'1'->'23' [label = '1.02', penwidth = '4.0665015034711'] 
+'1'->'24' [label = '0.9', penwidth = '3.58185570115017'] 
+'1'->'25' [label = '0.86', penwidth = '3.43422503039626'] 
+'2'->'3' [label = '0.41', penwidth = '1.6482052872024'] 
+'2'->'4' [label = '0.16', penwidth = '0.62432594718815'] 
+'2'->'5' [label = '0.55', penwidth = '2.19857048814461'] 
+'2'->'7' [label = '-0.17', penwidth = '0.687682717740456'] 
+'2'->'9' [label = '0.46', penwidth = '1.85510815263036'] 
+'2'->'11' [label = '0.2', penwidth = '0.802075683333857'] 
+'2'->'12' [label = '0.27', penwidth = '1.0603063625551'] 
+'2'->'13' [label = '0.37', penwidth = '1.46994787473968'] 
+'2'->'14' [label = '-0.25', penwidth = '1.00255587573466'] 
+'2'->'15' [label = '0.21', penwidth = '0.830362100257246'] 
+'2'->'22' [label = '0.25', penwidth = '0.98699974805709'] 
+'2'->'23' [label = '-0.46', penwidth = '1.84304958050374'] 
+'2'->'25' [label = '-0.26', penwidth = '1.02168689057729'] 
+'1'->'2' [label = '-0.27', penwidth = '1.072'] 
+}
+"
+grViz(symptoms_efa.gv)
 
 cat(str_replace_all(symptoms_efa.gv, "'", '"'), file='mdd-symptom-gsem_files/symptoms_efa.gv')
 

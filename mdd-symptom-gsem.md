@@ -285,6 +285,33 @@ MDD9      6194:7221               2779:46
 
 </div>
 
+```r
+pgc_symptom_counts %>% 
+spread(Status, N) %>%
+mutate(Total=Absent+Present) %>%
+filter(MDD == 'Case') %>%
+arrange(Total)
+```
+
+<div class="kable-table">
+
+MDD    Symptom    Absent   Present   Total
+-----  --------  -------  --------  ------
+Case   MDD5a        5533      5510   11043
+Case   MDD4b        7859      3440   11299
+Case   MDD5b        6405      5815   12220
+Case   MDD3b        9421      2930   12351
+Case   MDD8         1501     11209   12710
+Case   MDD2         1451     11671   13122
+Case   MDD7         3072     10113   13185
+Case   MDD9         6194      7221   13415
+Case   MDD3a        6370      7060   13430
+Case   MDD4a        3340     10209   13549
+Case   MDD6         1736     11833   13569
+Case   MDD1          914     12689   13603
+
+</div>
+
 Calculate symptom prevalences separately for cases and controls:
 
 
@@ -870,8 +897,8 @@ dev.off()
 ```
 
 ```
-## X11cairo 
-##        2
+## png 
+##   2
 ```
 
 
@@ -931,11 +958,11 @@ mutate(ref=paste0('MDD', symptom_ref)) %>%
 left_join(dsm_mdd_symptoms_labels, by='ref') %>%
 mutate(color=recode(study, PGC='#7570b3', UKB_CIDI='#1b9e77', UKB_PHQ='#d95f02'))
 
-node_labels <- c(trait_symptom_labels$h, paste0('A', 1:3))
-names(node_labels) <- c(trait_symptom_labels$trait, paste0('A', 1:3))
+node_labels <- c(trait_symptom_labels$h, paste0('A', 1:3), 'S1')
+names(node_labels) <- c(trait_symptom_labels$trait, paste0('A', 1:3), 'S1')
 
-node_colors <- c(trait_symptom_labels$color, rep('white', times=3))
-names(node_colors) <- c(trait_symptom_labels$trait, paste0('A', 1:3))
+node_colors <- c(trait_symptom_labels$color, rep('white', times=3), 'grey')
+names(node_colors) <- c(trait_symptom_labels$trait, paste0('A', 1:3), 'S1')
 
 edge_dir <- c('forward', 'back', 'both')
 names(edge_dir) <- c('=~', '~', '~~')
@@ -1087,27 +1114,31 @@ cat(str_replace_all(pgc_commonfactor_constr.gv, "'", '"'), file='mdd-symptom-gse
 
 ### Common factor
 
-Common factor model
+Common factor model. Remove common variance shared between the gating items (Mood: `UKB_CIDI1`, Interest: `UKB_CIDI2`) that is uncorrelated with the common factor variance, to recover the genetic structure among gated items.
 
 
 ```r
 ukb_cidi_commonfactor.model <- "
 A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+S1 =~ sc1*UKB_CIDI1 + sc1*UKB_CIDI2
 A1 ~~ 1*A1
+A1 ~~ 0*S1
+c2 > 0.001
+UKB_CIDI2 ~~ c2*UKB_CIDI2
 "
 ukb_cidi_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_commonfactor.model)
 ```
 
 ```
 ## [1] "Running primary model"
-## [1] "The model as initially specified failed to converge. A lower bound of 0 on residual variances has been automatically added to try and troubleshoot this."
 ## [1] "Calculating model chi-square"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   2.221 
+##   3.885 
 ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00210653588796324"
+## [1] "Please note that when equality constraints are used in the current version of Genomic SEM that\n            the standardized output will also impose the same constraint."
 ```
 
 ```r
@@ -1116,9 +1147,9 @@ ukb_cidi_commonfactor.fit$modelfit
 
 <div class="kable-table">
 
-         chisq   df     p_chisq        AIC         CFI        SRMR
----  ---------  ---  ----------  ---------  ----------  ----------
-df    73.24112   35   0.0001621   113.2411   0.9852652   0.1230814
+         chisq   df    p_chisq        AIC         CFI        SRMR
+---  ---------  ---  ---------  ---------  ----------  ----------
+df    52.25627   34   0.023487   94.25627   0.9929656   0.1164807
 
 </div>
 
@@ -1130,27 +1161,30 @@ ukb_cidi_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
 
 lhs          op   rhs           STD_Genotype  STD_Genotype_SE    
 -----------  ---  -----------  -------------  -------------------
-A1           =~   UKB_CIDI1        0.8704875  0.05826398889932   
-A1           =~   UKB_CIDI9        0.6098945  0.106226362693508  
-A1           =~   UKB_CIDI2        0.9877271  0.0470902179094761 
-A1           =~   UKB_CIDI3a       0.1673369  0.0984537120911675 
-A1           =~   UKB_CIDI3b       0.4246263  0.0811112304149095 
-A1           =~   UKB_CIDI4a       0.5697511  0.0991012052532406 
-A1           =~   UKB_CIDI4b       0.5532670  0.109518534730284  
-A1           =~   UKB_CIDI6        0.7121426  0.0975266039629619 
-A1           =~   UKB_CIDI7        0.6332052  0.075484415797212  
-A1           =~   UKB_CIDI8        0.7005428  0.0892927930117068 
+A1           =~   UKB_CIDI1        0.7578601  0.0900993615212484 
+A1           =~   UKB_CIDI9        0.6444958  0.116093206766738  
+A1           =~   UKB_CIDI2        0.8665722  0.0740657168508157 
+A1           =~   UKB_CIDI3a       0.1780675  0.105871822239598  
+A1           =~   UKB_CIDI3b       0.4565478  0.0897167947174869 
+A1           =~   UKB_CIDI4a       0.6196343  0.110722978889933  
+A1           =~   UKB_CIDI4b       0.5732473  0.118233776041022  
+A1           =~   UKB_CIDI6        0.7645569  0.108683000810272  
+A1           =~   UKB_CIDI7        0.6806983  0.0826291233660147 
+A1           =~   UKB_CIDI8        0.7649294  0.102296360749648  
 A1           ~~   A1               1.0000000                     
-UKB_CIDI1    ~~   UKB_CIDI1        0.2422517  0.08973623514996   
-UKB_CIDI9    ~~   UKB_CIDI9        0.6280293  0.25573053454608   
-UKB_CIDI2    ~~   UKB_CIDI2        0.0243952  0.0659942901065309 
-UKB_CIDI3a   ~~   UKB_CIDI3a       0.9720001  0.288395960840524  
-UKB_CIDI3b   ~~   UKB_CIDI3b       0.8196921  0.15610082568216   
-UKB_CIDI4a   ~~   UKB_CIDI4a       0.6753799  0.307544707892769  
-UKB_CIDI4b   ~~   UKB_CIDI4b       0.6938966  0.26292611486907   
-UKB_CIDI6    ~~   UKB_CIDI6        0.4928531  0.35434830914567   
-UKB_CIDI7    ~~   UKB_CIDI7        0.5990512  0.155913628187352  
-UKB_CIDI8    ~~   UKB_CIDI8        0.5092401  0.21799205413804   
+S1           =~   UKB_CIDI1        1.0000000                     
+S1           =~   UKB_CIDI2        1.0000000                     
+S1           ~~   S1               0.2584080  0.116839720531971  
+UKB_CIDI1    ~~   UKB_CIDI1        0.1672399  0.0664373923799151 
+UKB_CIDI9    ~~   UKB_CIDI9        0.5846202  0.25673461256609   
+UKB_CIDI2    ~~   UKB_CIDI2        0.0010004  0.0568436023031496 
+UKB_CIDI3a   ~~   UKB_CIDI3a       0.9682917  0.288329459120184  
+UKB_CIDI3b   ~~   UKB_CIDI3b       0.7915644  0.158567790326609  
+UKB_CIDI4a   ~~   UKB_CIDI4a       0.6160443  0.306731708712364  
+UKB_CIDI4b   ~~   UKB_CIDI4b       0.6713893  0.263639481017155  
+UKB_CIDI6    ~~   UKB_CIDI6        0.4154544  0.345583876649429  
+UKB_CIDI7    ~~   UKB_CIDI7        0.5366493  0.155074942179858  
+UKB_CIDI8    ~~   UKB_CIDI8        0.4148819  0.213015542843444  
 
 </div>
 
@@ -1158,12 +1192,11 @@ UKB_CIDI8    ~~   UKB_CIDI8        0.5092401  0.21799205413804
 render_fit(ukb_cidi_commonfactor.fit$results)
 ```
 
-<!--html_preserve--><div id="htmlwidget-66e7b1ebaa53a9ffc55a" style="width:672px;height:480px;" class="grViz html-widget"></div>
-<script type="application/json" data-for="htmlwidget-66e7b1ebaa53a9ffc55a">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"A1\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"2\" [label = \"Mood\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"3\" [label = \"Interest\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"4\" [label = \"Weight⇊\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"5\" [label = \"Weight⇈\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"6\" [label = \"Sleep⇊\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"7\" [label = \"Sleep⇈\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"8\" [label = \"Fatigue\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"9\" [label = \"Guilt\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"10\" [label = \"Concentrate\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"11\" [label = \"Suicidality\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n\"1\"->\"1\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"1\"->\"2\" [label = \"0.87\", penwidth = \"2.61146236862217\", dir = \"forward\"] \n\"1\"->\"3\" [label = \"0.99\", penwidth = \"2.96318128531284\", dir = \"forward\"] \n\"1\"->\"4\" [label = \"0.17\", penwidth = \"0.502010762736211\", dir = \"forward\"] \n\"1\"->\"5\" [label = \"0.42\", penwidth = \"1.27387893873277\", dir = \"forward\"] \n\"1\"->\"6\" [label = \"0.57\", penwidth = \"1.70925336911864\", dir = \"forward\"] \n\"1\"->\"7\" [label = \"0.55\", penwidth = \"1.65980087869007\", dir = \"forward\"] \n\"1\"->\"8\" [label = \"0.71\", penwidth = \"2.13642794349472\", dir = \"forward\"] \n\"1\"->\"9\" [label = \"0.63\", penwidth = \"1.89961552177294\", dir = \"forward\"] \n\"1\"->\"10\" [label = \"0.7\", penwidth = \"2.10162845516194\", dir = \"forward\"] \n\"1\"->\"11\" [label = \"0.61\", penwidth = \"1.82968337755774\", dir = \"forward\"] \n\"2\"->\"2\" [label = \"0.24\", penwidth = \"0.72675497267186\", dir = \"both\"] \n\"3\"->\"3\" [label = \"0.02\", penwidth = \"0.0731855443883617\", dir = \"both\"] \n\"4\"->\"4\" [label = \"0.97\", penwidth = \"2.91600044510908\", dir = \"both\"] \n\"5\"->\"5\" [label = \"0.82\", penwidth = \"2.4590763552315\", dir = \"both\"] \n\"6\"->\"6\" [label = \"0.68\", penwidth = \"2.02613969686873\", dir = \"both\"] \n\"7\"->\"7\" [label = \"0.69\", penwidth = \"2.08168973477537\", dir = \"both\"] \n\"8\"->\"8\" [label = \"0.49\", penwidth = \"1.47855915371992\", dir = \"both\"] \n\"9\"->\"9\" [label = \"0.6\", penwidth = \"1.79715362889942\", dir = \"both\"] \n\"10\"->\"10\" [label = \"0.51\", penwidth = \"1.52772032471201\", dir = \"both\"] \n\"11\"->\"11\" [label = \"0.63\", penwidth = \"1.88408783763102\", dir = \"both\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+<!--html_preserve--><div id="htmlwidget-32e3e5096c094af99708" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-32e3e5096c094af99708">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"A1\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"2\" [label = \"S1\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#C0C0C0\"] \n  \"3\" [label = \"Mood\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"4\" [label = \"Interest\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"5\" [label = \"Weight⇊\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"6\" [label = \"Weight⇈\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"7\" [label = \"Sleep⇊\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"8\" [label = \"Sleep⇈\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"9\" [label = \"Fatigue\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"10\" [label = \"Guilt\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"11\" [label = \"Concentrate\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"12\" [label = \"Suicidality\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n\"1\"->\"1\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"1\"->\"3\" [label = \"0.76\", penwidth = \"2.27358024598545\", dir = \"forward\"] \n\"1\"->\"4\" [label = \"0.87\", penwidth = \"2.59971665960552\", dir = \"forward\"] \n\"1\"->\"5\" [label = \"0.18\", penwidth = \"0.534202383755795\", dir = \"forward\"] \n\"1\"->\"6\" [label = \"0.46\", penwidth = \"1.36964330970695\", dir = \"forward\"] \n\"1\"->\"7\" [label = \"0.62\", penwidth = \"1.85890299780663\", dir = \"forward\"] \n\"1\"->\"8\" [label = \"0.57\", penwidth = \"1.71974200316354\", dir = \"forward\"] \n\"1\"->\"9\" [label = \"0.76\", penwidth = \"2.29367055937047\", dir = \"forward\"] \n\"1\"->\"10\" [label = \"0.68\", penwidth = \"2.04209482675688\", dir = \"forward\"] \n\"1\"->\"11\" [label = \"0.76\", penwidth = \"2.29478831762078\", dir = \"forward\"] \n\"1\"->\"12\" [label = \"0.64\", penwidth = \"1.93348728662594\", dir = \"forward\"] \n\"2\"->\"2\" [label = \"0.26\", penwidth = \"0.775223925513722\", dir = \"both\"] \n\"2\"->\"3\" [label = \"1\", penwidth = \"3\", dir = \"forward\"] \n\"2\"->\"4\" [label = \"1\", penwidth = \"3\", dir = \"forward\"] \n\"3\"->\"3\" [label = \"0.17\", penwidth = \"0.50171960932473\", dir = \"both\"] \n\"4\"->\"4\" [label = \"0\", penwidth = \"0.0030012026796101\", dir = \"both\"] \n\"5\"->\"5\" [label = \"0.97\", penwidth = \"2.90487503854937\", dir = \"both\"] \n\"6\"->\"6\" [label = \"0.79\", penwidth = \"2.37469310323469\", dir = \"both\"] \n\"7\"->\"7\" [label = \"0.62\", penwidth = \"1.84813294650782\", dir = \"both\"] \n\"8\"->\"8\" [label = \"0.67\", penwidth = \"2.01416792499206\", dir = \"both\"] \n\"9\"->\"9\" [label = \"0.42\", penwidth = \"1.24636328648197\", dir = \"both\"] \n\"10\"->\"10\" [label = \"0.54\", penwidth = \"1.60994795294331\", dir = \"both\"] \n\"11\"->\"11\" [label = \"0.41\", penwidth = \"1.24464555443488\", dir = \"both\"] \n\"12\"->\"12\" [label = \"0.58\", penwidth = \"1.75386051421905\", dir = \"both\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
 
 ```r
 ukb_cidi_commonfactor.gv <- generate_dot(fit_graph(ukb_cidi_commonfactor.fit$results))
-
 cat(str_replace_all(ukb_cidi_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_commonfactor.gv')
 ```
 
@@ -1336,7 +1369,7 @@ ukb_cidi_kendler_neale_orth.fit <- usermodel(symptoms_covstruct, estimation='DWL
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   4.455 
+##   3.261 
 ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00022213202890202"
 ```
 
@@ -1382,6 +1415,18 @@ UKB_CIDI8    ~~   UKB_CIDI8        0.5796384  0.294142571829342
 UKB_CIDI9    ~~   UKB_CIDI9        0.6751568  0.307981650140958  
 
 </div>
+
+```r
+render_fit(ukb_cidi_kendler_neale_orth.fit$results)
+```
+
+<!--html_preserve--><div id="htmlwidget-cfc145c7a774413e6719" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-cfc145c7a774413e6719">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"A1\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"2\" [label = \"A2\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"3\" [label = \"A3\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"4\" [label = \"Mood\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"5\" [label = \"Interest\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"6\" [label = \"Weight⇈\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"7\" [label = \"Sleep⇈\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"8\" [label = \"Fatigue\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"9\" [label = \"Guilt\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"10\" [label = \"Concentrate\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"11\" [label = \"Suicidality\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n\"1\"->\"1\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"1\"->\"9\" [label = \"0.85\", penwidth = \"2.53563788781856\", dir = \"forward\"] \n\"1\"->\"10\" [label = \"0.65\", penwidth = \"1.94503644397938\", dir = \"forward\"] \n\"1\"->\"11\" [label = \"0.57\", penwidth = \"1.70985358573493\", dir = \"forward\"] \n\"2\"->\"2\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"2\"->\"4\" [label = \"0.95\", penwidth = \"2.86079578445163\", dir = \"forward\"] \n\"2\"->\"5\" [label = \"0.97\", penwidth = \"2.92084894954738\", dir = \"forward\"] \n\"2\"->\"9\" [label = \"0.57\", penwidth = \"1.70535947365613\", dir = \"forward\"] \n\"3\"->\"3\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"3\"->\"6\" [label = \"0.25\", penwidth = \"0.763877789421455\", dir = \"forward\"] \n\"3\"->\"7\" [label = \"0.63\", penwidth = \"1.87828603424745\", dir = \"forward\"] \n\"3\"->\"8\" [label = \"1.02\", penwidth = \"3.06245211331807\", dir = \"forward\"] \n\"4\"->\"4\" [label = \"0.09\", penwidth = \"0.271950819115332\", dir = \"both\"] \n\"5\"->\"5\" [label = \"0.05\", penwidth = \"0.156214887022649\", dir = \"both\"] \n\"6\"->\"6\" [label = \"0.94\", penwidth = \"2.8055051549425\", dir = \"both\"] \n\"7\"->\"7\" [label = \"0.61\", penwidth = \"1.82397358176609\", dir = \"both\"] \n\"8\"->\"8\" [label = \"0\", penwidth = \"0.00300278495315029\", dir = \"both\"] \n\"9\"->\"9\" [label = \"0\", penwidth = \"0.00300061899314795\", dir = \"both\"] \n\"10\"->\"10\" [label = \"0.58\", penwidth = \"1.7389153079133\", dir = \"both\"] \n\"11\"->\"11\" [label = \"0.68\", penwidth = \"2.02547028350552\", dir = \"both\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+
+```r
+ukb_cidi_kendler_neale_orth.gv <- generate_dot(fit_graph(ukb_cidi_kendler_neale_orth.fit$results))
+cat(str_replace_all(ukb_cidi_kendler_neale_orth.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_kendler_neale_orth.gv')
+```
 
 
 
@@ -1723,7 +1768,7 @@ ukb_phq_kendler_neale_ortho.fit <- usermodel(symptoms_covstruct, estimation='DWL
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   4.299 
+##   2.268 
 ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest\n                  difference in a cell between the smoothed and non-smoothed matrix was 0.00110427527212622"
 ```
 
@@ -1771,6 +1816,18 @@ UKB_PHQ8_M   ~~   UKB_PHQ8_M       0.0010000  0.119293040790217
 UKB_PHQ9_M   ~~   UKB_PHQ9_M       0.2838702  0.21199910104614   
 
 </div>
+
+```r
+render_fit(ukb_phq_kendler_neale_ortho.fit$results)
+```
+
+<!--html_preserve--><div id="htmlwidget-c9a2501c108e49ce2bbc" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-c9a2501c108e49ce2bbc">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"A1\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"2\" [label = \"A2\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"3\" [label = \"A3\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"4\" [label = \"Mood\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"5\" [label = \"Interest\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"6\" [label = \"Weight⇅\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"7\" [label = \"Sleep⇅\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"8\" [label = \"Motor⇅\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"9\" [label = \"Fatigue\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"10\" [label = \"Guilt\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"11\" [label = \"Concentrate\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"12\" [label = \"Suicidality\", shape = \"oval\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n\"1\"->\"1\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"1\"->\"8\" [label = \"0.96\", penwidth = \"2.88966041010033\", dir = \"forward\"] \n\"1\"->\"10\" [label = \"0.76\", penwidth = \"2.28009103450177\", dir = \"forward\"] \n\"1\"->\"11\" [label = \"1.01\", penwidth = \"3.02850209143341\", dir = \"forward\"] \n\"1\"->\"12\" [label = \"0.85\", penwidth = \"2.5386149763316\", dir = \"forward\"] \n\"2\"->\"2\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"2\"->\"4\" [label = \"1.01\", penwidth = \"3.03665758458884\", dir = \"forward\"] \n\"2\"->\"5\" [label = \"1\", penwidth = \"3.00296613316754\", dir = \"forward\"] \n\"2\"->\"10\" [label = \"0.78\", penwidth = \"2.33490327103825\", dir = \"forward\"] \n\"3\"->\"3\" [label = \"1\", penwidth = \"3\", dir = \"both\"] \n\"3\"->\"6\" [label = \"0.84\", penwidth = \"2.5078573862287\", dir = \"forward\"] \n\"3\"->\"7\" [label = \"0.85\", penwidth = \"2.53847101901262\", dir = \"forward\"] \n\"3\"->\"9\" [label = \"0.97\", penwidth = \"2.89901866291597\", dir = \"forward\"] \n\"4\"->\"4\" [label = \"0\", penwidth = \"0.00299962881162719\", dir = \"both\"] \n\"5\"->\"5\" [label = \"0\", penwidth = \"0.00300013081773586\", dir = \"both\"] \n\"6\"->\"6\" [label = \"0.3\", penwidth = \"0.903550558942395\", dir = \"both\"] \n\"7\"->\"7\" [label = \"0.28\", penwidth = \"0.852054820702531\", dir = \"both\"] \n\"8\"->\"8\" [label = \"0.07\", penwidth = \"0.216479885908376\", dir = \"both\"] \n\"9\"->\"9\" [label = \"0.07\", penwidth = \"0.198564056373477\", dir = \"both\"] \n\"10\"->\"10\" [label = \"0\", penwidth = \"0.00300049768051055\", dir = \"both\"] \n\"11\"->\"11\" [label = \"0\", penwidth = \"0.00300013190606675\", dir = \"both\"] \n\"12\"->\"12\" [label = \"0.28\", penwidth = \"0.85161055749192\", dir = \"both\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+
+```r
+ukb_phq_kendler_neale_ortho.gv <- generate_dot(fit_graph(ukb_phq_kendler_neale_ortho.fit$results))
+cat(str_replace_all(ukb_phq_kendler_neale_ortho.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_kendler_neale_ortho.gv')
+```
 
 ## Symptom factors
 
@@ -2069,7 +2126,7 @@ symptoms_efa
 node_names <- c('A1', 'A2', rownames(symptoms_efa$loadings))
 node_idx <- seq_along(node_names)
 
-highpass <- function(x, a=0.4) ifelse(x >= a, yes=x, no=0)
+highpass <- function(x, a=0.4) ifelse(abs(x) >= a, yes=abs(x), no=0)
 
 symptoms_efa.graph <-
 create_graph(nodes_df=create_node_df(n=length(node_names), 
@@ -2077,24 +2134,113 @@ create_graph(nodes_df=create_node_df(n=length(node_names),
                                      width=1,
                                      fontcolor='black',
                                      fillcolor=node_colors[node_names]),
-             edges_df=create_edge_df(from=rep(c(1, 2), each=nrow(symptoms_efa$loadings)),
-                                     to=rep(node_idx[c(-1, -2)], times=2),
+             edges_df=create_edge_df(from=c(rep(c(1, 2), each=nrow(symptoms_efa$loadings)), 1),
+                                     to=c(rep(node_idx[c(-1, -2)], times=2), 2),
+                                     label=round(c(symptoms_efa$loadings[,1],
+                                                   symptoms_efa$loadings[,2],
+                                                -0.268), 2),
                                      penwidth=highpass(c(symptoms_efa$loadings[,1],
-                                                symptoms_efa$loadings[,2]),
+                                                symptoms_efa$loadings[,2], -0.268),
                                                        a=0.15)) %>%
                       filter(penwidth > 0) %>% mutate(penwidth=4*penwidth),
             attr_theme='tb')
-render_graph(symptoms_efa.graph)
+#render_graph(symptoms_efa.graph)
+
+# cat(generate_dot(symptoms_efa.graph))
+
+symptoms_efa.gv <- 
+"
+digraph {
+graph [layout = 'dot',
+       rankdir = 'TB',
+       outputorder = 'edgesfirst',
+       bgcolor = 'white']
+node [fontname = 'Helvetica',
+      fontsize = '10',
+      shape = 'circle',
+      fixedsize = 'true',
+      width = '0.5',
+      style = 'filled',
+      fillcolor = 'aliceblue',
+      color = 'gray70',
+      fontcolor = 'gray50']
+edge [fontname = 'Helvetica',
+     fontsize = '8',
+     len = '1.5',
+     color = 'gray80',
+     arrowsize = '0.5']
+
+   {rank=same '1' '2'}
+  '1' [label = 'A1', width = '1', fontcolor = 'black', fillcolor = 'white'] 
+  '2' [label = 'A2', width = '1', fontcolor = 'black', fillcolor = 'white'] 
+  '3' [label = 'Weight⇊', width = '1', fontcolor = 'black', fillcolor = '#7570b3'] 
+  '4' [label = 'Motor⇈', width = '1', fontcolor = 'black', fillcolor = '#7570b3'] 
+  '5' [label = 'Motor⇊', width = '1', fontcolor = 'black', fillcolor = '#7570b3'] 
+  '6' [label = 'Suicidality', width = '1', fontcolor = 'black', fillcolor = '#7570b3'] 
+  '7' [label = 'Mood', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '8' [label = 'Interest', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '9' [label = 'Weight⇊', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '10' [label = 'Weight⇈', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '11' [label = 'Sleep⇊', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '12' [label = 'Sleep⇈', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '13' [label = 'Fatigue', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '14' [label = 'Guilt', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '15' [label = 'Concentrate', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '16' [label = 'Suicidality', width = '1', fontcolor = 'black', fillcolor = '#1b9e77'] 
+  '17' [label = 'Mood', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '18' [label = 'Interest', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '19' [label = 'Weight⇅', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '20' [label = 'Sleep⇅', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '21' [label = 'Motor⇅', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '22' [label = 'Fatigue', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '23' [label = 'Guilt', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '24' [label = 'Concentrate', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+  '25' [label = 'Suicidality', width = '1', fontcolor = 'black', fillcolor = '#d95f02'] 
+
+'1'->'3' [label = '-0.24', penwidth = '0.966609884185723'] 
+'1'->'6' [label = '0.41', penwidth = '1.62244268872947'] 
+'1'->'7' [label = '0.76', penwidth = '3.04353567041099'] 
+'1'->'8' [label = '0.78', penwidth = '3.11897772798293'] 
+'1'->'9' [label = '-0.15', penwidth = '0.609562716468333'] 
+'1'->'10' [label = '0.6', penwidth = '2.38498843016525'] 
+'1'->'11' [label = '0.43', penwidth = '1.73732679672606'] 
+'1'->'12' [label = '0.45', penwidth = '1.79914820763346'] 
+'1'->'13' [label = '0.42', penwidth = '1.68578337306743'] 
+'1'->'14' [label = '0.62', penwidth = '2.46081098202301'] 
+'1'->'15' [label = '0.51', penwidth = '2.04050907681188'] 
+'1'->'16' [label = '0.59', penwidth = '2.375933221593'] 
+'1'->'17' [label = '0.94', penwidth = '3.77519287148625'] 
+'1'->'18' [label = '0.92', penwidth = '3.67095912919635'] 
+'1'->'19' [label = '0.81', penwidth = '3.25052189556413'] 
+'1'->'20' [label = '0.72', penwidth = '2.88092886952725'] 
+'1'->'21' [label = '0.81', penwidth = '3.2597817199889'] 
+'1'->'22' [label = '0.86', penwidth = '3.42170369313828'] 
+'1'->'23' [label = '1.02', penwidth = '4.0665015034711'] 
+'1'->'24' [label = '0.9', penwidth = '3.58185570115017'] 
+'1'->'25' [label = '0.86', penwidth = '3.43422503039626'] 
+'2'->'3' [label = '0.41', penwidth = '1.6482052872024'] 
+'2'->'4' [label = '0.16', penwidth = '0.62432594718815'] 
+'2'->'5' [label = '0.55', penwidth = '2.19857048814461'] 
+'2'->'7' [label = '-0.17', penwidth = '0.687682717740456'] 
+'2'->'9' [label = '0.46', penwidth = '1.85510815263036'] 
+'2'->'11' [label = '0.2', penwidth = '0.802075683333857'] 
+'2'->'12' [label = '0.27', penwidth = '1.0603063625551'] 
+'2'->'13' [label = '0.37', penwidth = '1.46994787473968'] 
+'2'->'14' [label = '-0.25', penwidth = '1.00255587573466'] 
+'2'->'15' [label = '0.21', penwidth = '0.830362100257246'] 
+'2'->'22' [label = '0.25', penwidth = '0.98699974805709'] 
+'2'->'23' [label = '-0.46', penwidth = '1.84304958050374'] 
+'2'->'25' [label = '-0.26', penwidth = '1.02168689057729'] 
+'1'->'2' [label = '-0.27', penwidth = '1.072'] 
+}
+"
+grViz(symptoms_efa.gv)
 ```
 
-<!--html_preserve--><div id="htmlwidget-ab176c7edae60d67d90a" style="width:672px;height:480px;" class="grViz html-widget"></div>
-<script type="application/json" data-for="htmlwidget-ab176c7edae60d67d90a">{"x":{"diagram":"digraph {\n\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\n\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\n\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n  \"1\" [label = \"A1\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"2\" [label = \"A2\", width = \"1\", fontcolor = \"black\", fillcolor = \"#FFFFFF\"] \n  \"3\" [label = \"Weight⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"4\" [label = \"Motor⇈\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"5\" [label = \"Motor⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"6\" [label = \"Suicidality\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"7\" [label = \"Mood\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"8\" [label = \"Interest\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"9\" [label = \"Weight⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"10\" [label = \"Weight⇈\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"11\" [label = \"Sleep⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"12\" [label = \"Sleep⇈\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"13\" [label = \"Fatigue\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"14\" [label = \"Guilt\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"15\" [label = \"Concentrate\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"16\" [label = \"Suicidality\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"17\" [label = \"Mood\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"18\" [label = \"Interest\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"19\" [label = \"Weight⇅\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"20\" [label = \"Sleep⇅\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"21\" [label = \"Motor⇅\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"22\" [label = \"Fatigue\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"23\" [label = \"Guilt\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"24\" [label = \"Concentrate\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"25\" [label = \"Suicidality\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n\"1\"->\"6\" [penwidth = \"1.62244268872947\"] \n\"1\"->\"7\" [penwidth = \"3.04353567041099\"] \n\"1\"->\"8\" [penwidth = \"3.11897772798293\"] \n\"1\"->\"10\" [penwidth = \"2.38498843016525\"] \n\"1\"->\"11\" [penwidth = \"1.73732679672606\"] \n\"1\"->\"12\" [penwidth = \"1.79914820763346\"] \n\"1\"->\"13\" [penwidth = \"1.68578337306743\"] \n\"1\"->\"14\" [penwidth = \"2.46081098202301\"] \n\"1\"->\"15\" [penwidth = \"2.04050907681188\"] \n\"1\"->\"16\" [penwidth = \"2.375933221593\"] \n\"1\"->\"17\" [penwidth = \"3.77519287148625\"] \n\"1\"->\"18\" [penwidth = \"3.67095912919635\"] \n\"1\"->\"19\" [penwidth = \"3.25052189556413\"] \n\"1\"->\"20\" [penwidth = \"2.88092886952725\"] \n\"1\"->\"21\" [penwidth = \"3.2597817199889\"] \n\"1\"->\"22\" [penwidth = \"3.42170369313828\"] \n\"1\"->\"23\" [penwidth = \"4.0665015034711\"] \n\"1\"->\"24\" [penwidth = \"3.58185570115017\"] \n\"1\"->\"25\" [penwidth = \"3.43422503039626\"] \n\"2\"->\"3\" [penwidth = \"1.6482052872024\"] \n\"2\"->\"4\" [penwidth = \"0.62432594718815\"] \n\"2\"->\"5\" [penwidth = \"2.19857048814461\"] \n\"2\"->\"9\" [penwidth = \"1.85510815263036\"] \n\"2\"->\"11\" [penwidth = \"0.802075683333857\"] \n\"2\"->\"12\" [penwidth = \"1.0603063625551\"] \n\"2\"->\"13\" [penwidth = \"1.46994787473968\"] \n\"2\"->\"15\" [penwidth = \"0.830362100257246\"] \n\"2\"->\"22\" [penwidth = \"0.98699974805709\"] \n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
+<!--html_preserve--><div id="htmlwidget-b4cfeed37634e0694d3c" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-b4cfeed37634e0694d3c">{"x":{"diagram":"\ndigraph {\ngraph [layout = \"dot\",\n       rankdir = \"TB\",\n       outputorder = \"edgesfirst\",\n       bgcolor = \"white\"]\nnode [fontname = \"Helvetica\",\n      fontsize = \"10\",\n      shape = \"circle\",\n      fixedsize = \"true\",\n      width = \"0.5\",\n      style = \"filled\",\n      fillcolor = \"aliceblue\",\n      color = \"gray70\",\n      fontcolor = \"gray50\"]\nedge [fontname = \"Helvetica\",\n     fontsize = \"8\",\n     len = \"1.5\",\n     color = \"gray80\",\n     arrowsize = \"0.5\"]\n\n   {rank=same \"1\" \"2\"}\n  \"1\" [label = \"A1\", width = \"1\", fontcolor = \"black\", fillcolor = \"white\"] \n  \"2\" [label = \"A2\", width = \"1\", fontcolor = \"black\", fillcolor = \"white\"] \n  \"3\" [label = \"Weight⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"4\" [label = \"Motor⇈\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"5\" [label = \"Motor⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"6\" [label = \"Suicidality\", width = \"1\", fontcolor = \"black\", fillcolor = \"#7570b3\"] \n  \"7\" [label = \"Mood\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"8\" [label = \"Interest\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"9\" [label = \"Weight⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"10\" [label = \"Weight⇈\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"11\" [label = \"Sleep⇊\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"12\" [label = \"Sleep⇈\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"13\" [label = \"Fatigue\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"14\" [label = \"Guilt\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"15\" [label = \"Concentrate\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"16\" [label = \"Suicidality\", width = \"1\", fontcolor = \"black\", fillcolor = \"#1b9e77\"] \n  \"17\" [label = \"Mood\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"18\" [label = \"Interest\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"19\" [label = \"Weight⇅\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"20\" [label = \"Sleep⇅\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"21\" [label = \"Motor⇅\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"22\" [label = \"Fatigue\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"23\" [label = \"Guilt\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"24\" [label = \"Concentrate\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n  \"25\" [label = \"Suicidality\", width = \"1\", fontcolor = \"black\", fillcolor = \"#d95f02\"] \n\n\"1\"->\"3\" [label = \"-0.24\", penwidth = \"0.966609884185723\"] \n\"1\"->\"6\" [label = \"0.41\", penwidth = \"1.62244268872947\"] \n\"1\"->\"7\" [label = \"0.76\", penwidth = \"3.04353567041099\"] \n\"1\"->\"8\" [label = \"0.78\", penwidth = \"3.11897772798293\"] \n\"1\"->\"9\" [label = \"-0.15\", penwidth = \"0.609562716468333\"] \n\"1\"->\"10\" [label = \"0.6\", penwidth = \"2.38498843016525\"] \n\"1\"->\"11\" [label = \"0.43\", penwidth = \"1.73732679672606\"] \n\"1\"->\"12\" [label = \"0.45\", penwidth = \"1.79914820763346\"] \n\"1\"->\"13\" [label = \"0.42\", penwidth = \"1.68578337306743\"] \n\"1\"->\"14\" [label = \"0.62\", penwidth = \"2.46081098202301\"] \n\"1\"->\"15\" [label = \"0.51\", penwidth = \"2.04050907681188\"] \n\"1\"->\"16\" [label = \"0.59\", penwidth = \"2.375933221593\"] \n\"1\"->\"17\" [label = \"0.94\", penwidth = \"3.77519287148625\"] \n\"1\"->\"18\" [label = \"0.92\", penwidth = \"3.67095912919635\"] \n\"1\"->\"19\" [label = \"0.81\", penwidth = \"3.25052189556413\"] \n\"1\"->\"20\" [label = \"0.72\", penwidth = \"2.88092886952725\"] \n\"1\"->\"21\" [label = \"0.81\", penwidth = \"3.2597817199889\"] \n\"1\"->\"22\" [label = \"0.86\", penwidth = \"3.42170369313828\"] \n\"1\"->\"23\" [label = \"1.02\", penwidth = \"4.0665015034711\"] \n\"1\"->\"24\" [label = \"0.9\", penwidth = \"3.58185570115017\"] \n\"1\"->\"25\" [label = \"0.86\", penwidth = \"3.43422503039626\"] \n\"2\"->\"3\" [label = \"0.41\", penwidth = \"1.6482052872024\"] \n\"2\"->\"4\" [label = \"0.16\", penwidth = \"0.62432594718815\"] \n\"2\"->\"5\" [label = \"0.55\", penwidth = \"2.19857048814461\"] \n\"2\"->\"7\" [label = \"-0.17\", penwidth = \"0.687682717740456\"] \n\"2\"->\"9\" [label = \"0.46\", penwidth = \"1.85510815263036\"] \n\"2\"->\"11\" [label = \"0.2\", penwidth = \"0.802075683333857\"] \n\"2\"->\"12\" [label = \"0.27\", penwidth = \"1.0603063625551\"] \n\"2\"->\"13\" [label = \"0.37\", penwidth = \"1.46994787473968\"] \n\"2\"->\"14\" [label = \"-0.25\", penwidth = \"1.00255587573466\"] \n\"2\"->\"15\" [label = \"0.21\", penwidth = \"0.830362100257246\"] \n\"2\"->\"22\" [label = \"0.25\", penwidth = \"0.98699974805709\"] \n\"2\"->\"23\" [label = \"-0.46\", penwidth = \"1.84304958050374\"] \n\"2\"->\"25\" [label = \"-0.26\", penwidth = \"1.02168689057729\"] \n\"1\"->\"2\" [label = \"-0.27\", penwidth = \"1.072\"] \n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script><!--/html_preserve-->
 
 ```r
-export_graph(symptoms_efa.graph, file_name='mdd-symptoms-gsem_files/symptoms_efa.svg', file_type='svg')
-
-symptoms_efa.gv <- generate_dot(symptoms_efa.graph)
-
 cat(str_replace_all(symptoms_efa.gv, "'", '"'), file='mdd-symptom-gsem_files/symptoms_efa.gv')
 ```
 
