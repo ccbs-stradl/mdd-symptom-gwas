@@ -761,28 +761,20 @@ names(edge_dir) <- c('=~', '~', '~~')
 
 ### Common factor
 
-Common factor model
+Common factor model. Allow residual negative correlation between directional symptoms
 
 ```{r pgc_commonfactor, cache=TRUE}
 
 pgc_commonfactor.model <- "
 A1 =~ NA*PGC3a + PGC5a + PGC5b + PGC9
 A1 ~~ 1*A1
+PGC5a ~~ PGC5b
 "
 pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor.model)
 
-```
+pgc_commonfactor.fit$modelfit
+pgc_commonfactor.fit$results[c(1,2,3,6,7)]
 
-```{r pgc_commonfactor_constr, cache=TRUE}
-
-pgc_commonfactor_constr.model <- "
-A1 =~ NA*PGC3a + PGC5a + -0.001*PGC5b + PGC9
-A1 ~~ 1*A1
-"
-pgc_commonfactor_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor_constr.model)
-
-pgc_commonfactor_constr.fit$modelfit
-pgc_commonfactor_constr.fit$results[c(1, 2, 3, 6, 7)]
 
 fit_graph <- function(results, ...) {
 
@@ -812,13 +804,26 @@ fit_graph <- function(results, ...) {
 
 render_fit <- function(results) render_graph(fit_graph(results))
 
-render_fit(pgc_commonfactor_constr.fit$results)
+render_fit(pgc_commonfactor.fit$results)
 
-pgc_commonfactor_constr.gv <- generate_dot(fit_graph(pgc_commonfactor_constr.fit$results))
+pgc_commonfactor.gv <- generate_dot(fit_graph(pgc_commonfactor.fit$results))
+
+# add in block to specify node ranks
+pgc_commonfactor.gv.list <- str_split(pgc_commonfactor.gv, '\n\n')[[1]]
+
+# move the nodes/edges element to the end
+pgc_commonfactor.gv.list[6] <- pgc_commonfactor.gv.list[5]
+
+# add manually made ranks
+pgc_commonfactor.gv.list[5] <- "{rank=same '1'}\n{rank=same '2' '3' '4' '5'}" 
+
+pgc_commonfactor_rank.gv <- paste(pgc_commonfactor.gv.list, collapse='\n\n')
+
+grViz(pgc_commonfactor_rank.gv)
 
 # output as a GraphViz dot file. Replace single quotes with double quotes 
 # as that's what the command line utility expects
-cat(str_replace_all(pgc_commonfactor_constr.gv, "'", '"'), file='mdd-symptom-gsem_files/pgc_commonfactor_constr.gv')
+cat(str_replace_all(pgc_commonfactor_rank.gv, "'", '"'), file='mdd-symptom-gsem_files/pgc_commonfactor.gv')
 
 ```
 
@@ -838,6 +843,13 @@ A1 ~~ 1*A1
 A1 ~~ 0*S1
 c2 > 0.001
 UKB_CIDI2 ~~ c2*UKB_CIDI2
+"
+ukb_cidi_commonfactor.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+A1 ~~ 1*A1
+UKB_CIDI1 ~~ UKB_CIDI2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
 "
 ukb_cidi_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_commonfactor.model)
 
@@ -862,10 +874,66 @@ A3 =~ NA*UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI3b
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3"
+ukb_cidi_kendler_neale.model <- "
+A1 =~ NA*UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7
+A3 =~ NA*UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI3a + UKB_CIDI3b
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+"
 ukb_cidi_kendler_neale.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_kendler_neale.model)
 
 ukb_cidi_kendler_neale.fit$modelfit
 ukb_cidi_kendler_neale.fit$results[c(1,2,3,6,7)]
+
+```
+
+
+```{r ukb_cidi_kendler_neale_constr, cache=TRUE}
+
+ukb_cidi_kendler_neale_constr.model <- "
+A1 =~ NA*UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7
+A3 =~ NA*UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI3a + UKB_CIDI3b
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+ca13 > -1
+A1 ~~ ca13*A3
+c1 > 0.001
+UKB_CIDI1 ~~ c1*UKB_CIDI1
+c2 > 0.001
+UKB_CIDI2 ~~ c2*UKB_CIDI2
+c3a > 0.001
+UKB_CIDI3a ~~ c3a*UKB_CIDI3a
+c3b > 0.001
+UKB_CIDI3b ~~ c3b*UKB_CIDI3b
+c4a > 0.001
+UKB_CIDI4a ~~ c4a*UKB_CIDI4a
+c4b > 0.001
+UKB_CIDI4b ~~ c4b*UKB_CIDI4b
+c6 > 0.001
+UKB_CIDI6 ~~ c6*UKB_CIDI6
+c7 > 0.001
+UKB_CIDI7 ~~ c7*UKB_CIDI7
+c8 > 0.001
+UKB_CIDI8 ~~ c8*UKB_CIDI8
+c9 > 0.001
+UKB_CIDI9 ~~ c9*UKB_CIDI9
+"
+ukb_cidi_kendler_neale_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_kendler_neale_constr.model)
+
+ukb_cidi_kendler_neale_constr.fit$modelfit
+ukb_cidi_kendler_neale_constr.fit$results[c(1,2,3,6,7)]
+
+```
+
+```{r}
 
 #render_fit(ukb_cidi_kendler_neale.fit$results)
 # cat(generate_dot(fit_graph(ukb_cidi_kendler_neale.fit$results)))
