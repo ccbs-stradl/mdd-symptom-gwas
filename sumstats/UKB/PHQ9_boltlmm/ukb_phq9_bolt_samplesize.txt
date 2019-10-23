@@ -1,0 +1,10 @@
+trait abbv N Nca Nco prev
+D_anhedonia anh 153300 29308 123992 0.191181
+D_appetite_changes app 153501 28542 124959 0.18594
+D_concentration_problems conc 153495 28180 125315 0.183589
+D_depressed_mood dep 153169 34523 118646 0.225392
+D_fatigue fat 153393 77292 76101 0.503882
+D_low_selfesteem self 152963 30200 122763 0.197433
+D_psychomotor_changes psyc 153450 8824 144626 0.057504
+D_sleep_problems sle 153394 75405 77989 0.491577
+D_suicidal_ideation sui 152533 6586 145947 0.043178
