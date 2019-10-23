@@ -301,31 +301,40 @@ Read in headers from PGC daner files. The daner format contains headers for the 
 
 ```{r, warning=FALSE}
 
-# list daner files
-pgc_daner_meta_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='meta.gz', full.names=TRUE)
+pgc_symptoms_sample_prev_file <- 'sumstats/PGC/CasesAllCohorts/pgc_dsm_symptoms_prev.txt'
 
-# pull out which symptom 'x' this is from the filename (daner_MDDx_*)
-names(pgc_daner_meta_gz) <- str_extract(pgc_daner_meta_gz, 'MDD[:digit:](a|b)?')
+if(!file.exists(pgc_symptoms_sample_prev_file)) {
 
-# read in header and pull out 6th and 7th columns
-pgc_daner_meta_frq_cols <- 
-bind_rows(
-lapply(pgc_daner_meta_gz, function(daner) {
-        daner_header <-read.table(daner, nrows=1, stringsAsFactors=F)
-        return(data.frame(frq_a_col=daner_header$V6, frq_u_col=daner_header$V7))
-}), .id='Symptom')
+  # list daner files
+  pgc_daner_meta_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='meta.gz', full.names=TRUE)
+  
+  # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
+  names(pgc_daner_meta_gz) <- str_extract(pgc_daner_meta_gz, 'MDD[:digit:](a|b)?')
+  
+  # read in header and pull out 6th and 7th columns
+  pgc_daner_meta_frq_cols <- 
+  bind_rows(
+  lapply(pgc_daner_meta_gz, function(daner) {
+          daner_header <-read.table(daner, nrows=1, stringsAsFactors=F)
+          return(data.frame(frq_a_col=daner_header$V6, frq_u_col=daner_header$V7))
+  }), .id='Symptom')
+  
+  # shape and unshape and extract N from column names
+  pgc_symptoms_sample_prev <-
+  pgc_daner_meta_frq_cols %>%
+  gather(key='col', value='frq', frq_a_col:frq_u_col) %>%
+  select(-col) %>%
+  separate(frq, into=c('frq', 'status', 'Count')) %>%
+  mutate(presence=recode(status, 'A'='Present', 'U'='Absent'),
+         N=as.integer(Count)) %>%
+  select(-frq, -status, -Count) %>%
+  spread(presence, N) %>%
+  mutate(samp_prev=Present / (Present + Absent))
 
-# shape and unshape and extract N from column names
-pgc_symptoms_sample_prev <-
-pgc_daner_meta_frq_cols %>%
-gather(key='col', value='frq', frq_a_col:frq_u_col) %>%
-select(-col) %>%
-separate(frq, into=c('frq', 'status', 'Count')) %>%
-mutate(presence=recode(status, 'A'='Present', 'U'='Absent'),
-       N=as.integer(Count)) %>%
-select(-frq, -status, -Count) %>%
-spread(presence, N) %>%
-mutate(samp_prev=Present / (Present + Absent))
+  write_delim(pgc_symptoms_sample_prev, pgc_symptoms_sample_prev_file, delim=' ')
+} else {
+  pgc_symptoms_sample_prev <- read_table2(pgc_symptoms_sample_prev_file)
+}
 
 pgc_symptoms_sample_prev %>%
   left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref')) %>%
