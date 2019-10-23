@@ -1264,6 +1264,10 @@ Both the CIDI and the PHQ suggest only a single higher-order factor.
 Check eigen values of the correlation matrix
 ```{r mdd_symptom_gsem_efa_eigen}
 
+symptoms_cov_pd.eigen <- eigen(cov2cor(symptoms_cov_pd))
+
+signif(symptoms_cov_pd.eigen$values, 3)
+
 plot(eigen(cov2cor(symptoms_cov_pd))$values, ylab='Eigenvalue')
 lines(eigen(cov2cor(symptoms_cov_pd))$values)
 abline(1, 0, col='red')
@@ -1272,7 +1276,7 @@ abline(1, 0, col='red')
 
 ```{r symptoms_efa}
 
-symptoms_efa <- factanal(covmat=symptoms_cov_pd, factors=3, rotation='promax')
+symptoms_efa <- factanal(covmat=symptoms_cov_pd, factors=2, rotation='promax')
 
 symptoms_efa
 
@@ -1418,18 +1422,80 @@ select(study, h, A1, A2)
 
 ```
 
+```{r symptoms_efa1}
+
+symptoms_efa1 <- factanal(covmat=symptoms_cov_pd, factors=1, rotation='promax')
+
+symptoms_efa1
+
+symptoms_efa1.df <- 
+data.frame(Factor1=loadings(symptoms_efa1)[,1]) %>%
+mutate(trait=rownames(loadings(symptoms_efa1))) %>%
+left_join(trait_symptom_labels, by='trait') %>%
+select(study, Symptom=h, starts_with('Factor'))
+
+```
+
+
+```{r symptoms_efa2}
+
+symptoms_efa2 <- factanal(covmat=symptoms_cov_pd, factors=2, rotation='promax')
+
+symptoms_efa2
+
+symptoms_efa2.df <- 
+as.data.frame(loadings(symptoms_efa2)[,1:2]) %>%
+mutate(trait=rownames(loadings(symptoms_efa1))) %>%
+left_join(trait_symptom_labels, by='trait') %>%
+select(study, Symptom=h, starts_with('Factor'))
+
+```
+
 ```{r symptoms_efa3}
 
 symptoms_efa3 <- factanal(covmat=symptoms_cov_pd, factors=3, rotation='promax')
 
 symptoms_efa3
 
+symptoms_efa3.df <- 
 as.data.frame(loadings(symptoms_efa3)[,1:3]) %>%
 mutate(trait=rownames(loadings(symptoms_efa3))) %>%
 left_join(trait_symptom_labels, by='trait') %>%
 select(study, Symptom=h, starts_with('Factor'))
 
 ```
+
+
+```{r symptoms_efa6}
+
+symptoms_efa6 <- factanal(covmat=symptoms_cov_pd, factors=6, rotation='promax')
+
+symptoms_efa6
+
+symptoms_efa6.df <- 
+as.data.frame(loadings(symptoms_efa6)[,1:6]) %>%
+mutate(trait=rownames(loadings(symptoms_efa6))) %>%
+left_join(trait_symptom_labels, by='trait') %>%
+select(study, Symptom=h, starts_with('Factor'))
+
+```
+
+```{r}
+
+symptoms_efa.df <- 
+symptoms_efa1.df %>%
+select(study, Symptom, Factor1.=starts_with('Factor')) %>%
+left_join(symptoms_efa2.df %>%
+          select(study, Symptom, Factor2.=starts_with('Factor')))%>%
+left_join(symptoms_efa3.df %>%
+          select(study, Symptom, Factor3.=starts_with('Factor')))%>%
+left_join(symptoms_efa6.df %>%
+          select(study, Symptom, Factor6.=starts_with('Factor')))
+
+write_csv(symptoms_efa.df, 'mdd-symptom-gsem_files/symptom_efa.csv')
+
+```
+
 
 ## Graphviz
 
