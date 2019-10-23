@@ -81,22 +81,22 @@ MDD DSM symptoms are numbered 1-9:
 
 dsm_mdd_symptoms_labels <-
 read_delim("
-MDD1;Mood;Mood
-MDD2;Interest;Interest
-MDD3;Weight⇅;Weight⇆
-MDD3a;Weight⇊;Weight⇇
-MDD3b;Weight⇈;Weight⇉
-MDD4;Sleep⇅;Sleep⇆
-MDD4a;Sleep⇊;Sleep⇇
-MDD4b;Sleep⇈;Sleep⇉
-MDD5;Motor⇅;Motor⇆
-MDD5a;Motor⇈;Motor⇉
-MDD5b;Motor⇊;Motor⇇
-MDD6;Fatigue;Fatigue
-MDD7;Guilt;Guilt
-MDD8;Concentrate;Concentrate
-MDD9;Suicidality;Suicidality
-", col_names=c('ref', 'h', 'v'), delim=';')
+MDD1;Mood;Mood;Dep
+MDD2;Interest;Interest;Anh
+MDD3;Weight⇅;Weight⇆;App
+MDD3a;Weight⇊;Weight⇇;AppDec
+MDD3b;Weight⇈;Weight⇉;AppInc
+MDD4;Sleep⇅;Sleep⇆;Sle
+MDD4a;Sleep⇊;Sleep⇇;SleDec
+MDD4b;Sleep⇈;Sleep⇉;SleInc
+MDD5;Motor⇅;Motor⇆;Psyc
+MDD5a;Motor⇈;Motor⇉;PsycInc
+MDD5b;Motor⇊;Motor⇇;PsycDec
+MDD6;Fatigue;Fatigue;Fat
+MDD7;Guilt;Guilt;Self
+MDD8;Concentrate;Concentrate;Conc
+MDD9;Suicidality;Suicidality;Sui
+", col_names=c('ref', 'h', 'v', 'abbv'), delim=';')
 
 dsm_mdd_symptoms_reference <-
 read_delim("
@@ -119,7 +119,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 
 dsm_mdd_symptoms_reference %>%
 left_join(dsm_mdd_symptoms_labels, by=c('Reference'='ref')) %>%
-select(Reference, Label=h, Description)
+select(Reference, Abbreviation=abbv, Label=h, Description)
 
 ```
 
@@ -180,7 +180,7 @@ done
 
 ### PHQ
 
-The PHQ9 and PHQ-like items were assessed at 4 timepoints: 0 = initial assessment, 1 = repeate assessment, 2 = imaging assessment, M = Mental Health Questionnaire online followup
+The PHQ9 and PHQ-like items were assessed at 4 timepoints: 0 = initial assessment, 1 = repeat assessment, 2 = imaging assessment, M = Mental Health Questionnaire online followup. The phenotypes from these sumstats were [coded as quantitative](https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=504).
 
 ```{bash, eval=FALSE}
 
@@ -204,6 +204,9 @@ for sumstats in $(ls sumstats/UKB/PHQ/UKB_PHQ_MDD*.gz); do
 done
 
 ```
+
+We also used binary coded (`0` = not at all or several days; `1`= more than half the days or nearly every day) from [Thorp et al](https://www.biorxiv.org/content/10.1101/528067v1)
+
 
 
 # Symptom prevalences
@@ -298,31 +301,40 @@ Read in headers from PGC daner files. The daner format contains headers for the 
 
 ```{r, warning=FALSE}
 
-# list daner files
-pgc_daner_meta_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='meta.gz', full.names=TRUE)
+pgc_symptoms_sample_prev_file <- 'sumstats/PGC/CasesAllCohorts/pgc_dsm_symptoms_prev.txt'
 
-# pull out which symptom 'x' this is from the filename (daner_MDDx_*)
-names(pgc_daner_meta_gz) <- str_extract(pgc_daner_meta_gz, 'MDD[:digit:](a|b)?')
+if(!file.exists(pgc_symptoms_sample_prev_file)) {
 
-# read in header and pull out 6th and 7th columns
-pgc_daner_meta_frq_cols <- 
-bind_rows(
-lapply(pgc_daner_meta_gz, function(daner) {
-        daner_header <-read.table(daner, nrows=1, stringsAsFactors=F)
-        return(data.frame(frq_a_col=daner_header$V6, frq_u_col=daner_header$V7))
-}), .id='Symptom')
+  # list daner files
+  pgc_daner_meta_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='meta.gz', full.names=TRUE)
+  
+  # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
+  names(pgc_daner_meta_gz) <- str_extract(pgc_daner_meta_gz, 'MDD[:digit:](a|b)?')
+  
+  # read in header and pull out 6th and 7th columns
+  pgc_daner_meta_frq_cols <- 
+  bind_rows(
+  lapply(pgc_daner_meta_gz, function(daner) {
+          daner_header <-read.table(daner, nrows=1, stringsAsFactors=F)
+          return(data.frame(frq_a_col=daner_header$V6, frq_u_col=daner_header$V7))
+  }), .id='Symptom')
+  
+  # shape and unshape and extract N from column names
+  pgc_symptoms_sample_prev <-
+  pgc_daner_meta_frq_cols %>%
+  gather(key='col', value='frq', frq_a_col:frq_u_col) %>%
+  select(-col) %>%
+  separate(frq, into=c('frq', 'status', 'Count')) %>%
+  mutate(presence=recode(status, 'A'='Present', 'U'='Absent'),
+         N=as.integer(Count)) %>%
+  select(-frq, -status, -Count) %>%
+  spread(presence, N) %>%
+  mutate(samp_prev=Present / (Present + Absent))
 
-# shape and unshape and extract N from column names
-pgc_symptoms_sample_prev <-
-pgc_daner_meta_frq_cols %>%
-gather(key='col', value='frq', frq_a_col:frq_u_col) %>%
-select(-col) %>%
-separate(frq, into=c('frq', 'status', 'Count')) %>%
-mutate(presence=recode(status, 'A'='Present', 'U'='Absent'),
-       N=as.integer(Count)) %>%
-select(-frq, -status, -Count) %>%
-spread(presence, N) %>%
-mutate(samp_prev=Present / (Present + Absent))
+  write_delim(pgc_symptoms_sample_prev, pgc_symptoms_sample_prev_file, delim=' ')
+} else {
+  pgc_symptoms_sample_prev <- read_table2(pgc_symptoms_sample_prev_file)
+}
 
 pgc_symptoms_sample_prev %>%
   left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref')) %>%
@@ -341,6 +353,10 @@ Symptom prevalences in the UKB CIDI assessment were calculated for the present/a
 # from a separate repository
 
 ukb_cidi_prevalences <- read_tsv('sumstats/UKB/CIDI/ukb_cidi_symptoms_prev.txt')
+
+ukb_cidi_prevalences %>%
+left_join(dsm_mdd_symptoms_labels, by=c('reference'='ref')) %>%
+select(Symptom=h, `Sample Prev.`=cidi_sample, `Pop. Prev`=mhq_sample)
 
 ```
 
@@ -379,6 +395,19 @@ Correlation (Spearman's rho) between sample prevalences in UKB CIDI and PGC DSM:
 ```{r}
 
 with(pgc_ukb_symptoms_prev, cor.test(samp_prev, cidi_sample, method='spearman', use='pair'))
+
+```
+
+## UKB PHQ sample prevalences 
+
+```{r}
+
+ukb_phq_symptoms_prev <- read_table2('sumstats/UKB/PHQ9_boltlmm/ukb_phq9_bolt_samplesize.txt')
+
+ukb_phq_symptoms_prev %>%
+left_join(dsm_mdd_symptoms_labels %>% mutate(abbv=tolower(abbv)), by='abbv') %>%
+arrange(ref) %>%
+select(Symptom=h, Total=N, Cases=Nca, Controls=Nco, Prev.=prev)
 
 ```
 
@@ -558,7 +587,7 @@ done
 
 ```{r}
 
-other_mdd_gz <- list.files('sumstats/PGC/OtherMDD', pattern='daner_.+sumstats.gz$', full.names=TRUE)
+other_mdd_gz <- list.files('sumstats/PGC/MDD', pattern='daner_.+sumstats.gz$', full.names=TRUE)
 
 names(other_mdd_gz) <- sapply(str_split(sapply(str_split(other_mdd_gz, '/'), last), '\\.'), first)
 
@@ -895,13 +924,6 @@ cat(str_replace_all(ukb_cidi_common.gv, "'", '"'), file='mdd-symptom-gsem_files/
 
 ```{r ukb_cidi_kendler_neale, cache=TRUE}
 
-ukb_cidi_kendler_neale.model <- "
-A1 =~ NA*UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
-A2 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7
-A3 =~ NA*UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI3b
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A3 ~~ 1*A3"
 ukb_cidi_kendler_neale.model <- "
 A1 =~ NA*UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
 A2 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7
