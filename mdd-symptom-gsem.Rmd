@@ -180,11 +180,11 @@ done
 
 ### PHQ
 
-The PHQ9 and PHQ-like items were assessed at 4 timepoints: 0 = initial assessment, 1 = repeat assessment, 2 = imaging assessment, M = Mental Health Questionnaire online followup. The phenotypes from these sumstats were [coded as quantitative](https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=504).
+The PHQ9 and PHQ-like items were assessed at 4 timepoints: 0 = initial assessment, 1 = repeat assessment, 2 = imaging assessment, M = Mental Health Questionnaire online followup. The phenotypes from these sumstats were [coded as quantitative](https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=504) and inverse-normal transformed.
 
 ```{bash, eval=FALSE}
 
-for sumstats in $(ls sumstats/UKB/PHQ/UKB_PHQ_MDD*.gz); do
+for sumstats in $(ls sumstats/UKB/PHQ9_INT/UKB_PHQ9_INT_MDD*.gz); do
 
         prefix=$(basename $sumstats .gz)
 
@@ -192,14 +192,13 @@ for sumstats in $(ls sumstats/UKB/PHQ/UKB_PHQ_MDD*.gz); do
         --sumstats $sumstats \
         --a1 a_1 \
         --a2 a_0 \
-        --signed-sumstats beta,0 \
-        --N-col N \
-        --p p \
         --info info \
         --frq af \
-        --snp rsid \
+        --N-col N \
+        --signed-sumstats beta,0 \
+        --p p \
         --merge-alleles sumstats/reference/w_hm3.snplist \
-        --out sumstats/UKB/PHQ/${prefix}.ldsc
+        --out sumstats/UKB/PHQ9_INT/${prefix}.ldsc
 
 done
 
@@ -398,19 +397,6 @@ with(pgc_ukb_symptoms_prev, cor.test(samp_prev, cidi_sample, method='spearman', 
 
 ```
 
-## UKB PHQ sample prevalences 
-
-```{r}
-
-ukb_phq_symptoms_prev <- read_table2('sumstats/UKB/PHQ9_boltlmm/ukb_phq9_bolt_samplesize.txt')
-
-ukb_phq_symptoms_prev %>%
-left_join(dsm_mdd_symptoms_labels %>% mutate(abbv=tolower(abbv)), by='abbv') %>%
-arrange(ref) %>%
-select(Symptom=h, Total=N, Cases=Nca, Controls=Nco, Prev.=prev)
-
-```
-
 
 # Multivariable LDSC estimation
 
@@ -426,7 +412,7 @@ pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sums
 
 ukb_cidi_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz$', full.names=TRUE)
 
-ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ9_INT', pattern='ldsc.sumstats.gz$', full.names=TRUE)
 
 # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
 names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
