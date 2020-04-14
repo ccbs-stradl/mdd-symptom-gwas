@@ -188,17 +188,20 @@ for sumstats in $(ls sumstats/UKB/PHQ9_INT/UKB_PHQ9_INT_MDD*.gz); do
 
         prefix=$(basename $sumstats .gz)
 
-        munge_sumstats.py \
-        --sumstats $sumstats \
-        --a1 a_1 \
-        --a2 a_0 \
-        --info info \
-        --frq af \
-        --N-col N \
-        --signed-sumstats beta,0 \
-        --p p \
-        --merge-alleles sumstats/reference/w_hm3.snplist \
-        --out sumstats/UKB/PHQ9_INT/${prefix}.ldsc
+        if [ ! -f sumstats/UKB/PHQ9_INT/${prefix}.ldsc.sumstats.gz ]; then
+          munge_sumstats.py \
+          --sumstats $sumstats \
+          --a1 a_1 \
+          --a2 a_0 \
+          --info info \
+          --frq af \
+          --N-col N \
+          --signed-sumstats beta,0 \
+          --p p \
+          --merge-alleles sumstats/reference/w_hm3.snplist \
+          --out sumstats/UKB/PHQ9_INT/${prefix}.ldsc \
+          --chunksize 500000
+       fi
 
 done
 
