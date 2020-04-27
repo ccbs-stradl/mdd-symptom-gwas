@@ -409,44 +409,53 @@ We list out the munged sumstats for PGC and UKB and unify them with sample and p
 
 pgc_ukb_covstruct_r <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.deparse.R'
 pgc_ukb_covstruct_rds <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.rds'
+pgc_ukb_sumstats_prevs_txt <- 'ldsc/pgc_dsm.ukb_cidi.sumstats.prevs.txt'
 
-# list sumstats files
-pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz$', full.names=TRUE)
 
-ukb_cidi_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+if(!file.exists(pgc_ukb_sumstats_prevs_txt)) {
 
-ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ9_INT', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+  # list sumstats files
+  pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+  
+  ukb_cidi_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+  
+  ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ9_INT', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+  
+  # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
+  names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
+  
+  names(ukb_cidi_sumstats_gz) <- str_extract(ukb_cidi_sumstats_gz, 'MDD[:digit:](a|b)?')
+  
+  names(ukb_phq_sumstats_gz) <- str_extract(ukb_phq_sumstats_gz, 'MDD[:digit:]')
+  
+  pgc_sumstats_prevs <- 
+  tibble(Symptom=names(pgc_sumstats_gz),
+         filename=pgc_sumstats_gz,
+         study='PGC') %>%
+  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
+  mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
+  select(trait_name, filename, samp_prev, pop_prev)
+  
+  ukb_cidi_sumstats_prevs <- 
+  tibble(Symptom=names(ukb_cidi_sumstats_gz), 
+         filename=ukb_cidi_sumstats_gz,
+         study='UKB_CIDI') %>%
+  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
+  mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
+  select(trait_name, filename, samp_prev=cidi_sample, pop_prev)
+  
+  ukb_phq_sumstats_prevs <- tibble(Symptom=names(ukb_phq_sumstats_gz),
+         filename=ukb_phq_sumstats_gz,
+         study='UKB_PHQ') %>%
+  mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
+  select(trait_name, filename)
+  
+  sumstats_prevs <- bind_rows(pgc_sumstats_prevs, ukb_cidi_sumstats_prevs, ukb_phq_sumstats_prevs)
 
-# pull out which symptom 'x' this is from the filename (daner_MDDx_*)
-names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
-
-names(ukb_cidi_sumstats_gz) <- str_extract(ukb_cidi_sumstats_gz, 'MDD[:digit:](a|b)?')
-
-names(ukb_phq_sumstats_gz) <- str_extract(ukb_phq_sumstats_gz, 'MDD[:digit:]_[:alnum:]')
-
-pgc_sumstats_prevs <- 
-tibble(Symptom=names(pgc_sumstats_gz),
-       filename=pgc_sumstats_gz,
-       study='PGC') %>%
-left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
-mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
-select(trait_name, filename, samp_prev, pop_prev)
-
-ukb_cidi_sumstats_prevs <- 
-tibble(Symptom=names(ukb_cidi_sumstats_gz), 
-       filename=ukb_cidi_sumstats_gz,
-       study='UKB_CIDI') %>%
-left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
-mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
-select(trait_name, filename, samp_prev=cidi_sample, pop_prev)
-
-ukb_phq_sumstats_prevs <- tibble(Symptom=names(ukb_phq_sumstats_gz),
-       filename=ukb_phq_sumstats_gz,
-       study='UKB_PHQ') %>%
-mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
-select(trait_name, filename)
-
-sumstats_prevs <- bind_rows(pgc_sumstats_prevs, ukb_cidi_sumstats_prevs, ukb_phq_sumstats_prevs)
+  write_tsv(sumstats_prevs, pgc_ukb_sumstats_prevs_txt)
+} else {
+  sumstats_prevs <- read_tsv(pgc_ukb_sumstats_prevs_txt)
+}
 
 if(!file.exists(pgc_ukb_covstruct_r)) {
 
@@ -480,37 +489,61 @@ Run LDSC, using sumstats filenames and estimated prevalences to construct comman
 
 ```{r mdd_symptom_gsem_ldsc_h2, results='hide'}
 
-sumstats_h2 <- plyr::adply(sumstats_prevs, 1, function(x) {
+sumstats_h2_txt <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.h2.txt'
+
+if(!file.exists(sumstats_h2_txt)) {
+
+  sumstats_h2 <- plyr::adply(sumstats_prevs, 1, function(x) {
+    
+    filename <- x$filename
+    samp_prev <- x$samp_prev
+    pop_prev <- x$pop_prev
+    outname <- paste(filename, 'h2', sep='.')
+    logfile <- paste(outname, 'log', sep='.')
+
+    print(filename)
   
-  filename <- x$filename
-  samp_prev <- x$samp_prev
-  pop_prev <- x$pop_prev
-  outname <- paste(filename, 'h2', sep='.')
-  logfile <- paste(outname, 'log', sep='.')
+  
+    if(!file.exists(logfile)) {
+    if(!is.na(samp_prev)) {
+       ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev, '--pop-prev', pop_prev)
+    } else {
+       ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname)
+    }
+    system(ldsc_command)
+    }
+  
+    h2_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
+  
+    h2_row <- h2_log$V1[str_detect(h2_log$V1, 'h2:')]
+    h2_est_str <- str_extract_all(str_split(h2_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+    h2 <- as.numeric(h2_est_str[1])
+    se <- as.numeric(h2_est_str[2])
 
+    lambda_row <- h2_log$V1[str_detect(h2_log$V1, 'Lambda GC:')]
+    lambda_est_str <- str_extract_all(str_split(lambda_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+    LambdaGC <- as.numeric(lambda_est_str)
+  
+    meanchisq_row <- h2_log$V1[str_detect(h2_log$V1, 'Mean Chi\\^2:')]
+    meanchisq_est_str <- str_extract_all(str_split(meanchisq_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+    MeanChiSq <- as.numeric(meanchisq_est_str)
 
-  if(!file.exists(logfile)) {
-  if(!is.na(samp_prev)) {
-     ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev, '--pop-prev', pop_prev)
-  } else {
-     ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname)
-  }
-  system(ldsc_command)
-  }
+    intercept_row <- h2_log$V1[str_detect(h2_log$V1, 'Intercept:')]
+    intercept_est_str <- str_extract_all(str_split(intercept_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+    Intercept <- as.numeric(intercept_est_str[1])
+    InterceptSE <- as.numeric(intercept_est_str[2])
 
-  h2_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
+    return(data.frame(h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE))
+  
+  })
 
-  h2_row <- h2_log$V1[str_detect(h2_log$V1, 'h2:')]
+  write_tsv(sumstats_h2, sumstats_h2_txt)
 
-  h2_est_str <- str_extract_all(str_split(h2_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+} else {
 
-  h2 <- as.numeric(h2_est_str[1])
-  se <- as.numeric(h2_est_str[2])
+  sumstats_h2 <- read_tsv(sumstats_h2_txt)
 
-  return(data.frame(h2, se))
-
-})
-
+}
 
 
 ```
