@@ -1,0 +1,153 @@
+---
+title: Meta-analyses of MDD Symptom GWASs
+author: Mark adams
+output:
+  html_document:
+    df_print: kable
+---
+
+Meta analyze MDD Symptom GWASs for the following two sets of cohorts:
+
+1. [PGC MDD clinical cohorts](pgc-symptom-gwas.html) and the [Australian of Depression Study](https://www.geneticsofdepression.org.au/)
+2. [UK Biobank](https://www.ukbiobank.ac.uk) and [ALSPAC](http://www.bristol.ac.uk/alspac/)
+
+```{r symptoms}
+
+library(readr)
+library(dplyr)
+
+dsm_mdd_symptoms_reference <-
+read_delim("
+MDD1;depressed;Depressed mood most of the day, nearly every day
+MDD2;anhedonia;Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
+MDD3;weightChange;Significant change in weight or appetite
+MDD3a;weightLoss;Significant weight loss or decrease in appetite
+MDD3b;weightGain;Significant weight gain or increase in appetite
+MDD4;sleepChange;Sleeping too much or not sleeping enough
+MDD4a;sleepProb;Insomnia nearly every day
+MDD4b;sleepMore;Hypersomnia nearly every day
+MDD5;psychomotor;Changes in speed/amount of moving or speaking
+MDD5a;psychomotorFast;Psychomotor agitation nearly every day
+MDD5b;psychomotorSlow;Psychomotor retardation nearly every day
+MDD6;fatigue;Fatigue or loss of energy nearly every day
+MDD7;worthless;Feelings of worthlessness or excessive or inappropriate guilt
+MDD8;concentration;Diminished ability to think or concentrate, or indecisiveness
+MDD9;death;Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide
+", col_names=c('Reference', 'Symptom Abbrev.', 'Description'), delim=';')
+
+dsm_mdd_symptoms_reference
+
+```
+
+
+# Sumstats alignment
+
+Align all sumstats to the reference panel used for the PGC MDD cohorts in preparation to run the [RICOPILI post-imputation command](https://docs.google.com/document/d/1o4bN_uLK4IEItXCSdeQkXfZwEpLuSCWlveJevRogi08/edit#heading=h.4008addvumol). 
+
+Set up imputation reference directory
+
+```{bash reference_info, eval=FALSE}
+
+cd meta
+
+impute_dirsub --refdir /home/pgcdac/imputation_references/pgc-samples/hapmap_ref/impute2_ref/1000GP_Phase3_sr_0517d/ --out meta --reference_info
+
+```
+
+Open reference files
+```{r panel, cache=TRUE}
+
+reference_dir <- readLines('meta/reference_info')[[1]]
+
+impute_eur_frq2_files <- list.files(reference_dir, '*.EUR.frq2.gz', full.names=T)
+
+impute_eur_frq2 <-
+bind_rows(
+lapply(impute_eur_frq2_files,
+       function(frq2_file)
+         read_table2(frq2_file,
+                     col_types=cols(SNP = col_character(),
+                                    CHR = col_integer(),
+                                    POS = col_integer(),
+                                    A1 = col_character(),
+                                    A2 = col_character(),
+                                    FA1 = col_double(),
+                                    NCHROBS = col_integer()
+)))) %>%
+select(-FA1, -NCHROBS)
+
+```
+
+Alleles used in reference panel:
+
+```{r panel_alleleles, cache=TRUE}
+
+impute_eur_frq2 %>%
+select(A1) %>%
+distinct()
+
+```
+
+Get list of symptom GWASs
+```{r, eval=FALSE}
+
+gwas_files <- c(
+list.files('sumstats/PGC/CasesAllCohorts', 'daner_MDD', full.names=TRUE),
+list.files('sumstats/AGDS', '*dat_daner.gz', full.names=TRUE),
+list.files('sumstats/ALSPAC', 'daner_MDD*', full.names=TRUE),
+list.files('sumstats/UKB/CIDI', 'daner_MDD*', full.names=TRUE))
+
+```
+
+Read in each GWAS and align its SNP IDs with the imputation panel using CPIDs `CHR_POS_A1_A2` and `CHR_POS_A2_A1`
+
+```{r align}
+
+library(stringr)
+
+dir.create('sumstats/aligned', showWarnings=FALSE)
+
+for(gwas_gz in gwas_files) {
+
+        gwas_basename <- basename(gwas_gz)
+        aligned_gz <- file.path('sumstats/aligned', str_replace(gwas_basename, 'gz', 'aligned.gz'))
+        aligned_snpcount <- file.path('sumstats/aligned', str_replace(gwas_basename, 'gz', 'aligned_snpcount'))
+  
+        if(!file.exists(aligned_gz)) {
+        
+          gwas <- read_table2(gwas_gz)
+
+          # merge on chromosome and position
+          gwas_1kg <-
+          gwas %>%
+          left_join(impute_eur_frq2 ,
+                    by=c('CHR'='CHR', 'BP'='POS'), suffix=c('', '.1kg')) %>%
+          # rewrite insertion/deletion allles to just 'I/D'
+          mutate(across(A1:A2,
+                        ~ case_when(str_detect(.x, pattern='I') ~ 'I',
+                                    str_detect(.x, pattern='D') ~ 'D',
+                                    TRUE ~ .x))) %>%
+          # keep SNPs where alleles match
+          filter((A1 == A1.1kg & A2 == A2.1kg) | (A1 == A2.1kg & A2 == A1.1kg)) %>%
+          # user 1kg markername
+          mutate(SNP=SNP.1kg) %>%
+          select(-ends_with('.1kg'))
+
+          write_tsv(gwas_1kg, aligned_gz)
+
+          aligned_size <- data.frame(gwas=gwas_basename, pre_align=nrow(gwas), post_align=nrow(gwas_1kg))
+
+          write_tsv(aligned_size, aligned_snpcount)
+
+        }
+}
+
+```
+
+Number of SNPs pre- and post-alignment
+```{r aligned}
+
+
+```
+
+
