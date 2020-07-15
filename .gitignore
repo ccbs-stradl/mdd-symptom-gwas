@@ -12,3 +12,7 @@ fields.ukb
 sumstats/UKB/*.r
 sumstats/reference
 *_cache/
+meta/pcaer_sub
+meta/pi_sub
+meta/reference_info
+meta/refiex_templ
