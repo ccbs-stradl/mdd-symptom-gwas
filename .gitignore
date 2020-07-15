@@ -6,9 +6,11 @@ config.yaml
 *.csv
 *.enc
 *.enc_ukb
+*.xlsx
 encoding.ukb
 fields.ukb
 *.tab
 sumstats/UKB/*.r
+sumstats/**/*.png
 sumstats/reference
 *_cache/
