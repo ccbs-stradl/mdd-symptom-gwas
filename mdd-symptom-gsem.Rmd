@@ -180,26 +180,28 @@ done
 
 ### PHQ
 
-The PHQ9 and PHQ-like items were assessed at 4 timepoints: 0 = initial assessment, 1 = repeat assessment, 2 = imaging assessment, M = Mental Health Questionnaire online followup. The phenotypes from these sumstats were [coded as quantitative](https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=504).
+The PHQ9 and PHQ-like items were assessed at 4 timepoints: 0 = initial assessment, 1 = repeat assessment, 2 = imaging assessment, M = Mental Health Questionnaire online followup. The phenotypes from these sumstats were [coded as quantitative](https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=504) and inverse-normal transformed.
 
 ```{bash, eval=FALSE}
 
-for sumstats in $(ls sumstats/UKB/PHQ/UKB_PHQ_MDD*.gz); do
+for sumstats in $(ls sumstats/UKB/PHQ9_INT/UKB_PHQ9_INT_MDD*.gz); do
 
         prefix=$(basename $sumstats .gz)
 
-        munge_sumstats.py \
-        --sumstats $sumstats \
-        --a1 a_1 \
-        --a2 a_0 \
-        --signed-sumstats beta,0 \
-        --N-col N \
-        --p p \
-        --info info \
-        --frq af \
-        --snp rsid \
-        --merge-alleles sumstats/reference/w_hm3.snplist \
-        --out sumstats/UKB/PHQ/${prefix}.ldsc
+        if [ ! -f sumstats/UKB/PHQ9_INT/${prefix}.ldsc.sumstats.gz ]; then
+          munge_sumstats.py \
+          --sumstats $sumstats \
+          --a1 a_1 \
+          --a2 a_0 \
+          --info info \
+          --frq af \
+          --N-col N \
+          --signed-sumstats beta,0 \
+          --p p \
+          --merge-alleles sumstats/reference/w_hm3.snplist \
+          --out sumstats/UKB/PHQ9_INT/${prefix}.ldsc \
+          --chunksize 500000
+       fi
 
 done
 
@@ -398,19 +400,6 @@ with(pgc_ukb_symptoms_prev, cor.test(samp_prev, cidi_sample, method='spearman', 
 
 ```
 
-## UKB PHQ sample prevalences 
-
-```{r}
-
-ukb_phq_symptoms_prev <- read_table2('sumstats/UKB/PHQ9_boltlmm/ukb_phq9_bolt_samplesize.txt')
-
-ukb_phq_symptoms_prev %>%
-left_join(dsm_mdd_symptoms_labels %>% mutate(abbv=tolower(abbv)), by='abbv') %>%
-arrange(ref) %>%
-select(Symptom=h, Total=N, Cases=Nca, Controls=Nco, Prev.=prev)
-
-```
-
 
 # Multivariable LDSC estimation
 
@@ -420,44 +409,54 @@ We list out the munged sumstats for PGC and UKB and unify them with sample and p
 
 pgc_ukb_covstruct_r <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.deparse.R'
 pgc_ukb_covstruct_rds <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.rds'
+pgc_ukb_sumstats_prevs_txt <- 'ldsc/pgc_dsm.ukb_cidi.sumstats.prevs.txt'
 
-# list sumstats files
-pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz$', full.names=TRUE)
 
-ukb_cidi_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+if(!file.exists(pgc_ukb_sumstats_prevs_txt)) {
 
-ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+  # list sumstats files
+  pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+  
+  ukb_cidi_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+  
+  ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ9_INT', pattern='ldsc.sumstats.gz$', full.names=TRUE)
+  
+  # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
+  names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
+  
+  names(ukb_cidi_sumstats_gz) <- str_extract(ukb_cidi_sumstats_gz, 'MDD[:digit:](a|b)?')
+  
+  names(ukb_phq_sumstats_gz) <- str_extract(ukb_phq_sumstats_gz, 'MDD[:digit:]')
+  
+  pgc_sumstats_prevs <- 
+  tibble(Symptom=names(pgc_sumstats_gz),
+         filename=pgc_sumstats_gz,
+         study='PGC') %>%
+  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
+  mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
+  select(trait_name, filename, samp_prev, pop_prev)
+  
+  ukb_cidi_sumstats_prevs <- 
+  tibble(Symptom=names(ukb_cidi_sumstats_gz), 
+         filename=ukb_cidi_sumstats_gz,
+         study='UKB_CIDI') %>%
+  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
+  mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
+  select(trait_name, filename, samp_prev=cidi_sample, pop_prev)
+  
+  ukb_phq_sumstats_prevs <- tibble(Symptom=names(ukb_phq_sumstats_gz),
+         filename=ukb_phq_sumstats_gz,
+         study='UKB_PHQ') %>%
+  mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
+  select(trait_name, filename)
+  
+  sumstats_prevs <- bind_rows(pgc_sumstats_prevs, ukb_cidi_sumstats_prevs, ukb_phq_sumstats_prevs)
 
-# pull out which symptom 'x' this is from the filename (daner_MDDx_*)
-names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
+  write_tsv(sumstats_prevs, pgc_ukb_sumstats_prevs_txt)
 
-names(ukb_cidi_sumstats_gz) <- str_extract(ukb_cidi_sumstats_gz, 'MDD[:digit:](a|b)?')
-
-names(ukb_phq_sumstats_gz) <- str_extract(ukb_phq_sumstats_gz, 'MDD[:digit:]_[:alnum:]')
-
-pgc_sumstats_prevs <- 
-tibble(Symptom=names(pgc_sumstats_gz),
-       filename=pgc_sumstats_gz,
-       study='PGC') %>%
-left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
-mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
-select(trait_name, filename, samp_prev, pop_prev)
-
-ukb_cidi_sumstats_prevs <- 
-tibble(Symptom=names(ukb_cidi_sumstats_gz), 
-       filename=ukb_cidi_sumstats_gz,
-       study='UKB_CIDI') %>%
-left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
-mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
-select(trait_name, filename, samp_prev=cidi_sample, pop_prev)
-
-ukb_phq_sumstats_prevs <- tibble(Symptom=names(ukb_phq_sumstats_gz),
-       filename=ukb_phq_sumstats_gz,
-       study='UKB_PHQ') %>%
-mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
-select(trait_name, filename)
-
-sumstats_prevs <- bind_rows(pgc_sumstats_prevs, ukb_cidi_sumstats_prevs, ukb_phq_sumstats_prevs)
+} else {
+  sumstats_prevs <- read_tsv(pgc_ukb_sumstats_prevs_txt)
+}
 
 if(!file.exists(pgc_ukb_covstruct_r)) {
 
@@ -491,37 +490,61 @@ Run LDSC, using sumstats filenames and estimated prevalences to construct comman
 
 ```{r mdd_symptom_gsem_ldsc_h2, results='hide'}
 
-sumstats_h2 <- plyr::adply(sumstats_prevs, 1, function(x) {
+sumstats_h2_txt <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.h2.txt'
+
+if(!file.exists(sumstats_h2_txt)) {
+
+  sumstats_h2 <- plyr::adply(sumstats_prevs, 1, function(x) {
+    
+    filename <- x$filename
+    samp_prev <- x$samp_prev
+    pop_prev <- x$pop_prev
+    outname <- paste(filename, 'h2', sep='.')
+    logfile <- paste(outname, 'log', sep='.')
+
+    print(filename)
   
-  filename <- x$filename
-  samp_prev <- x$samp_prev
-  pop_prev <- x$pop_prev
-  outname <- paste(filename, 'h2', sep='.')
-  logfile <- paste(outname, 'log', sep='.')
+  
+    if(!file.exists(logfile)) {
+    if(!is.na(samp_prev)) {
+       ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev, '--pop-prev', pop_prev)
+    } else {
+       ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname)
+    }
+    system(ldsc_command)
+    }
+  
+    h2_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
+  
+    h2_row <- h2_log$V1[str_detect(h2_log$V1, 'h2:')]
+    h2_est_str <- str_extract_all(str_split(h2_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+    h2 <- as.numeric(h2_est_str[1])
+    se <- as.numeric(h2_est_str[2])
 
+    lambda_row <- h2_log$V1[str_detect(h2_log$V1, 'Lambda GC:')]
+    lambda_est_str <- str_extract_all(str_split(lambda_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+    LambdaGC <- as.numeric(lambda_est_str)
+  
+    meanchisq_row <- h2_log$V1[str_detect(h2_log$V1, 'Mean Chi\\^2:')]
+    meanchisq_est_str <- str_extract_all(str_split(meanchisq_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+    MeanChiSq <- as.numeric(meanchisq_est_str)
 
-  if(!file.exists(logfile)) {
-  if(!is.na(samp_prev)) {
-     ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev, '--pop-prev', pop_prev)
-  } else {
-     ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname)
-  }
-  system(ldsc_command)
-  }
+    intercept_row <- h2_log$V1[str_detect(h2_log$V1, 'Intercept:')]
+    intercept_est_str <- str_extract_all(str_split(intercept_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+    Intercept <- as.numeric(intercept_est_str[1])
+    InterceptSE <- as.numeric(intercept_est_str[2])
 
-  h2_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
+    return(data.frame(h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE))
+  
+  })
 
-  h2_row <- h2_log$V1[str_detect(h2_log$V1, 'h2:')]
+  write_tsv(sumstats_h2, sumstats_h2_txt)
 
-  h2_est_str <- str_extract_all(str_split(h2_row, ':')[[1]][2], '[0-9.\\-]+')[[1]]
+} else {
 
-  h2 <- as.numeric(h2_est_str[1])
-  se <- as.numeric(h2_est_str[2])
+  sumstats_h2 <- read_tsv(sumstats_h2_txt)
 
-  return(data.frame(h2, se))
-
-})
-
+}
 
 
 ```
@@ -557,7 +580,7 @@ scale_y_continuous(expression(h[SNP]^2)) +
 scale_alpha_identity() +
 coord_flip() +
 theme_bw() + 
-theme(axis.text.y=element_text(size=12))
+theme(axis.text.y=element_text(size=12, family='Apple Symbols'))
 
 ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=10, height=4)
 
@@ -891,17 +914,13 @@ cat(str_replace_all(pgc_commonfactor_rank.gv, "'", '"'), file='mdd-symptom-gsem_
 
 ### Common factor
 
-Common factor model. Remove common variance shared between the gating items (Mood: `UKB_CIDI1`, Interest: `UKB_CIDI2`) that is uncorrelated with the common factor variance, to recover the genetic structure among gated items.
+Common factor model. (can also consider removing) common variance shared between the gating items (Mood: `UKB_CIDI1`, Interest: `UKB_CIDI2`) that is uncorrelated with the common factor variance, to recover the genetic structure among gated items)
 
 ```{r ukb_cidi_commonfactor, cache=TRUE}
 
 ukb_cidi_commonfactor.model <- "
 A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
-S1 =~ sc1*UKB_CIDI1 + sc1*UKB_CIDI2
 A1 ~~ 1*A1
-A1 ~~ 0*S1
-c2 > 0.001
-UKB_CIDI2 ~~ c2*UKB_CIDI2
 UKB_CIDI3a ~~ UKB_CIDI3b
 UKB_CIDI4a ~~ UKB_CIDI4b
 "
@@ -936,9 +955,6 @@ UKB_CIDI4a ~~ UKB_CIDI4b
 "
 ukb_cidi_kendler_neale.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_kendler_neale.model)
 
-ukb_cidi_kendler_neale.fit$modelfit
-ukb_cidi_kendler_neale.fit$results[c(1,2,3,6,7)]
-
 ```
 
 
@@ -953,44 +969,25 @@ A2 ~~ 1*A2
 A3 ~~ 1*A3
 UKB_CIDI3a ~~ UKB_CIDI3b
 UKB_CIDI4a ~~ UKB_CIDI4b
-ca13 > -1
-A1 ~~ ca13*A3
-c1 > 0.001
-UKB_CIDI1 ~~ c1*UKB_CIDI1
-c2 > 0.001
-UKB_CIDI2 ~~ c2*UKB_CIDI2
-c3a > 0.001
-UKB_CIDI3a ~~ c3a*UKB_CIDI3a
-c3b > 0.001
-UKB_CIDI3b ~~ c3b*UKB_CIDI3b
-c4a > 0.001
-UKB_CIDI4a ~~ c4a*UKB_CIDI4a
-c4b > 0.001
-UKB_CIDI4b ~~ c4b*UKB_CIDI4b
-c6 > 0.001
-UKB_CIDI6 ~~ c6*UKB_CIDI6
-c7 > 0.001
-UKB_CIDI7 ~~ c7*UKB_CIDI7
-c8 > 0.001
-UKB_CIDI8 ~~ c8*UKB_CIDI8
-c9 > 0.001
-UKB_CIDI9 ~~ c9*UKB_CIDI9
+c13 > -1
+c13 < 1
+A1 ~~ c13*A3
 "
 ukb_cidi_kendler_neale_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_kendler_neale_constr.model)
 
 ukb_cidi_kendler_neale_constr.fit$modelfit
 ukb_cidi_kendler_neale_constr.fit$results[c(1,2,3,6,7)]
 
-render_fit(ukb_cidi_kendler_neale_constr.fit$results)
-
-
-ukb_cidi_kendler_neale_constr.graph <- fit_graph(ukb_cidi_kendler_neale_constr.fit$results)
-ukb_cidi_kendler_neale_constr.gv <- add_rank_same(generate_dot(ukb_cidi_kendler_neale_constr.graph), 1:3, 4:13)
-grViz(ukb_cidi_kendler_neale_constr.gv)
-
-
-cat(str_replace_all(ukb_cidi_kendler_neale_constr.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_kendler_neale_constr.gv')
-
+#render_fit(ukb_cidi_kendler_neale_constr.fit$results)
+#
+#
+#ukb_cidi_kendler_neale_constr.graph <- fit_graph(ukb_cidi_kendler_neale_constr.fit$results)
+#ukb_cidi_kendler_neale_constr.gv <- add_rank_same(generate_dot(ukb_cidi_kendler_neale_constr.graph), 1:3, 4:13)
+#grViz(ukb_cidi_kendler_neale_constr.gv)
+#
+#
+#cat(str_replace_all(ukb_cidi_kendler_neale_constr.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_cidi_kendler_neale_constr.gv')
+#
 ```
 
 
@@ -1024,7 +1021,232 @@ cat(str_replace_all(ukb_cidi_kendler_neale_orth.gv, "'", '"'), file='mdd-symptom
 
 ```
 
+### Two-factor models
 
+[Elhai Psychiat Res 2012](https://www.sciencedirect.com/science/article/pii/S0165178112002685) compared 3 two-factor models
+
+### Psychological-Somatic (Elhai Model 2a)
+
+[Kruse Rehab Psychol 2008](https://psycnet.apa.org/record/2008-17022-011), [Kruse Arch Psys Med Rehab 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
+
+> the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor retardation as a fourth somatic item
+
+```{r ukb_cidi_psych_soma, cache=TRUE}
+
+ukb_cidi_psych_soma.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+"
+ukb_cidi_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_psych_soma.model)
+
+ukb_cidi_psych_soma.fit$modelfit
+ukb_cidi_psych_soma.fit$results[c(1,2,3,6,7)]
+
+```
+
+Bifactor model
+
+
+```{r ukb_cidi_psych_soma_bif, cache=TRUE}
+
+ukb_cidi_psych_soma_bif.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6
+A  =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A  ~~ 0*A1
+A  ~~ 0*A2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+"
+ukb_cidi_psych_soma_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_psych_soma_bif.model)
+
+```
+
+
+```{r ukb_cidi_psych_soma_bif_constr, cache=TRUE}
+
+ukb_cidi_psych_soma_bif_constr.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6
+A  =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI8 + UKB_CIDI9 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A  ~~ 0*A1
+A  ~~ 0*A2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+c4a > 0.001
+c4b > 0.001
+c8 > 0.001
+UKB_CIDI4a ~~ c4a*UKB_CIDI4a
+UKB_CIDI4b ~~ c4b*UKB_CIDI4b
+UKB_CIDI8 ~~ c8*UKB_CIDI8
+"
+ukb_cidi_psych_soma_bif_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_psych_soma_bif_constr.model)
+
+ukb_cidi_psych_soma_bif_constr.fit$model
+ukb_cidi_psych_soma_bif_constr.fit$results[c(1,2,3,6,7)]
+
+```
+
+### Psychological-Neurovegetative (Elhai Model 2b)
+
+```{r ukb_cidi_psych_veg, cache=TRUE}
+
+ukb_cidi_psych_veg.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+"
+ukb_cidi_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_psych_veg.model)
+
+ukb_cidi_psych_veg.fit$modelfit
+ukb_cidi_psych_veg.fit$results[c(1,2,3,6,7)]
+
+```
+
+```{r ukb_cidi_psych_veg_bif, cache=TRUE}
+
+ukb_cidi_psych_veg_bif.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI8
+A  =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI9 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A ~~ 0*A1
+A ~~ 0*A2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+"
+ukb_cidi_psych_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_psych_veg_bif.model)
+
+```
+
+```{r ukb_cidi_psych_veg_bif_constr, cache=TRUE}
+
+ukb_cidi_psych_veg_bif_constr.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI8
+A  =~ NA*UKB_CIDI1 + UKB_CIDI2 + UKB_CIDI7 + UKB_CIDI9 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A ~~ 0*A1
+A ~~ 0*A2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+c2 > 0.001
+c4a > 0.001
+c4b > 0.001
+UKB_CIDI2 ~~ c2*UKB_CIDI2
+UKB_CIDI4a ~~ c4a*UKB_CIDI4a
+UKB_CIDI4b ~~ c4b*UKB_CIDI4b
+"
+ukb_cidi_psych_veg_bif_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_psych_veg_bif_constr.model)
+
+ukb_cidi_psych_veg_bif_constr.fit$modelfit
+ukb_cidi_psych_veg_bif_constr.fit$results[c(1,2,3,6,7)]
+
+```
+
+### Affective-Neurovegetative (Elhai Model 2c)
+
+```{r ukb_cidi_affect_veg, cache=TRUE}
+
+ukb_cidi_affect_veg.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI7 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+"
+ukb_cidi_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_affect_veg.model)
+
+```
+
+```{r ukb_cidi_affect_veg_constr, cache=TRUE}
+
+ukb_cidi_affect_veg_constr.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI7 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+c2 > 0.001
+UKB_CIDI2 ~~ c2*UKB_CIDI2
+"
+ukb_cidi_affect_veg_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_affect_veg_constr.model)
+
+ukb_cidi_affect_veg_constr.fit$modelfit
+ukb_cidi_affect_veg_constr.fit$results[c(1,2,3,6,7)]
+
+```
+
+```{r ukb_cidi_affect_veg_bif, cache=TRUE}
+
+ukb_cidi_affect_veg_bif.model <- "
+A1 =~ NA*UKB_CIDI1 + UKB_CIDI7 + UKB_CIDI9
+A2 =~ NA*UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI8
+A  =~ NA*UKB_CIDI1 + UKB_CIDI7 + UKB_CIDI9 + UKB_CIDI2 + UKB_CIDI3a + UKB_CIDI3b + UKB_CIDI4a + UKB_CIDI4b + UKB_CIDI6 + UKB_CIDI8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A ~~ 0*A1
+A ~~ 0*A2
+UKB_CIDI3a ~~ UKB_CIDI3b
+UKB_CIDI4a ~~ UKB_CIDI4b
+"
+ukb_cidi_affect_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_cidi_affect_veg_bif.model)
+
+ukb_cidi_affect_veg_bif.fit$modelfit
+ukb_cidi_affect_veg_bif.fit$results[c(1,2,3,6,7)]
+
+```
+
+
+### Model comparisons
+
+```{r}
+
+data.frame(Model=c('1', '2a(i)', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)'),
+       Name=c('Common',
+              'Psych-Somatic',
+              'Psych-Somatic (BiF)',
+              'Psych-Neuroveg',
+              'Psych-Neuroveg (BiF)',
+              'Affect-Neuroveg',
+              'Affect-Neuroveg (BiF)')) %>%
+bind_cols(
+bind_rows(
+lapply(list(ukb_cidi_commonfactor.fit,
+                    ukb_cidi_psych_soma.fit,
+                    ukb_cidi_psych_soma_bif_constr.fit,
+                    ukb_cidi_psych_veg.fit,
+                    ukb_cidi_psych_veg_bif_constr.fit,
+                    ukb_cidi_affect_veg_constr.fit,
+                    ukb_cidi_affect_veg_bif.fit),
+       function(fit) signif(bind_cols(fit$modelfit, fit$results %>%
+                     filter(lhs == 'A1' & rhs == 'A2') %>%
+                     summarize(A1A2cor=mean(STD_Genotype), A1A2se=mean(as.numeric(STD_Genotype_SE)))), 3))
+))
+
+
+```
+       
 
 ## UKB PHQ
 
@@ -1032,22 +1254,22 @@ cat(str_replace_all(ukb_cidi_kendler_neale_orth.gv, "'", '"'), file='mdd-symptom
 
 Common factor model at MHQ assessment
 
-```{r ukb_phq_m_commonfactor, cache=TRUE}
+```{r ukb_phqcommonfactor, cache=TRUE}
 
-ukb_phq_m_commonfactor.model <- "
-A1 =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ3_M + UKB_PHQ5_M + UKB_PHQ6_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
+ukb_phq_commonfactor.model <- "
+A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ7 + UKB_PHQ8 + UKB_PHQ9
 A1 ~~ 1*A1
 "
-ukb_phq_m_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_m_commonfactor.model)
+ukb_phq_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_commonfactor.model)
 
-ukb_phq_m_commonfactor.fit$modelfit
-ukb_phq_m_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
+ukb_phq_commonfactor.fit$modelfit
+ukb_phq_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
 
-render_fit(ukb_phq_m_commonfactor.fit$results)
+render_fit(ukb_phq_commonfactor.fit$results)
 
-ukb_phq_m_commonfactor.gv <- generate_dot(fit_graph(ukb_phq_m_commonfactor.fit$results))
+ukb_phq_commonfactor.gv <- generate_dot(fit_graph(ukb_phq_commonfactor.fit$results))
 
-cat(str_replace_all(ukb_phq_m_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_m_commonfactor.gv')
+cat(str_replace_all(ukb_phq_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_commonfactor.gv')
 
 ```
 
@@ -1056,17 +1278,13 @@ cat(str_replace_all(ukb_phq_m_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem
 ```{r ukb_phq_kendler_neale, cache=TRUE}
 
 ukb_phq_kendler_neale.model <- "
-A1 =~ NA*UKB_PHQ5_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
-A2 =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ7_M
-A3 =~ NA*UKB_PHQ4_M + UKB_PHQ6_M + UKB_PHQ3_M
+A1 =~ NA*UKB_PHQ5 + UKB_PHQ8 + UKB_PHQ9
+A2 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7
+A3 =~ NA*UKB_PHQ4 + UKB_PHQ6 + UKB_PHQ3
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3"
 ukb_phq_kendler_neale.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_kendler_neale.model)
-
-ukb_phq_kendler_neale.fit$modelfit
-ukb_phq_kendler_neale.fit$results[c(1,2,3,6,7)]
-
 
 
 ```
@@ -1075,33 +1293,14 @@ ukb_phq_kendler_neale.fit$results[c(1,2,3,6,7)]
 ```{r ukb_phq_kendler_neale_constr, cache=TRUE}
 
 ukb_phq_kendler_neale_constr.model <- "
-A1 =~ NA*UKB_PHQ5_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
-A2 =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ7_M
-A3 =~ NA*UKB_PHQ4_M + UKB_PHQ6_M + UKB_PHQ3_M
+A1 =~ NA*UKB_PHQ5 + UKB_PHQ8 + UKB_PHQ9
+A2 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7
+A3 =~ NA*UKB_PHQ4 + UKB_PHQ6 + UKB_PHQ3
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
 ca12 < 1
-ca12 > -1
 A1 ~~ ca12*A2
-c1 > 0.001
-UKB_PHQ1_M ~~ c1*UKB_PHQ1_M
-c2 > 0.001
-UKB_PHQ2_M ~~ c2*UKB_PHQ2_M
-c3 > 0.001
-UKB_PHQ3_M ~~ c3*UKB_PHQ3_M
-c4 > 0.001
-UKB_PHQ4_M ~~ c4*UKB_PHQ4_M
-c5 > 0.001
-UKB_PHQ5_M ~~ c5*UKB_PHQ5_M
-c6 > 0.001
-UKB_PHQ6_M ~~ c6*UKB_PHQ6_M
-c7 > 0.001
-UKB_PHQ7_M ~~ c7*UKB_PHQ7_M
-c8 > 0.001
-UKB_PHQ8_M ~~ c8*UKB_PHQ8_M
-c9 > 0.001
-UKB_PHQ9_M ~~ c9*UKB_PHQ9_M
 "
 ukb_phq_kendler_neale_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_kendler_neale_constr.model)
 
@@ -1117,72 +1316,155 @@ cat(str_replace_all(ukb_phq_kendler_neale_constr.gv, "'", '"'), file='mdd-sympto
 
 ```
 
-```{r ukb_phq_kendler_neale_ortho, cache=TRUE}
+### Two-factor models
 
-ukb_phq_kendler_neale_ortho.model <- "
-A1 =~ NA*UKB_PHQ5_M + UKB_PHQ7_M + UKB_PHQ8_M + UKB_PHQ9_M
-A2 =~ NA*UKB_PHQ1_M + UKB_PHQ2_M + UKB_PHQ7_M
-A3 =~ NA*UKB_PHQ4_M + UKB_PHQ6_M + UKB_PHQ3_M
+### Psychological-Somatic (Elhai Model 2a)
+
+[Kruse Rehab Psychol 2008](https://psycnet.apa.org/record/2008-17022-011), [Kruse Arch Psys Med Rehab 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
+
+> the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor retardation as a fourth somatic item
+
+```{r ukb_phq_psych_soma, cache=TRUE}
+
+ukb_phq_psych_soma.model <- "
+A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ5 + UKB_PHQ7 + UKB_PHQ8 + UKB_PHQ9
+A2 =~ NA*UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ6
 A1 ~~ 1*A1
 A2 ~~ 1*A2
-A3 ~~ 1*A3
-A1 ~~ 0*A2 + 0*A3
-A2 ~~ 0*A3"
-ukb_phq_kendler_neale_ortho.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_kendler_neale_ortho.model)
-
-ukb_phq_kendler_neale_ortho.fit$modelfit
-ukb_phq_kendler_neale_ortho.fit$results[c(1,2,3,6,7)]
-
-render_fit(ukb_phq_kendler_neale_ortho.fit$results)
-
-ukb_phq_kendler_neale_ortho.graph <- fit_graph(ukb_phq_kendler_neale_ortho.fit$results)
-ukb_phq_kendler_neale_ortho.gv <- add_rank_same(generate_dot(ukb_phq_kendler_neale_ortho.graph), 1:3, 4:12)
-grViz(ukb_phq_kendler_neale_ortho.gv)
-
-ukb_phq_kendler_neale_ortho.gv <- generate_dot(fit_graph(ukb_phq_kendler_neale_ortho.fit$results))
-cat(str_replace_all(ukb_phq_kendler_neale_ortho.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_kendler_neale_ortho.gv')
-
-```
-
-## Symptom factors
-
-```{r symptom_factors, cache=TRUE}
-
-pgc_ukb_cidi_phq_symptom.model <- "
-A1  =~ NA*UKB_CIDI1 + UKB_PHQ1_M
-A2  =~ NA*UKB_CIDI2 + UKB_PHQ1_M
-A3a =~ NA*PGC3a + UKB_CIDI3a + UKB_PHQ3_M
-A3b =~ NA*UKB_CIDI3b + UKB_PHQ3_M
-A4a =~ NA*UKB_CIDI4a + UKB_PHQ4_M
-A4b =~ NA*UKB_CIDI4b + UKB_PHQ4_M
-A5a =~ NA*PGC5a + UKB_PHQ5_M
-A5b =~ NA*PGC5b + UKB_PHQ5_M
-A6  =~ NA*UKB_CIDI6 + UKB_PHQ6_M
-A7  =~ NA*UKB_CIDI7 + UKB_PHQ7_M
-A8  =~ NA*UKB_CIDI8 + UKB_PHQ8_M
-A9  =~ NA*PGC9 + UKB_CIDI9 + UKB_PHQ9_M
-A1  ~~ 1*A1
-A2  ~~ 1*A2
-A3a ~~ 1*A3a
-A3b ~~ 1*A3b
-A4a ~~ 1*A4a
-A4b ~~ 1*A4b
-A5a ~~ 1*A5a
-A5b ~~ 1*A5b
-A6  ~~ 1*A6
-A7  ~~ 1*A7
-A8  ~~ 1*A8
-A9  ~~ 1*A9
 "
-pgc_ukb_cidi_phq_symptom.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_ukb_cidi_phq_symptom.model) 
+ukb_phq_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_psych_soma.model)
 
-pgc_ukb_cidi_phq_symptom.fit$modelfit
-pgc_ukb_cidi_phq_symptom.fit$results[c(1, 2, 3, 6, 7)]
+ukb_phq_psych_soma.fit$modelfit
+ukb_phq_psych_soma.fit$results[c(1,2,3,6,7)]
+
+```
+
+Bifactor model
+
+```{r ukb_phq_psych_soma, cache=TRUE}
+
+ukb_phq_psych_soma_bi.model <- "
+A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ5 + UKB_PHQ7 + UKB_PHQ8 + UKB_PHQ9
+A2 =~ NA*UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ6
+A  =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ5 + UKB_PHQ7 + UKB_PHQ8 + UKB_PHQ9 + UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ6
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A ~~ 0*A1
+A ~~ 0*A2
+"
+ukb_phq_psych_soma_bi.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_psych_soma_bi.model)
+
+ukb_phq_psych_soma_bi.fit$modelfit
+ukb_phq_psych_soma_bi.fit$results[c(1,2,3,6,7)]
+
+```
+### Psychological-Neurovegetative (Elhai Model 2b)
+
+```{r ukb_phq_psych_veg, cache=TRUE}
+
+ukb_phq_psych_veg.model <- "
+A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7 + UKB_PHQ9
+A2 =~ NA*UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+"
+ukb_phq_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_psych_veg.model)
+
+ukb_phq_psych_veg.fit$modelfit
+ukb_phq_psych_veg.fit$results[c(1,2,3,6,7)]
+
+```
+
+
+```{r ukb_phq_psych_veg_bi, cache=TRUE}
+
+ukb_phq_psych_veg_bi.model <- "
+A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7 + UKB_PHQ9
+A2 =~ NA*UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
+A =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7 + UKB_PHQ9 + UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A ~~ 0*A1
+A ~~ 0*A2
+"
+ukb_phq_psych_veg_bi.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_psych_veg_bi.model)
+
+ukb_phq_psych_veg_bi.fit$modelfit
+ukb_phq_psych_veg_bi.fit$results[c(1,2,3,6,7)]
+
+```
+
+
+### Affective-Neurovegetative (Elhai Model 2c)
+
+```{r ukb_phq_affect_veg, cache=TRUE}
+
+ukb_phq_affect_veg.model <- "
+A1 =~ NA*UKB_PHQ1 + UKB_PHQ7 + UKB_PHQ9
+A2 =~ NA*UKB_PHQ2 + UKB_PHQ3 +  UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+"
+ukb_phq_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_affect_veg.model)
+
+
+ukb_phq_affect_veg.fit$modelfit
+ukb_phq_affect_veg.fit$results[c(1,2,3,6,7)]
+
+```
+
+```{r ukb_phq_affect_veg_bi, cache=TRUE}
+
+ukb_phq_affect_veg_bi.model <- "
+A1 =~ NA*UKB_PHQ1 + UKB_PHQ7 + UKB_PHQ9
+A2 =~ NA*UKB_PHQ2 + UKB_PHQ3 +  UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
+A  =~ NA*UKB_PHQ1 + UKB_PHQ7 + UKB_PHQ9 + UKB_PHQ2 + UKB_PHQ3 +  UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A  ~~ 0*A1
+A  ~~ 0*A2
+"
+ukb_phq_affect_veg_bi.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_affect_veg_bi.model)
+
+ukb_phq_affect_veg_bi.fit$modelfit
+ukb_phq_affect_veg_bi.fit$results[c(1,2,3,6,7)]
 
 ```
 
 
 
+### Model comparisons
+
+```{r}
+
+data.frame(Model=c('1', '2a(i)', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)'),
+       Name=c('Common',
+              'Psych-Somatic',
+              'Psych-Somatic (BiF)',
+              'Psych-Neuroveg',
+              'Psych-Neuroveg (BiF)',
+              'Affect-Neuroveg',
+              'Affect-Neuroveg (BiF)')) %>%
+bind_cols(
+bind_rows(
+lapply(list(ukb_phq_commonfactor.fit,
+                    ukb_phq_psych_soma.fit,
+                    ukb_phq_psych_soma_bi.fit,
+                    ukb_phq_psych_veg.fit,
+                    ukb_phq_psych_veg_bi.fit,
+                    ukb_phq_affect_veg.fit,
+                    ukb_phq_affect_veg_bi.fit),
+       function(fit) signif(bind_cols(fit$modelfit, fit$results %>%
+                     filter(lhs == 'A1' & rhs == 'A2') %>%
+                     summarize(A1A2cor=mean(STD_Genotype), A1A2se=mean(as.numeric(STD_Genotype_SE)))), 3))
+))
+
+
+
+```
 
 # Exploratory factor analysis
 
