@@ -153,3 +153,59 @@ bind_rows(lapply(aligned_count_files, read_tsv, col_types=cols(gwas = col_charac
 
 ```
 
+# Meta-analysis
+
+Set up dataset lists for meta-analysis. First, create symlinks to all of the aligned sumstats files in the `meta` directory
+
+```{bash symlink}
+
+for gz in sumstats/aligned/*.gz; do
+        ln -sr $gz meta/$(basename $gz);
+done
+
+```
+
+Open mapping between sumstats filenames and MDD symptom reference numbers. Meta-analyze PGC+ADGS and ALSPAC+UKB.
+
+```{r metafile}
+
+# open file
+cohorts <- read_tsv('meta/cohort_alignment.txt')
+
+# create aligned filenames
+cohorts_reference <-
+cohorts %>%
+left_join(dsm_mdd_symptoms_reference, by=c('reference'='Reference')) %>%
+mutate(metagroup=case_when(cohort %in% c('AGDS', 'PGC') ~ 'AGDS_PGC',
+                           cohort %in% c('ALSPAC', 'UKBB') ~ 'ALSPAC_UKB',
+                           TRUE ~ NA_character_)) %>%
+mutate(meta=paste0(metagroup, '.', reference, '_', `Symptom Abbrev.`, '.meta')) %>%
+mutate(aligned_gz=str_replace(filename, 'gz', 'aligned.gz')) %>%
+# discard non-directional symptoms
+filter(!reference %in% c('MDD3', 'MDD4')) %>%
+# select meta-analyses where there are at least two sumstats
+# contributing
+group_by(meta) %>%
+filter(n() >= 2) %>%
+ungroup()
+
+for(metafile in unique(cohorts_reference$meta)) {
+
+  write_tsv(cohorts_reference %>% filter(meta == metafile) %>% select(aligned_gz), path=file.path('meta', metafile), col_names=F)
+
+}
+
+```
+
+```{bash postimp_navi, eval=FALSE}
+
+cd meta
+
+for metafile in *.meta; do
+       outname=$(basename $metafile .meta)
+       if [ ! -f j._pi_${outname} ]; then
+         echo postimp_navi --result $metafile --nolahunt --popname eur  --out $outname 
+       fi
+done
+
+```
