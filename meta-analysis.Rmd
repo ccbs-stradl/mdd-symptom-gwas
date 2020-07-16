@@ -204,7 +204,7 @@ cd meta
 for metafile in *.meta; do
        outname=$(basename $metafile .meta)
        if [ ! -f j._pi_${outname} ]; then
-         echo postimp_navi --result $metafile --nolahunt --popname eur  --out $outname 
+         postimp_navi --result $metafile --nolahunt --popname eur  --out $outname 
        fi
 done
 
