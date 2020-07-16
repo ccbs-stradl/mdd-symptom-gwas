@@ -89,7 +89,7 @@ distinct()
 ```
 
 Get list of symptom GWASs
-```{r, eval=FALSE}
+```{r gwas_files}
 
 gwas_files <- c(
 list.files('sumstats/PGC/CasesAllCohorts', 'daner_MDD', full.names=TRUE),
@@ -147,7 +147,9 @@ for(gwas_gz in gwas_files) {
 Number of SNPs pre- and post-alignment
 ```{r aligned}
 
+aligned_count_files <- list.files('sumstats/aligned', pattern='aligned_snpcount', full.names=TRUE)
+
+bind_rows(lapply(aligned_count_files, read_tsv, col_types=cols(gwas = col_character(), pre_align = col_integer(), post_align = col_integer())))
 
 ```
-
 

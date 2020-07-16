@@ -13,6 +13,7 @@ fields.ukb
 sumstats/UKB/*.r
 sumstats/**/*.png
 sumstats/reference
+sumstats/aligned
 *_cache/
 meta/pcaer_sub
 meta/pi_sub
