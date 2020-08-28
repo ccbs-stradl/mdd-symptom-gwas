@@ -27,7 +27,7 @@ R.version
 
 Package installation
 
-```{r, output='hide', warning=FALSE, message=FALSE}
+```{r, output='hide', warning=FALSE, message=FALSE, eval=FALSE}
 
 required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr', 'corrplot')
 for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.packages(pack)
@@ -36,7 +36,7 @@ library(devtools)
 
 if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
 
-if(!require(DiagrammeR)) install_github('rich-iannone/DiagrammeR')
+if(!require(tidySEM)) install_github("cjvanlissa/tidySEM")
 
 ```
 
@@ -49,7 +49,7 @@ require(stringr)
 require(dplyr)
 require(ggplot2)
 require(corrplot)
-require(DiagrammeR)
+require(tidySEM)
 require(GenomicSEM)
 
 packageVersion("GenomicSEM")
@@ -65,6 +65,7 @@ The LDSC support files first need to be downloaded and unpacked
 mkdir -p sumstats/reference
 curl https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2 > sumstats/reference/eur_w_ld_chr.tar.bz2
 curl https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2 > sumstats/reference/w_hm3.snplist.bz2
+curl 'https://public.boxcloud.com/d/1/b1!Ig4kcOi79AyLq_ZRX8FjHkvt6Po00Y6YqwN8wuER4__laOMPSMuMho40OgLDhkTGJrIrekFdhPPbhkPvp6F_cGglssbvvhvDSYWJOk33p5BVrrjt9lLjSQe7Z7KHPF8pmBdaxaa6yP_ooYshyWYdss7veC9RO9cGabPWIGbqlfzEJOhGI3tPQHX-ri_5NiHEJF-eq-OFEfkhY3GUgXQGI90TdK4280tHSH_Nu1aD0vZiOre_V1wJxg57YSGujsJNhhT5mPeBYw9F8xRDXn-NfgX2RslTW51Li8DDTXk1kAEP3_i0ccVVBPCO78YWGUPYE94xJXM0lSARJ76VmMekZG0c2MuDiTyO2PF16uB_NdHZ--a0668Q_C8_szHLMakUZTOqXKDZixjInGP_XrQOJgqY-75ZJUu5pU1qA4Y1ye9moKmABldnzYpGXf4YPp3oBZAG1JhULpjpfeZc4ubKjsBgTG9fE-WI4OAm4FMr9FBIsYwGIgFb87TxrsK2xICFGEowk9cqWL7XoWNAF-15aslI4yfZHDevpPYoE-RxwoaWPEG56H9Dkeb4o9SRZ5rHtcfVaVv3Y7n1upfdl04uZFqfeZDmfS1v4S9DBLvrmlRsDOGO_9qNW0j5pE07hmxjVv_o-IA5B8cCJ84QpMtPpDvat1Prz031MsEbmaTg7Bf0h-83G1I4b8sjmkwB1NtM460dzaph0FMzu1TCXvx0ij1lYh1X1EvwfpFrMgzwph0n_0aTqjf54wf0BwnyEwJJqXqI-WS8Mi14dzK3Akm2j5Jq3MU4X2nXNCvqSSmJbzqLGZC9F8NueqtY8rnal7JtLsZgWm1kq1Zl8FDcH_7j9RDEZiLZwn90EDYo_6J0HusqkkobkFtUqCyavduI-ClKlsMCIlW53ubrWSkdTtnhNbheHKplqxpwLcYPrRqeHPjbnX-QFUNpe1sbe1HjPHq3w89SUNY9hyOT1D-Ls8AjZ2UVwBNnbaoCVwguiuu79Skr521Ve4yCrSpYd6OSpixmt7Od2UXRCbqCkHAIkC7QaBDjJQAXoeoLGmce7QHVraBabDkDUpfGvsHKeDP5Q_7sEg4aboGmQVPtHOSimo2QxGBO4qD_JWsIg2iqx-fjH39SayXbMTE1AsY-rFQvCe5Jl-yYbA1e2YuBKG07BhmluJP9VL7SOXG1q23v68melX1gCAQNZTSMoLVpO-r5FJwpW7wDPg-RmvBJwglLjhN4axO2qK_qdT4BybGRADsULrbWjM-F8Ic6-TmkDxhg-g../download' > sumstats/reference/w_hm3.noMHC.snplist
 
 tar -xjf sumstats/reference/eur_w_ld_chr.tar.bz2 -C sumstats/reference
 rm sumstats/reference/eur_w_ld_chr.tar.bz2
@@ -123,92 +124,31 @@ select(Reference, Abbreviation=abbv, Label=h, Description)
 
 ```
 
-```{r}
-
-
-```
 
 # Sumstats munging
 
-## PGC
+GWAS of MDD symptoms for two cohorts were meta-analyzed:
 
-PGC sumstats are output in the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) ("**D**osage **An**alyz**er**) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. We find all daner files in the PGC directory and loop them through the munge step.
+- Population samples: ALSPAC + UK Biobankc
+- Case-enriched samples: AGDS + PGC
+
+Meta-analysis was conducted using the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) so the summary statistics are in the  ("**D**osage **An**alyz**er**) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. We find all daner files in the PGC directory and loop them through the munge step.
 
 ```{bash, eval=FALSE}
 # Munge sumstats for all cohorts symptom GWASs
 
-for sumstats in $(ls sumstats/PGC/CasesAllCohorts/daner_MDD*.meta.gz); do
+mkdir -p meta/ldsc
 
-        prefix=$(basename $sumstats .gz)
-
-        munge_sumstats.py --daner-n \
-        --sumstats $sumstats \
-        --merge-alleles sumstats/reference/w_hm3.snplist \
-        --out sumstats/PGC/CasesAllCohorts/${prefix}.ldsc
-
+for sumstats in $(find meta/distribution -regex ".*/daner[A-Za-z_]*\.MDD[1-9a-z]*_[A-Za-z]*\.gz"); do
+  prefix=$(basename $sumstats .gz)
+  if [ ! -f meta/ldsc/${prefix}.sumstats.gz ]; then
+    munge_sumstats.py --daner-n \
+    --sumstats $sumstats \
+    --merge-alleles sumstats/reference/w_hm3.noMHC.snplist \
+    --chunksize 50000 \
+    --out meta/ldsc/${prefix}
+  fi
 done
-
-
-```
-
-## UKB
-
-### CIDI
-
-UKB CIDI sumstats are in a format easily digestible by `munge_sumstats.py`.
-
-```{bash, eval=FALSE}
-
-# Munge sumstats for UKB CIDI
-
-for sumstats in $(ls sumstats/UKB/CIDI/UKB_CIDI_MDD*.gz); do
-
-        prefix=$(basename $sumstats .gz)
-
-        munge_sumstats.py \
-        --sumstats $sumstats \
-        --N-cas-col Nca \
-        --N-con-col Nco \
-        --signed-sumstats OR,1 \
-        --p P \
-        --merge-alleles sumstats/reference/w_hm3.snplist \
-        --out sumstats/UKB/CIDI/${prefix}.ldsc
-
-done
-
-```
-
-### PHQ
-
-The PHQ9 and PHQ-like items were assessed at 4 timepoints: 0 = initial assessment, 1 = repeat assessment, 2 = imaging assessment, M = Mental Health Questionnaire online followup. The phenotypes from these sumstats were [coded as quantitative](https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=504) and inverse-normal transformed.
-
-```{bash, eval=FALSE}
-
-for sumstats in $(ls sumstats/UKB/PHQ9_INT/UKB_PHQ9_INT_MDD*.gz); do
-
-        prefix=$(basename $sumstats .gz)
-
-        if [ ! -f sumstats/UKB/PHQ9_INT/${prefix}.ldsc.sumstats.gz ]; then
-          munge_sumstats.py \
-          --sumstats $sumstats \
-          --a1 a_1 \
-          --a2 a_0 \
-          --info info \
-          --frq af \
-          --N-col N \
-          --signed-sumstats beta,0 \
-          --p p \
-          --merge-alleles sumstats/reference/w_hm3.snplist \
-          --out sumstats/UKB/PHQ9_INT/${prefix}.ldsc \
-          --chunksize 500000
-       fi
-
-done
-
-```
-
-We also used binary coded (`0` = not at all or several days; `1`= more than half the days or nearly every day) from [Thorp et al](https://www.biorxiv.org/content/10.1101/528067v1)
-
 
 
 # Symptom prevalences

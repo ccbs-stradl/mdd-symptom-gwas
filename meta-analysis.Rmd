@@ -197,13 +197,15 @@ for(metafile in unique(cohorts_reference$meta)) {
 
 ```
 
+Submit Ricopili post imputation command if it isn't already running and the final meta-analyzed daner file doesn't exist. 
+
 ```{bash postimp_navi, eval=FALSE}
 
 cd meta
 
 for metafile in *.meta; do
        outname=$(basename $metafile .meta)
-       if [ ! -f j._pi_${outname} ]; then
+       if [ ! -f j._pi_${outname} -a ! -f distribution/${outname}/daner_${outname}.gz ]; then
          postimp_navi --result $metafile --nolahunt --popname eur  --out $outname 
        fi
 done
