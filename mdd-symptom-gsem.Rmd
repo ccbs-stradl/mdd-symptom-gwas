@@ -65,7 +65,6 @@ The LDSC support files first need to be downloaded and unpacked
 mkdir -p sumstats/reference
 curl https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2 > sumstats/reference/eur_w_ld_chr.tar.bz2
 curl https://data.broadinstitute.org/alkesgroup/LDSCORE/w_hm3.snplist.bz2 > sumstats/reference/w_hm3.snplist.bz2
-curl 'https://public.boxcloud.com/d/1/b1!Ig4kcOi79AyLq_ZRX8FjHkvt6Po00Y6YqwN8wuER4__laOMPSMuMho40OgLDhkTGJrIrekFdhPPbhkPvp6F_cGglssbvvhvDSYWJOk33p5BVrrjt9lLjSQe7Z7KHPF8pmBdaxaa6yP_ooYshyWYdss7veC9RO9cGabPWIGbqlfzEJOhGI3tPQHX-ri_5NiHEJF-eq-OFEfkhY3GUgXQGI90TdK4280tHSH_Nu1aD0vZiOre_V1wJxg57YSGujsJNhhT5mPeBYw9F8xRDXn-NfgX2RslTW51Li8DDTXk1kAEP3_i0ccVVBPCO78YWGUPYE94xJXM0lSARJ76VmMekZG0c2MuDiTyO2PF16uB_NdHZ--a0668Q_C8_szHLMakUZTOqXKDZixjInGP_XrQOJgqY-75ZJUu5pU1qA4Y1ye9moKmABldnzYpGXf4YPp3oBZAG1JhULpjpfeZc4ubKjsBgTG9fE-WI4OAm4FMr9FBIsYwGIgFb87TxrsK2xICFGEowk9cqWL7XoWNAF-15aslI4yfZHDevpPYoE-RxwoaWPEG56H9Dkeb4o9SRZ5rHtcfVaVv3Y7n1upfdl04uZFqfeZDmfS1v4S9DBLvrmlRsDOGO_9qNW0j5pE07hmxjVv_o-IA5B8cCJ84QpMtPpDvat1Prz031MsEbmaTg7Bf0h-83G1I4b8sjmkwB1NtM460dzaph0FMzu1TCXvx0ij1lYh1X1EvwfpFrMgzwph0n_0aTqjf54wf0BwnyEwJJqXqI-WS8Mi14dzK3Akm2j5Jq3MU4X2nXNCvqSSmJbzqLGZC9F8NueqtY8rnal7JtLsZgWm1kq1Zl8FDcH_7j9RDEZiLZwn90EDYo_6J0HusqkkobkFtUqCyavduI-ClKlsMCIlW53ubrWSkdTtnhNbheHKplqxpwLcYPrRqeHPjbnX-QFUNpe1sbe1HjPHq3w89SUNY9hyOT1D-Ls8AjZ2UVwBNnbaoCVwguiuu79Skr521Ve4yCrSpYd6OSpixmt7Od2UXRCbqCkHAIkC7QaBDjJQAXoeoLGmce7QHVraBabDkDUpfGvsHKeDP5Q_7sEg4aboGmQVPtHOSimo2QxGBO4qD_JWsIg2iqx-fjH39SayXbMTE1AsY-rFQvCe5Jl-yYbA1e2YuBKG07BhmluJP9VL7SOXG1q23v68melX1gCAQNZTSMoLVpO-r5FJwpW7wDPg-RmvBJwglLjhN4axO2qK_qdT4BybGRADsULrbWjM-F8Ic6-TmkDxhg-g../download' > sumstats/reference/w_hm3.noMHC.snplist
 
 tar -xjf sumstats/reference/eur_w_ld_chr.tar.bz2 -C sumstats/reference
 rm sumstats/reference/eur_w_ld_chr.tar.bz2
@@ -134,22 +133,41 @@ GWAS of MDD symptoms for two cohorts were meta-analyzed:
 
 Meta-analysis was conducted using the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) so the summary statistics are in the  ("**D**osage **An**alyz**er**) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. We find all daner files in the PGC directory and loop them through the munge step.
 
-```{bash, eval=FALSE}
+```{r, eval=FALSE}
 # Munge sumstats for all cohorts symptom GWASs
 
-mkdir -p meta/ldsc
+# list sumstats distribution directories
+distributions_dirs <- dir(file.path("meta", "distribution"))
+# construct filenames of daner sumstats
+daner_files <- sapply(distributions_dirs, function(dd) file.path("meta", "distribution", dd, paste0('daner_', dd, '.gz')))
 
-for sumstats in $(find meta/distribution -regex ".*/daner[A-Za-z_]*\.MDD[1-9a-z]*_[A-Za-z]*\.gz"); do
-  prefix=$(basename $sumstats .gz)
-  if [ ! -f meta/ldsc/${prefix}.sumstats.gz ]; then
-    munge_sumstats.py --daner-n \
-    --sumstats $sumstats \
-    --merge-alleles sumstats/reference/w_hm3.noMHC.snplist \
-    --chunksize 50000 \
-    --out meta/ldsc/${prefix}
-  fi
-done
+# snp list reference file
+hm3_file <- "sumstats/reference/w_hm3.noMHC.snplist"
 
+trait_names <- names(daner_files)
+
+dir.create(file.path("meta", "munged"), showWarnings=FALSE)
+
+for(daner in daner_files) {
+
+  # get traitname from daner filename
+  daner_basename <- str_remove(basename(daner), '.gz')
+  trait_name <- str_remove(daner_basename, 'daner_')
+
+  sumstats_gz <- paste(trait_name, 'sumstats.gz', sep='.')
+  munge_log <- paste(trait_name, 'munge.log', sep='_')
+
+  if(!file.exists(file.path('meta', 'munged', sumstats_gz))) {
+    # munge daner sumstats with hm3
+    munge(files=daner, hm3=hm3_file, trait.names=trait_name, info.filter=0.9, maf.filter=0.01)
+    # move munged files
+    file.rename(sumstats_gz, file.path('meta', 'munged', sumstats_gz))
+    file.rename(munge_log, file.path('meta', 'munged', munge_log))
+  }
+
+}
+
+```
 
 # Symptom prevalences
 
@@ -237,98 +255,74 @@ pgc_symptoms_pop_prev %>%
 
 ```
 
-## PGC sample prevalences
+## Cohort sample prevalences
 
-Read in headers from PGC daner files. The daner format contains headers for the frequency of the referenec allele in cases (A=Affected) and controls (U=Unaffected) where the column name includes the sample size (`FRQ_A_NNNN`, `FRQ_U_MMMM`)
+Read in headers from the daner files. The daner format contains headers for the frequency of the referenec allele in cases (A=Affected) and controls (U=Unaffected) where the column name includes the sample size (`FRQ_A_NNNN`, `FRQ_U_MMMM`)
 
-```{r, warning=FALSE}
+```{r symptoms_sample_prevs, warning=FALSE}
 
-pgc_symptoms_sample_prev_file <- 'sumstats/PGC/CasesAllCohorts/pgc_dsm_symptoms_prev.txt'
+symptoms_sample_prev_file <- 'meta/symptoms_prev.txt'
 
-if(!file.exists(pgc_symptoms_sample_prev_file)) {
+if(!file.exists(symptoms_sample_prev_file)) {
 
-  # list daner files
-  pgc_daner_meta_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='meta.gz', full.names=TRUE)
+  # list sumstats distribution directories
+  distributions_dirs <- dir(file.path("meta", "distribution"))
+  # construct filenames of daner sumstats
+  daner_files <- sapply(distributions_dirs, function(dd) file.path("meta", "distribution", dd, paste0('daner_', dd, '.gz')))
   
-  # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
-  names(pgc_daner_meta_gz) <- str_extract(pgc_daner_meta_gz, 'MDD[:digit:](a|b)?')
+  # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
+  cohorts_symptoms <- str_match(names(daner_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,2:3]
+  colnames(cohorts_symptoms) <- c('cohorts', 'symptom')
   
   # read in header and pull out 6th and 7th columns
-  pgc_daner_meta_frq_cols <- 
-  bind_rows(
-  lapply(pgc_daner_meta_gz, function(daner) {
-          daner_header <-read.table(daner, nrows=1, stringsAsFactors=F)
-          return(data.frame(frq_a_col=daner_header$V6, frq_u_col=daner_header$V7))
-  }), .id='Symptom')
+  daner_nca_nco <- 
+  bind_rows(lapply(daner_files, function(daner) {
+      # # get sample size columns from file header
+      daner_header <- read.table(daner, nrows=1)
+      frq_a_col <- daner_header$V6
+      frq_u_col <- daner_header$V7
+      # extract sample size information for cases and controls
+      nca <- as.integer(str_split(frq_a_col, pattern="_")[[1]][3])
+      nco <- as.integer(str_split(frq_u_col, pattern="_")[[1]][3])
+      return(data.frame(Nca=nca, Nco=nco))
+  }), .id='sumstats')
   
-  # shape and unshape and extract N from column names
-  pgc_symptoms_sample_prev <-
-  pgc_daner_meta_frq_cols %>%
-  gather(key='col', value='frq', frq_a_col:frq_u_col) %>%
-  select(-col) %>%
-  separate(frq, into=c('frq', 'status', 'Count')) %>%
-  mutate(presence=recode(status, 'A'='Present', 'U'='Absent'),
-         N=as.integer(Count)) %>%
-  select(-frq, -status, -Count) %>%
-  spread(presence, N) %>%
-  mutate(samp_prev=Present / (Present + Absent))
+  # merge and calculate sample prevalence
+  symptoms_sample_prev <-
+  cbind(cohorts_symptoms, daner_nca_nco) %>%
+  mutate(samp_prev=Nca/(Nca+Nco))
 
-  write_delim(pgc_symptoms_sample_prev, pgc_symptoms_sample_prev_file, delim=' ')
+  write_tsv(symptoms_sample_prev, symptoms_sample_prev_file)
+
 } else {
-  pgc_symptoms_sample_prev <- read_table2(pgc_symptoms_sample_prev_file)
+  symptoms_sample_prev <- read_tsv(symptoms_sample_prev_file)
 }
 
-pgc_symptoms_sample_prev %>%
-  left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref')) %>%
-  select(Symptom=h, Absent, Present, `Sample prevalence`=samp_prev)
+symptoms_sample_prev %>%
+  left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
+  select(Cohorts=cohorts, Ref=symptom, Symptom=h, Cases=Nca, Controls=Nco, `Sample prevalence`=samp_prev)
 
 ```
 
-## UKB CIDI sample prevalences
+```{r cohorts_prevs, warning=FALSE}
 
-Symptom prevalences in the UKB CIDI assessment were calculated for the present/absent reponses and in reference to the whole MHQ sample (assuming particpants who were screened out do not have any symptoms)
+cohorts_sample_prev <-
+symptoms_sample_prev %>%
+  left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
+  select(cohorts, samp_prev, h) %>%
+  pivot_wider(names_from=cohorts, values_from=samp_prev)
 
-```{r, message=FALSE}
-
-# read this in as a table.
-# TODO: incorporate the code for this, but need to pull in code
-# from a separate repository
-
-ukb_cidi_prevalences <- read_tsv('sumstats/UKB/CIDI/ukb_cidi_symptoms_prev.txt')
-
-ukb_cidi_prevalences %>%
-left_join(dsm_mdd_symptoms_labels, by=c('reference'='ref')) %>%
-select(Symptom=h, `Sample Prev.`=cidi_sample, `Pop. Prev`=mhq_sample)
-
-```
-
-```{r, pgc_ukb_prevs, warning=FALSE}
-
-pgc_ukb_symptoms_prev <- 
-pgc_symptoms_sample_prev %>%
-full_join(pgc_symptoms_pop_prev, by='Symptom') %>%
-full_join(ukb_cidi_prevalences, by=c('Symptom'='reference')) %>%
-left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref'))
-
-ggplot(pgc_ukb_symptoms_prev, aes(x=samp_prev, y=cidi_sample)) +
+ggplot(cohorts_sample_prev, aes(x=AGDS_PGC, y=ALSPAC_UKB)) +
 geom_abline(col='red') +
 geom_point() +
 geom_text(aes(label=h), hjust=-0.1) +
-scale_x_continuous('PGC sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
-scale_y_continuous('UKB sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
+scale_x_continuous('AGDS/PGC sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
+scale_y_continuous('ALSPAC/UKB sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
 coord_fixed(clip='off') +
 theme_bw() +
 theme(plot.margin=unit(c(1, 1, 1, 1), 'cm'))
 
-ggsave('mdd-symptom-gsem_files/pgc_ukb_symptoms_prev.png', width=5.5, height=5.5)
-
-ggplot(pgc_ukb_symptoms_prev, aes(x=pop_prev, y=mhq_sample)) +
-geom_abline(col='red') +
-geom_point() +
-geom_text(aes(label=h), hjust=-0.1) +
-scale_x_continuous('PGC pop prevalence', limits=c(0, 1)) +
-scale_y_continuous('UKB MHQ prevalence', limits=c(0, 1)) +
-coord_fixed() 
+ggsave('mdd-symptom-gsem_files/cohorts_symptoms_prev.png', width=5.5, height=5.5)
 
 ```
 
@@ -336,70 +330,36 @@ Correlation (Spearman's rho) between sample prevalences in UKB CIDI and PGC DSM:
 
 ```{r}
 
-with(pgc_ukb_symptoms_prev, cor.test(samp_prev, cidi_sample, method='spearman', use='pair'))
+with(cohorts_sample_prev, cor.test(AGDS_PGC, ALSPAC_UKB, method='spearman', use='pair'))
 
 ```
 
 
 # Multivariable LDSC estimation
 
-We list out the munged sumstats for PGC and UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code. We use deparsed code instead of R data object serialization (`save()` or `saveRDS()`) so that the data can be inspected with a text editor to check that it does not contain individual-level data before being committed to the version control system. A simple caching strategy is employed to check whether the covariance structure already exists and, if so, to parse it rather than re-running the LD score calculation.
+We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code. We use deparsed code instead of R data object serialization (`save()` or `saveRDS()`) so that the data can be inspected with a text editor to check that it does not contain individual-level data before being committed to the version control system. A simple caching strategy is employed to check whether the covariance structure already exists and, if so, to parse it rather than re-running the LD score calculation.
 
 ```{r, results='hide'}
 
-pgc_ukb_covstruct_r <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.deparse.R'
-pgc_ukb_covstruct_rds <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.covstruct.rds'
-pgc_ukb_sumstats_prevs_txt <- 'ldsc/pgc_dsm.ukb_cidi.sumstats.prevs.txt'
+covstruct_prefix <- 'agds_pgc.ukb_cidi.covstruct'
+covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
+covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
+if(!file.exists(covstruct_r)) {
 
-if(!file.exists(pgc_ukb_sumstats_prevs_txt)) {
+  # list sumstats distribution directories
+  sumstats_files <- list.files(file.path('meta', 'munged'), '.gz', full.names=TRUE)
 
-  # list sumstats files
-  pgc_sumstats_gz <- list.files('sumstats/PGC/CasesAllCohorts', pattern='ldsc.sumstats.gz$', full.names=TRUE)
-  
-  ukb_cidi_sumstats_gz <- list.files('sumstats/UKB/CIDI', pattern='ldsc.sumstats.gz$', full.names=TRUE)
-  
-  ukb_phq_sumstats_gz <- list.files('sumstats/UKB/PHQ9_INT', pattern='ldsc.sumstats.gz$', full.names=TRUE)
-  
-  # pull out which symptom 'x' this is from the filename (daner_MDDx_*)
-  names(pgc_sumstats_gz) <- str_extract(pgc_sumstats_gz, 'MDD[:digit:](a|b)?')
-  
-  names(ukb_cidi_sumstats_gz) <- str_extract(ukb_cidi_sumstats_gz, 'MDD[:digit:](a|b)?')
-  
-  names(ukb_phq_sumstats_gz) <- str_extract(ukb_phq_sumstats_gz, 'MDD[:digit:]')
-  
-  pgc_sumstats_prevs <- 
-  tibble(Symptom=names(pgc_sumstats_gz),
-         filename=pgc_sumstats_gz,
-         study='PGC') %>%
-  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
-  mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
-  select(trait_name, filename, samp_prev, pop_prev)
-  
-  ukb_cidi_sumstats_prevs <- 
-  tibble(Symptom=names(ukb_cidi_sumstats_gz), 
-         filename=ukb_cidi_sumstats_gz,
-         study='UKB_CIDI') %>%
-  left_join(pgc_ukb_symptoms_prev, by='Symptom') %>%
-  mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
-  select(trait_name, filename, samp_prev=cidi_sample, pop_prev)
-  
-  ukb_phq_sumstats_prevs <- tibble(Symptom=names(ukb_phq_sumstats_gz),
-         filename=ukb_phq_sumstats_gz,
-         study='UKB_PHQ') %>%
-  mutate(trait_name=paste0(study, str_replace(Symptom, 'MDD', ''))) %>%
-  select(trait_name, filename)
-  
-  sumstats_prevs <- bind_rows(pgc_sumstats_prevs, ukb_cidi_sumstats_prevs, ukb_phq_sumstats_prevs)
+  # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
+  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
 
-  write_tsv(sumstats_prevs, pgc_ukb_sumstats_prevs_txt)
+  sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
 
-} else {
-  sumstats_prevs <- read_tsv(pgc_ukb_sumstats_prevs_txt)
-}
-
-if(!file.exists(pgc_ukb_covstruct_r)) {
-
+  sumstats_prevs <- 
+    symptoms_sample_prev %>%
+    left_join(sumstats_paths, by='sumstats') %>%
+    left_join(pgc_symptoms_pop_prev, by=c('symptom'='Symptom')) %>%
+    mutate(trait_name=paste(cohorts, symptom, sep='.'))
 
   symptoms_covstruct <- ldsc(traits=sumstats_prevs$filename,
                              sample.prev=sumstats_prevs$samp_prev,
@@ -408,12 +368,11 @@ if(!file.exists(pgc_ukb_covstruct_r)) {
                              wld='sumstats/reference/eur_w_ld_chr/',
                              trait.names=sumstats_prevs$trait_name)
 
-
-  dput(symptoms_covstruct, pgc_ukb_covstruct_r, control=c('all', 'digits17'))
-  saveRDS(symptoms_covstruct, pgc_ukb_covstruct_rds)
+  dput(symptoms_covstruct, covstruct_r, control=c('all', 'digits17'))
+  saveRDS(symptoms_covstruct, covstruct_rds)
   
   # check for exact match of deparsed object
-  identical(dget(pgc_ukb_covstruct_r), symptoms_covstruct)
+  identical(dget(covstruct_r), symptoms_covstruct)
 
 } else {
 
