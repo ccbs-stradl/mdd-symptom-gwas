@@ -186,7 +186,6 @@ filter(!reference %in% c('MDD3', 'MDD4')) %>%
 # select meta-analyses where there are at least two sumstats
 # contributing
 group_by(meta) %>%
-filter(n() >= 2) %>%
 ungroup()
 
 for(metafile in unique(cohorts_reference$meta)) {
@@ -206,7 +205,7 @@ cd meta
 for metafile in *.meta; do
        outname=$(basename $metafile .meta)
        if [ ! -f j._pi_${outname} -a ! -f distribution/${outname}/daner_${outname}.gz ]; then
-         postimp_navi --result $metafile --nolahunt --popname eur  --out $outname 
+         postimp_navi --result $metafile --nolahunt --popname EUR  --out $outname 
        fi
 done
 

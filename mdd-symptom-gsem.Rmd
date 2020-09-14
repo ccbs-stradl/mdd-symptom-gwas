@@ -131,7 +131,22 @@ GWAS of MDD symptoms for two cohorts were meta-analyzed:
 - Population samples: ALSPAC + UK Biobankc
 - Case-enriched samples: AGDS + PGC
 
-Meta-analysis was conducted using the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) so the summary statistics are in the  ("**D**osage **An**alyz**er**) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. We find all daner files in the PGC directory and loop them through the munge step.
+Meta-analysis was conducted using the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) so the summary statistics are in the  ("**D**osage **An**alyz**er**) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. 
+
+First we need to prepare files for the MDD5 symptoms for the population samples as these were only available in one cohorts (ALSPAC) and therefore not meta-analyzed. These just need to  be copied with the correct names and have sample size columns added.
+
+```{bash, eval=FALSE}
+
+mkdir -p meta/distribution/ALSPAC_UKB.MDD5a_psychomotorFast
+mkdir -p meta/distribution/ALSPAC_UKB.MDD5b_psychomotorSlow
+
+zcat sumstats/aligned/daner_MDD5a_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print $0, "Nca", "Nco"} else {print $0, 113, 3181}}' | gzip -c > meta/distribution/ALSPAC_UKB.MDD5a_psychomotorFast/daner_ALSPAC_UKB.MDD5a_psychomotorFast.gz
+
+zcat sumstats/aligned/daner_MDD5b_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print $0, "Nca", "Nco"} else {print $0, 299, 2995}}' | gzip -c > meta/distribution/ALSPAC_UKB.MDD5b_psychomotorSlow/daner_ALSPAC_UKB.MDD5b_psychomotorSlow.gz
+
+```
+
+We find all daner files in the PGC directory and loop them through the munge step.
 
 ```{r, eval=FALSE}
 # Munge sumstats for all cohorts symptom GWASs
@@ -334,6 +349,28 @@ with(cohorts_sample_prev, cor.test(AGDS_PGC, ALSPAC_UKB, method='spearman', use=
 
 ```
 
+## Population prevalences
+
+Combine the sample prevalences weighted by assuming 15% population prevalence of MDD and 57% of UKB participants screening positively for mood or anhedonia.
+
+```{r mdd_pop_prev}
+
+pop_prevs_w <-
+symptoms_sample_prev %>%
+mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
+                   symptom %in% c('MDD1', 'MDD2') ~ 1.0,
+                   TRUE ~ 0.57)) %>%
+mutate(pop_prev=samp_prev*w) %>%
+select(symptom, cohorts, pop_prev) %>%
+pivot_wider(names_from=cohorts, values_from=pop_prev) %>%
+group_by(symptom) %>%
+mutate(pop_prev=mean(c(AGDS_PGC, ALSPAC_UKB))) %>%
+select(symptom, pop_prev)
+
+pop_prevs_w
+
+```
+
 
 # Multivariable LDSC estimation
 
@@ -341,7 +378,7 @@ We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with 
 
 ```{r, results='hide'}
 
-covstruct_prefix <- 'agds_pgc.ukb_cidi.covstruct'
+covstruct_prefix <- 'agds_pgc.alspac_ukb.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
@@ -358,7 +395,7 @@ if(!file.exists(covstruct_r)) {
   sumstats_prevs <- 
     symptoms_sample_prev %>%
     left_join(sumstats_paths, by='sumstats') %>%
-    left_join(pgc_symptoms_pop_prev, by=c('symptom'='Symptom')) %>%
+    left_join(pop_prevs_w, by='symptom') %>%
     mutate(trait_name=paste(cohorts, symptom, sep='.'))
 
   symptoms_covstruct <- ldsc(traits=sumstats_prevs$filename,
@@ -389,7 +426,7 @@ Run LDSC, using sumstats filenames and estimated prevalences to construct comman
 
 ```{r mdd_symptom_gsem_ldsc_h2, results='hide'}
 
-sumstats_h2_txt <- 'ldsc/pgc_dsm.ukb_cidi.ukb_phq.h2.txt'
+sumstats_h2_txt <- 'ldsc/agds_pgc.alspac_ukb.h2.txt'
 
 if(!file.exists(sumstats_h2_txt)) {
 
@@ -453,22 +490,23 @@ if(!file.exists(sumstats_h2_txt)) {
 sumstats_h2_labels <-
 as_tibble(sumstats_h2) %>%
 mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
-       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', ' '),
-       sub_study=str_extract(trait_name, '_[012M]$')) %>%
-# split negative estimates into their own facet
-mutate(study_est=case_when(study == 'PGC' & h2 > 0 ~ 'PGC (+)',
-                           study == 'PGC' & h2 <= 0 ~ 'PGC (-)',
-                           TRUE ~ study)) %>%
-filter(is.na(sub_study) | sub_study == '_M') %>%
-left_join(dsm_mdd_symptoms_labels, by='ref') %>%
-mutate(a=1) %>%
-# insert invisible placeholder estimates so that the positive estimates are
-# all plotted on common scale even though the facet has `scale='free'`
-bind_rows(tibble(study_est=rep(c('PGC (-)', 'PGC (+)', 'UKB CIDI', 'UKB PHQ'), times=2),
-                 h='Mood',
-                 a=0,
-                 h2=rep(c(0, 0.26), each=4),
-                 se=0.0))
+       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', ' ')) %>%
+left_join(dsm_mdd_symptoms_labels, by='ref')
+       
+#        %>%
+# # split negative estimates into their own facet
+# mutate(study_est=case_when(study == 'PGC' & h2 > 0 ~ 'PGC (+)',
+#                            study == 'PGC' & h2 <= 0 ~ 'PGC (-)',
+#                            TRUE ~ study)) %>%
+# filter(is.na(sub_study) | sub_study == '_M') %>%
+# mutate(a=1) %>%
+# # insert invisible placeholder estimates so that the positive estimates are
+# # all plotted on common scale even though the facet has `scale='free'`
+# bind_rows(tibble(study_est=rep(c('PGC (-)', 'PGC (+)', 'UKB CIDI', 'UKB PHQ'), times=2),
+#                  h='Mood',
+#                  a=0,
+#                  h2=rep(c(0, 0.26), each=4),
+#                  se=0.0))
 
 ggplot(sumstats_h2_labels, aes(x=h, y=h2, ymin=h2+se*qnorm(0.025), ymax=h2+se*qnorm(0.975))) +
 geom_hline(yintercept=0, col='grey') +
