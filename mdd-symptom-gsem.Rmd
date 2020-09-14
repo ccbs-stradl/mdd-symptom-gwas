@@ -413,7 +413,7 @@ if(!file.exists(covstruct_r)) {
 
 } else {
 
-  symptoms_covstruct <- dget(pgc_ukb_covstruct_r)
+  symptoms_covstruct <- dget(covstruct_r)
 
 }
 
@@ -510,9 +510,9 @@ left_join(dsm_mdd_symptoms_labels, by='ref')
 
 ggplot(sumstats_h2_labels, aes(x=h, y=h2, ymin=h2+se*qnorm(0.025), ymax=h2+se*qnorm(0.975))) +
 geom_hline(yintercept=0, col='grey') +
-geom_pointrange(aes(alpha=a)) + 
-facet_grid(cols=vars(study_est), scale='free') +
-scale_x_discrete('Symptom', limits=rev(dsm_mdd_symptoms_labels$h)) +
+geom_pointrange() + 
+facet_grid(cols=vars(study), scale='free') +
+scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$h))) +
 scale_y_continuous(expression(h[SNP]^2)) +
 scale_alpha_identity() +
 coord_flip() +
@@ -545,51 +545,30 @@ done
 
 ```
 
-```{r}
+```{r mdd_rg}
 
-other_mdd_gz <- list.files('sumstats/PGC/MDD', pattern='daner_.+sumstats.gz$', full.names=TRUE)
+mdd29_sumstats_gz <- 'sumstats/PGC/MDD/daner_MDD29.0515a_mds6.0316.ldsc.sumstats.gz'
+outname <- paste(mdd29_sumstats_gz, 'rg', sep='.')
+logfile <- paste(outname, 'log', sep='.')
 
-names(other_mdd_gz) <- sapply(str_split(sapply(str_split(other_mdd_gz, '/'), last), '\\.'), first)
+if(!file.exists(logfile)) {
 
-other_mdd_rg <-
-plyr::adply(other_mdd_gz, 1, function(gz) {
-  
-  filename_gz <- str_replace(gz, 'ldsc.sumstats.gz', 'gz') 
-  outname <- paste(gz, 'rg', sep='.')
-  logfile <- paste(outname, 'log', sep='.')
+  # string together rg and prevalence arguments, separated by commas
+  rg_arg <- paste(c(gz, sumstats_prevs$filename), collapse=',')
+  samp_prev_list <- c(samp_prev, sumstats_prevs$samp_prev)
+  # use 'nan' for prevalences of quantitative traits 
+  samp_prev_arg <- paste(ifelse(is.na(samp_prev_list), yes='nan', no=as.character(samp_prev_list)), collapse=',')
+  pop_prev_list <- c(0.15, sumstats_prevs$pop_prev)
+  pop_prev_arg <- paste(ifelse(is.na(pop_prev_list), yes='nan', no=as.character(pop_prev_list)), collapse=',')
 
+  ldsc_command <- paste('ldsc.py --rg', rg_arg, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev_arg, '--pop-prev', pop_prev_arg)
 
-  if(!file.exists(logfile)) {
+  system(ldsc_command)
 
-    # get sample prevalence
-    sumstats_gz <- read_tsv(filename_gz, n_max=1)
+}
 
-    # calculate sample prevalences from daner columns
-    sumstats_frq <- sumstats_gz %>% select(starts_with('FRQ_A'), starts_with('FRQ_U'))
+rg_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
 
-    frq_a_col <- names(sumstats_frq)[1]
-    frq_u_col <- names(sumstats_frq)[2]
-
-    frq_a <- as.numeric(str_extract(frq_a_col, '[:digit:]+'))
-    frq_u <- as.numeric(str_extract(frq_u_col, '[:digit:]+'))
-
-    samp_prev <- frq_a / (frq_a + frq_u)
-
-    # string together rg and prevalence arguments, separated by commas
-    rg_arg <- paste(c(gz, sumstats_prevs$filename), collapse=',')
-    samp_prev_list <- c(samp_prev, sumstats_prevs$samp_prev)
-    # use 'nan' for prevalences of quantitative traits 
-    samp_prev_arg <- paste(ifelse(is.na(samp_prev_list), yes='nan', no=as.character(samp_prev_list)), collapse=',')
-    pop_prev_list <- c(0.15, sumstats_prevs$pop_prev)
-    pop_prev_arg <- paste(ifelse(is.na(pop_prev_list), yes='nan', no=as.character(pop_prev_list)), collapse=',')
-
-    ldsc_command <- paste('ldsc.py --rg', rg_arg, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev_arg, '--pop-prev', pop_prev_arg)
-
-    system(ldsc_command)
-
-  }
-
-  rg_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
 
   start_of_results <- which(str_detect(rg_log[,1], 'Summary of Genetic Correlation Results')) + 1
   end_of_results <- which(str_detect(rg_log[,1], 'Analysis finished at'))-1
