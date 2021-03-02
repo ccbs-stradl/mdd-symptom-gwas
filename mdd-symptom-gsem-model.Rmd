@@ -2,14 +2,7 @@
 title: GenomicSEM of MDD symptoms
 author: Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard 
 output:
-  html_document:
-    toc: TRUE
-    code_folding: hide
-    number_sections: TRUE
-    df_print: kable
-    keep_md: true
-  md_document:
-    variant: markdown_github
+  github_document
 ---
 
 
@@ -32,11 +25,9 @@ Package installation
 required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr', 'corrplot')
 for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.packages(pack)
 
-library(devtools)
+if(!require(GenomicSEM)) remotes::install_github("MichelNivard/GenomicSEM")
 
-if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
-
-if(!require(tidySEM)) install_github("cjvanlissa/tidySEM")
+if(!require(tidySEM)) remotes::install_github("cjvanlissa/tidySEM")
 
 ```
 
@@ -300,7 +291,7 @@ pop_kendler_neale.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
 
 ```
 
-
+Add constraints to prevent variances from being negative and correlations from going out of bounds.
 ```{r pop_kendler_neale_constr, cache=TRUE}
 
 pop_kendler_neale_constr.model <- "
@@ -337,7 +328,7 @@ pop_kendler_neale_constr.fit$results[c(1, 2, 3, 6, 7)]
 
 ```
 
-
+Check that an orthogonal model has poor fit.
 ```{r pop_cidi_kendler_neale_orth, cache=TRUE}
 
 pop_kendler_neale_orth.model <- "
@@ -424,7 +415,7 @@ pop_psych_soma_bif.fit$results[c(1,2,3,6,7)]
 
 ```
 
-
+Add constraints for negative variances
 ```{r pop_psych_soma_bif_constr, cache=TRUE}
 
 pop_psych_soma_bif_constr.model <- "
@@ -468,16 +459,18 @@ pop_psych_veg.fit$results[c(1,2,3,6,7)]
 
 ```
 
+
 ```{r pop_psych_veg_const, cache=TRUE}
 
 pop_psych_veg_const.model <- "
-c2 < 0.99
-A1 =~ NA*PopDep + c2*PopAnh + PopGuilt + PopSui
+A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
 A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 PopAppDec ~~ PopAppInc
 PopSleDec ~~ PopSleInc
+c2 > 0.001
+PopAnh ~~ c2*PopAnh
 "
 pop_psych_veg_const.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg_const.model)
 
@@ -569,6 +562,7 @@ pop_affect_veg_constr.fit$results[c(1,2,3,6,7)]
 
 ```
 
+Bifactor model
 ```{r pop_affect_veg_bif, cache=TRUE}
 
 pop_affect_veg_bif.model <- "
@@ -587,7 +581,7 @@ PopSleInc ~~ PopSleDec
 pop_affect_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_affect_veg_bif.model)
 
 pop_affect_veg_bif.fit$modelfit
-pop_affect_veg_bif.fit$results[c(1,2,3,6,7)]
+pop_affect_veg_bif.fit$results
 
 ```
 
@@ -595,9 +589,10 @@ pop_affect_veg_bif.fit$results[c(1,2,3,6,7)]
 ```{r pop_affect_veg_bif_constr, cache=TRUE}
 
 pop_affect_veg_bif_constr.model <- "
+a2 < 1
 A1 =~ NA*PopDep + PopGuilt + PopSui
 A2 =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-A =~ NA*PopDep + PopGuilt + PopSui + PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
+A =~ NA*PopDep + PopGuilt + PopSui + a2*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A  ~~ 1*A
@@ -606,10 +601,18 @@ A ~~ 0*A2
 A1 ~~ 0*A2
 PopAppInc ~~ PopAppDec
 PopSleInc ~~ PopSleDec
+c1 > 0.001
+PopDep ~~ c1*PopDep
 c2 > 0.001
 PopAnh ~~ c2*PopAnh
+c4a > 0.001
+PopSleDec ~~ c4a*PopSleDec
+c8 > 0.001
+PopConc ~~ c8*PopConc
+c9 > 0.001
+PopSui ~~ c9*PopSui
 "
-pop_affect_veg_bif_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_affect_veg_bif_constr.model)
+pop_affect_veg_bif_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_affect_veg_bif_constr.model, fix_resid=FALSE)
 
 pop_affect_veg_bif_constr.fit$modelfit
 pop_affect_veg_bif_constr.fit$results[c(1,2,3,6,7)]
@@ -621,23 +624,21 @@ pop_affect_veg_bif_constr.fit$results[c(1,2,3,6,7)]
 
 ```{r}
 
-data.frame(Model=c('1', '2a(i)', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)'),
+data.frame(Model=c('1', '2a(i)', '2a(ii)', '2b(i)', '2b(ii)', '3'),
        Name=c('Common',
               'Psych-Somatic',
               'Psych-Somatic (BiF)',
               'Psych-Neuroveg',
               'Psych-Neuroveg (BiF)',
-              'Affect-Neuroveg',
-              'Affect-Neuroveg (BiF)')) %>%
+			  'Cog-Mood-Neuroveg')) %>%
 bind_cols(
 bind_rows(
-lapply(list(ukb_cidi_commonfactor.fit,
-                    ukb_cidi_psych_soma.fit,
-                    ukb_cidi_psych_soma_bif_constr.fit,
-                    ukb_cidi_psych_veg.fit,
-                    ukb_cidi_psych_veg_bif_constr.fit,
-                    ukb_cidi_affect_veg_constr.fit,
-                    ukb_cidi_affect_veg_bif.fit),
+lapply(list(pop_commonfactor.fit,
+            pop_psych_soma.fit,
+            pop_psych_soma_bif_constr.fit,
+            pop_psych_veg_const.fit,
+            pop_psych_veg_bif_constr.fit,
+            pop_kendler_neale_constr.fit),
        function(fit) signif(bind_cols(fit$modelfit, fit$results %>%
                      filter(lhs == 'A1' & rhs == 'A2') %>%
                      summarize(A1A2cor=mean(STD_Genotype), A1A2se=mean(as.numeric(STD_Genotype_SE)))), 3))
@@ -646,224 +647,6 @@ lapply(list(ukb_cidi_commonfactor.fit,
 
 ```
        
-
-## UKB PHQ
-
-### Common factor (MHQ)
-
-Common factor model at MHQ assessment
-
-```{r ukb_phqcommonfactor, cache=TRUE}
-
-ukb_phq_commonfactor.model <- "
-A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ7 + UKB_PHQ8 + UKB_PHQ9
-A1 ~~ 1*A1
-"
-ukb_phq_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_commonfactor.model)
-
-ukb_phq_commonfactor.fit$modelfit
-ukb_phq_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
-
-render_fit(ukb_phq_commonfactor.fit$results)
-
-ukb_phq_commonfactor.gv <- generate_dot(fit_graph(ukb_phq_commonfactor.fit$results))
-
-cat(str_replace_all(ukb_phq_commonfactor.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_commonfactor.gv')
-
-```
-
-### Kendler Neale model
-
-```{r ukb_phq_kendler_neale, cache=TRUE}
-
-ukb_phq_kendler_neale.model <- "
-A1 =~ NA*UKB_PHQ5 + UKB_PHQ8 + UKB_PHQ9
-A2 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7
-A3 =~ NA*UKB_PHQ4 + UKB_PHQ6 + UKB_PHQ3
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A3 ~~ 1*A3"
-ukb_phq_kendler_neale.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_kendler_neale.model)
-
-
-```
-
-
-```{r ukb_phq_kendler_neale_constr, cache=TRUE}
-
-ukb_phq_kendler_neale_constr.model <- "
-A1 =~ NA*UKB_PHQ5 + UKB_PHQ8 + UKB_PHQ9
-A2 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7
-A3 =~ NA*UKB_PHQ4 + UKB_PHQ6 + UKB_PHQ3
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A3 ~~ 1*A3
-ca12 < 1
-A1 ~~ ca12*A2
-"
-ukb_phq_kendler_neale_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_kendler_neale_constr.model)
-
-ukb_phq_kendler_neale_constr.fit$modelfit
-ukb_phq_kendler_neale_constr.fit$results[c(1,2,3,6,7)]
-
-
-ukb_phq_kendler_neale_constr.graph <- fit_graph(ukb_phq_kendler_neale_constr.fit$results)
-ukb_phq_kendler_neale_constr.gv <- add_rank_same(generate_dot(ukb_phq_kendler_neale_constr.graph), 1:3, 4:12)
-grViz(ukb_phq_kendler_neale_constr.gv)
-
-cat(str_replace_all(ukb_phq_kendler_neale_constr.gv, "'", '"'), file='mdd-symptom-gsem_files/ukb_phq_kendler_neale_constr.gv')
-
-```
-
-### Two-factor models
-
-### Psychological-Somatic (Elhai Model 2a)
-
-[Kruse Rehab Psychol 2008](https://psycnet.apa.org/record/2008-17022-011), [Kruse Arch Psys Med Rehab 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
-
-> the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor retardation as a fourth somatic item
-
-```{r ukb_phq_psych_soma, cache=TRUE}
-
-ukb_phq_psych_soma.model <- "
-A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ5 + UKB_PHQ7 + UKB_PHQ8 + UKB_PHQ9
-A2 =~ NA*UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ6
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-"
-ukb_phq_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_psych_soma.model)
-
-ukb_phq_psych_soma.fit$modelfit
-ukb_phq_psych_soma.fit$results[c(1,2,3,6,7)]
-
-```
-
-Bifactor model
-
-```{r ukb_phq_psych_soma, cache=TRUE}
-
-ukb_phq_psych_soma_bi.model <- "
-A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ5 + UKB_PHQ7 + UKB_PHQ8 + UKB_PHQ9
-A2 =~ NA*UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ6
-A  =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ5 + UKB_PHQ7 + UKB_PHQ8 + UKB_PHQ9 + UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ6
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A ~~ 0*A1
-A ~~ 0*A2
-"
-ukb_phq_psych_soma_bi.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_psych_soma_bi.model)
-
-ukb_phq_psych_soma_bi.fit$modelfit
-ukb_phq_psych_soma_bi.fit$results[c(1,2,3,6,7)]
-
-```
-### Psychological-Neurovegetative (Elhai Model 2b)
-
-```{r ukb_phq_psych_veg, cache=TRUE}
-
-ukb_phq_psych_veg.model <- "
-A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7 + UKB_PHQ9
-A2 =~ NA*UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-"
-ukb_phq_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_psych_veg.model)
-
-ukb_phq_psych_veg.fit$modelfit
-ukb_phq_psych_veg.fit$results[c(1,2,3,6,7)]
-
-```
-
-
-```{r ukb_phq_psych_veg_bi, cache=TRUE}
-
-ukb_phq_psych_veg_bi.model <- "
-A1 =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7 + UKB_PHQ9
-A2 =~ NA*UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
-A =~ NA*UKB_PHQ1 + UKB_PHQ2 + UKB_PHQ7 + UKB_PHQ9 + UKB_PHQ3 + UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A ~~ 0*A1
-A ~~ 0*A2
-"
-ukb_phq_psych_veg_bi.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_psych_veg_bi.model)
-
-ukb_phq_psych_veg_bi.fit$modelfit
-ukb_phq_psych_veg_bi.fit$results[c(1,2,3,6,7)]
-
-```
-
-
-### Affective-Neurovegetative (Elhai Model 2c)
-
-```{r ukb_phq_affect_veg, cache=TRUE}
-
-ukb_phq_affect_veg.model <- "
-A1 =~ NA*UKB_PHQ1 + UKB_PHQ7 + UKB_PHQ9
-A2 =~ NA*UKB_PHQ2 + UKB_PHQ3 +  UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-"
-ukb_phq_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_affect_veg.model)
-
-
-ukb_phq_affect_veg.fit$modelfit
-ukb_phq_affect_veg.fit$results[c(1,2,3,6,7)]
-
-```
-
-```{r ukb_phq_affect_veg_bi, cache=TRUE}
-
-ukb_phq_affect_veg_bi.model <- "
-A1 =~ NA*UKB_PHQ1 + UKB_PHQ7 + UKB_PHQ9
-A2 =~ NA*UKB_PHQ2 + UKB_PHQ3 +  UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
-A  =~ NA*UKB_PHQ1 + UKB_PHQ7 + UKB_PHQ9 + UKB_PHQ2 + UKB_PHQ3 +  UKB_PHQ4 + UKB_PHQ5 + UKB_PHQ6 + UKB_PHQ8
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A  ~~ 0*A1
-A  ~~ 0*A2
-"
-ukb_phq_affect_veg_bi.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ukb_phq_affect_veg_bi.model)
-
-ukb_phq_affect_veg_bi.fit$modelfit
-ukb_phq_affect_veg_bi.fit$results[c(1,2,3,6,7)]
-
-```
-
-
-
-### Model comparisons
-
-```{r}
-
-data.frame(Model=c('1', '2a(i)', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)'),
-       Name=c('Common',
-              'Psych-Somatic',
-              'Psych-Somatic (BiF)',
-              'Psych-Neuroveg',
-              'Psych-Neuroveg (BiF)',
-              'Affect-Neuroveg',
-              'Affect-Neuroveg (BiF)')) %>%
-bind_cols(
-bind_rows(
-lapply(list(ukb_phq_commonfactor.fit,
-                    ukb_phq_psych_soma.fit,
-                    ukb_phq_psych_soma_bi.fit,
-                    ukb_phq_psych_veg.fit,
-                    ukb_phq_psych_veg_bi.fit,
-                    ukb_phq_affect_veg.fit,
-                    ukb_phq_affect_veg_bi.fit),
-       function(fit) signif(bind_cols(fit$modelfit, fit$results %>%
-                     filter(lhs == 'A1' & rhs == 'A2') %>%
-                     summarize(A1A2cor=mean(STD_Genotype), A1A2se=mean(as.numeric(STD_Genotype_SE)))), 3))
-))
-
-
-
-```
 
 # Exploratory factor analysis
 
@@ -879,9 +662,7 @@ symptoms_se[lower.tri(symptoms_se, diag=TRUE)] <- sqrt(diag(symptoms_covstruct$V
 
 symptoms_se[upper.tri(symptoms_se)] <- t(symptoms_se)[upper.tri(symptoms_se)]
 
-
-
-symptoms_cov_keep <- which(diag(symptoms_cov > 0) & colnames(symptoms_cov) %in% symptoms_pgc_cidi_phqm)
+symptoms_cov_keep <- which(diag(symptoms_cov > 0))
 
 symptoms_cov_pos <- symptoms_cov[symptoms_cov_keep,symptoms_cov_keep]
 
@@ -903,9 +684,9 @@ corrplot(cov2cor(symptoms_cov_pd))
 Check eigen values of the correlation matrix
 ```{r mdd_symptom_gsem_pgc_efa_eigen}
 
-symptoms_pgc <- c("PGC3a", "PGC5a", "PGC5b", "PGC9")
+symptoms_pgc_idx <- which(str_detect(dimnames(symptoms_cov_pd)[[1]], 'Clin'))
 
-symptoms_pgc_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_pgc,symptoms_pgc])) 
+symptoms_pgc_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_pgc_idx,symptoms_pgc_idx])) 
 
 plot(symptoms_pgc_eigen$values, ylab='Eigenvalue')
 lines(symptoms_pgc_eigen$values)
@@ -918,48 +699,18 @@ abline(1, 0, col='red')
 Check eigen values of the correlation matrix
 ```{r mdd_symptom_gsem_ukb_cidi_efa_eigen}
 
-symptoms_ukb_cidi <- c("UKB_CIDI1", "UKB_CIDI2", "UKB_CIDI3a", "UKB_CIDI3b", "UKB_CIDI4a", "UKB_CIDI4b", "UKB_CIDI6", "UKB_CIDI7", "UKB_CIDI8", "UKB_CIDI9")
+symptoms_ukb_cidi_idx <- which(str_detect(dimnames(symptoms_cov_pd)[[1]], 'Pop'))
 
-symptoms_ukb_cidi_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_ukb_cidi,symptoms_ukb_cidi])) 
+symptoms_ukb_cidi_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_ukb_cidi_idx,symptoms_ukb_cidi_idx])) 
 
 plot(symptoms_ukb_cidi_eigen$values, ylab='Eigenvalue')
 lines(symptoms_ukb_cidi_eigen$values)
 abline(1, 0, col='red')
 
-symptoms_ukb_cidi_efa <- factanal(covmat=symptoms_cov_pd[symptoms_ukb_cidi,symptoms_ukb_cidi], factors=3, rotation='promax')
+symptoms_ukb_cidi_efa <- factanal(covmat=symptoms_cov_pd[symptoms_ukb_cidi_idx,symptoms_ukb_cidi_idx], factors=3, rotation='promax')
 symptoms_ukb_cidi_efa
 
-as_tibble(loadings(symptoms_ukb_cidi_efa)[,1:3]) %>%
-mutate(trait=rownames(loadings(symptoms_ukb_cidi_efa))) %>%
-left_join(trait_symptom_labels, by='trait') %>%
-select(study, Symptom=h, Factor1, Factor2, Factor3)
-
 ```
-
-## UKB PHQ
-
-Check eigen values of the correlation matrix
-```{r mdd_symptom_gsem_ukb_phq_efa_eigen}
-
-symptoms_ukb_phq <- c("UKB_PHQ1_M", "UKB_PHQ2_M", "UKB_PHQ3_M", "UKB_PHQ4_M", "UKB_PHQ5_M",  "UKB_PHQ6_M", "UKB_PHQ7_M", "UKB_PHQ8_M", "UKB_PHQ9_M")
-
-symptoms_ukb_phq_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_ukb_phq,symptoms_ukb_phq])) 
-
-plot(symptoms_ukb_phq_eigen$values, ylab='Eigenvalue')
-lines(symptoms_ukb_phq_eigen$values)
-abline(1, 0, col='red')
-
-symptoms_ukb_phq_efa <- factanal(covmat=symptoms_cov_pd[symptoms_ukb_phq,symptoms_ukb_phq], factors=3, rotation='promax')
-symptoms_ukb_phq_efa
-
-as_tibble(loadings(symptoms_ukb_phq_efa)[,1:3]) %>%
-mutate(trait=rownames(loadings(symptoms_ukb_phq_efa))) %>%
-left_join(trait_symptom_labels, by='trait') %>%
-select(study, Symptom=h, Factor1, Factor2, Factor3)
-
-```
-
-Both the CIDI and the PHQ suggest only a single higher-order factor.
 
 
 ## All symptoms
@@ -977,165 +728,37 @@ abline(1, 0, col='red')
 
 ```
 
-```{r symptoms_efa}
-
-symptoms_efa <- factanal(covmat=symptoms_cov_pd, factors=2, rotation='promax')
-
-symptoms_efa
-
-
-node_names <- c('A1', 'A2', rownames(symptoms_efa$loadings))
-node_idx <- seq_along(node_names)
-
-highpass <- function(x, a=0.4) ifelse(abs(x) >= a, yes=abs(x), no=0)
-
-edge_color <- c('red', 'blue')
-
-node_cats <- c("Mood"='mood', "Interest"='mood', "Weight⇊"='neuroveg', "Weight⇈"='neuroveg', "Sleep⇊"='neuroveg', "Sleep⇈"='neuroveg', 
-"Motor⇈"='cognitive', "Motor⇊"='neuroveg', "Fatigue"='neuroveg', "Guilt"='mood', "Concentrate"='cognitive', "Suicidality"='cognitive', 
-"Weight⇅"='neuroveg', "Sleep⇅"='neuroveg', "Motor⇅"='cognitive', 'A1'='factor', 'A2'='factor')
-
-node_shapes=c('mood'='square', 'cognitive'='diamond', 'neuroveg'='egg', 'factor'='oval')
-
-
-
-symptoms_efa.graph <-
-create_graph(nodes_df=create_node_df(n=length(node_names), 
-                                     label=node_labels[node_names],
-                                     width=1,
-                                     shape=node_shapes[node_cats[node_labels[node_names]]],
-                                     fontcolor='black',
-                                     fillcolor=node_colors[node_names]),
-             edges_df=create_edge_df(from=c(rep(c(1, 2), each=nrow(symptoms_efa$loadings)), 1),
-                                     to=c(rep(node_idx[c(-1, -2)], times=2), 2),
-                                     label=round(c(symptoms_efa$loadings[,1],
-                                                   symptoms_efa$loadings[,2],
-                                                -0.268), 2),
-                                     color=edge_color[1+(c(symptoms_efa$loadings[,1],
-                                                symptoms_efa$loadings[,2], -0.268) > 0)],
-                                     penwidth=highpass(c(symptoms_efa$loadings[,1],
-                                                symptoms_efa$loadings[,2], -0.268),
-                                                       a=0.15)) %>%
-                      filter(penwidth > 0) %>% mutate(penwidth=4*penwidth),
-            attr_theme='tb')
-render_graph(symptoms_efa.graph)
-
-# cat(generate_dot(symptoms_efa.graph))
-
-symptoms_efa.gv <- 
-"
-digraph {
-graph [layout = 'dot',
-       rankdir = 'TB',
-       outputorder = 'edgesfirst',
-       bgcolor = 'white']
-node [fontname = 'Helvetica',
-      fontsize = '10',
-      shape = 'circle',
-      fixedsize = 'true',
-      width = '0.5',
-      style = 'filled',
-      fillcolor = 'aliceblue',
-      color = 'gray70',
-      fontcolor = 'gray50']
-edge [fontname = 'Helvetica',
-     fontsize = '8',
-     len = '1.5',
-     color = 'gray80',
-     arrowsize = '0.5']
-
-   {rank=same '1' '2'}
-  '1' [label = 'A1', width = '1', shape = 'oval', fontcolor = 'black', fillcolor = 'white'] 
-  '2' [label = 'A2', width = '1', shape = 'oval', fontcolor = 'black', fillcolor = 'white'] 
-  '3' [label = 'Weight⇊', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#7570b3'] 
-  '4' [label = 'Motor⇈', width = '1', shape = 'diamond', fontcolor = 'black', fillcolor = '#7570b3'] 
-  '5' [label = 'Motor⇊', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#7570b3'] 
-  '6' [label = 'Suicidality', width = '1', shape = 'diamond', fontcolor = 'black', fillcolor = '#7570b3'] 
-  '7' [label = 'Mood', width = '1', shape = 'square', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '8' [label = 'Interest', width = '1', shape = 'square', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '9' [label = 'Weight⇊', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '10' [label = 'Weight⇈', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '11' [label = 'Sleep⇊', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '12' [label = 'Sleep⇈', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '13' [label = 'Fatigue', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '14' [label = 'Guilt', width = '1', shape = 'square', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '15' [label = 'Concentrate', width = '1', shape = 'diamond', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '16' [label = 'Suicidality', width = '1', shape = 'diamond', fontcolor = 'black', fillcolor = '#1b9e77'] 
-  '17' [label = 'Mood', width = '1', shape = 'square', fontcolor = 'black', fillcolor = '#d95f02'] 
-  '18' [label = 'Interest', width = '1', shape = 'square', fontcolor = 'black', fillcolor = '#d95f02'] 
-  '19' [label = 'Weight⇅', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#d95f02'] 
-  '20' [label = 'Sleep⇅', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#d95f02'] 
-  '21' [label = 'Motor⇅', width = '1', shape = 'diamond', fontcolor = 'black', fillcolor = '#d95f02'] 
-  '22' [label = 'Fatigue', width = '1', shape = 'egg', fontcolor = 'black', fillcolor = '#d95f02'] 
-  '23' [label = 'Guilt', width = '1', shape = 'square', fontcolor = 'black', fillcolor = '#d95f02'] 
-  '24' [label = 'Concentrate', width = '1', shape = 'diamond', fontcolor = 'black', fillcolor = '#d95f02'] 
-  '25' [label = 'Suicidality', width = '1', shape = 'diamond', fontcolor = 'black', fillcolor = '#d95f02'] 
-
-'1'->'3' [label = '-0.24', color = 'red', penwidth = '0.966609884185723'] 
-'1'->'6' [label = '0.41', color = 'blue', penwidth = '1.62244268872947'] 
-'1'->'7' [label = '0.76', color = 'blue', penwidth = '3.04353567041099'] 
-'1'->'8' [label = '0.78', color = 'blue', penwidth = '3.11897772798293'] 
-'1'->'9' [label = '-0.15', color = 'red', penwidth = '0.609562716468333'] 
-'1'->'10' [label = '0.6', color = 'blue', penwidth = '2.38498843016525'] 
-'1'->'11' [label = '0.43', color = 'blue', penwidth = '1.73732679672606'] 
-'1'->'12' [label = '0.45', color = 'blue', penwidth = '1.79914820763346'] 
-'1'->'13' [label = '0.42', color = 'blue', penwidth = '1.68578337306743'] 
-'1'->'14' [label = '0.62', color = 'blue', penwidth = '2.46081098202301'] 
-'1'->'15' [label = '0.51', color = 'blue', penwidth = '2.04050907681188'] 
-'1'->'16' [label = '0.59', color = 'blue', penwidth = '2.375933221593'] 
-'1'->'17' [label = '0.94', color = 'blue', penwidth = '3.77519287148625'] 
-'1'->'18' [label = '0.92', color = 'blue', penwidth = '3.67095912919635'] 
-'1'->'19' [label = '0.81', color = 'blue', penwidth = '3.25052189556413'] 
-'1'->'20' [label = '0.72', color = 'blue', penwidth = '2.88092886952725'] 
-'1'->'21' [label = '0.81', color = 'blue', penwidth = '3.2597817199889'] 
-'1'->'22' [label = '0.86', color = 'blue', penwidth = '3.42170369313828'] 
-'1'->'23' [label = '1.02', color = 'blue', penwidth = '4.0665015034711'] 
-'1'->'24' [label = '0.9', color = 'blue', penwidth = '3.58185570115017'] 
-'1'->'25' [label = '0.86', color = 'blue', penwidth = '3.43422503039626'] 
-'2'->'3' [label = '0.41', color = 'blue', penwidth = '1.6482052872024'] 
-'2'->'4' [label = '0.16', color = 'blue', penwidth = '0.62432594718815'] 
-'2'->'5' [label = '0.55', color = 'blue', penwidth = '2.19857048814461'] 
-'2'->'7' [label = '-0.17', color = 'red', penwidth = '0.687682717740456'] 
-'2'->'9' [label = '0.46', color = 'blue', penwidth = '1.85510815263036'] 
-'2'->'11' [label = '0.2', color = 'blue', penwidth = '0.802075683333857'] 
-'2'->'12' [label = '0.27', color = 'blue', penwidth = '1.0603063625551'] 
-'2'->'13' [label = '0.37', color = 'blue', penwidth = '1.46994787473968'] 
-'2'->'14' [label = '-0.25', color = 'red', penwidth = '1.00255587573466'] 
-'2'->'15' [label = '0.21', color = 'blue', penwidth = '0.830362100257246'] 
-'2'->'22' [label = '0.25', color = 'blue', penwidth = '0.98699974805709'] 
-'2'->'23' [label = '-0.46', color = 'red', penwidth = '1.84304958050374'] 
-'2'->'25' [label = '-0.26', color = 'red', penwidth = '1.02168689057729'] 
-'1'->'2' [label = '-0.27', color = 'red', penwidth = '1.072'] 
-}
-"
-grViz(symptoms_efa.gv)
-
-cat(str_replace_all(symptoms_efa.gv, "'", '"'), file='mdd-symptom-gsem_files/symptoms_efa.gv')
-
-
-```
+Simulate uncertainty in $\mathbf{S}$ using the $\mathbf{V}$ matrix
 
 ```{r}
 
-as.data.frame(loadings(symptoms_efa)[,1:2]) %>%
-transmute(trait=rownames(loadings(symptoms_efa)), A1=round(Factor1, 2), A2=round(Factor2, 2)) %>%
-left_join(trait_symptom_labels, by='trait') %>%
-select(study, h, A1, A2)
+# replicates
+m <- 100
 
+# simulate with S as the mean and V as the variance
+S_lowertri_sim = mvtnorm::rmvnorm(m,
+	mean=symptoms_covstruct$S[lower.tri(symptoms_covstruct$S, diag=TRUE)],
+	sigma=symptoms_covstruct$V)
+	
+# reshape into a 24x24xm array
+S_sim <- plyr::aaply(S_lowertri_sim, 1, function(x, k=nrow(symptoms_covstruct$S)){
+	S <- matrix(NA, ncol=k, nrow=k)
+	S[lower.tri(S, diag=T)] <- x
+	S[upper.tri(S, diag=T)] <- t(S)[upper.tri(S, diag=T)]
+	return(S)
+})
+dimnames(S_sim) <- list(1:m, colnames(symptoms_cov), colnames(symptoms_cov))
 
-```
+# find which symptoms have positive variances across all replicates
+sim_cov_keep <- which(colSums(plyr::aaply(S_sim, 1, diag) > 0) == m)
 
-```{r symptoms_efa1}
+eigen(cov2cor(symptoms_covstruct$S[sim_cov_keep,sim_cov_keep]))$values
 
-symptoms_efa1 <- factanal(covmat=symptoms_cov_pd, factors=1, rotation='promax')
+S_sim_pos <- S_sim[,sim_cov_keep,sim_cov_keep]
 
-symptoms_efa1
+S_sim_pos_ev <- plyr::aaply(S_sim_pos, 1, function(x) eigen(cov2cor(x))$values)
 
-symptoms_efa1.df <- 
-data.frame(Factor1=loadings(symptoms_efa1)[,1]) %>%
-mutate(trait=rownames(loadings(symptoms_efa1))) %>%
-left_join(trait_symptom_labels, by='trait') %>%
-select(study, Symptom=h, starts_with('Factor'))
+summary(S_sim_pos_ev)
 
 ```
 
@@ -1146,25 +769,15 @@ symptoms_efa2 <- factanal(covmat=symptoms_cov_pd, factors=2, rotation='promax')
 
 symptoms_efa2
 
-symptoms_efa2.df <- 
-as.data.frame(loadings(symptoms_efa2)[,1:2]) %>%
-mutate(trait=rownames(loadings(symptoms_efa1))) %>%
-left_join(trait_symptom_labels, by='trait') %>%
-select(study, Symptom=h, starts_with('Factor'))
 
 ```
 
-```{r symptoms_efa3}
+```{r symptoms_efa4}
 
-symptoms_efa3 <- factanal(covmat=symptoms_cov_pd, factors=3, rotation='promax')
+symptoms_efa4 <- factanal(covmat=symptoms_cov_pd, factors=4, rotation='promax')
 
-symptoms_efa3
+symptoms_efa4
 
-symptoms_efa3.df <- 
-as.data.frame(loadings(symptoms_efa3)[,1:3]) %>%
-mutate(trait=rownames(loadings(symptoms_efa3))) %>%
-left_join(trait_symptom_labels, by='trait') %>%
-select(study, Symptom=h, starts_with('Factor'))
 
 ```
 
@@ -1175,61 +788,5 @@ symptoms_efa6 <- factanal(covmat=symptoms_cov_pd, factors=6, rotation='promax')
 
 symptoms_efa6
 
-symptoms_efa6.df <- 
-as.data.frame(loadings(symptoms_efa6)[,1:6]) %>%
-mutate(trait=rownames(loadings(symptoms_efa6))) %>%
-left_join(trait_symptom_labels, by='trait') %>%
-select(study, Symptom=h, starts_with('Factor'))
-
-```
-
-```{r}
-
-symptoms_efa.df <- 
-symptoms_efa1.df %>%
-select(study, Symptom, Factor1.=starts_with('Factor')) %>%
-left_join(symptoms_efa2.df %>%
-          select(study, Symptom, Factor2.=starts_with('Factor')))%>%
-left_join(symptoms_efa3.df %>%
-          select(study, Symptom, Factor3.=starts_with('Factor')))%>%
-left_join(symptoms_efa6.df %>%
-          select(study, Symptom, Factor6.=starts_with('Factor')))
-
-write_csv(symptoms_efa.df, 'mdd-symptom-gsem_files/symptom_efa.csv')
-
-```
-
-
-## Graphviz
-
-Render SEM plots out to PDF
-
-```{bash}
-
-for gv in $(ls mdd-symptom-gsem_files/*.gv); do
-        out=$(dirname $gv)/$(basename $gv .gv)
-        dot -Tpdf -o${out}.pdf $gv
-done
-
-
-```
-
-## Multivariable LDSC Estimation - Using Case/Control Datasets
-
-To see the impact of conditioning on MDD cases the correlation matrix was created using the PGC datasets that have symptom level information on cases and controls. Correlation between symptoms is increased substantially. 
-
-```{r}
-
-pgc_dsm_ukb_cidi_covstruct_r_casecontrol <- 'ldsc/PGC_Case_Control_CovarianceMatrix_wUKB.RData'
-load(pgc_dsm_ukb_cidi_covstruct_r_casecontrol) #saved as symptoms_covstruct
-
-variance_is_positive <- diag(symptoms_covstruct$S) > 0
-
-symptoms_cor <- cov2cor(symptoms_covstruct$S[variance_is_positive,variance_is_positive])
-symptoms_cor[which(symptoms_cor > 1)] <- 1
-rownames(symptoms_cor) <- colnames(symptoms_cor)
-
-
-corrplot(symptoms_cor, 'square')
 
 ```
