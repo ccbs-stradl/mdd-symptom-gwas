@@ -44,14 +44,72 @@ GenomicSEM version
 
 ``` r
 require(readr)
-require(tidyr)
-require(stringr)
-require(dplyr)
-require(ggplot2)
-require(corrplot)
-require(tidySEM)
-require(GenomicSEM)
+```
 
+    ## Loading required package: readr
+
+``` r
+require(tidyr)
+```
+
+    ## Loading required package: tidyr
+
+``` r
+require(stringr)
+```
+
+    ## Loading required package: stringr
+
+``` r
+require(dplyr)
+```
+
+    ## Loading required package: dplyr
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
+require(ggplot2)
+```
+
+    ## Loading required package: ggplot2
+
+``` r
+require(corrplot)
+```
+
+    ## Loading required package: corrplot
+
+    ## corrplot 0.84 loaded
+
+``` r
+require(tidySEM)
+```
+
+    ## Loading required package: tidySEM
+
+    ## Registered S3 methods overwritten by 'tidySEM':
+    ##   method              from           
+    ##   print.mplus.model   MplusAutomation
+    ##   print.mplusObject   MplusAutomation
+    ##   summary.mplus.model MplusAutomation
+
+``` r
+require(GenomicSEM)
+```
+
+    ## Loading required package: GenomicSEM
+
+``` r
 packageVersion("GenomicSEM")
 ```
 

@@ -647,13 +647,86 @@ lapply(list(pop_commonfactor.fit,
 
 ```
        
+# Regression models
+
+Regress clinical symptoms on the population symptom factors
+
+```{r clin_pop_reg, cache=TRUE}
+
+pop_psych_veg_bif_clin_reg_a.model <- "
+A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
+A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
+A  =~ NA*PopDep + PopAnh + PopGuilt + PopSui + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A ~~ 0*A1
+A ~~ 0*A2
+A1 ~~ 0*A2
+A ~ ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
+c1 > 0.001
+PopDep ~~ c1*PopDep
+"
+pop_psych_veg_bif_clin_reg_a.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg_bif_clin_reg_a.model)
+
+pop_psych_veg_bif_clin_reg_a.fit$modelfit
+pop_psych_veg_bif_clin_reg_a.fit$results[c(1:3,6,7,9)] %>%
+filter(op == '~')
+
+```
+
+
+```{r clin_pop_reg_a1, cache=TRUE, results=FALSE}
+
+pop_psych_veg_bif_clin_reg_a1.model <- "
+A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
+A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
+A  =~ NA*PopDep + PopAnh + PopGuilt + PopSui + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A ~~ 0*A1
+A ~~ 0*A2
+A1 ~~ 0*A2
+A1 ~ ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
+c1 > 0.001
+PopDep ~~ c1*PopDep
+"
+pop_psych_veg_bif_clin_reg_a1.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg_bif_clin_reg_a1.model)
+
+```
+
+```{r clin_pop_reg_a2, cache=TRUE, results=FALSE}
+
+pop_psych_veg_bif_clin_reg_a2.model <- "
+A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
+A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
+A  =~ NA*PopDep + PopAnh + PopGuilt + PopSui + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A  ~~ 1*A
+A ~~ 0*A1
+A ~~ 0*A2
+A1 ~~ 0*A2
+A2 ~ ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
+c1 > 0.001
+PopDep ~~ c1*PopDep
+"
+pop_psych_veg_bif_clin_reg_a2.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg_bif_clin_reg_a2.model)
+
+```
 
 # Exploratory factor analysis
 
-
 Get the genetic covariance matrix for symptoms with a positive heritability
 
-```{r}
+```{r mdd_symptoms_cov}
 
 symptoms_cov <- symptoms_covstruct$S
 k <- nrow(symptoms_cov)
@@ -678,37 +751,40 @@ corrplot(cov2cor(symptoms_cov_pd))
 
 ```
 
-## PGC
+## PGC/AGDS
 
 
 Check eigen values of the correlation matrix
-```{r mdd_symptom_gsem_pgc_efa_eigen}
+```{r mdd_symptom_gsem_clin_efa_eigen}
 
-symptoms_pgc_idx <- which(str_detect(dimnames(symptoms_cov_pd)[[1]], 'Clin'))
+symptoms_clin_idx <- which(str_detect(dimnames(symptoms_cov_pd)[[1]], 'Clin'))
 
-symptoms_pgc_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_pgc_idx,symptoms_pgc_idx])) 
+symptoms_clin_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_clin_idx,symptoms_clin_idx])) 
 
-plot(symptoms_pgc_eigen$values, ylab='Eigenvalue')
-lines(symptoms_pgc_eigen$values)
+plot(symptoms_clin_eigen$values, ylab='Eigenvalue')
+lines(symptoms_clin_eigen$values)
 abline(1, 0, col='red')
+
+symptoms_clin_efa <- factanal(covmat=symptoms_cov_pd[symptoms_clin_idx,symptoms_clin_idx], factors=3, rotation='varimax')
+symptoms_clin_efa
 
 ```
 
-## UKB CIDI
+## ALSPAC/UKB
 
 Check eigen values of the correlation matrix
-```{r mdd_symptom_gsem_ukb_cidi_efa_eigen}
+```{r mdd_symptom_gsem_pop_efa_eigen}
 
-symptoms_ukb_cidi_idx <- which(str_detect(dimnames(symptoms_cov_pd)[[1]], 'Pop'))
+symptoms_pop_idx <- which(str_detect(dimnames(symptoms_cov_pd)[[1]], 'Pop'))
 
-symptoms_ukb_cidi_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_ukb_cidi_idx,symptoms_ukb_cidi_idx])) 
+symptoms_pop_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_pop_idx,symptoms_pop_idx])) 
 
-plot(symptoms_ukb_cidi_eigen$values, ylab='Eigenvalue')
-lines(symptoms_ukb_cidi_eigen$values)
+plot(symptoms_pop_eigen$values, ylab='Eigenvalue')
+lines(symptoms_pop_eigen$values)
 abline(1, 0, col='red')
 
-symptoms_ukb_cidi_efa <- factanal(covmat=symptoms_cov_pd[symptoms_ukb_cidi_idx,symptoms_ukb_cidi_idx], factors=3, rotation='promax')
-symptoms_ukb_cidi_efa
+symptoms_pop_efa <- factanal(covmat=symptoms_cov_pd[symptoms_pop_idx,symptoms_pop_idx], factors=3, rotation='varimax')
+symptoms_pop_efa
 
 ```
 
@@ -765,7 +841,7 @@ summary(S_sim_pos_ev)
 
 ```{r symptoms_efa2}
 
-symptoms_efa2 <- factanal(covmat=symptoms_cov_pd, factors=2, rotation='promax')
+symptoms_efa2 <- factanal(covmat=symptoms_cov_pd, factors=2, rotation='varimax')
 
 symptoms_efa2
 
@@ -774,7 +850,7 @@ symptoms_efa2
 
 ```{r symptoms_efa4}
 
-symptoms_efa4 <- factanal(covmat=symptoms_cov_pd, factors=4, rotation='promax')
+symptoms_efa4 <- factanal(covmat=symptoms_cov_pd, factors=4, rotation='varimax')
 
 symptoms_efa4
 
@@ -784,7 +860,7 @@ symptoms_efa4
 
 ```{r symptoms_efa6}
 
-symptoms_efa6 <- factanal(covmat=symptoms_cov_pd, factors=6, rotation='promax')
+symptoms_efa6 <- factanal(covmat=symptoms_cov_pd, factors=6, rotation='varimax')
 
 symptoms_efa6
 
