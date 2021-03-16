@@ -1,48 +1,17 @@
----
-title: GenomicSEM of MDD symptoms setup (HDL)
-author: Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard 
-output:
-  html_document:
-    toc: TRUE
-    code_folding: hide
-    number_sections: TRUE
-    df_print: kable
-    keep_md: true
-  md_document:
-    variant: markdown_github
----
 
-Because of the smaller sample sizes in the MDD symptom GWAS cohorts, we will estimate the covariance matrix using [High-definition likelihood (HDL) in GenomicSEM](https://rpubs.com/MichelNivard/640145)
+## GenomicSEM of MDD symptoms setup (HDL)
+## authors: Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard 
+
+# Because of the smaller sample sizes in the MDD symptom GWAS cohorts, we will estimate the covariance matrix using High-definition likelihood (HDL) in GenomicSEM <https://rpubs.com/MichelNivard/640145>
 
 # Setup
 
 ## R packages
 
-R version
-
-```{r}
 
 R.version
 
-```
 
-Package installation
-
-```{r, output='hide', warning=FALSE, message=FALSE, eval=FALSE}
-
-required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr', 'corrplot')
-for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.packages(pack)
-
-library(devtools)
-
-if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
-
-if(!require(tidySEM)) install_github("cjvanlissa/tidySEM")
-
-```
-
-GenomicSEM version
-```{r, warning=FALSE, messages=FALSE}
 
 require(readr)
 require(tidyr)
@@ -53,27 +22,24 @@ require(corrplot)
 require(tidySEM)
 require(GenomicSEM)
 
-packageVersion("GenomicSEM")
+source('hdl.R')
 
-```
+packageVersion("GenomicSEM")
 
 ## Support files
 
-Download the LD reference files for HDL
+#Download the LD reference files for HDL
 
-```{bash, eval=FALSE}
-wget "https://www.dropbox.com/s/kv5zhgu274wg9z5/UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz?dl=0"
-mv "UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz?dl=0" UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz
-tar xzf UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz
-mv UKB_imputed_hapmap2_SVD_eigen99_extraction sumstats/reference/
-rm UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz
-```
+# wget "https://www.dropbox.com/s/kv5zhgu274wg9z5/UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz?dl=0"
+# mv "UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz?dl=0" UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz
+# tar xzf UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz
+# mv UKB_imputed_hapmap2_SVD_eigen99_extraction sumstats/reference/
+# rm UKB_imputed_hapmap2_SVD_eigen99_extraction.tar.gz
+
 
 # Symptom labels
 
-MDD DSM symptoms are numbered 1-9:
-
-```{r}
+# MDD DSM symptoms are numbered 1-9:
 
 # plot labels
 
@@ -119,25 +85,18 @@ dsm_mdd_symptoms_reference %>%
 left_join(dsm_mdd_symptoms_labels, by=c('Reference'='ref')) %>%
 select(Reference, Abbreviation=abbv, Label=h, Description)
 
-```
-
 
 # Sumstats munging
 
-GWAS of MDD symptoms for two cohorts were meta-analyzed:
-
-- Population samples: ALSPAC + UK Biobankc
-- Case-enriched samples: AGDS + PGC
-
-and then munged for input in the [mdd-symptom-gsem.md](mdd-symptom-gsem.md) file.
+# GWAS of MDD symptoms for two cohorts were meta-analyzed:
+# 
+# - Population samples: ALSPAC + UK Biobankc
+# - Case-enriched samples: AGDS + PGC
+# 
+# and then munged for input in the [mdd-symptom-gsem.md](mdd-symptom-gsem.md) file.
 
 
 # Symptom prevalences
-
-Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output but population prevalences were estimated.
-
-
-```{r, message=FALSE}
 
 pgc_symptom_counts <- read_table2('sumstats/PGC/CasesAllCohorts/pgc_dsm_symptom_counts.txt')
 
@@ -148,8 +107,8 @@ symptoms_sample_prev <- read_tsv(symptoms_sample_prev_file)
 pop_prevs_w <-
 symptoms_sample_prev %>%
 mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
-                   symptom %in% c('MDD1', 'MDD2') ~ 1.0,
-                   TRUE ~ 0.57)) %>%
+				   symptom %in% c('MDD1', 'MDD2') ~ 1.0,
+				   TRUE ~ 0.57)) %>%
 mutate(pop_prev=samp_prev*w) %>%
 select(symptom, cohorts, pop_prev) %>%
 pivot_wider(names_from=cohorts, values_from=pop_prev) %>%
@@ -157,14 +116,10 @@ group_by(symptom) %>%
 mutate(pop_prev=mean(c(AGDS_PGC, ALSPAC_UKB))) %>%
 select(symptom, pop_prev)
 
-```
-
 
 # Multivariable LDSC estimation
 
-We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code.
-
-```{r}
+# We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code.
 
 covstruct_prefix <- 'agds_pgc.alspac_ukb.hdl.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
@@ -181,15 +136,15 @@ if(!file.exists(covstruct_r)) {
   sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
 
   sumstats_prevs <- 
-    symptoms_sample_prev %>%
-    left_join(sumstats_paths, by='sumstats') %>%
-    left_join(pop_prevs_w, by='symptom') %>%
-    mutate(trait_name=paste(cohorts, symptom, sep='.'))
+	symptoms_sample_prev %>%
+	left_join(sumstats_paths, by='sumstats') %>%
+	left_join(pop_prevs_w, by='symptom') %>%
+	mutate(trait_name=paste(cohorts, symptom, sep='.'))
 
   symptoms_covstruct <- hdl(traits=sumstats_prevs$filename,
-                             sample.prev=sumstats_prevs$samp_prev,
-                             population.prev=sumstats_prevs$pop_prev,
-                             trait.names=sumstats_prevs$trait_name,
+							 sample.prev=sumstats_prevs$samp_prev,
+							 population.prev=sumstats_prevs$pop_prev,
+							 trait.names=sumstats_prevs$trait_name,
 							 LD.path="sumstats/reference/UKB_imputed_hapmap2_SVD_eigen99_extraction/",
 							 method="piecewise")
 
@@ -206,4 +161,3 @@ if(!file.exists(covstruct_r)) {
   sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 
 }
-```
