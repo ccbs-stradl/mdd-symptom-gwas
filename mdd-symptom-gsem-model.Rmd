@@ -233,8 +233,6 @@ Common factor model
 pop_commonfactor.model <- "
 A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
 "
 pop_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor.model)
 
@@ -251,13 +249,41 @@ pop_commonfactor_gating.model <- "
 A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
 PopDep ~~ PopAnh
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
 "
 pop_commonfactor_gating.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor_gating.model)
 
 pop_commonfactor_gating.fit$modelfit
 pop_commonfactor_gating.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+Check if model is improved by allowing residual correlations between the directional symptoms.
+
+```{r pop_commonfactor_app, cache=TRUE}
+
+pop_commonfactor_app.model <- "
+A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
+A1 ~~ 1*A1
+PopDep ~~ PopAnh
+PopAppDec ~~ PopAppInc
+"
+pop_commonfactor_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor_app.model)
+
+pop_commonfactor_app.fit$modelfit
+
+```
+
+```{r pop_commonfactor_sle, cache=TRUE}
+
+pop_commonfactor_sle.model <- "
+A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
+A1 ~~ 1*A1
+PopDep ~~ PopAnh
+PopSleDec ~~ PopSleInc
+"
+pop_commonfactor_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor_sle.model)
+
+pop_commonfactor_sle.fit$modelfit
 
 ```
 
@@ -298,35 +324,10 @@ PopAnh ~~ c2*PopAnh
 a13 > -1.0
 A1 ~~ a13*A3
 "
-pop_kendler_neale_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_kendler_neale_constr.model)
+pop_kendler_neale_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_kendler_neale_constr.model, fix_resid=FALSE)
 
 pop_kendler_neale_constr.fit$modelfit
 pop_kendler_neale_constr.fit$results[c(1, 2, 3, 6, 7)]
-
-```
-
-Check that an orthogonal model has poor fit.
-```{r pop_cidi_kendler_neale_orth, cache=TRUE}
-
-pop_kendler_neale_orth.model <- "
-A1 =~ NA*PopGuilt + PopConc + PopSui
-A2 =~ NA*PopDep + PopAnh + PopGuilt
-A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A3 ~~ 1*A3
-PopSleDec ~~ PopSleInc
-PopAppDec ~~ PopAppInc
-A1 ~~ 0*A2
-A1 ~~ 0*A3
-A2 ~~ 0*A3
-a7 > 0.001
-PopGuilt ~~ a7*PopGuilt
-"
-pop_kendler_neale_orth.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_kendler_neale_orth.model)
-
-pop_kendler_neale_orth.fit$modelfit
-pop_kendler_neale_orth.fit$results[c(1, 2, 3, 6, 7)]
 
 ```
 
@@ -348,8 +349,6 @@ A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 PopDep ~~ PopAnh
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
 "
 pop_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_soma.model)
 
@@ -364,12 +363,6 @@ A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 PopDep ~~ PopAnh
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
-a1 > 0.001
-PopDep ~~ a1*PopDep
-a2 > 0.001
-PopAnh ~~ a2*PopAnh
 a12 < 1
 A1 ~~ a12*A2
 "
@@ -397,8 +390,6 @@ A  ~~ 0*A1
 A  ~~ 0*A2
 A1 ~~ 0*A2
 PopDep ~~ PopAnh
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
 "
 pop_psych_soma_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_soma_bif.model)
 
@@ -417,8 +408,6 @@ A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 PopDep ~~ PopAnh
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
 "
 pop_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg.model)
 
@@ -441,7 +430,6 @@ A ~~ 0*A1
 A ~~ 0*A2
 A1 ~~ 0*A2
 PopDep ~~ PopAnh
-PopAppDec ~~ PopAppInc
 PopSleDec ~~ PopSleInc
 "
 pop_psych_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg_bif.model)
@@ -461,34 +449,14 @@ A2 =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + Pop
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 PopDep ~~ PopAnh
-PopAppInc ~~ PopAppDec
-PopSleInc ~~ PopSleDec
 "
 pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_affect_veg.model)
 
 pop_affect_veg.fit$modelfit
-pop_affect_veg.fit$results
+pop_affect_veg.fit$results[c(1,2,3,6,7)]
 
 ```
-```{r pop_affect_veg_constr, cache=TRUE}
 
-pop_affect_veg_constr.model <- "
-A1 =~ NA*PopDep + PopGuilt + PopSui
-A2 =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-PopDep ~~ PopAnh
-c2 > 0.001
-PopAnh ~~ c2*PopAnh
-c7 > 0.001
-PopGuilt ~~ c7*PopGuilt
-"
-pop_affect_veg_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_affect_veg_constr.model, fix_resid=FALSE)
-
-pop_affect_veg_constr.fit$modelfit
-pop_affect_veg_constr.fit$results[c(1,2,3,6,7)]
-
-```
 
 Bifactor model
 ```{r pop_affect_veg_bif, cache=TRUE}
@@ -541,6 +509,7 @@ pop_affect_veg_bif_constr.fit$results[c(1,2,3,6,7)]
 
 ```{r}
 
+model_fits <- 
 data.frame(Model=c('1a', '1b', '2a', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)', '3'),
        Name=c('Common',
 	          'Common (gating)',
@@ -559,13 +528,13 @@ lapply(list(pop_commonfactor.fit,
             pop_psych_soma_bif.fit,
             pop_psych_veg.fit,
             pop_psych_veg_bif.fit,
-			pop_affect_veg_constr.fit,
+			pop_affect_veg.fit,
 			pop_affect_veg_bif_constr.fit,
             pop_kendler_neale_constr.fit),
-       function(fit) signif(bind_cols(fit$modelfit, fit$results %>%
-                     filter(lhs == 'A1' & rhs == 'A2') %>%
-                     summarize(A1A2cor=mean(STD_Genotype), A1A2se=mean(as.numeric(STD_Genotype_SE)))), 3))
+       function(fit) signif(fit$modelfit))
 ))
+rownames(model_fits) <- NULL
+model_fits
 
 
 ```
