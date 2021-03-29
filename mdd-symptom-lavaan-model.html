@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="data:text/css,%0A%0A%40font%2Dface%20%7B%0A%20%20font%2Dfamily%3A%20octicons%2Dlink%3B%0A%20%20src%3A%20url%28data%3Afont%2Fwoff%3Bcharset%3Dutf%2D8%3Bbase64%3Bbase64%2Cd09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM%2B8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB%2FaFGpk3jaTY6xa8JAGMW%2FO62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v%2Bk%2F0an2i%2BitHDw3v2%2B9%2BDBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3%2FI7AtxEJLtzzuZfI%2BVVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy%2FLt7Kc%2B0vWY%2FgAgIIEqAN9we0pwKXreiMasxvabDQMM4riO%2BqxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw%2Bymhce7vwM9jSqO8JyVd5RH9gyTt2%2BJ%2FyUmYlIR0s04n6%2B7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv%2FocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi%2BW2%2BMjCzMIDApSwvXzC97Z4Ig8N%2FBxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh%2F8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT%2BAEjAwuDFpBmA9KMDEwMCh9i%2Fv8H8sH0%2F4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9%2FlqYwOGZxeUelN2U2R6%2BcArgtCJpauW7UQBqnFkUsjAY%2FkOU1cP%2BDAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl%2BvvmM%2FbyA48e6tWrKArm4ZJlCbdsrxksL1AwWn%2FyBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO%2F%2FsdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd%2F89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF%2B9JOS0nbaaYDCQfwCJ7Au3AHj%2BLO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm%2BEBXuAbHmIMSRMs%2B4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL%2BhD7C1xoaHeLJSEao0FEW14ckxC%2BTU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13%2F%2Blm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl%2B9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O%2FAdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB%2F%2F%2FAA8AAQAAAAAAAAAAAAAAAAABAAAAAA%3D%3D%29%20format%28%27woff%27%29%3B%0A%7D%0A%0Abody%20%7B%0A%20%20%2Dwebkit%2Dtext%2Dsize%2Dadjust%3A%20100%25%3B%0A%20%20text%2Dsize%2Dadjust%3A%20100%25%3B%0A%20%20color%3A%20%23333%3B%0A%20%20font%2Dfamily%3A%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20%22Segoe%20UI%22%2C%20Arial%2C%20freesans%2C%20sans%2Dserif%2C%20%22Apple%20Color%20Emoji%22%2C%20%22Segoe%20UI%20Emoji%22%2C%20%22Segoe%20UI%20Symbol%22%3B%0A%20%20font%2Dsize%3A%2016px%3B%0A%20%20line%2Dheight%3A%201%2E6%3B%0A%20%20word%2Dwrap%3A%20break%2Dword%3B%0A%7D%0A%0Aa%20%7B%0A%20%20background%2Dcolor%3A%20transparent%3B%0A%7D%0A%0Aa%3Aactive%2C%0Aa%3Ahover%20%7B%0A%20%20outline%3A%200%3B%0A%7D%0A%0Astrong%20%7B%0A%20%20font%2Dweight%3A%20bold%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20font%2Dsize%3A%202em%3B%0A%20%20margin%3A%200%2E67em%200%3B%0A%7D%0A%0Aimg%20%7B%0A%20%20border%3A%200%3B%0A%7D%0A%0Ahr%20%7B%0A%20%20box%2Dsizing%3A%20content%2Dbox%3B%0A%20%20height%3A%200%3B%0A%7D%0A%0Apre%20%7B%0A%20%20overflow%3A%20auto%3B%0A%7D%0A%0Acode%2C%0Akbd%2C%0Apre%20%7B%0A%20%20font%2Dfamily%3A%20monospace%2C%20monospace%3B%0A%20%20font%2Dsize%3A%201em%3B%0A%7D%0A%0Ainput%20%7B%0A%20%20color%3A%20inherit%3B%0A%20%20font%3A%20inherit%3B%0A%20%20margin%3A%200%3B%0A%7D%0A%0Ahtml%20input%5Bdisabled%5D%20%7B%0A%20%20cursor%3A%20default%3B%0A%7D%0A%0Ainput%20%7B%0A%20%20line%2Dheight%3A%20normal%3B%0A%7D%0A%0Ainput%5Btype%3D%22checkbox%22%5D%20%7B%0A%20%20box%2Dsizing%3A%20border%2Dbox%3B%0A%20%20padding%3A%200%3B%0A%7D%0A%0Atable%20%7B%0A%20%20border%2Dcollapse%3A%20collapse%3B%0A%20%20border%2Dspacing%3A%200%3B%0A%7D%0A%0Atd%2C%0Ath%20%7B%0A%20%20padding%3A%200%3B%0A%7D%0A%0A%2A%20%7B%0A%20%20box%2Dsizing%3A%20border%2Dbox%3B%0A%7D%0A%0Ainput%20%7B%0A%20%20font%3A%2013px%20%2F%201%2E4%20Helvetica%2C%20arial%2C%20nimbussansl%2C%20liberationsans%2C%20freesans%2C%20clean%2C%20sans%2Dserif%2C%20%22Apple%20Color%20Emoji%22%2C%20%22Segoe%20UI%20Emoji%22%2C%20%22Segoe%20UI%20Symbol%22%3B%0A%7D%0A%0Aa%20%7B%0A%20%20color%3A%20%234078c0%3B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%7D%0A%0Aa%3Ahover%2C%0Aa%3Aactive%20%7B%0A%20%20text%2Ddecoration%3A%20underline%3B%0A%7D%0A%0Ahr%20%7B%0A%20%20height%3A%200%3B%0A%20%20margin%3A%2015px%200%3B%0A%20%20overflow%3A%20hidden%3B%0A%20%20background%3A%20transparent%3B%0A%20%20border%3A%200%3B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23ddd%3B%0A%7D%0A%0Ahr%3Abefore%20%7B%0A%20%20display%3A%20table%3B%0A%20%20content%3A%20%22%22%3B%0A%7D%0A%0Ahr%3Aafter%20%7B%0A%20%20display%3A%20table%3B%0A%20%20clear%3A%20both%3B%0A%20%20content%3A%20%22%22%3B%0A%7D%0A%0Ah1%2C%0Ah2%2C%0Ah3%2C%0Ah4%2C%0Ah5%2C%0Ah6%20%7B%0A%20%20margin%2Dtop%3A%2015px%3B%0A%20%20margin%2Dbottom%3A%2015px%3B%0A%20%20line%2Dheight%3A%201%2E1%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20font%2Dsize%3A%2030px%3B%0A%7D%0A%0Ah2%20%7B%0A%20%20font%2Dsize%3A%2021px%3B%0A%7D%0A%0Ah3%20%7B%0A%20%20font%2Dsize%3A%2016px%3B%0A%7D%0A%0Ah4%20%7B%0A%20%20font%2Dsize%3A%2014px%3B%0A%7D%0A%0Ah5%20%7B%0A%20%20font%2Dsize%3A%2012px%3B%0A%7D%0A%0Ah6%20%7B%0A%20%20font%2Dsize%3A%2011px%3B%0A%7D%0A%0Ablockquote%20%7B%0A%20%20margin%3A%200%3B%0A%7D%0A%0Aul%2C%0Aol%20%7B%0A%20%20padding%3A%200%3B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20margin%2Dbottom%3A%200%3B%0A%7D%0A%0Aol%20ol%2C%0Aul%20ol%20%7B%0A%20%20list%2Dstyle%2Dtype%3A%20lower%2Droman%3B%0A%7D%0A%0Aul%20ul%20ol%2C%0Aul%20ol%20ol%2C%0Aol%20ul%20ol%2C%0Aol%20ol%20ol%20%7B%0A%20%20list%2Dstyle%2Dtype%3A%20lower%2Dalpha%3B%0A%7D%0A%0Add%20%7B%0A%20%20margin%2Dleft%3A%200%3B%0A%7D%0A%0Acode%20%7B%0A%20%20font%2Dfamily%3A%20Consolas%2C%20%22Liberation%20Mono%22%2C%20Menlo%2C%20Courier%2C%20monospace%3B%0A%20%20font%2Dsize%3A%2012px%3B%0A%7D%0A%0Apre%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20margin%2Dbottom%3A%200%3B%0A%20%20font%3A%2012px%20Consolas%2C%20%22Liberation%20Mono%22%2C%20Menlo%2C%20Courier%2C%20monospace%3B%0A%7D%0A%0A%2Eselect%3A%3A%2Dms%2Dexpand%20%7B%0A%20%20opacity%3A%200%3B%0A%7D%0A%0A%2Eocticon%20%7B%0A%20%20font%3A%20normal%20normal%20normal%2016px%2F1%20octicons%2Dlink%3B%0A%20%20display%3A%20inline%2Dblock%3B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%20%20text%2Drendering%3A%20auto%3B%0A%20%20%2Dwebkit%2Dfont%2Dsmoothing%3A%20antialiased%3B%0A%20%20%2Dmoz%2Dosx%2Dfont%2Dsmoothing%3A%20grayscale%3B%0A%20%20%2Dwebkit%2Duser%2Dselect%3A%20none%3B%0A%20%20%2Dmoz%2Duser%2Dselect%3A%20none%3B%0A%20%20%2Dms%2Duser%2Dselect%3A%20none%3B%0A%20%20user%2Dselect%3A%20none%3B%0A%7D%0A%0A%2Eocticon%2Dlink%3Abefore%20%7B%0A%20%20content%3A%20%27%5Cf05c%27%3B%0A%7D%0A%0A%2Emarkdown%2Dbody%3Abefore%20%7B%0A%20%20display%3A%20table%3B%0A%20%20content%3A%20%22%22%3B%0A%7D%0A%0A%2Emarkdown%2Dbody%3Aafter%20%7B%0A%20%20display%3A%20table%3B%0A%20%20clear%3A%20both%3B%0A%20%20content%3A%20%22%22%3B%0A%7D%0A%0A%2Emarkdown%2Dbody%3E%2A%3Afirst%2Dchild%20%7B%0A%20%20margin%2Dtop%3A%200%20%21important%3B%0A%7D%0A%0A%2Emarkdown%2Dbody%3E%2A%3Alast%2Dchild%20%7B%0A%20%20margin%2Dbottom%3A%200%20%21important%3B%0A%7D%0A%0Aa%3Anot%28%5Bhref%5D%29%20%7B%0A%20%20color%3A%20inherit%3B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%7D%0A%0A%2Eanchor%20%7B%0A%20%20display%3A%20inline%2Dblock%3B%0A%20%20padding%2Dright%3A%202px%3B%0A%20%20margin%2Dleft%3A%20%2D18px%3B%0A%7D%0A%0A%2Eanchor%3Afocus%20%7B%0A%20%20outline%3A%20none%3B%0A%7D%0A%0Ah1%2C%0Ah2%2C%0Ah3%2C%0Ah4%2C%0Ah5%2C%0Ah6%20%7B%0A%20%20margin%2Dtop%3A%201em%3B%0A%20%20margin%2Dbottom%3A%2016px%3B%0A%20%20font%2Dweight%3A%20bold%3B%0A%20%20line%2Dheight%3A%201%2E4%3B%0A%7D%0A%0Ah1%20%2Eocticon%2Dlink%2C%0Ah2%20%2Eocticon%2Dlink%2C%0Ah3%20%2Eocticon%2Dlink%2C%0Ah4%20%2Eocticon%2Dlink%2C%0Ah5%20%2Eocticon%2Dlink%2C%0Ah6%20%2Eocticon%2Dlink%20%7B%0A%20%20color%3A%20%23000%3B%0A%20%20vertical%2Dalign%3A%20middle%3B%0A%20%20visibility%3A%20hidden%3B%0A%7D%0A%0Ah1%3Ahover%20%2Eanchor%2C%0Ah2%3Ahover%20%2Eanchor%2C%0Ah3%3Ahover%20%2Eanchor%2C%0Ah4%3Ahover%20%2Eanchor%2C%0Ah5%3Ahover%20%2Eanchor%2C%0Ah6%3Ahover%20%2Eanchor%20%7B%0A%20%20text%2Ddecoration%3A%20none%3B%0A%7D%0A%0Ah1%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%0Ah2%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%0Ah3%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%0Ah4%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%0Ah5%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%2C%0Ah6%3Ahover%20%2Eanchor%20%2Eocticon%2Dlink%20%7B%0A%20%20visibility%3A%20visible%3B%0A%7D%0A%0Ah1%20%7B%0A%20%20padding%2Dbottom%3A%200%2E3em%3B%0A%20%20font%2Dsize%3A%202%2E25em%3B%0A%20%20line%2Dheight%3A%201%2E2%3B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23eee%3B%0A%7D%0A%0Ah1%20%2Eanchor%20%7B%0A%20%20line%2Dheight%3A%201%3B%0A%7D%0A%0Ah2%20%7B%0A%20%20padding%2Dbottom%3A%200%2E3em%3B%0A%20%20font%2Dsize%3A%201%2E75em%3B%0A%20%20line%2Dheight%3A%201%2E225%3B%0A%20%20border%2Dbottom%3A%201px%20solid%20%23eee%3B%0A%7D%0A%0Ah2%20%2Eanchor%20%7B%0A%20%20line%2Dheight%3A%201%3B%0A%7D%0A%0Ah3%20%7B%0A%20%20font%2Dsize%3A%201%2E5em%3B%0A%20%20line%2Dheight%3A%201%2E43%3B%0A%7D%0A%0Ah3%20%2Eanchor%20%7B%0A%20%20line%2Dheight%3A%201%2E2%3B%0A%7D%0A%0Ah4%20%7B%0A%20%20font%2Dsize%3A%201%2E25em%3B%0A%7D%0A%0Ah4%20%2Eanchor%20%7B%0A%20%20line%2Dheight%3A%201%2E2%3B%0A%7D%0A%0Ah5%20%7B%0A%20%20font%2Dsize%3A%201em%3B%0A%7D%0A%0Ah5%20%2Eanchor%20%7B%0A%20%20line%2Dheight%3A%201%2E1%3B%0A%7D%0A%0Ah6%20%7B%0A%20%20font%2Dsize%3A%201em%3B%0A%20%20color%3A%20%23777%3B%0A%7D%0A%0Ah6%20%2Eanchor%20%7B%0A%20%20line%2Dheight%3A%201%2E1%3B%0A%7D%0A%0Ap%2C%0Ablockquote%2C%0Aul%2C%0Aol%2C%0Adl%2C%0Atable%2C%0Apre%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20margin%2Dbottom%3A%2016px%3B%0A%7D%0A%0Ahr%20%7B%0A%20%20height%3A%204px%3B%0A%20%20padding%3A%200%3B%0A%20%20margin%3A%2016px%200%3B%0A%20%20background%2Dcolor%3A%20%23e7e7e7%3B%0A%20%20border%3A%200%20none%3B%0A%7D%0A%0Aul%2C%0Aol%20%7B%0A%20%20padding%2Dleft%3A%202em%3B%0A%7D%0A%0Aul%20ul%2C%0Aul%20ol%2C%0Aol%20ol%2C%0Aol%20ul%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%20%20margin%2Dbottom%3A%200%3B%0A%7D%0A%0Ali%3Ep%20%7B%0A%20%20margin%2Dtop%3A%2016px%3B%0A%7D%0A%0Adl%20%7B%0A%20%20padding%3A%200%3B%0A%7D%0A%0Adl%20dt%20%7B%0A%20%20padding%3A%200%3B%0A%20%20margin%2Dtop%3A%2016px%3B%0A%20%20font%2Dsize%3A%201em%3B%0A%20%20font%2Dstyle%3A%20italic%3B%0A%20%20font%2Dweight%3A%20bold%3B%0A%7D%0A%0Adl%20dd%20%7B%0A%20%20padding%3A%200%2016px%3B%0A%20%20margin%2Dbottom%3A%2016px%3B%0A%7D%0A%0Ablockquote%20%7B%0A%20%20padding%3A%200%2015px%3B%0A%20%20color%3A%20%23777%3B%0A%20%20border%2Dleft%3A%204px%20solid%20%23ddd%3B%0A%7D%0A%0Ablockquote%3E%3Afirst%2Dchild%20%7B%0A%20%20margin%2Dtop%3A%200%3B%0A%7D%0A%0Ablockquote%3E%3Alast%2Dchild%20%7B%0A%20%20margin%2Dbottom%3A%200%3B%0A%7D%0A%0Atable%20%7B%0A%20%20display%3A%20block%3B%0A%20%20width%3A%20100%25%3B%0A%20%20overflow%3A%20auto%3B%0A%20%20word%2Dbreak%3A%20normal%3B%0A%20%20word%2Dbreak%3A%20keep%2Dall%3B%0A%7D%0A%0Atable%20th%20%7B%0A%20%20font%2Dweight%3A%20bold%3B%0A%7D%0A%0Atable%20th%2C%0Atable%20td%20%7B%0A%20%20padding%3A%206px%2013px%3B%0A%20%20border%3A%201px%20solid%20%23ddd%3B%0A%7D%0A%0Atable%20tr%20%7B%0A%20%20background%2Dcolor%3A%20%23fff%3B%0A%20%20border%2Dtop%3A%201px%20solid%20%23ccc%3B%0A%7D%0A%0Atable%20tr%3Anth%2Dchild%282n%29%20%7B%0A%20%20background%2Dcolor%3A%20%23f8f8f8%3B%0A%7D%0A%0Aimg%20%7B%0A%20%20max%2Dwidth%3A%20100%25%3B%0A%20%20box%2Dsizing%3A%20content%2Dbox%3B%0A%20%20background%2Dcolor%3A%20%23fff%3B%0A%7D%0A%0Acode%20%7B%0A%20%20padding%3A%200%3B%0A%20%20padding%2Dtop%3A%200%2E2em%3B%0A%20%20padding%2Dbottom%3A%200%2E2em%3B%0A%20%20margin%3A%200%3B%0A%20%20font%2Dsize%3A%2085%25%3B%0A%20%20background%2Dcolor%3A%20rgba%280%2C0%2C0%2C0%2E04%29%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%7D%0A%0Acode%3Abefore%2C%0Acode%3Aafter%20%7B%0A%20%20letter%2Dspacing%3A%20%2D0%2E2em%3B%0A%20%20content%3A%20%22%5C00a0%22%3B%0A%7D%0A%0Apre%3Ecode%20%7B%0A%20%20padding%3A%200%3B%0A%20%20margin%3A%200%3B%0A%20%20font%2Dsize%3A%20100%25%3B%0A%20%20word%2Dbreak%3A%20normal%3B%0A%20%20white%2Dspace%3A%20pre%3B%0A%20%20background%3A%20transparent%3B%0A%20%20border%3A%200%3B%0A%7D%0A%0A%2Ehighlight%20%7B%0A%20%20margin%2Dbottom%3A%2016px%3B%0A%7D%0A%0A%2Ehighlight%20pre%2C%0Apre%20%7B%0A%20%20padding%3A%2016px%3B%0A%20%20overflow%3A%20auto%3B%0A%20%20font%2Dsize%3A%2085%25%3B%0A%20%20line%2Dheight%3A%201%2E45%3B%0A%20%20background%2Dcolor%3A%20%23f7f7f7%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%7D%0A%0A%2Ehighlight%20pre%20%7B%0A%20%20margin%2Dbottom%3A%200%3B%0A%20%20word%2Dbreak%3A%20normal%3B%0A%7D%0A%0Apre%20%7B%0A%20%20word%2Dwrap%3A%20normal%3B%0A%7D%0A%0Apre%20code%20%7B%0A%20%20display%3A%20inline%3B%0A%20%20max%2Dwidth%3A%20initial%3B%0A%20%20padding%3A%200%3B%0A%20%20margin%3A%200%3B%0A%20%20overflow%3A%20initial%3B%0A%20%20line%2Dheight%3A%20inherit%3B%0A%20%20word%2Dwrap%3A%20normal%3B%0A%20%20background%2Dcolor%3A%20transparent%3B%0A%20%20border%3A%200%3B%0A%7D%0A%0Apre%20code%3Abefore%2C%0Apre%20code%3Aafter%20%7B%0A%20%20content%3A%20normal%3B%0A%7D%0A%0Akbd%20%7B%0A%20%20display%3A%20inline%2Dblock%3B%0A%20%20padding%3A%203px%205px%3B%0A%20%20font%2Dsize%3A%2011px%3B%0A%20%20line%2Dheight%3A%2010px%3B%0A%20%20color%3A%20%23555%3B%0A%20%20vertical%2Dalign%3A%20middle%3B%0A%20%20background%2Dcolor%3A%20%23fcfcfc%3B%0A%20%20border%3A%20solid%201px%20%23ccc%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23bbb%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20box%2Dshadow%3A%20inset%200%20%2D1px%200%20%23bbb%3B%0A%7D%0A%0A%2Epl%2Dc%20%7B%0A%20%20color%3A%20%23969896%3B%0A%7D%0A%0A%2Epl%2Dc1%2C%0A%2Epl%2Ds%20%2Epl%2Dv%20%7B%0A%20%20color%3A%20%230086b3%3B%0A%7D%0A%0A%2Epl%2De%2C%0A%2Epl%2Den%20%7B%0A%20%20color%3A%20%23795da3%3B%0A%7D%0A%0A%2Epl%2Ds%20%2Epl%2Ds1%2C%0A%2Epl%2Dsmi%20%7B%0A%20%20color%3A%20%23333%3B%0A%7D%0A%0A%2Epl%2Dent%20%7B%0A%20%20color%3A%20%2363a35c%3B%0A%7D%0A%0A%2Epl%2Dk%20%7B%0A%20%20color%3A%20%23a71d5d%3B%0A%7D%0A%0A%2Epl%2Dpds%2C%0A%2Epl%2Ds%2C%0A%2Epl%2Ds%20%2Epl%2Dpse%20%2Epl%2Ds1%2C%0A%2Epl%2Dsr%2C%0A%2Epl%2Dsr%20%2Epl%2Dcce%2C%0A%2Epl%2Dsr%20%2Epl%2Dsra%2C%0A%2Epl%2Dsr%20%2Epl%2Dsre%20%7B%0A%20%20color%3A%20%23183691%3B%0A%7D%0A%0A%2Epl%2Dv%20%7B%0A%20%20color%3A%20%23ed6a43%3B%0A%7D%0A%0A%2Epl%2Did%20%7B%0A%20%20color%3A%20%23b52a1d%3B%0A%7D%0A%0A%2Epl%2Dii%20%7B%0A%20%20background%2Dcolor%3A%20%23b52a1d%3B%0A%20%20color%3A%20%23f8f8f8%3B%0A%7D%0A%0A%2Epl%2Dsr%20%2Epl%2Dcce%20%7B%0A%20%20color%3A%20%2363a35c%3B%0A%20%20font%2Dweight%3A%20bold%3B%0A%7D%0A%0A%2Epl%2Dml%20%7B%0A%20%20color%3A%20%23693a17%3B%0A%7D%0A%0A%2Epl%2Dmh%2C%0A%2Epl%2Dmh%20%2Epl%2Den%2C%0A%2Epl%2Dms%20%7B%0A%20%20color%3A%20%231d3e81%3B%0A%20%20font%2Dweight%3A%20bold%3B%0A%7D%0A%0A%2Epl%2Dmq%20%7B%0A%20%20color%3A%20%23008080%3B%0A%7D%0A%0A%2Epl%2Dmi%20%7B%0A%20%20color%3A%20%23333%3B%0A%20%20font%2Dstyle%3A%20italic%3B%0A%7D%0A%0A%2Epl%2Dmb%20%7B%0A%20%20color%3A%20%23333%3B%0A%20%20font%2Dweight%3A%20bold%3B%0A%7D%0A%0A%2Epl%2Dmd%20%7B%0A%20%20background%2Dcolor%3A%20%23ffecec%3B%0A%20%20color%3A%20%23bd2c00%3B%0A%7D%0A%0A%2Epl%2Dmi1%20%7B%0A%20%20background%2Dcolor%3A%20%23eaffea%3B%0A%20%20color%3A%20%2355a532%3B%0A%7D%0A%0A%2Epl%2Dmdr%20%7B%0A%20%20color%3A%20%23795da3%3B%0A%20%20font%2Dweight%3A%20bold%3B%0A%7D%0A%0A%2Epl%2Dmo%20%7B%0A%20%20color%3A%20%231d3e81%3B%0A%7D%0A%0Akbd%20%7B%0A%20%20display%3A%20inline%2Dblock%3B%0A%20%20padding%3A%203px%205px%3B%0A%20%20font%3A%2011px%20Consolas%2C%20%22Liberation%20Mono%22%2C%20Menlo%2C%20Courier%2C%20monospace%3B%0A%20%20line%2Dheight%3A%2010px%3B%0A%20%20color%3A%20%23555%3B%0A%20%20vertical%2Dalign%3A%20middle%3B%0A%20%20background%2Dcolor%3A%20%23fcfcfc%3B%0A%20%20border%3A%20solid%201px%20%23ccc%3B%0A%20%20border%2Dbottom%2Dcolor%3A%20%23bbb%3B%0A%20%20border%2Dradius%3A%203px%3B%0A%20%20box%2Dshadow%3A%20inset%200%20%2D1px%200%20%23bbb%3B%0A%7D%0A%0A%2Etask%2Dlist%2Ditem%20%7B%0A%20%20list%2Dstyle%2Dtype%3A%20none%3B%0A%7D%0A%0A%2Etask%2Dlist%2Ditem%2B%2Etask%2Dlist%2Ditem%20%7B%0A%20%20margin%2Dtop%3A%203px%3B%0A%7D%0A%0A%2Etask%2Dlist%2Ditem%20input%20%7B%0A%20%20margin%3A%200%200%2E35em%200%2E25em%20%2D1%2E6em%3B%0A%20%20vertical%2Dalign%3A%20middle%3B%0A%7D%0A%0A%3Achecked%2B%2Eradio%2Dlabel%20%7B%0A%20%20z%2Dindex%3A%201%3B%0A%20%20position%3A%20relative%3B%0A%20%20border%2Dcolor%3A%20%234078c0%3B%0A%7D%0A%0A%2EsourceLine%20%7B%0A%20%20display%3A%20inline%2Dblock%3B%0A%7D%0A%0Acode%20%2Ekw%20%7B%20color%3A%20%23000000%3B%20%7D%0Acode%20%2Edt%20%7B%20color%3A%20%23ed6a43%3B%20%7D%0Acode%20%2Edv%20%7B%20color%3A%20%23009999%3B%20%7D%0Acode%20%2Ebn%20%7B%20color%3A%20%23009999%3B%20%7D%0Acode%20%2Efl%20%7B%20color%3A%20%23009999%3B%20%7D%0Acode%20%2Ech%20%7B%20color%3A%20%23009999%3B%20%7D%0Acode%20%2Est%20%7B%20color%3A%20%23183691%3B%20%7D%0Acode%20%2Eco%20%7B%20color%3A%20%23969896%3B%20%7D%0Acode%20%2Eot%20%7B%20color%3A%20%230086b3%3B%20%7D%0Acode%20%2Eal%20%7B%20color%3A%20%23a61717%3B%20%7D%0Acode%20%2Efu%20%7B%20color%3A%20%2363a35c%3B%20%20%7D%0Acode%20%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%0Acode%20%2Ewa%20%7B%20color%3A%20%23000000%3B%20%7D%0Acode%20%2Ecn%20%7B%20color%3A%20%23008080%3B%20%20%7D%0Acode%20%2Esc%20%7B%20color%3A%20%23008080%3B%20%7D%0Acode%20%2Evs%20%7B%20color%3A%20%23183691%3B%20%7D%0Acode%20%2Ess%20%7B%20color%3A%20%23183691%3B%20%7D%0Acode%20%2Eim%20%7B%20color%3A%20%23000000%3B%20%7D%0Acode%20%2Eva%20%7Bcolor%3A%20%23008080%3B%20%7D%0Acode%20%2Ecf%20%7B%20color%3A%20%23000000%3B%20%20%7D%0Acode%20%2Eop%20%7B%20color%3A%20%23000000%3B%20%7D%0Acode%20%2Ebu%20%7B%20color%3A%20%23000000%3B%20%7D%0Acode%20%2Eex%20%7B%20color%3A%20%23000000%3B%20%7D%0Acode%20%2Epp%20%7B%20color%3A%20%23999999%3B%20%7D%0Acode%20%2Eat%20%7B%20color%3A%20%23008080%3B%20%7D%0Acode%20%2Edo%20%7B%20color%3A%20%23969896%3B%20%7D%0Acode%20%2Ean%20%7B%20color%3A%20%23008080%3B%20%7D%0Acode%20%2Ecv%20%7B%20color%3A%20%23008080%3B%20%7D%0Acode%20%2Ein%20%7B%20color%3A%20%23008080%3B%20%7D%0A" rel="stylesheet">
+<style>
+body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+  padding-top: 0px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1 id="cfa-of-mdd-symptoms-phenotypes">CFA of MDD symptoms phenotypes</h1>
+<p>Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard</p>
+<p>Phenotype level CFA models of MDD symptoms.</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(dplyr)
+<span class="kw">library</span>(lavaan)</code></pre>
+<h1 id="ukb-cidi">UKB CIDI</h1>
+<p>Load the phenotype file</p>
+<pre class="sourceCode r"><code class="sourceCode r">ukb_cidi &lt;-<span class="st"> </span><span class="kw">readRDS</span>(<span class="st">&quot;pheno/ukb_mhq_cidi_symptoms_screen_absent_present_contrasts.rds&quot;</span>)</code></pre>
+<p>Rename symptoms to match the GenomicSEM analysis: UKB is one of the <em>Pop</em>ulation samples.</p>
+<pre class="sourceCode r"><code class="sourceCode r">ab0pr1 &lt;-<span class="st"> </span>function(symptom) <span class="kw">case_when</span>(symptom %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">'Absent'</span>, <span class="st">'Not present'</span>) ~<span class="st"> </span>0L,
+                                      symptom ==<span class="st"> 'Present'</span> ~<span class="st"> </span>1L,
+                                      <span class="ot">TRUE</span> ~<span class="st"> </span><span class="ot">NA_integer_</span>)
+
+ukb_symp &lt;-
+<span class="kw">as_tibble</span>(ukb_cidi) %&gt;%
+<span class="kw">transmute</span>(f.eid,
+<span class="dt">PopDep=</span><span class="kw">ab0pr1</span>(cidi_mood),
+<span class="dt">PopAnh=</span><span class="kw">ab0pr1</span>(cidi_anhed),
+<span class="dt">PopAppDec=</span><span class="kw">ab0pr1</span>(cidi_wloss),
+<span class="dt">PopAppInc=</span><span class="kw">ab0pr1</span>(cidi_wgain),
+<span class="dt">PopSleDec=</span><span class="kw">ab0pr1</span>(cidi_insomn),
+<span class="dt">PopSleInc=</span><span class="kw">ab0pr1</span>(cidi_hypersom),
+<span class="dt">PopFatig=</span><span class="kw">ab0pr1</span>(cidi_tired),
+<span class="dt">PopGuilt=</span><span class="kw">ab0pr1</span>(cidi_worth),
+<span class="dt">PopConc=</span><span class="kw">ab0pr1</span>(cidi_cnctr),
+<span class="dt">PopSui=</span><span class="kw">ab0pr1</span>(cidi_death)) %&gt;%
+<span class="kw">filter_at</span>(<span class="kw">vars</span>(<span class="kw">starts_with</span>(<span class="st">'Pop'</span>)), <span class="kw">any_vars</span>(!<span class="kw">is.na</span>(.)))</code></pre>
+<h1 id="models">Models</h1>
+<h2 id="common-factor">Common factor</h2>
+<pre class="sourceCode r"><code class="sourceCode r">pop_commonfactor.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">&quot;</span>
+
+pop_commonfactor.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_commonfactor.model, <span class="dt">data=</span>ukb_symp,  <span class="dt">missing=</span><span class="st">'ML'</span>)
+                               
+<span class="kw">summary</span>(pop_commonfactor.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 43 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         30
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                        
+##   Test statistic                              13744.396
+##   Degrees of freedom                                 35
+##   P-value (Chi-square)                            0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.911
+##   Tucker-Lewis Index (TLI)                       0.886
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -526424.400
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1052908.801
+##   Bayesian (BIC)                           1053207.758
+##   Sample-size adjusted Bayesian (BIC)      1053112.417
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.050
+##   90 Percent confidence interval - lower         0.049
+##   90 Percent confidence interval - upper         0.051
+##   P-value RMSEA &lt;= 0.05                          0.575
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.134
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopDep            0.401    0.001  345.056    0.000
+##     PopAnh            0.389    0.001  350.594    0.000
+##     PopAppDec         0.143    0.003   42.490    0.000
+##     PopAppInc         0.150    0.003   51.878    0.000
+##     PopSleDec         0.227    0.003   75.905    0.000
+##     PopSleInc         0.155    0.003   61.392    0.000
+##     PopFatig          0.325    0.003  125.552    0.000
+##     PopGuilt          0.350    0.003  108.035    0.000
+##     PopConc           0.371    0.003  131.309    0.000
+##     PopSui            0.200    0.003   61.969    0.000
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopDep            0.547    0.001  435.921    0.000
+##    .PopAnh            0.396    0.001  320.699    0.000
+##    .PopAppDec         0.320    0.003  106.203    0.000
+##    .PopAppInc         0.132    0.003   50.805    0.000
+##    .PopSleDec         0.584    0.003  213.266    0.000
+##    .PopSleInc         0.053    0.002   23.101    0.000
+##    .PopFatig          0.580    0.002  238.662    0.000
+##    .PopGuilt          0.261    0.003   87.638    0.000
+##    .PopConc           0.515    0.003  194.614    0.000
+##    .PopSui            0.379    0.003  130.765    0.000
+##     A1                0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##    .PopDep            0.087    0.001  163.810    0.000
+##    .PopAnh            0.088    0.000  191.440    0.000
+##    .PopAppDec         0.236    0.001  191.297    0.000
+##    .PopAppInc         0.173    0.001  189.768    0.000
+##    .PopSleDec         0.166    0.001  183.400    0.000
+##    .PopSleInc         0.129    0.001  188.497    0.000
+##    .PopFatig          0.105    0.001  162.521    0.000
+##    .PopGuilt          0.198    0.001  180.225    0.000
+##    .PopConc           0.111    0.001  152.363    0.000
+##    .PopSui            0.233    0.001  198.067    0.000</code></pre>
+<p>Add negative residual correlations to directional symptoms</p>
+<pre class="sourceCode r"><code class="sourceCode r">pop_commonfactor_dir.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">PopAppDec ~~ PopAppInc</span>
+<span class="st">PopSleDec ~~ PopSleInc</span>
+<span class="st">&quot;</span>
+
+pop_commonfactor_dir.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_commonfactor_dir.model, <span class="dt">data=</span>ukb_symp,  <span class="dt">missing=</span><span class="st">'ML'</span>)
+                               
+<span class="kw">summary</span>(pop_commonfactor_dir.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 50 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         32
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                       
+##   Test statistic                              8053.091
+##   Degrees of freedom                                33
+##   P-value (Chi-square)                           0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.948
+##   Tucker-Lewis Index (TLI)                       0.929
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -523578.748
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1047221.496
+##   Bayesian (BIC)                           1047540.384
+##   Sample-size adjusted Bayesian (BIC)      1047438.687
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.039
+##   90 Percent confidence interval - lower         0.039
+##   90 Percent confidence interval - upper         0.040
+##   P-value RMSEA &lt;= 0.05                          1.000
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.140
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopDep            0.402    0.001  347.367    0.000
+##     PopAnh            0.387    0.001  350.597    0.000
+##     PopAppDec         0.163    0.003   48.409    0.000
+##     PopAppInc         0.165    0.003   57.135    0.000
+##     PopSleDec         0.244    0.003   80.878    0.000
+##     PopSleInc         0.169    0.003   66.192    0.000
+##     PopFatig          0.327    0.003  127.441    0.000
+##     PopGuilt          0.350    0.003  108.572    0.000
+##     PopConc           0.373    0.003  133.879    0.000
+##     PopSui            0.203    0.003   62.848    0.000
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##  .PopAppDec ~~                                        
+##    .PopAppInc        -0.048    0.001  -62.924    0.000
+##  .PopSleDec ~~                                        
+##    .PopSleInc        -0.021    0.001  -38.579    0.000
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopDep            0.547    0.001  435.921    0.000
+##    .PopAnh            0.396    0.001  320.698    0.000
+##    .PopAppDec         0.306    0.003  100.862    0.000
+##    .PopAppInc         0.121    0.003   46.285    0.000
+##    .PopSleDec         0.572    0.003  206.972    0.000
+##    .PopSleInc         0.043    0.002   18.224    0.000
+##    .PopFatig          0.578    0.002  239.220    0.000
+##    .PopGuilt          0.260    0.003   87.669    0.000
+##    .PopConc           0.513    0.003  195.673    0.000
+##    .PopSui            0.377    0.003  129.793    0.000
+##     A1                0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##    .PopDep            0.086    0.001  165.070    0.000
+##    .PopAnh            0.089    0.000  197.998    0.000
+##    .PopAppDec         0.233    0.001  190.450    0.000
+##    .PopAppInc         0.171    0.001  188.957    0.000
+##    .PopSleDec         0.163    0.001  181.532    0.000
+##    .PopSleInc         0.127    0.001  187.001    0.000
+##    .PopFatig          0.105    0.001  164.075    0.000
+##    .PopGuilt          0.199    0.001  181.396    0.000
+##    .PopConc           0.111    0.001  154.606    0.000
+##    .PopSui            0.233    0.001  198.167    0.000</code></pre>
+<h2 id="two-factor-models">Two-factor models</h2>
+<h3 id="psychological-somatic-elhai-model-2a">Psychological-Somatic (Elhai Model 2a)</h3>
+<pre class="sourceCode r"><code class="sourceCode r">pop_psych_soma.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A1 =~ NA*PopDep + PopAnh + PopGuilt + PopConc + PopSui </span>
+<span class="st">A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">A2 ~~ 1*A2</span>
+<span class="st">PopAppDec ~~ PopAppInc</span>
+<span class="st">PopSleDec ~~ PopSleInc</span>
+<span class="st">&quot;</span>
+pop_psych_soma.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_psych_soma.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
+
+<span class="kw">summary</span>(pop_psych_soma.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 51 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         33
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                       
+##   Test statistic                              7558.880
+##   Degrees of freedom                                32
+##   P-value (Chi-square)                           0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.951
+##   Tucker-Lewis Index (TLI)                       0.932
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -523331.643
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1046729.285
+##   Bayesian (BIC)                           1047058.138
+##   Sample-size adjusted Bayesian (BIC)      1046953.263
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.039
+##   90 Percent confidence interval - lower         0.038
+##   90 Percent confidence interval - upper         0.039
+##   P-value RMSEA &lt;= 0.05                          1.000
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.126
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopDep            0.401    0.001  344.505    0.000
+##     PopAnh            0.389    0.001  349.253    0.000
+##     PopGuilt          0.352    0.003  108.128    0.000
+##     PopConc           0.368    0.003  129.497    0.000
+##     PopSui            0.203    0.003   62.643    0.000
+##   A2 =~                                               
+##     PopAppDec         0.158    0.003   48.061    0.000
+##     PopAppInc         0.166    0.003   59.085    0.000
+##     PopSleDec         0.243    0.003   82.591    0.000
+##     PopSleInc         0.167    0.002   67.025    0.000
+##     PopFatig          0.324    0.003  128.135    0.000
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##  .PopAppDec ~~                                        
+##    .PopAppInc        -0.049    0.001  -64.424    0.000
+##  .PopSleDec ~~                                        
+##    .PopSleInc        -0.024    0.001  -42.008    0.000
+##   A1 ~~                                               
+##     A2                0.948    0.003  371.044    0.000
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopDep            0.547    0.001  435.921    0.000
+##    .PopAnh            0.396    0.001  320.699    0.000
+##    .PopGuilt          0.260    0.003   86.821    0.000
+##    .PopConc           0.517    0.003  194.477    0.000
+##    .PopSui            0.377    0.003  129.729    0.000
+##    .PopAppDec         0.315    0.003  107.779    0.000
+##    .PopAppInc         0.127    0.003   50.606    0.000
+##    .PopSleDec         0.582    0.003  214.950    0.000
+##    .PopSleInc         0.050    0.002   22.011    0.000
+##    .PopFatig          0.593    0.002  239.605    0.000
+##     A1                0.000                           
+##     A2                0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##     A2                1.000                           
+##    .PopDep            0.087    0.001  162.581    0.000
+##    .PopAnh            0.088    0.000  187.174    0.000
+##    .PopGuilt          0.198    0.001  179.426    0.000
+##    .PopConc           0.112    0.001  152.319    0.000
+##    .PopSui            0.232    0.001  197.737    0.000
+##    .PopAppDec         0.232    0.001  188.679    0.000
+##    .PopAppInc         0.169    0.001  185.688    0.000
+##    .PopSleDec         0.159    0.001  173.121    0.000
+##    .PopSleInc         0.126    0.001  182.186    0.000
+##    .PopFatig          0.098    0.001  138.569    0.000</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">pop_psych_soma_bif.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui</span>
+<span class="st">A1 =~ NA*PopDep + PopAnh + PopGuilt + PopConc + PopSui </span>
+<span class="st">A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">A2 ~~ 1*A2</span>
+<span class="st">A ~~ 0*A1 + 0*A2</span>
+<span class="st">A1 ~~ 0*A2</span>
+<span class="st">&quot;</span>
+pop_psych_soma_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_psych_soma_bif.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
+
+<span class="kw">summary</span>(pop_psych_soma_bif.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 62 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         41
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                       
+##   Test statistic                              4095.589
+##   Degrees of freedom                                24
+##   P-value (Chi-square)                           0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.974
+##   Tucker-Lewis Index (TLI)                       0.951
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -521599.997
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1043281.994
+##   Bayesian (BIC)                           1043690.569
+##   Sample-size adjusted Bayesian (BIC)      1043560.269
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.033
+##   90 Percent confidence interval - lower         0.032
+##   90 Percent confidence interval - upper         0.034
+##   P-value RMSEA &lt;= 0.05                          1.000
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.043
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A =~                                                
+##     PopDep            0.796    4.890    0.163    0.871
+##     PopAnh            0.900    5.529    0.163    0.871
+##     PopAppDec         0.348    2.140    0.163    0.871
+##     PopAppInc         0.339    2.081    0.163    0.871
+##     PopSleDec         0.519    3.191    0.163    0.871
+##     PopSleInc         0.319    1.958    0.163    0.871
+##     PopFatig          0.737    4.530    0.163    0.871
+##     PopGuilt          0.851    5.232    0.163    0.871
+##     PopConc           0.833    5.120    0.163    0.871
+##     PopSui            0.505    3.101    0.163    0.871
+##   A1 =~                                               
+##     PopDep            0.313    0.005   66.156    0.000
+##     PopAnh            0.208    0.004   54.945    0.000
+##     PopGuilt          0.159    0.005   30.399    0.000
+##     PopConc          -0.008    0.005   -1.626    0.104
+##     PopSui            0.113    0.005   22.504    0.000
+##   A2 =~                                               
+##     PopAppDec         0.264    0.006   46.989    0.000
+##     PopAppInc        -0.176    0.004  -47.710    0.000
+##     PopSleDec         0.070    0.003   26.409    0.000
+##     PopSleInc        -0.068    0.003  -26.652    0.000
+##     PopFatig         -0.020    0.002   -9.410    0.000
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A ~~                                                
+##     A1                0.000                           
+##     A2                0.000                           
+##   A1 ~~                                               
+##     A2                0.000                           
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopDep            0.547    0.001  435.920    0.000
+##    .PopAnh            0.396    0.001  320.706    0.000
+##    .PopAppDec         0.356    0.003  135.960    0.000
+##    .PopAppInc         0.176    0.002   77.753    0.000
+##    .PopSleDec         0.648    0.003  238.687    0.000
+##    .PopSleInc         0.104    0.002   50.605    0.000
+##    .PopFatig          0.673    0.003  225.488    0.000
+##    .PopGuilt          0.266    0.004   62.586    0.000
+##    .PopConc           0.626    0.004  176.845    0.000
+##    .PopSui            0.366    0.004   85.845    0.000
+##     A                 0.000                           
+##     A1                0.000                           
+##     A2                0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##     A2                1.000                           
+##    .PopDep            0.066    0.001   47.699    0.000
+##    .PopAnh            0.089    0.001  138.022    0.000
+##    .PopAppDec         0.163    0.003   54.847    0.000
+##    .PopAppInc         0.140    0.001  100.114    0.000
+##    .PopSleDec         0.156    0.001  166.262    0.000
+##    .PopSleInc         0.124    0.001  171.782    0.000
+##    .PopFatig          0.095    0.001  134.113    0.000
+##    .PopGuilt          0.197    0.001  174.914    0.000
+##    .PopConc           0.098    0.001  108.970    0.000
+##    .PopSui            0.231    0.001  193.245    0.000
+##     A                 0.132    1.622    0.081    0.935</code></pre>
+<h3 id="psychological-neurovegetative-elhai-model-2b">Psychological-Neurovegetative (Elhai Model 2b)</h3>
+<pre class="sourceCode r"><code class="sourceCode r">pop_psych_veg.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui</span>
+<span class="st">A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">A2 ~~ 1*A2</span>
+<span class="st">PopAppDec ~~ PopAppInc</span>
+<span class="st">PopSleDec ~~ PopSleInc</span>
+<span class="st">&quot;</span>
+pop_psych_veg.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_psych_veg.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
+
+<span class="kw">summary</span>(pop_psych_veg.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 50 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         33
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                       
+##   Test statistic                              4929.103
+##   Degrees of freedom                                32
+##   P-value (Chi-square)                           0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.968
+##   Tucker-Lewis Index (TLI)                       0.956
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -522016.754
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1044099.508
+##   Bayesian (BIC)                           1044428.361
+##   Sample-size adjusted Bayesian (BIC)      1044323.485
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.031
+##   90 Percent confidence interval - lower         0.030
+##   90 Percent confidence interval - upper         0.032
+##   P-value RMSEA &lt;= 0.05                          1.000
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.077
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopDep            0.398    0.001  327.347    0.000
+##     PopAnh            0.398    0.001  341.083    0.000
+##     PopGuilt          0.348    0.003   99.611    0.000
+##     PopSui            0.200    0.003   60.422    0.000
+##   A2 =~                                               
+##     PopAppDec         0.143    0.003   48.611    0.000
+##     PopAppInc         0.143    0.003   55.822    0.000
+##     PopSleDec         0.228    0.003   86.203    0.000
+##     PopSleInc         0.144    0.002   63.046    0.000
+##     PopFatig          0.301    0.002  129.491    0.000
+##     PopConc           0.344    0.003  135.651    0.000
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##  .PopAppDec ~~                                        
+##    .PopAppInc        -0.049    0.001  -63.651    0.000
+##  .PopSleDec ~~                                        
+##    .PopSleInc        -0.023    0.001  -41.789    0.000
+##   A1 ~~                                               
+##     A2                0.875    0.003  286.206    0.000
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopDep            0.547    0.001  435.921    0.000
+##    .PopAnh            0.396    0.001  320.705    0.000
+##    .PopGuilt          0.265    0.003   84.093    0.000
+##    .PopSui            0.381    0.003  129.327    0.000
+##    .PopAppDec         0.334    0.003  126.710    0.000
+##    .PopAppInc         0.151    0.002   65.632    0.000
+##    .PopSleDec         0.605    0.002  243.391    0.000
+##    .PopSleInc         0.074    0.002   35.570    0.000
+##    .PopFatig          0.626    0.002  264.652    0.000
+##    .PopConc           0.567    0.003  218.345    0.000
+##     A1                0.000                           
+##     A2                0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##     A2                1.000                           
+##    .PopDep            0.089    0.001  148.981    0.000
+##    .PopAnh            0.081    0.001  148.020    0.000
+##    .PopGuilt          0.196    0.001  172.831    0.000
+##    .PopSui            0.232    0.001  196.227    0.000
+##    .PopAppDec         0.232    0.001  189.298    0.000
+##    .PopAppInc         0.170    0.001  187.579    0.000
+##    .PopSleDec         0.158    0.001  175.023    0.000
+##    .PopSleInc         0.127    0.001  184.920    0.000
+##    .PopFatig          0.097    0.001  145.635    0.000
+##    .PopConc           0.100    0.001  131.301    0.000</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">pop_psych_veg_bif.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui</span>
+<span class="st">A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc</span>
+<span class="st">A  =~ NA*PopDep + PopAnh + PopGuilt + PopSui + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">A2 ~~ 1*A2</span>
+<span class="st">A  ~~ 1*A</span>
+<span class="st">A ~~ 0*A1</span>
+<span class="st">A ~~ 0*A2</span>
+<span class="st">A1 ~~ 0*A2</span>
+<span class="st">&quot;</span>
+
+pop_psych_veg_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_psych_veg_bif.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
+
+<span class="kw">summary</span>(pop_psych_veg_bif.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 54 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         40
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                       
+##   Test statistic                              3790.216
+##   Degrees of freedom                                25
+##   P-value (Chi-square)                           0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.976
+##   Tucker-Lewis Index (TLI)                       0.956
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -521447.310
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1042974.621
+##   Bayesian (BIC)                           1043373.231
+##   Sample-size adjusted Bayesian (BIC)      1043246.109
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.031
+##   90 Percent confidence interval - lower         0.030
+##   90 Percent confidence interval - upper         0.032
+##   P-value RMSEA &lt;= 0.05                          1.000
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.050
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopDep            0.324    0.004   78.343    0.000
+##     PopAnh            0.212    0.003   65.004    0.000
+##     PopGuilt          0.159    0.005   32.380    0.000
+##     PopSui            0.119    0.005   23.921    0.000
+##   A2 =~                                               
+##     PopAppDec         0.243    0.004   56.912    0.000
+##     PopAppInc        -0.179    0.004  -50.653    0.000
+##     PopSleDec         0.093    0.003   30.179    0.000
+##     PopSleInc        -0.067    0.002  -28.025    0.000
+##     PopFatig          0.006    0.003    2.376    0.017
+##     PopConc           0.053    0.003   17.616    0.000
+##   A =~                                                
+##     PopDep            0.281    0.004   78.015    0.000
+##     PopAnh            0.323    0.002  145.966    0.000
+##     PopGuilt          0.309    0.004   86.580    0.000
+##     PopSui            0.181    0.003   54.373    0.000
+##     PopAppDec         0.094    0.003   28.926    0.000
+##     PopAppInc         0.144    0.003   54.325    0.000
+##     PopSleDec         0.178    0.003   70.203    0.000
+##     PopSleInc         0.122    0.002   58.909    0.000
+##     PopFatig          0.265    0.002  114.484    0.000
+##     PopConc           0.299    0.003  114.861    0.000
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 ~~                                               
+##     A                 0.000                           
+##   A2 ~~                                               
+##     A                 0.000                           
+##   A1 ~~                                               
+##     A2                0.000                           
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopDep            0.547    0.001  435.920    0.000
+##    .PopAnh            0.396    0.001  320.706    0.000
+##    .PopGuilt          0.267    0.004   62.606    0.000
+##    .PopSui            0.365    0.004   84.694    0.000
+##    .PopAppDec         0.375    0.003  144.940    0.000
+##    .PopAppInc         0.167    0.002   71.518    0.000
+##    .PopSleDec         0.656    0.003  259.810    0.000
+##    .PopSleInc         0.102    0.002   51.136    0.000
+##    .PopFatig          0.678    0.003  243.102    0.000
+##    .PopConc           0.628    0.003  201.251    0.000
+##     A1                0.000                           
+##     A2                0.000                           
+##     A                 0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##     A2                1.000                           
+##     A                 1.000                           
+##    .PopDep            0.064    0.001   44.929    0.000
+##    .PopAnh            0.090    0.001  140.033    0.000
+##    .PopGuilt          0.196    0.001  175.369    0.000
+##    .PopSui            0.231    0.001  193.222    0.000
+##    .PopAppDec         0.178    0.002   82.948    0.000
+##    .PopAppInc         0.135    0.001   94.558    0.000
+##    .PopSleDec         0.155    0.001  161.801    0.000
+##    .PopSleInc         0.123    0.001  167.750    0.000
+##    .PopFatig          0.095    0.001  142.935    0.000
+##    .PopConc           0.097    0.001  122.971    0.000</code></pre>
+<h3 id="affective-neurovegetative-elhai-model-2c">Affective-Neurovegetative (Elhai Model 2c)</h3>
+<pre class="sourceCode r"><code class="sourceCode r">pop_affect_veg.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A1 =~ NA*PopDep + PopGuilt + PopSui</span>
+<span class="st">A2 =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">A2 ~~ 1*A2</span>
+<span class="st">PopAppDec ~~ PopAppInc</span>
+<span class="st">PopSleDec ~~ PopSleInc</span>
+<span class="st">&quot;</span>
+pop_affect_veg.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_affect_veg.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
+
+<span class="kw">summary</span>(pop_affect_veg.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 52 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         33
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                       
+##   Test statistic                              7872.353
+##   Degrees of freedom                                32
+##   P-value (Chi-square)                           0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.949
+##   Tucker-Lewis Index (TLI)                       0.929
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -523488.379
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1047042.758
+##   Bayesian (BIC)                           1047371.612
+##   Sample-size adjusted Bayesian (BIC)      1047266.736
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.039
+##   90 Percent confidence interval - lower         0.039
+##   90 Percent confidence interval - upper         0.040
+##   P-value RMSEA &lt;= 0.05                          1.000
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.144
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopDep            0.412    0.001  315.781    0.000
+##     PopGuilt          0.392    0.004   87.059    0.000
+##     PopSui            0.229    0.004   58.218    0.000
+##   A2 =~                                               
+##     PopAnh            0.388    0.001  350.192    0.000
+##     PopAppInc         0.164    0.003   57.145    0.000
+##     PopAppDec         0.162    0.003   48.328    0.000
+##     PopSleInc         0.168    0.003   66.173    0.000
+##     PopSleDec         0.242    0.003   80.622    0.000
+##     PopFatig          0.327    0.003  127.527    0.000
+##     PopConc           0.371    0.003  133.529    0.000
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##  .PopAppInc ~~                                        
+##    .PopAppDec        -0.048    0.001  -62.917    0.000
+##  .PopSleInc ~~                                        
+##    .PopSleDec        -0.021    0.001  -38.572    0.000
+##   A1 ~~                                               
+##     A2                0.972    0.002  506.580    0.000
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopDep            0.547    0.001  435.920    0.000
+##    .PopGuilt          0.226    0.004   56.735    0.000
+##    .PopSui            0.356    0.003  103.452    0.000
+##    .PopAnh            0.396    0.001  320.697    0.000
+##    .PopAppInc         0.122    0.003   46.892    0.000
+##    .PopAppDec         0.307    0.003  101.765    0.000
+##    .PopSleInc         0.044    0.002   18.726    0.000
+##    .PopSleDec         0.573    0.003  208.227    0.000
+##    .PopFatig          0.579    0.002  240.165    0.000
+##    .PopConc           0.514    0.003  196.548    0.000
+##     A1                0.000                           
+##     A2                0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##     A2                1.000                           
+##    .PopDep            0.078    0.001  107.717    0.000
+##    .PopGuilt          0.192    0.001  159.801    0.000
+##    .PopSui            0.230    0.001  193.241    0.000
+##    .PopAnh            0.089    0.000  193.984    0.000
+##    .PopAppInc         0.171    0.001  188.950    0.000
+##    .PopAppDec         0.233    0.001  190.460    0.000
+##    .PopSleInc         0.127    0.001  186.991    0.000
+##    .PopSleDec         0.163    0.001  181.487    0.000
+##    .PopFatig          0.104    0.001  163.470    0.000
+##    .PopConc           0.111    0.001  154.048    0.000</code></pre>
+<p>Bifactor model</p>
+<pre class="sourceCode r"><code class="sourceCode r">pop_affect_veg_bif.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A1 =~ NA*PopDep + PopGuilt + PopSui</span>
+<span class="st">A2 =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc</span>
+<span class="st">A =~ NA*PopDep + PopGuilt + PopSui + PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">A2 ~~ 1*A2</span>
+<span class="st">A  ~~ 1*A</span>
+<span class="st">A ~~ 0*A1</span>
+<span class="st">A ~~ 0*A2</span>
+<span class="st">A1 ~~ 0*A2</span>
+<span class="st">&quot;</span>
+pop_affect_veg_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_affect_veg_bif.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
+
+<span class="kw">summary</span>(pop_affect_veg_bif.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 68 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         40
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                       
+##   Test statistic                              7497.803
+##   Degrees of freedom                                25
+##   P-value (Chi-square)                           0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.952
+##   Tucker-Lewis Index (TLI)                       0.913
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -523301.104
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1046682.208
+##   Bayesian (BIC)                           1047080.818
+##   Sample-size adjusted Bayesian (BIC)      1046953.697
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.044
+##   90 Percent confidence interval - lower         0.043
+##   90 Percent confidence interval - upper         0.044
+##   P-value RMSEA &lt;= 0.05                          1.000
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.138
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopDep            0.051    0.006    8.328    0.000
+##     PopGuilt          0.075    0.009    8.541    0.000
+##     PopSui            0.172    0.019    8.933    0.000
+##   A2 =~                                               
+##     PopAnh           -0.000    0.002   -0.121    0.904
+##     PopAppInc        -0.163    0.003  -48.216    0.000
+##     PopAppDec         0.263    0.005   54.128    0.000
+##     PopSleInc        -0.064    0.003  -24.761    0.000
+##     PopSleDec         0.092    0.003   27.790    0.000
+##     PopFatig          0.007    0.003    2.126    0.034
+##     PopConc           0.046    0.003   13.300    0.000
+##   A =~                                                
+##     PopDep            0.400    0.001  341.380    0.000
+##     PopGuilt          0.361    0.004   81.602    0.000
+##     PopSui            0.225    0.005   49.314    0.000
+##     PopAnh            0.389    0.001  349.618    0.000
+##     PopAppInc         0.176    0.004   48.366    0.000
+##     PopAppDec         0.134    0.005   26.804    0.000
+##     PopSleInc         0.163    0.003   61.174    0.000
+##     PopSleDec         0.223    0.003   69.082    0.000
+##     PopFatig          0.326    0.003  125.695    0.000
+##     PopConc           0.368    0.003  127.991    0.000
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 ~~                                               
+##     A                 0.000                           
+##   A2 ~~                                               
+##     A                 0.000                           
+##   A1 ~~                                               
+##     A2                0.000                           
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopDep            0.547    0.001  435.921    0.000
+##    .PopGuilt          0.248    0.004   55.593    0.000
+##    .PopSui            0.349    0.005   76.196    0.000
+##    .PopAnh            0.396    0.001  320.698    0.000
+##    .PopAppInc         0.114    0.003   37.638    0.000
+##    .PopAppDec         0.327    0.004   83.075    0.000
+##    .PopSleInc         0.047    0.002   19.834    0.000
+##    .PopSleDec         0.587    0.003  205.369    0.000
+##    .PopFatig          0.580    0.002  238.574    0.000
+##    .PopConc           0.517    0.003  193.995    0.000
+##     A1                0.000                           
+##     A2                0.000                           
+##     A                 0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##     A2                1.000                           
+##     A                 1.000                           
+##    .PopDep            0.085    0.001  116.327    0.000
+##    .PopGuilt          0.194    0.002  120.536    0.000
+##    .PopSui            0.205    0.007   30.915    0.000
+##    .PopAnh            0.088    0.000  188.446    0.000
+##    .PopAppInc         0.143    0.001  115.823    0.000
+##    .PopAppDec         0.167    0.003   64.861    0.000
+##    .PopSleInc         0.124    0.001  170.180    0.000
+##    .PopSleDec         0.158    0.001  162.836    0.000
+##    .PopFatig          0.104    0.001  162.258    0.000
+##    .PopConc           0.109    0.001  147.421    0.000</code></pre>
+<h2 id="factor-models">3 factor models</h2>
+<pre class="sourceCode r"><code class="sourceCode r">pop_cog_mood_neuroveg.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A1 =~ NA*PopGuilt + PopConc + PopSui</span>
+<span class="st">A2 =~ NA*PopDep + PopAnh + PopGuilt</span>
+<span class="st">A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">A2 ~~ 1*A2</span>
+<span class="st">A3 ~~ 1*A3</span>
+<span class="st">PopSleDec ~~ PopSleInc</span>
+<span class="st">PopAppDec ~~ PopAppInc</span>
+<span class="st">&quot;</span>
+pop_cog_mood_neuroveg.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_cog_mood_neuroveg.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)</code></pre>
+<pre><code>## Warning in lav_object_post_check(object): lavaan WARNING: covariance matrix of latent variables
+##                 is not positive definite;
+##                 use lavInspect(fit, &quot;cov.lv&quot;) to investigate.</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(pop_cog_mood_neuroveg.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 57 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         36
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                       
+##   Test statistic                              4568.581
+##   Degrees of freedom                                29
+##   P-value (Chi-square)                           0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.971
+##   Tucker-Lewis Index (TLI)                       0.954
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -521836.493
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1043744.986
+##   Bayesian (BIC)                           1044103.735
+##   Sample-size adjusted Bayesian (BIC)      1043989.325
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.032
+##   90 Percent confidence interval - lower         0.031
+##   90 Percent confidence interval - upper         0.032
+##   P-value RMSEA &lt;= 0.05                          1.000
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.060
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopGuilt          0.167    0.005   30.739    0.000
+##     PopConc           0.309    0.003  114.194    0.000
+##     PopSui            0.155    0.003   56.723    0.000
+##   A2 =~                                               
+##     PopDep            0.386    0.001  264.707    0.000
+##     PopAnh            0.414    0.001  281.333    0.000
+##     PopGuilt          0.135    0.007   19.733    0.000
+##   A3 =~                                               
+##     PopSleDec         0.207    0.003   81.401    0.000
+##     PopSleInc         0.134    0.002   63.118    0.000
+##     PopFatig          0.274    0.002  117.753    0.000
+##     PopAppDec         0.131    0.003   47.581    0.000
+##     PopAppInc         0.135    0.002   56.998    0.000
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##  .PopSleDec ~~                                        
+##    .PopSleInc        -0.023    0.001  -41.642    0.000
+##  .PopAppDec ~~                                        
+##    .PopAppInc        -0.049    0.001  -64.027    0.000
+##   A1 ~~                                               
+##     A2                0.840    0.007  119.498    0.000
+##     A3                1.013    0.005  185.055    0.000
+##   A2 ~~                                               
+##     A3                0.802    0.006  141.638    0.000
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopGuilt          0.321    0.004   89.272    0.000
+##    .PopConc           0.601    0.003  197.072    0.000
+##    .PopSui            0.432    0.003  163.154    0.000
+##    .PopDep            0.547    0.001  435.921    0.000
+##    .PopAnh            0.396    0.001  320.707    0.000
+##    .PopSleDec         0.632    0.003  249.041    0.000
+##    .PopSleInc         0.089    0.002   43.952    0.000
+##    .PopFatig          0.661    0.003  253.147    0.000
+##    .PopAppDec         0.350    0.003  138.930    0.000
+##    .PopAppInc         0.165    0.002   74.505    0.000
+##     A1                0.000                           
+##     A2                0.000                           
+##     A3                0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##     A2                1.000                           
+##     A3                1.000                           
+##    .PopGuilt          0.203    0.001  184.262    0.000
+##    .PopConc           0.105    0.001  102.739    0.000
+##    .PopSui            0.234    0.001  197.700    0.000
+##    .PopDep            0.099    0.001  115.273    0.000
+##    .PopAnh            0.068    0.001   72.906    0.000
+##    .PopSleDec         0.158    0.001  173.937    0.000
+##    .PopSleInc         0.127    0.001  184.086    0.000
+##    .PopFatig          0.097    0.001  139.480    0.000
+##    .PopAppDec         0.232    0.001  189.288    0.000
+##    .PopAppInc         0.170    0.001  186.714    0.000</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">pop_cog_mood_neuroveg_bif.model &lt;-<span class="st"> &quot;</span>
+<span class="st">A1 =~ NA*PopGuilt + PopConc + PopSui</span>
+<span class="st">A2 =~ NA*PopDep + PopAnh + PopGuilt</span>
+<span class="st">A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc</span>
+<span class="st">A =~ NA*PopDep + PopGuilt + PopSui + PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc</span>
+<span class="st">A1 ~~ 1*A1</span>
+<span class="st">A2 ~~ 1*A2</span>
+<span class="st">A3 ~~ 1*A3</span>
+<span class="st">A ~~ 0*A1 + 0*A2 + 0*A3</span>
+<span class="st">A1 ~~ 0*A2 + 0*A3</span>
+<span class="st">A2 ~~ 0*A3</span>
+<span class="st">&quot;</span>
+pop_cog_mood_neuroveg_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_cog_mood_neuroveg_bif.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
+
+<span class="kw">summary</span>(pop_cog_mood_neuroveg_bif.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 113 iterations
+## 
+##   Estimator                                         ML
+##   Optimization method                           NLMINB
+##   Number of free parameters                         42
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                       
+##   Test statistic                              4244.884
+##   Degrees of freedom                                23
+##   P-value (Chi-square)                           0.000
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            154800.316
+##   Degrees of freedom                                45
+##   P-value                                        0.000
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.973
+##   Tucker-Lewis Index (TLI)                       0.947
+## 
+## Loglikelihood and Information Criteria:
+## 
+##   Loglikelihood user model (H0)            -521674.644
+##   Loglikelihood unrestricted model (H1)    -519552.202
+##                                                       
+##   Akaike (AIC)                             1043433.289
+##   Bayesian (BIC)                           1043851.829
+##   Sample-size adjusted Bayesian (BIC)      1043718.351
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.034
+##   90 Percent confidence interval - lower         0.033
+##   90 Percent confidence interval - upper         0.035
+##   P-value RMSEA &lt;= 0.05                          1.000
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.054
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                             Standard
+##   Information                                 Observed
+##   Observed information based on                Hessian
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopGuilt          0.037    0.020    1.839    0.066
+##     PopConc          -0.019    0.011   -1.753    0.080
+##     PopSui            0.359    0.199    1.806    0.071
+##   A2 =~                                               
+##     PopDep            0.292    0.005   59.900    0.000
+##     PopAnh            0.211    0.004   59.614    0.000
+##     PopGuilt          0.134    0.005   26.356    0.000
+##   A3 =~                                               
+##     PopSleDec         0.069    0.003   25.966    0.000
+##     PopSleInc        -0.068    0.003  -27.097    0.000
+##     PopFatig         -0.021    0.002   -9.962    0.000
+##     PopAppDec         0.262    0.006   47.362    0.000
+##     PopAppInc        -0.178    0.004  -47.981    0.000
+##   A =~                                                
+##     PopDep            0.822   10.355    0.079    0.937
+##     PopGuilt          0.820   10.326    0.079    0.937
+##     PopSui            0.417    5.254    0.079    0.937
+##     PopAnh            0.916   11.545    0.079    0.937
+##     PopAppInc         0.343    4.326    0.079    0.937
+##     PopAppDec         0.362    4.555    0.079    0.937
+##     PopSleInc         0.323    4.073    0.079    0.937
+##     PopSleDec         0.530    6.677    0.079    0.937
+##     PopFatig          0.742    9.351    0.079    0.937
+##     PopConc           0.859   10.824    0.079    0.937
+## 
+## Covariances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 ~~                                               
+##     A                 0.000                           
+##   A2 ~~                                               
+##     A                 0.000                           
+##   A3 ~~                                               
+##     A                 0.000                           
+##   A1 ~~                                               
+##     A2                0.000                           
+##     A3                0.000                           
+##   A2 ~~                                               
+##     A3                0.000                           
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopGuilt          0.286    0.004   63.809    0.000
+##    .PopConc           0.614    0.003  198.129    0.000
+##    .PopSui            0.442    0.003  170.425    0.000
+##    .PopDep            0.547    0.001  435.921    0.000
+##    .PopAnh            0.396    0.001  320.707    0.000
+##    .PopSleDec         0.644    0.003  253.473    0.000
+##    .PopSleInc         0.102    0.002   51.416    0.000
+##    .PopFatig          0.669    0.003  245.117    0.000
+##    .PopAppDec         0.353    0.003  137.285    0.000
+##    .PopAppInc         0.174    0.002   78.495    0.000
+##     A1                0.000                           
+##     A2                0.000                           
+##     A3                0.000                           
+##     A                 0.000                           
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##     A2                1.000                           
+##     A3                1.000                           
+##    .PopGuilt          0.199    0.002   96.321    0.000
+##    .PopConc           0.098    0.001  100.018    0.000
+##    .PopSui            0.105    0.142    0.734    0.463
+##    .PopDep            0.075    0.002   40.510    0.000
+##    .PopAnh            0.085    0.001   88.047    0.000
+##    .PopSleDec         0.156    0.001  167.074    0.000
+##    .PopSleInc         0.124    0.001  171.941    0.000
+##    .PopFatig          0.096    0.001  141.715    0.000
+##    .PopAppDec         0.163    0.003   55.799    0.000
+##    .PopAppInc         0.139    0.001   99.066    0.000
+##     A                 0.130    3.282    0.040    0.968</code></pre>
+<h1 id="model-comparison">Model comparison</h1>
+<pre class="sourceCode r"><code class="sourceCode r">fits &lt;-<span class="st"> </span><span class="kw">list</span>(
+pop_commonfactor.fit,
+pop_commonfactor_dir.fit,
+
+pop_psych_soma_bif.fit,
+pop_psych_soma.fit,
+
+pop_psych_veg_bif.fit,
+pop_psych_veg.fit,
+
+pop_affect_veg_bif.fit,
+pop_affect_veg.fit,
+
+pop_cog_mood_neuroveg.fit,
+pop_cog_mood_neuroveg_bif.fit)
+
+model_fits &lt;-<span class="st"> </span>
+<span class="kw">data.frame</span>(<span class="dt">Model=</span><span class="kw">c</span>(<span class="st">'1a'</span>, <span class="st">'1b'</span>, <span class="st">'2a'</span>, <span class="st">'2a(ii)'</span>, <span class="st">'2b(i)'</span>, <span class="st">'2b(ii)'</span>, <span class="st">'2c(i)'</span>, <span class="st">'2c(ii)'</span>, <span class="st">'3'</span>, <span class="st">'3(ii)'</span>),
+   <span class="dt">Name=</span><span class="kw">c</span>(<span class="st">'Common'</span>,
+          <span class="st">'Common (direction)'</span>,
+          <span class="st">'Psych-Somatic'</span>,
+          <span class="st">'Psych-Somatic (BiF)'</span>,
+          <span class="st">'Psych-Neuroveg'</span>,
+          <span class="st">'Psych-Neuroveg (BiF)'</span>,
+          <span class="st">'Affect-Neuroveg'</span>,
+          <span class="st">'Affect-Neuroveg (BiF)'</span>,
+          <span class="st">'Cog-Mood-Neuroveg'</span>,
+          <span class="st">'Cog-Mood-Neuroveg (BiF)'</span>)) %&gt;%
+<span class="kw">bind_cols</span>(
+<span class="kw">bind_rows</span>(<span class="kw">lapply</span>(fits, function(fit) <span class="kw">fitMeasures</span>(fit)[<span class="kw">c</span>(<span class="st">'aic'</span>, <span class="st">'bic'</span>, <span class="st">'cfi'</span>, <span class="st">'srmr'</span>)]))
+)
+
+model_fits %&gt;%
+<span class="kw">mutate</span>(<span class="dt">dAIC=</span>aic-<span class="kw">min</span>(aic)) %&gt;%
+<span class="kw">select</span>(-bic)</code></pre>
+<pre><code>##     Model                    Name     aic       cfi       srmr      dAIC
+## 1      1a                  Common 1052909 0.9114124 0.13443218 9934.1803
+## 2      1b      Common (direction) 1047221 0.9481757 0.14027941 4246.8754
+## 3      2a           Psych-Somatic 1043282 0.9736902 0.04269307  307.3729
+## 4  2a(ii)     Psych-Somatic (BiF) 1046729 0.9513627 0.12594659 3754.6644
+## 5   2b(i)          Psych-Neuroveg 1042975 0.9756699 0.05019574    0.0000
+## 6  2b(ii)    Psych-Neuroveg (BiF) 1044100 0.9683558 0.07676342 1124.8868
+## 7   2c(i)         Affect-Neuroveg 1046682 0.9517121 0.13760998 3707.5875
+## 8  2c(ii)   Affect-Neuroveg (BiF) 1047043 0.9493371 0.14436362 4068.1377
+## 9       3       Cog-Mood-Neuroveg 1043745 0.9706661 0.05950532  770.3651
+## 10  3(ii) Cog-Mood-Neuroveg (BiF) 1043433 0.9727190 0.05434575  458.6680</code></pre>
+
+</body>
+</html>
