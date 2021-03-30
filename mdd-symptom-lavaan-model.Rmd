@@ -60,7 +60,7 @@ A1 ~~ 1*A1
 
 pop_commonfactor.fit <- cfa(model=pop_commonfactor.model, data=ukb_symp,  missing='ML')
 							   
-summary(pop_commonfactor.fit, fit.measures=TRUE)
+standardizedSolution(pop_commonfactor.fit)
 
 ```
 
@@ -77,7 +77,7 @@ PopSleDec ~~ PopSleInc
 
 pop_commonfactor_dir.fit <- cfa(model=pop_commonfactor_dir.model, data=ukb_symp,  missing='ML')
 							   
-summary(pop_commonfactor_dir.fit, fit.measures=TRUE)
+standardizedSolution(pop_commonfactor_dir.fit)
 
 ```
 
@@ -97,7 +97,7 @@ PopSleDec ~~ PopSleInc
 "
 pop_psych_soma.fit <- cfa(model=pop_psych_soma.model, data=ukb_symp, missing="ML")
 
-summary(pop_psych_soma.fit, fit.measures=TRUE)
+standardizedSolution(pop_psych_soma.fit)
 
 ```
 
@@ -114,7 +114,7 @@ A1 ~~ 0*A2
 "
 pop_psych_soma_bif.fit <- cfa(model=pop_psych_soma_bif.model, data=ukb_symp, missing="ML")
 
-summary(pop_psych_soma_bif.fit, fit.measures=TRUE)
+standardizedSolution(pop_psych_soma_bif.fit)
 
 ```
 
@@ -133,7 +133,7 @@ PopSleDec ~~ PopSleInc
 "
 pop_psych_veg.fit <- cfa(model=pop_psych_veg.model, data=ukb_symp, missing="ML")
 
-summary(pop_psych_veg.fit, fit.measures=TRUE)
+standardizedSolution(pop_psych_veg.fit)
 
 ```
 
@@ -154,7 +154,7 @@ A1 ~~ 0*A2
 
 pop_psych_veg_bif.fit <- cfa(model=pop_psych_veg_bif.model, data=ukb_symp, missing="ML")
 
-summary(pop_psych_veg_bif.fit, fit.measures=TRUE)
+standardizedSolution(pop_psych_veg_bif.fit)
 
 ```
 
@@ -173,7 +173,7 @@ PopSleDec ~~ PopSleInc
 "
 pop_affect_veg.fit <- cfa(model=pop_affect_veg.model, data=ukb_symp, missing="ML")
 
-summary(pop_affect_veg.fit, fit.measures=TRUE)
+standardizedSolution(pop_affect_veg.fit)
 
 ```
 
@@ -194,7 +194,7 @@ A1 ~~ 0*A2
 "
 pop_affect_veg_bif.fit <- cfa(model=pop_affect_veg_bif.model, data=ukb_symp, missing="ML")
 
-summary(pop_affect_veg_bif.fit, fit.measures=TRUE)
+standardizedSolution(pop_affect_veg_bif.fit)
 
 ```
 
@@ -215,7 +215,7 @@ PopAppDec ~~ PopAppInc
 "
 pop_cog_mood_neuroveg.fit <- cfa(model=pop_cog_mood_neuroveg.model, data=ukb_symp, missing="ML")
 
-summary(pop_cog_mood_neuroveg.fit, fit.measures=TRUE)
+standardizedSolution(pop_cog_mood_neuroveg.fit)
 
 ```
 
@@ -236,7 +236,7 @@ A2 ~~ 0*A3
 "
 pop_cog_mood_neuroveg_bif.fit <- cfa(model=pop_cog_mood_neuroveg_bif.model, data=ukb_symp, missing="ML")
 
-summary(pop_cog_mood_neuroveg_bif.fit, fit.measures=TRUE)
+standardizedSolution(pop_cog_mood_neuroveg_bif.fit)
 
 ```
 
@@ -279,5 +279,17 @@ bind_rows(lapply(fits, function(fit) fitMeasures(fit)[c('aic', 'bic', 'cfi', 'sr
 model_fits %>%
 mutate(dAIC=aic-min(aic)) %>%
 select(-bic)
+
+```
+
+## Categorical models
+
+Treat symptoms as ordered categorical variables
+
+```{r ordered, cache=TRUE}
+
+pop_commonfactor_ord.fit <- cfa(model=pop_commonfactor.model, data=ukb_symp, ordered=TRUE, missing='pairwise')
+
+summary(pop_commonfactor_ord.fit, fit.measures=TRUE)
 
 ```

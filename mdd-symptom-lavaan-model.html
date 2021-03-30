@@ -61,100 +61,40 @@ ukb_symp &lt;-
 
 pop_commonfactor.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_commonfactor.model, <span class="dt">data=</span>ukb_symp,  <span class="dt">missing=</span><span class="st">'ML'</span>)
                                
-<span class="kw">summary</span>(pop_commonfactor.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 43 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         30
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                        
-##   Test statistic                              13744.396
-##   Degrees of freedom                                 35
-##   P-value (Chi-square)                            0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.911
-##   Tucker-Lewis Index (TLI)                       0.886
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -526424.400
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1052908.801
-##   Bayesian (BIC)                           1053207.758
-##   Sample-size adjusted Bayesian (BIC)      1053112.417
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.050
-##   90 Percent confidence interval - lower         0.049
-##   90 Percent confidence interval - upper         0.051
-##   P-value RMSEA &lt;= 0.05                          0.575
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.134
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 =~                                               
-##     PopDep            0.401    0.001  345.056    0.000
-##     PopAnh            0.389    0.001  350.594    0.000
-##     PopAppDec         0.143    0.003   42.490    0.000
-##     PopAppInc         0.150    0.003   51.878    0.000
-##     PopSleDec         0.227    0.003   75.905    0.000
-##     PopSleInc         0.155    0.003   61.392    0.000
-##     PopFatig          0.325    0.003  125.552    0.000
-##     PopGuilt          0.350    0.003  108.035    0.000
-##     PopConc           0.371    0.003  131.309    0.000
-##     PopSui            0.200    0.003   61.969    0.000
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopDep            0.547    0.001  435.921    0.000
-##    .PopAnh            0.396    0.001  320.699    0.000
-##    .PopAppDec         0.320    0.003  106.203    0.000
-##    .PopAppInc         0.132    0.003   50.805    0.000
-##    .PopSleDec         0.584    0.003  213.266    0.000
-##    .PopSleInc         0.053    0.002   23.101    0.000
-##    .PopFatig          0.580    0.002  238.662    0.000
-##    .PopGuilt          0.261    0.003   87.638    0.000
-##    .PopConc           0.515    0.003  194.614    0.000
-##    .PopSui            0.379    0.003  130.765    0.000
-##     A1                0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##    .PopDep            0.087    0.001  163.810    0.000
-##    .PopAnh            0.088    0.000  191.440    0.000
-##    .PopAppDec         0.236    0.001  191.297    0.000
-##    .PopAppInc         0.173    0.001  189.768    0.000
-##    .PopSleDec         0.166    0.001  183.400    0.000
-##    .PopSleInc         0.129    0.001  188.497    0.000
-##    .PopFatig          0.105    0.001  162.521    0.000
-##    .PopGuilt          0.198    0.001  180.225    0.000
-##    .PopConc           0.111    0.001  152.363    0.000
-##    .PopSui            0.233    0.001  198.067    0.000</code></pre>
+<span class="kw">standardizedSolution</span>(pop_commonfactor.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se       z pvalue ci.lower ci.upper
+## 1         A1 =~    PopDep   0.806 0.001 578.784      0    0.803    0.809
+## 2         A1 =~    PopAnh   0.795 0.001 619.588      0    0.792    0.797
+## 3         A1 =~ PopAppDec   0.282 0.006  45.376      0    0.270    0.294
+## 4         A1 =~ PopAppInc   0.339 0.006  57.140      0    0.327    0.350
+## 5         A1 =~ PopSleDec   0.487 0.005  93.871      0    0.477    0.498
+## 6         A1 =~ PopSleInc   0.395 0.006  70.256      0    0.384    0.406
+## 7         A1 =~  PopFatig   0.709 0.003 213.080      0    0.703    0.716
+## 8         A1 =~  PopGuilt   0.618 0.004 156.640      0    0.610    0.626
+## 9         A1 =~   PopConc   0.744 0.003 238.986      0    0.738    0.750
+## 10        A1 =~    PopSui   0.383 0.005  70.255      0    0.372    0.394
+## 11        A1 ~~        A1   1.000 0.000      NA     NA    1.000    1.000
+## 12    PopDep ~~    PopDep   0.350 0.002 156.038      0    0.346    0.355
+## 13    PopAnh ~~    PopAnh   0.368 0.002 180.671      0    0.364    0.372
+## 14 PopAppDec ~~ PopAppDec   0.920 0.004 262.561      0    0.914    0.927
+## 15 PopAppInc ~~ PopAppInc   0.885 0.004 220.268      0    0.877    0.893
+## 16 PopSleDec ~~ PopSleDec   0.762 0.005 150.600      0    0.752    0.772
+## 17 PopSleInc ~~ PopSleInc   0.844 0.004 189.530      0    0.835    0.852
+## 18  PopFatig ~~  PopFatig   0.497 0.005 105.143      0    0.487    0.506
+## 19  PopGuilt ~~  PopGuilt   0.618 0.005 126.629      0    0.608    0.627
+## 20   PopConc ~~   PopConc   0.446 0.005  96.343      0    0.437    0.455
+## 21    PopSui ~~    PopSui   0.853 0.004 204.431      0    0.845    0.862
+## 22    PopDep ~1             1.100 0.003 344.014      0    1.094    1.106
+## 23    PopAnh ~1             0.809 0.003 278.380      0    0.804    0.815
+## 24 PopAppDec ~1             0.633 0.007  90.720      0    0.620    0.647
+## 25 PopAppInc ~1             0.299 0.006  46.783      0    0.287    0.312
+## 26 PopSleDec ~1             1.253 0.009 136.066      0    1.235    1.271
+## 27 PopSleInc ~1             0.136 0.006  22.150      0    0.124    0.148
+## 28  PopFatig ~1             1.264 0.009 134.983      0    1.246    1.283
+## 29  PopGuilt ~1             0.460 0.006  71.171      0    0.448    0.473
+## 30   PopConc ~1             1.033 0.009 118.548      0    1.016    1.050
+## 31    PopSui ~1             0.726 0.007 104.103      0    0.712    0.739
+## 32        A1 ~1             0.000 0.000      NA     NA    0.000    0.000</code></pre>
 <p>Add negative residual correlations to directional symptoms</p>
 <pre class="sourceCode r"><code class="sourceCode r">pop_commonfactor_dir.model &lt;-<span class="st"> &quot;</span>
 <span class="st">A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui</span>
@@ -165,107 +105,42 @@ pop_commonfactor.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<
 
 pop_commonfactor_dir.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_commonfactor_dir.model, <span class="dt">data=</span>ukb_symp,  <span class="dt">missing=</span><span class="st">'ML'</span>)
                                
-<span class="kw">summary</span>(pop_commonfactor_dir.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 50 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         32
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                       
-##   Test statistic                              8053.091
-##   Degrees of freedom                                33
-##   P-value (Chi-square)                           0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.948
-##   Tucker-Lewis Index (TLI)                       0.929
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -523578.748
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1047221.496
-##   Bayesian (BIC)                           1047540.384
-##   Sample-size adjusted Bayesian (BIC)      1047438.687
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.039
-##   90 Percent confidence interval - lower         0.039
-##   90 Percent confidence interval - upper         0.040
-##   P-value RMSEA &lt;= 0.05                          1.000
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.140
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 =~                                               
-##     PopDep            0.402    0.001  347.367    0.000
-##     PopAnh            0.387    0.001  350.597    0.000
-##     PopAppDec         0.163    0.003   48.409    0.000
-##     PopAppInc         0.165    0.003   57.135    0.000
-##     PopSleDec         0.244    0.003   80.878    0.000
-##     PopSleInc         0.169    0.003   66.192    0.000
-##     PopFatig          0.327    0.003  127.441    0.000
-##     PopGuilt          0.350    0.003  108.572    0.000
-##     PopConc           0.373    0.003  133.879    0.000
-##     PopSui            0.203    0.003   62.848    0.000
-## 
-## Covariances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##  .PopAppDec ~~                                        
-##    .PopAppInc        -0.048    0.001  -62.924    0.000
-##  .PopSleDec ~~                                        
-##    .PopSleInc        -0.021    0.001  -38.579    0.000
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopDep            0.547    0.001  435.921    0.000
-##    .PopAnh            0.396    0.001  320.698    0.000
-##    .PopAppDec         0.306    0.003  100.862    0.000
-##    .PopAppInc         0.121    0.003   46.285    0.000
-##    .PopSleDec         0.572    0.003  206.972    0.000
-##    .PopSleInc         0.043    0.002   18.224    0.000
-##    .PopFatig          0.578    0.002  239.220    0.000
-##    .PopGuilt          0.260    0.003   87.669    0.000
-##    .PopConc           0.513    0.003  195.673    0.000
-##    .PopSui            0.377    0.003  129.793    0.000
-##     A1                0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##    .PopDep            0.086    0.001  165.070    0.000
-##    .PopAnh            0.089    0.000  197.998    0.000
-##    .PopAppDec         0.233    0.001  190.450    0.000
-##    .PopAppInc         0.171    0.001  188.957    0.000
-##    .PopSleDec         0.163    0.001  181.532    0.000
-##    .PopSleInc         0.127    0.001  187.001    0.000
-##    .PopFatig          0.105    0.001  164.075    0.000
-##    .PopGuilt          0.199    0.001  181.396    0.000
-##    .PopConc           0.111    0.001  154.606    0.000
-##    .PopSui            0.233    0.001  198.167    0.000</code></pre>
+<span class="kw">standardizedSolution</span>(pop_commonfactor_dir.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se       z pvalue ci.lower ci.upper
+## 1         A1 =~    PopDep   0.807 0.001 588.386      0    0.805    0.810
+## 2         A1 =~    PopAnh   0.791 0.001 624.105      0    0.789    0.794
+## 3         A1 =~ PopAppDec   0.320 0.006  52.754      0    0.308    0.332
+## 4         A1 =~ PopAppInc   0.371 0.006  64.283      0    0.360    0.382
+## 5         A1 =~ PopSleDec   0.517 0.005 103.204      0    0.507    0.527
+## 6         A1 =~ PopSleInc   0.428 0.006  77.687      0    0.417    0.439
+## 7         A1 =~  PopFatig   0.711 0.003 218.104      0    0.705    0.718
+## 8         A1 =~  PopGuilt   0.618 0.004 157.763      0    0.610    0.625
+## 9         A1 =~   PopConc   0.746 0.003 246.103      0    0.740    0.751
+## 10        A1 =~    PopSui   0.388 0.005  71.555      0    0.377    0.398
+## 11        A1 ~~        A1   1.000 0.000      NA     NA    1.000    1.000
+## 12 PopAppDec ~~ PopAppInc  -0.240 0.004 -67.644      0   -0.247   -0.233
+## 13 PopSleDec ~~ PopSleInc  -0.148 0.004 -39.150      0   -0.156   -0.141
+## 14    PopDep ~~    PopDep   0.348 0.002 157.011      0    0.344    0.352
+## 15    PopAnh ~~    PopAnh   0.374 0.002 186.639      0    0.370    0.378
+## 16 PopAppDec ~~ PopAppDec   0.898 0.004 231.403      0    0.890    0.905
+## 17 PopAppInc ~~ PopAppInc   0.862 0.004 201.319      0    0.854    0.871
+## 18 PopSleDec ~~ PopSleDec   0.732 0.005 141.221      0    0.722    0.743
+## 19 PopSleInc ~~ PopSleInc   0.817 0.005 173.282      0    0.808    0.826
+## 20  PopFatig ~~  PopFatig   0.494 0.005 106.545      0    0.485    0.503
+## 21  PopGuilt ~~  PopGuilt   0.618 0.005 127.800      0    0.609    0.628
+## 22   PopConc ~~   PopConc   0.444 0.005  98.341      0    0.435    0.453
+## 23    PopSui ~~    PopSui   0.850 0.004 202.091      0    0.841    0.858
+## 24    PopDep ~1             1.100 0.003 344.014      0    1.094    1.106
+## 25    PopAnh ~1             0.809 0.003 278.379      0    0.804    0.815
+## 26 PopAppDec ~1             0.600 0.007  85.611      0    0.586    0.614
+## 27 PopAppInc ~1             0.272 0.006  42.680      0    0.259    0.284
+## 28 PopSleDec ~1             1.213 0.009 131.446      0    1.195    1.231
+## 29 PopSleInc ~1             0.108 0.006  17.583      0    0.096    0.120
+## 30  PopFatig ~1             1.257 0.009 135.463      0    1.239    1.275
+## 31  PopGuilt ~1             0.459 0.006  71.214      0    0.446    0.472
+## 32   PopConc ~1             1.026 0.009 119.409      0    1.009    1.043
+## 33    PopSui ~1             0.720 0.007 103.214      0    0.707    0.734
+## 34        A1 ~1             0.000 0.000      NA     NA    0.000    0.000</code></pre>
 <h2 id="two-factor-models">Two-factor models</h2>
 <h3 id="psychological-somatic-elhai-model-2a">Psychological-Somatic (Elhai Model 2a)</h3>
 <pre class="sourceCode r"><code class="sourceCode r">pop_psych_soma.model &lt;-<span class="st"> &quot;</span>
@@ -278,112 +153,45 @@ pop_commonfactor_dir.fit &lt;-<span class="st"> </span><span class="kw">cfa</spa
 <span class="st">&quot;</span>
 pop_psych_soma.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_psych_soma.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
 
-<span class="kw">summary</span>(pop_psych_soma.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 51 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         33
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                       
-##   Test statistic                              7558.880
-##   Degrees of freedom                                32
-##   P-value (Chi-square)                           0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.951
-##   Tucker-Lewis Index (TLI)                       0.932
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -523331.643
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1046729.285
-##   Bayesian (BIC)                           1047058.138
-##   Sample-size adjusted Bayesian (BIC)      1046953.263
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.039
-##   90 Percent confidence interval - lower         0.038
-##   90 Percent confidence interval - upper         0.039
-##   P-value RMSEA &lt;= 0.05                          1.000
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.126
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 =~                                               
-##     PopDep            0.401    0.001  344.505    0.000
-##     PopAnh            0.389    0.001  349.253    0.000
-##     PopGuilt          0.352    0.003  108.128    0.000
-##     PopConc           0.368    0.003  129.497    0.000
-##     PopSui            0.203    0.003   62.643    0.000
-##   A2 =~                                               
-##     PopAppDec         0.158    0.003   48.061    0.000
-##     PopAppInc         0.166    0.003   59.085    0.000
-##     PopSleDec         0.243    0.003   82.591    0.000
-##     PopSleInc         0.167    0.002   67.025    0.000
-##     PopFatig          0.324    0.003  128.135    0.000
-## 
-## Covariances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##  .PopAppDec ~~                                        
-##    .PopAppInc        -0.049    0.001  -64.424    0.000
-##  .PopSleDec ~~                                        
-##    .PopSleInc        -0.024    0.001  -42.008    0.000
-##   A1 ~~                                               
-##     A2                0.948    0.003  371.044    0.000
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopDep            0.547    0.001  435.921    0.000
-##    .PopAnh            0.396    0.001  320.699    0.000
-##    .PopGuilt          0.260    0.003   86.821    0.000
-##    .PopConc           0.517    0.003  194.477    0.000
-##    .PopSui            0.377    0.003  129.729    0.000
-##    .PopAppDec         0.315    0.003  107.779    0.000
-##    .PopAppInc         0.127    0.003   50.606    0.000
-##    .PopSleDec         0.582    0.003  214.950    0.000
-##    .PopSleInc         0.050    0.002   22.011    0.000
-##    .PopFatig          0.593    0.002  239.605    0.000
-##     A1                0.000                           
-##     A2                0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##     A2                1.000                           
-##    .PopDep            0.087    0.001  162.581    0.000
-##    .PopAnh            0.088    0.000  187.174    0.000
-##    .PopGuilt          0.198    0.001  179.426    0.000
-##    .PopConc           0.112    0.001  152.319    0.000
-##    .PopSui            0.232    0.001  197.737    0.000
-##    .PopAppDec         0.232    0.001  188.679    0.000
-##    .PopAppInc         0.169    0.001  185.688    0.000
-##    .PopSleDec         0.159    0.001  173.121    0.000
-##    .PopSleInc         0.126    0.001  182.186    0.000
-##    .PopFatig          0.098    0.001  138.569    0.000</code></pre>
+<span class="kw">standardizedSolution</span>(pop_psych_soma.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se       z pvalue ci.lower ci.upper
+## 1         A1 =~    PopDep   0.806 0.001 575.920      0    0.804    0.809
+## 2         A1 =~    PopAnh   0.796 0.001 611.091      0    0.793    0.798
+## 3         A1 =~  PopGuilt   0.621 0.004 157.299      0    0.613    0.629
+## 4         A1 =~   PopConc   0.740 0.003 233.398      0    0.734    0.747
+## 5         A1 =~    PopSui   0.388 0.005  71.253      0    0.377    0.399
+## 6         A2 =~ PopAppDec   0.312 0.006  51.880      0    0.300    0.324
+## 7         A2 =~ PopAppInc   0.374 0.006  66.098      0    0.362    0.385
+## 8         A2 =~ PopSleDec   0.520 0.005 104.047      0    0.510    0.530
+## 9         A2 =~ PopSleInc   0.427 0.005  77.808      0    0.416    0.438
+## 10        A2 =~  PopFatig   0.719 0.003 213.801      0    0.712    0.725
+## 11        A1 ~~        A1   1.000 0.000      NA     NA    1.000    1.000
+## 12        A2 ~~        A2   1.000 0.000      NA     NA    1.000    1.000
+## 13 PopAppDec ~~ PopAppInc  -0.249 0.004 -69.065      0   -0.256   -0.241
+## 14 PopSleDec ~~ PopSleInc  -0.168 0.004 -42.263      0   -0.176   -0.160
+## 15    PopDep ~~    PopDep   0.350 0.002 154.953      0    0.345    0.354
+## 16    PopAnh ~~    PopAnh   0.367 0.002 176.957      0    0.363    0.371
+## 17  PopGuilt ~~  PopGuilt   0.614 0.005 125.331      0    0.605    0.624
+## 18   PopConc ~~   PopConc   0.452 0.005  96.136      0    0.442    0.461
+## 19    PopSui ~~    PopSui   0.850 0.004 201.139      0    0.841    0.858
+## 20 PopAppDec ~~ PopAppDec   0.903 0.004 240.966      0    0.895    0.910
+## 21 PopAppInc ~~ PopAppInc   0.860 0.004 203.800      0    0.852    0.869
+## 22 PopSleDec ~~ PopSleDec   0.730 0.005 140.497      0    0.720    0.740
+## 23 PopSleInc ~~ PopSleInc   0.818 0.005 174.352      0    0.808    0.827
+## 24  PopFatig ~~  PopFatig   0.483 0.005 100.028      0    0.474    0.493
+## 25        A1 ~~        A2   0.948 0.003 371.044      0    0.943    0.953
+## 26    PopDep ~1             1.100 0.003 344.014      0    1.094    1.106
+## 27    PopAnh ~1             0.809 0.003 278.380      0    0.804    0.815
+## 28  PopGuilt ~1             0.457 0.006  70.545      0    0.445    0.470
+## 29   PopConc ~1             1.040 0.009 118.306      0    1.022    1.057
+## 30    PopSui ~1             0.721 0.007 103.226      0    0.707    0.735
+## 31 PopAppDec ~1             0.622 0.007  91.723      0    0.609    0.635
+## 32 PopAppInc ~1             0.287 0.006  46.613      0    0.275    0.299
+## 33 PopSleDec ~1             1.246 0.009 136.849      0    1.228    1.264
+## 34 PopSleInc ~1             0.128 0.006  21.143      0    0.116    0.139
+## 35  PopFatig ~1             1.313 0.010 134.952      0    1.294    1.332
+## 36        A1 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 37        A2 ~1             0.000 0.000      NA     NA    0.000    0.000</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">pop_psych_soma_bif.model &lt;-<span class="st"> &quot;</span>
 <span class="st">A =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui</span>
 <span class="st">A1 =~ NA*PopDep + PopAnh + PopGuilt + PopConc + PopSui </span>
@@ -395,124 +203,57 @@ pop_psych_soma.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<sp
 <span class="st">&quot;</span>
 pop_psych_soma_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_psych_soma_bif.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
 
-<span class="kw">summary</span>(pop_psych_soma_bif.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 62 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         41
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                       
-##   Test statistic                              4095.589
-##   Degrees of freedom                                24
-##   P-value (Chi-square)                           0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.974
-##   Tucker-Lewis Index (TLI)                       0.951
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -521599.997
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1043281.994
-##   Bayesian (BIC)                           1043690.569
-##   Sample-size adjusted Bayesian (BIC)      1043560.269
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.033
-##   90 Percent confidence interval - lower         0.032
-##   90 Percent confidence interval - upper         0.034
-##   P-value RMSEA &lt;= 0.05                          1.000
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.043
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A =~                                                
-##     PopDep            0.796    4.890    0.163    0.871
-##     PopAnh            0.900    5.529    0.163    0.871
-##     PopAppDec         0.348    2.140    0.163    0.871
-##     PopAppInc         0.339    2.081    0.163    0.871
-##     PopSleDec         0.519    3.191    0.163    0.871
-##     PopSleInc         0.319    1.958    0.163    0.871
-##     PopFatig          0.737    4.530    0.163    0.871
-##     PopGuilt          0.851    5.232    0.163    0.871
-##     PopConc           0.833    5.120    0.163    0.871
-##     PopSui            0.505    3.101    0.163    0.871
-##   A1 =~                                               
-##     PopDep            0.313    0.005   66.156    0.000
-##     PopAnh            0.208    0.004   54.945    0.000
-##     PopGuilt          0.159    0.005   30.399    0.000
-##     PopConc          -0.008    0.005   -1.626    0.104
-##     PopSui            0.113    0.005   22.504    0.000
-##   A2 =~                                               
-##     PopAppDec         0.264    0.006   46.989    0.000
-##     PopAppInc        -0.176    0.004  -47.710    0.000
-##     PopSleDec         0.070    0.003   26.409    0.000
-##     PopSleInc        -0.068    0.003  -26.652    0.000
-##     PopFatig         -0.020    0.002   -9.410    0.000
-## 
-## Covariances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A ~~                                                
-##     A1                0.000                           
-##     A2                0.000                           
-##   A1 ~~                                               
-##     A2                0.000                           
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopDep            0.547    0.001  435.920    0.000
-##    .PopAnh            0.396    0.001  320.706    0.000
-##    .PopAppDec         0.356    0.003  135.960    0.000
-##    .PopAppInc         0.176    0.002   77.753    0.000
-##    .PopSleDec         0.648    0.003  238.687    0.000
-##    .PopSleInc         0.104    0.002   50.605    0.000
-##    .PopFatig          0.673    0.003  225.488    0.000
-##    .PopGuilt          0.266    0.004   62.586    0.000
-##    .PopConc           0.626    0.004  176.845    0.000
-##    .PopSui            0.366    0.004   85.845    0.000
-##     A                 0.000                           
-##     A1                0.000                           
-##     A2                0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##     A2                1.000                           
-##    .PopDep            0.066    0.001   47.699    0.000
-##    .PopAnh            0.089    0.001  138.022    0.000
-##    .PopAppDec         0.163    0.003   54.847    0.000
-##    .PopAppInc         0.140    0.001  100.114    0.000
-##    .PopSleDec         0.156    0.001  166.262    0.000
-##    .PopSleInc         0.124    0.001  171.782    0.000
-##    .PopFatig          0.095    0.001  134.113    0.000
-##    .PopGuilt          0.197    0.001  174.914    0.000
-##    .PopConc           0.098    0.001  108.970    0.000
-##    .PopSui            0.231    0.001  193.245    0.000
-##     A                 0.132    1.622    0.081    0.935</code></pre>
+<span class="kw">standardizedSolution</span>(pop_psych_soma_bif.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se       z pvalue ci.lower ci.upper
+## 1          A =~    PopDep   0.581 0.026  21.949  0.000    0.529    0.633
+## 2          A =~    PopAnh   0.668 0.027  24.833  0.000    0.616    0.721
+## 3          A =~ PopAppDec   0.254 0.016  15.636  0.000    0.222    0.286
+## 4          A =~ PopAppInc   0.285 0.019  14.875  0.000    0.248    0.323
+## 5          A =~ PopSleDec   0.425 0.024  18.061  0.000    0.379    0.472
+## 6          A =~ PopSleInc   0.307 0.022  13.726  0.000    0.263    0.350
+## 7          A =~  PopFatig   0.655 0.032  20.708  0.000    0.593    0.716
+## 8          A =~  PopGuilt   0.548 0.023  24.211  0.000    0.504    0.593
+## 9          A =~   PopConc   0.694 0.030  23.389  0.000    0.636    0.752
+## 10         A =~    PopSui   0.348 0.019  18.660  0.000    0.311    0.385
+## 11        A1 =~    PopDep   0.630 0.025  25.221  0.000    0.581    0.679
+## 12        A1 =~    PopAnh   0.424 0.026  16.261  0.000    0.373    0.476
+## 13        A1 =~  PopGuilt   0.282 0.022  12.763  0.000    0.238    0.325
+## 14        A1 =~   PopConc  -0.018 0.029  -0.613  0.540   -0.076    0.040
+## 15        A1 =~    PopSui   0.215 0.024   9.044  0.000    0.168    0.261
+## 16        A2 =~ PopAppDec   0.529 0.023  22.922  0.000    0.484    0.574
+## 17        A2 =~ PopAppInc  -0.409 0.029 -14.333  0.000   -0.464   -0.353
+## 18        A2 =~ PopSleDec   0.158 0.029   5.517  0.000    0.102    0.214
+## 19        A2 =~ PopSleInc  -0.180 0.034  -5.319  0.000   -0.246   -0.114
+## 20        A2 =~  PopFatig  -0.050 0.031  -1.584  0.113   -0.111    0.012
+## 21        A1 ~~        A1   1.000 0.000      NA     NA    1.000    1.000
+## 22        A2 ~~        A2   1.000 0.000      NA     NA    1.000    1.000
+## 23         A ~~        A1   0.000 0.000      NA     NA    0.000    0.000
+## 24         A ~~        A2   0.000 0.000      NA     NA    0.000    0.000
+## 25        A1 ~~        A2   0.000 0.000      NA     NA    0.000    0.000
+## 26    PopDep ~~    PopDep   0.266 0.040   6.668  0.000    0.188    0.345
+## 27    PopAnh ~~    PopAnh   0.373 0.038   9.700  0.000    0.298    0.448
+## 28 PopAppDec ~~ PopAppDec   0.656 0.026  25.551  0.000    0.606    0.706
+## 29 PopAppInc ~~ PopAppInc   0.752 0.026  28.824  0.000    0.701    0.803
+## 30 PopSleDec ~~ PopSleDec   0.794 0.022  36.349  0.000    0.751    0.837
+## 31 PopSleInc ~~ PopSleInc   0.874 0.019  46.760  0.000    0.837    0.910
+## 32  PopFatig ~~  PopFatig   0.569 0.041  13.722  0.000    0.488    0.650
+## 33  PopGuilt ~~  PopGuilt   0.620 0.026  24.237  0.000    0.570    0.670
+## 34   PopConc ~~   PopConc   0.518 0.041  12.574  0.000    0.437    0.599
+## 35    PopSui ~~    PopSui   0.833 0.016  51.971  0.000    0.801    0.864
+## 36         A ~~         A   1.000 0.000      NA     NA    1.000    1.000
+## 37    PopDep ~1             1.100 0.046  23.750  0.000    1.009    1.191
+## 38    PopAnh ~1             0.809 0.040  20.430  0.000    0.732    0.887
+## 39 PopAppDec ~1             0.715 0.033  21.546  0.000    0.650    0.780
+## 40 PopAppInc ~1             0.407 0.033  12.251  0.000    0.342    0.472
+## 41 PopSleDec ~1             1.462 0.058  25.250  0.000    1.348    1.575
+## 42 PopSleInc ~1             0.275 0.036   7.613  0.000    0.204    0.346
+## 43  PopFatig ~1             1.644 0.079  20.787  0.000    1.489    1.799
+## 44  PopGuilt ~1             0.471 0.026  18.258  0.000    0.420    0.521
+## 45   PopConc ~1             1.436 0.067  21.563  0.000    1.306    1.567
+## 46    PopSui ~1             0.696 0.030  23.424  0.000    0.638    0.754
+## 47         A ~1             0.000 0.000      NA     NA    0.000    0.000
+## 48        A1 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 49        A2 ~1             0.000 0.000      NA     NA    0.000    0.000</code></pre>
 <h3 id="psychological-neurovegetative-elhai-model-2b">Psychological-Neurovegetative (Elhai Model 2b)</h3>
 <pre class="sourceCode r"><code class="sourceCode r">pop_psych_veg.model &lt;-<span class="st"> &quot;</span>
 <span class="st">A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui</span>
@@ -524,112 +265,45 @@ pop_psych_soma_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>
 <span class="st">&quot;</span>
 pop_psych_veg.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_psych_veg.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
 
-<span class="kw">summary</span>(pop_psych_veg.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 50 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         33
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                       
-##   Test statistic                              4929.103
-##   Degrees of freedom                                32
-##   P-value (Chi-square)                           0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.968
-##   Tucker-Lewis Index (TLI)                       0.956
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -522016.754
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1044099.508
-##   Bayesian (BIC)                           1044428.361
-##   Sample-size adjusted Bayesian (BIC)      1044323.485
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.031
-##   90 Percent confidence interval - lower         0.030
-##   90 Percent confidence interval - upper         0.032
-##   P-value RMSEA &lt;= 0.05                          1.000
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.077
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 =~                                               
-##     PopDep            0.398    0.001  327.347    0.000
-##     PopAnh            0.398    0.001  341.083    0.000
-##     PopGuilt          0.348    0.003   99.611    0.000
-##     PopSui            0.200    0.003   60.422    0.000
-##   A2 =~                                               
-##     PopAppDec         0.143    0.003   48.611    0.000
-##     PopAppInc         0.143    0.003   55.822    0.000
-##     PopSleDec         0.228    0.003   86.203    0.000
-##     PopSleInc         0.144    0.002   63.046    0.000
-##     PopFatig          0.301    0.002  129.491    0.000
-##     PopConc           0.344    0.003  135.651    0.000
-## 
-## Covariances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##  .PopAppDec ~~                                        
-##    .PopAppInc        -0.049    0.001  -63.651    0.000
-##  .PopSleDec ~~                                        
-##    .PopSleInc        -0.023    0.001  -41.789    0.000
-##   A1 ~~                                               
-##     A2                0.875    0.003  286.206    0.000
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopDep            0.547    0.001  435.921    0.000
-##    .PopAnh            0.396    0.001  320.705    0.000
-##    .PopGuilt          0.265    0.003   84.093    0.000
-##    .PopSui            0.381    0.003  129.327    0.000
-##    .PopAppDec         0.334    0.003  126.710    0.000
-##    .PopAppInc         0.151    0.002   65.632    0.000
-##    .PopSleDec         0.605    0.002  243.391    0.000
-##    .PopSleInc         0.074    0.002   35.570    0.000
-##    .PopFatig          0.626    0.002  264.652    0.000
-##    .PopConc           0.567    0.003  218.345    0.000
-##     A1                0.000                           
-##     A2                0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##     A2                1.000                           
-##    .PopDep            0.089    0.001  148.981    0.000
-##    .PopAnh            0.081    0.001  148.020    0.000
-##    .PopGuilt          0.196    0.001  172.831    0.000
-##    .PopSui            0.232    0.001  196.227    0.000
-##    .PopAppDec         0.232    0.001  189.298    0.000
-##    .PopAppInc         0.170    0.001  187.579    0.000
-##    .PopSleDec         0.158    0.001  175.023    0.000
-##    .PopSleInc         0.127    0.001  184.920    0.000
-##    .PopFatig          0.097    0.001  145.635    0.000
-##    .PopConc           0.100    0.001  131.301    0.000</code></pre>
+<span class="kw">standardizedSolution</span>(pop_psych_veg.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se       z pvalue ci.lower ci.upper
+## 1         A1 =~    PopDep   0.800 0.002 509.319      0    0.797    0.803
+## 2         A1 =~    PopAnh   0.813 0.001 554.241      0    0.810    0.816
+## 3         A1 =~  PopGuilt   0.618 0.004 142.266      0    0.609    0.626
+## 4         A1 =~    PopSui   0.383 0.006  68.226      0    0.372    0.394
+## 5         A2 =~ PopAppDec   0.285 0.006  51.617      0    0.274    0.296
+## 6         A2 =~ PopAppInc   0.326 0.005  60.471      0    0.316    0.337
+## 7         A2 =~ PopSleDec   0.498 0.005 105.359      0    0.488    0.507
+## 8         A2 =~ PopSleInc   0.375 0.005  70.158      0    0.365    0.386
+## 9         A2 =~  PopFatig   0.696 0.003 205.015      0    0.689    0.702
+## 10        A2 =~   PopConc   0.736 0.003 229.785      0    0.729    0.742
+## 11        A1 ~~        A1   1.000 0.000      NA     NA    1.000    1.000
+## 12        A2 ~~        A2   1.000 0.000      NA     NA    1.000    1.000
+## 13 PopAppDec ~~ PopAppInc  -0.244 0.004 -68.329      0   -0.251   -0.237
+## 14 PopSleDec ~~ PopSleInc  -0.165 0.004 -42.301      0   -0.172   -0.157
+## 15    PopDep ~~    PopDep   0.360 0.003 143.439      0    0.355    0.365
+## 16    PopAnh ~~    PopAnh   0.338 0.002 141.770      0    0.334    0.343
+## 17  PopGuilt ~~  PopGuilt   0.618 0.005 115.314      0    0.608    0.629
+## 18    PopSui ~~    PopSui   0.853 0.004 198.441      0    0.845    0.862
+## 19 PopAppDec ~~ PopAppDec   0.919 0.003 291.827      0    0.913    0.925
+## 20 PopAppInc ~~ PopAppInc   0.893 0.004 253.535      0    0.887    0.900
+## 21 PopSleDec ~~ PopSleDec   0.752 0.005 159.994      0    0.743    0.762
+## 22 PopSleInc ~~ PopSleInc   0.859 0.004 214.300      0    0.851    0.867
+## 23  PopFatig ~~  PopFatig   0.516 0.005 109.220      0    0.507    0.525
+## 24   PopConc ~~   PopConc   0.459 0.005  97.371      0    0.449    0.468
+## 25        A1 ~~        A2   0.875 0.003 286.206      0    0.869    0.881
+## 26    PopDep ~1             1.100 0.003 344.017      0    1.094    1.106
+## 27    PopAnh ~1             0.809 0.003 278.386      0    0.804    0.815
+## 28  PopGuilt ~1             0.470 0.007  68.035      0    0.457    0.484
+## 29    PopSui ~1             0.730 0.007 103.211      0    0.716    0.744
+## 30 PopAppDec ~1             0.664 0.006 108.303      0    0.652    0.676
+## 31 PopAppInc ~1             0.346 0.006  60.382      0    0.335    0.358
+## 32 PopSleDec ~1             1.323 0.008 155.678      0    1.306    1.340
+## 33 PopSleInc ~1             0.194 0.006  33.822      0    0.182    0.205
+## 34  PopFatig ~1             1.447 0.010 148.174      0    1.428    1.466
+## 35   PopConc ~1             1.215 0.009 130.197      0    1.196    1.233
+## 36        A1 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 37        A2 ~1             0.000 0.000      NA     NA    0.000    0.000</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">pop_psych_veg_bif.model &lt;-<span class="st"> &quot;</span>
 <span class="st">A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui</span>
 <span class="st">A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc</span>
@@ -644,125 +318,57 @@ pop_psych_veg.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<spa
 
 pop_psych_veg_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_psych_veg_bif.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
 
-<span class="kw">summary</span>(pop_psych_veg_bif.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 54 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         40
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                       
-##   Test statistic                              3790.216
-##   Degrees of freedom                                25
-##   P-value (Chi-square)                           0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.976
-##   Tucker-Lewis Index (TLI)                       0.956
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -521447.310
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1042974.621
-##   Bayesian (BIC)                           1043373.231
-##   Sample-size adjusted Bayesian (BIC)      1043246.109
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.031
-##   90 Percent confidence interval - lower         0.030
-##   90 Percent confidence interval - upper         0.032
-##   P-value RMSEA &lt;= 0.05                          1.000
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.050
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 =~                                               
-##     PopDep            0.324    0.004   78.343    0.000
-##     PopAnh            0.212    0.003   65.004    0.000
-##     PopGuilt          0.159    0.005   32.380    0.000
-##     PopSui            0.119    0.005   23.921    0.000
-##   A2 =~                                               
-##     PopAppDec         0.243    0.004   56.912    0.000
-##     PopAppInc        -0.179    0.004  -50.653    0.000
-##     PopSleDec         0.093    0.003   30.179    0.000
-##     PopSleInc        -0.067    0.002  -28.025    0.000
-##     PopFatig          0.006    0.003    2.376    0.017
-##     PopConc           0.053    0.003   17.616    0.000
-##   A =~                                                
-##     PopDep            0.281    0.004   78.015    0.000
-##     PopAnh            0.323    0.002  145.966    0.000
-##     PopGuilt          0.309    0.004   86.580    0.000
-##     PopSui            0.181    0.003   54.373    0.000
-##     PopAppDec         0.094    0.003   28.926    0.000
-##     PopAppInc         0.144    0.003   54.325    0.000
-##     PopSleDec         0.178    0.003   70.203    0.000
-##     PopSleInc         0.122    0.002   58.909    0.000
-##     PopFatig          0.265    0.002  114.484    0.000
-##     PopConc           0.299    0.003  114.861    0.000
-## 
-## Covariances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 ~~                                               
-##     A                 0.000                           
-##   A2 ~~                                               
-##     A                 0.000                           
-##   A1 ~~                                               
-##     A2                0.000                           
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopDep            0.547    0.001  435.920    0.000
-##    .PopAnh            0.396    0.001  320.706    0.000
-##    .PopGuilt          0.267    0.004   62.606    0.000
-##    .PopSui            0.365    0.004   84.694    0.000
-##    .PopAppDec         0.375    0.003  144.940    0.000
-##    .PopAppInc         0.167    0.002   71.518    0.000
-##    .PopSleDec         0.656    0.003  259.810    0.000
-##    .PopSleInc         0.102    0.002   51.136    0.000
-##    .PopFatig          0.678    0.003  243.102    0.000
-##    .PopConc           0.628    0.003  201.251    0.000
-##     A1                0.000                           
-##     A2                0.000                           
-##     A                 0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##     A2                1.000                           
-##     A                 1.000                           
-##    .PopDep            0.064    0.001   44.929    0.000
-##    .PopAnh            0.090    0.001  140.033    0.000
-##    .PopGuilt          0.196    0.001  175.369    0.000
-##    .PopSui            0.231    0.001  193.222    0.000
-##    .PopAppDec         0.178    0.002   82.948    0.000
-##    .PopAppInc         0.135    0.001   94.558    0.000
-##    .PopSleDec         0.155    0.001  161.801    0.000
-##    .PopSleInc         0.123    0.001  167.750    0.000
-##    .PopFatig          0.095    0.001  142.935    0.000
-##    .PopConc           0.097    0.001  122.971    0.000</code></pre>
+<span class="kw">standardizedSolution</span>(pop_psych_veg_bif.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se       z pvalue ci.lower ci.upper
+## 1         A1 =~    PopDep   0.651 0.008  79.023  0.000    0.635    0.668
+## 2         A1 =~    PopAnh   0.434 0.007  65.392  0.000    0.421    0.447
+## 3         A1 =~  PopGuilt   0.282 0.008  35.645  0.000    0.267    0.298
+## 4         A1 =~    PopSui   0.225 0.009  25.495  0.000    0.208    0.242
+## 5         A2 =~ PopAppDec   0.489 0.008  58.454  0.000    0.473    0.506
+## 6         A2 =~ PopAppInc  -0.413 0.008 -51.666  0.000   -0.428   -0.397
+## 7         A2 =~ PopSleDec   0.210 0.007  30.238  0.000    0.197    0.224
+## 8         A2 =~ PopSleInc  -0.179 0.006 -28.219  0.000   -0.191   -0.166
+## 9         A2 =~  PopFatig   0.015 0.006   2.375  0.018    0.003    0.028
+## 10        A2 =~   PopConc   0.121 0.007  17.518  0.000    0.108    0.135
+## 11         A =~    PopDep   0.564 0.007  79.864  0.000    0.550    0.578
+## 12         A =~    PopAnh   0.660 0.004 157.798  0.000    0.652    0.669
+## 13         A =~  PopGuilt   0.549 0.005 120.887  0.000    0.540    0.558
+## 14         A =~    PopSui   0.344 0.005  63.048  0.000    0.333    0.355
+## 15         A =~ PopAppDec   0.189 0.006  29.443  0.000    0.176    0.202
+## 16         A =~ PopAppInc   0.332 0.006  57.763  0.000    0.321    0.343
+## 17         A =~ PopSleDec   0.403 0.005  78.378  0.000    0.393    0.413
+## 18         A =~ PopSleInc   0.324 0.005  63.057  0.000    0.314    0.334
+## 19         A =~  PopFatig   0.651 0.004 166.508  0.000    0.643    0.658
+## 20         A =~   PopConc   0.686 0.004 174.263  0.000    0.678    0.694
+## 21        A1 ~~        A1   1.000 0.000      NA     NA    1.000    1.000
+## 22        A2 ~~        A2   1.000 0.000      NA     NA    1.000    1.000
+## 23         A ~~         A   1.000 0.000      NA     NA    1.000    1.000
+## 24        A1 ~~         A   0.000 0.000      NA     NA    0.000    0.000
+## 25        A2 ~~         A   0.000 0.000      NA     NA    0.000    0.000
+## 26        A1 ~~        A2   0.000 0.000      NA     NA    0.000    0.000
+## 27    PopDep ~~    PopDep   0.257 0.006  44.652  0.000    0.246    0.268
+## 28    PopAnh ~~    PopAnh   0.375 0.003 135.874  0.000    0.370    0.381
+## 29  PopGuilt ~~  PopGuilt   0.619 0.006  95.450  0.000    0.606    0.632
+## 30    PopSui ~~    PopSui   0.831 0.006 131.634  0.000    0.819    0.843
+## 31 PopAppDec ~~ PopAppDec   0.725 0.008  85.439  0.000    0.708    0.741
+## 32 PopAppInc ~~ PopAppInc   0.719 0.007  95.973  0.000    0.705    0.734
+## 33 PopSleDec ~~ PopSleDec   0.793 0.004 179.473  0.000    0.785    0.802
+## 34 PopSleInc ~~ PopSleInc   0.863 0.004 214.312  0.000    0.855    0.871
+## 35  PopFatig ~~  PopFatig   0.576 0.005 113.838  0.000    0.566    0.586
+## 36   PopConc ~~   PopConc   0.515 0.005  97.225  0.000    0.504    0.525
+## 37    PopDep ~1             1.100 0.003 344.018  0.000    1.094    1.106
+## 38    PopAnh ~1             0.809 0.003 278.388  0.000    0.804    0.815
+## 39  PopGuilt ~1             0.474 0.009  50.201  0.000    0.456    0.493
+## 40    PopSui ~1             0.692 0.010  67.214  0.000    0.672    0.712
+## 41 PopAppDec ~1             0.756 0.006 127.772  0.000    0.744    0.768
+## 42 PopAppInc ~1             0.385 0.006  66.053  0.000    0.374    0.396
+## 43 PopSleDec ~1             1.486 0.008 174.932  0.000    1.470    1.503
+## 44 PopSleInc ~1             0.270 0.006  48.480  0.000    0.259    0.281
+## 45  PopFatig ~1             1.666 0.012 139.993  0.000    1.643    1.689
+## 46   PopConc ~1             1.444 0.012 121.654  0.000    1.421    1.467
+## 47        A1 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 48        A2 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 49         A ~1             0.000 0.000      NA     NA    0.000    0.000</code></pre>
 <h3 id="affective-neurovegetative-elhai-model-2c">Affective-Neurovegetative (Elhai Model 2c)</h3>
 <pre class="sourceCode r"><code class="sourceCode r">pop_affect_veg.model &lt;-<span class="st"> &quot;</span>
 <span class="st">A1 =~ NA*PopDep + PopGuilt + PopSui</span>
@@ -774,112 +380,45 @@ pop_psych_veg_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(
 <span class="st">&quot;</span>
 pop_affect_veg.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_affect_veg.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
 
-<span class="kw">summary</span>(pop_affect_veg.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 52 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         33
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                       
-##   Test statistic                              7872.353
-##   Degrees of freedom                                32
-##   P-value (Chi-square)                           0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.949
-##   Tucker-Lewis Index (TLI)                       0.929
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -523488.379
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1047042.758
-##   Bayesian (BIC)                           1047371.612
-##   Sample-size adjusted Bayesian (BIC)      1047266.736
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.039
-##   90 Percent confidence interval - lower         0.039
-##   90 Percent confidence interval - upper         0.040
-##   P-value RMSEA &lt;= 0.05                          1.000
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.144
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 =~                                               
-##     PopDep            0.412    0.001  315.781    0.000
-##     PopGuilt          0.392    0.004   87.059    0.000
-##     PopSui            0.229    0.004   58.218    0.000
-##   A2 =~                                               
-##     PopAnh            0.388    0.001  350.192    0.000
-##     PopAppInc         0.164    0.003   57.145    0.000
-##     PopAppDec         0.162    0.003   48.328    0.000
-##     PopSleInc         0.168    0.003   66.173    0.000
-##     PopSleDec         0.242    0.003   80.622    0.000
-##     PopFatig          0.327    0.003  127.527    0.000
-##     PopConc           0.371    0.003  133.529    0.000
-## 
-## Covariances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##  .PopAppInc ~~                                        
-##    .PopAppDec        -0.048    0.001  -62.917    0.000
-##  .PopSleInc ~~                                        
-##    .PopSleDec        -0.021    0.001  -38.572    0.000
-##   A1 ~~                                               
-##     A2                0.972    0.002  506.580    0.000
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopDep            0.547    0.001  435.920    0.000
-##    .PopGuilt          0.226    0.004   56.735    0.000
-##    .PopSui            0.356    0.003  103.452    0.000
-##    .PopAnh            0.396    0.001  320.697    0.000
-##    .PopAppInc         0.122    0.003   46.892    0.000
-##    .PopAppDec         0.307    0.003  101.765    0.000
-##    .PopSleInc         0.044    0.002   18.726    0.000
-##    .PopSleDec         0.573    0.003  208.227    0.000
-##    .PopFatig          0.579    0.002  240.165    0.000
-##    .PopConc           0.514    0.003  196.548    0.000
-##     A1                0.000                           
-##     A2                0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##     A2                1.000                           
-##    .PopDep            0.078    0.001  107.717    0.000
-##    .PopGuilt          0.192    0.001  159.801    0.000
-##    .PopSui            0.230    0.001  193.241    0.000
-##    .PopAnh            0.089    0.000  193.984    0.000
-##    .PopAppInc         0.171    0.001  188.950    0.000
-##    .PopAppDec         0.233    0.001  190.460    0.000
-##    .PopSleInc         0.127    0.001  186.991    0.000
-##    .PopSleDec         0.163    0.001  181.487    0.000
-##    .PopFatig          0.104    0.001  163.470    0.000
-##    .PopConc           0.111    0.001  154.048    0.000</code></pre>
+<span class="kw">standardizedSolution</span>(pop_affect_veg.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se       z pvalue ci.lower ci.upper
+## 1         A1 =~    PopDep   0.827 0.002 454.756      0    0.824    0.831
+## 2         A1 =~  PopGuilt   0.666 0.005 136.026      0    0.656    0.676
+## 3         A1 =~    PopSui   0.430 0.006  68.467      0    0.418    0.443
+## 4         A2 =~    PopAnh   0.793 0.001 619.642      0    0.790    0.795
+## 5         A2 =~ PopAppInc   0.369 0.006  64.197      0    0.358    0.381
+## 6         A2 =~ PopAppDec   0.318 0.006  52.591      0    0.306    0.330
+## 7         A2 =~ PopSleInc   0.426 0.005  77.509      0    0.415    0.437
+## 8         A2 =~ PopSleDec   0.515 0.005 102.522      0    0.505    0.525
+## 9         A2 =~  PopFatig   0.711 0.003 217.859      0    0.705    0.718
+## 10        A2 =~   PopConc   0.745 0.003 244.470      0    0.739    0.751
+## 11        A1 ~~        A1   1.000 0.000      NA     NA    1.000    1.000
+## 12        A2 ~~        A2   1.000 0.000      NA     NA    1.000    1.000
+## 13 PopAppInc ~~ PopAppDec  -0.240 0.004 -67.635      0   -0.247   -0.233
+## 14 PopSleInc ~~ PopSleDec  -0.148 0.004 -39.139      0   -0.156   -0.141
+## 15    PopDep ~~    PopDep   0.316 0.003 104.906      0    0.310    0.322
+## 16  PopGuilt ~~  PopGuilt   0.556 0.007  85.339      0    0.544    0.569
+## 17    PopSui ~~    PopSui   0.815 0.005 150.609      0    0.804    0.825
+## 18    PopAnh ~~    PopAnh   0.371 0.002 183.039      0    0.367    0.375
+## 19 PopAppInc ~~ PopAppInc   0.864 0.004 203.257      0    0.855    0.872
+## 20 PopAppDec ~~ PopAppDec   0.899 0.004 234.101      0    0.891    0.907
+## 21 PopSleInc ~~ PopSleInc   0.819 0.005 174.784      0    0.809    0.828
+## 22 PopSleDec ~~ PopSleDec   0.735 0.005 142.125      0    0.725    0.745
+## 23  PopFatig ~~  PopFatig   0.494 0.005 106.392      0    0.485    0.503
+## 24   PopConc ~~   PopConc   0.445 0.005  98.121      0    0.436    0.454
+## 25        A1 ~~        A2   0.972 0.002 506.580      0    0.968    0.976
+## 26    PopDep ~1             1.100 0.003 344.013      0    1.094    1.106
+## 27  PopGuilt ~1             0.384 0.008  46.444      0    0.368    0.400
+## 28    PopSui ~1             0.669 0.008  81.733      0    0.653    0.685
+## 29    PopAnh ~1             0.809 0.003 278.378      0    0.804    0.815
+## 30 PopAppInc ~1             0.274 0.006  43.237      0    0.261    0.286
+## 31 PopAppDec ~1             0.603 0.007  86.417      0    0.589    0.616
+## 32 PopSleInc ~1             0.110 0.006  18.057      0    0.098    0.122
+## 33 PopSleDec ~1             1.218 0.009 132.313      0    1.200    1.236
+## 34  PopFatig ~1             1.261 0.009 135.915      0    1.243    1.279
+## 35   PopConc ~1             1.032 0.009 119.792      0    1.015    1.049
+## 36        A1 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 37        A2 ~1             0.000 0.000      NA     NA    0.000    0.000</code></pre>
 <p>Bifactor model</p>
 <pre class="sourceCode r"><code class="sourceCode r">pop_affect_veg_bif.model &lt;-<span class="st"> &quot;</span>
 <span class="st">A1 =~ NA*PopDep + PopGuilt + PopSui</span>
@@ -894,125 +433,57 @@ pop_affect_veg.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<sp
 <span class="st">&quot;</span>
 pop_affect_veg_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_affect_veg_bif.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
 
-<span class="kw">summary</span>(pop_affect_veg_bif.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 68 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         40
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                       
-##   Test statistic                              7497.803
-##   Degrees of freedom                                25
-##   P-value (Chi-square)                           0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.952
-##   Tucker-Lewis Index (TLI)                       0.913
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -523301.104
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1046682.208
-##   Bayesian (BIC)                           1047080.818
-##   Sample-size adjusted Bayesian (BIC)      1046953.697
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.044
-##   90 Percent confidence interval - lower         0.043
-##   90 Percent confidence interval - upper         0.044
-##   P-value RMSEA &lt;= 0.05                          1.000
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.138
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 =~                                               
-##     PopDep            0.051    0.006    8.328    0.000
-##     PopGuilt          0.075    0.009    8.541    0.000
-##     PopSui            0.172    0.019    8.933    0.000
-##   A2 =~                                               
-##     PopAnh           -0.000    0.002   -0.121    0.904
-##     PopAppInc        -0.163    0.003  -48.216    0.000
-##     PopAppDec         0.263    0.005   54.128    0.000
-##     PopSleInc        -0.064    0.003  -24.761    0.000
-##     PopSleDec         0.092    0.003   27.790    0.000
-##     PopFatig          0.007    0.003    2.126    0.034
-##     PopConc           0.046    0.003   13.300    0.000
-##   A =~                                                
-##     PopDep            0.400    0.001  341.380    0.000
-##     PopGuilt          0.361    0.004   81.602    0.000
-##     PopSui            0.225    0.005   49.314    0.000
-##     PopAnh            0.389    0.001  349.618    0.000
-##     PopAppInc         0.176    0.004   48.366    0.000
-##     PopAppDec         0.134    0.005   26.804    0.000
-##     PopSleInc         0.163    0.003   61.174    0.000
-##     PopSleDec         0.223    0.003   69.082    0.000
-##     PopFatig          0.326    0.003  125.695    0.000
-##     PopConc           0.368    0.003  127.991    0.000
-## 
-## Covariances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 ~~                                               
-##     A                 0.000                           
-##   A2 ~~                                               
-##     A                 0.000                           
-##   A1 ~~                                               
-##     A2                0.000                           
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopDep            0.547    0.001  435.921    0.000
-##    .PopGuilt          0.248    0.004   55.593    0.000
-##    .PopSui            0.349    0.005   76.196    0.000
-##    .PopAnh            0.396    0.001  320.698    0.000
-##    .PopAppInc         0.114    0.003   37.638    0.000
-##    .PopAppDec         0.327    0.004   83.075    0.000
-##    .PopSleInc         0.047    0.002   19.834    0.000
-##    .PopSleDec         0.587    0.003  205.369    0.000
-##    .PopFatig          0.580    0.002  238.574    0.000
-##    .PopConc           0.517    0.003  193.995    0.000
-##     A1                0.000                           
-##     A2                0.000                           
-##     A                 0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##     A2                1.000                           
-##     A                 1.000                           
-##    .PopDep            0.085    0.001  116.327    0.000
-##    .PopGuilt          0.194    0.002  120.536    0.000
-##    .PopSui            0.205    0.007   30.915    0.000
-##    .PopAnh            0.088    0.000  188.446    0.000
-##    .PopAppInc         0.143    0.001  115.823    0.000
-##    .PopAppDec         0.167    0.003   64.861    0.000
-##    .PopSleInc         0.124    0.001  170.180    0.000
-##    .PopSleDec         0.158    0.001  162.836    0.000
-##    .PopFatig          0.104    0.001  162.258    0.000
-##    .PopConc           0.109    0.001  147.421    0.000</code></pre>
+<span class="kw">standardizedSolution</span>(pop_affect_veg_bif.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se       z pvalue ci.lower ci.upper
+## 1         A1 =~    PopDep   0.103 0.012   8.328  0.000    0.079    0.127
+## 2         A1 =~  PopGuilt   0.131 0.015   8.764  0.000    0.102    0.161
+## 3         A1 =~    PopSui   0.323 0.036   9.008  0.000    0.252    0.393
+## 4         A2 =~    PopAnh  -0.001 0.004  -0.121  0.904   -0.009    0.008
+## 5         A2 =~ PopAppInc  -0.363 0.008 -48.194  0.000   -0.378   -0.349
+## 6         A2 =~ PopAppDec   0.522 0.010  54.903  0.000    0.503    0.540
+## 7         A2 =~ PopSleInc  -0.162 0.007 -24.816  0.000   -0.175   -0.150
+## 8         A2 =~ PopSleDec   0.199 0.007  27.513  0.000    0.185    0.213
+## 9         A2 =~  PopFatig   0.014 0.007   2.125  0.034    0.001    0.028
+## 10        A2 =~   PopConc   0.093 0.007  13.217  0.000    0.079    0.107
+## 11         A =~    PopDep   0.803 0.001 564.425  0.000    0.801    0.806
+## 12         A =~  PopGuilt   0.628 0.005 128.129  0.000    0.618    0.638
+## 13         A =~    PopSui   0.421 0.007  59.569  0.000    0.407    0.434
+## 14         A =~    PopAnh   0.795 0.001 613.477  0.000    0.793    0.798
+## 15         A =~ PopAppInc   0.393 0.007  54.569  0.000    0.379    0.407
+## 16         A =~ PopAppDec   0.265 0.009  28.176  0.000    0.247    0.283
+## 17         A =~ PopSleInc   0.416 0.006  70.755  0.000    0.404    0.427
+## 18         A =~ PopSleDec   0.481 0.006  84.140  0.000    0.469    0.492
+## 19         A =~  PopFatig   0.711 0.003 213.476  0.000    0.704    0.717
+## 20         A =~   PopConc   0.741 0.003 229.042  0.000    0.734    0.747
+## 21        A1 ~~        A1   1.000 0.000      NA     NA    1.000    1.000
+## 22        A2 ~~        A2   1.000 0.000      NA     NA    1.000    1.000
+## 23         A ~~         A   1.000 0.000      NA     NA    1.000    1.000
+## 24        A1 ~~         A   0.000 0.000      NA     NA    0.000    0.000
+## 25        A2 ~~         A   0.000 0.000      NA     NA    0.000    0.000
+## 26        A1 ~~        A2   0.000 0.000      NA     NA    0.000    0.000
+## 27    PopDep ~~    PopDep   0.344 0.003 113.332  0.000    0.338    0.350
+## 28  PopGuilt ~~  PopGuilt   0.588 0.009  66.873  0.000    0.571    0.606
+## 29    PopSui ~~    PopSui   0.719 0.025  28.919  0.000    0.670    0.768
+## 30    PopAnh ~~    PopAnh   0.367 0.002 178.073  0.000    0.363    0.371
+## 31 PopAppInc ~~ PopAppInc   0.713 0.007 105.246  0.000    0.700    0.727
+## 32 PopAppDec ~~ PopAppDec   0.658 0.010  63.009  0.000    0.637    0.678
+## 33 PopSleInc ~~ PopSleInc   0.801 0.005 155.485  0.000    0.791    0.811
+## 34 PopSleDec ~~ PopSleDec   0.729 0.005 137.661  0.000    0.719    0.740
+## 35  PopFatig ~~  PopFatig   0.495 0.005 104.969  0.000    0.486    0.504
+## 36   PopConc ~~   PopConc   0.443 0.005  95.540  0.000    0.434    0.452
+## 37    PopDep ~1             1.100 0.003 344.014  0.000    1.094    1.106
+## 38  PopGuilt ~1             0.432 0.010  44.788  0.000    0.413    0.451
+## 39    PopSui ~1             0.652 0.011  60.045  0.000    0.631    0.673
+## 40    PopAnh ~1             0.809 0.003 278.379  0.000    0.804    0.815
+## 41 PopAppInc ~1             0.254 0.007  34.709  0.000    0.240    0.268
+## 42 PopAppDec ~1             0.649 0.009  71.580  0.000    0.631    0.666
+## 43 PopSleInc ~1             0.120 0.006  19.075  0.000    0.108    0.133
+## 44 PopSleDec ~1             1.262 0.010 131.331  0.000    1.243    1.281
+## 45  PopFatig ~1             1.265 0.009 134.947  0.000    1.246    1.283
+## 46   PopConc ~1             1.041 0.009 117.897  0.000    1.024    1.059
+## 47        A1 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 48        A2 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 49         A ~1             0.000 0.000      NA     NA    0.000    0.000</code></pre>
 <h2 id="factor-models">3 factor models</h2>
 <pre class="sourceCode r"><code class="sourceCode r">pop_cog_mood_neuroveg.model &lt;-<span class="st"> &quot;</span>
 <span class="st">A1 =~ NA*PopGuilt + PopConc + PopSui</span>
@@ -1028,119 +499,50 @@ pop_cog_mood_neuroveg.fit &lt;-<span class="st"> </span><span class="kw">cfa</sp
 <pre><code>## Warning in lav_object_post_check(object): lavaan WARNING: covariance matrix of latent variables
 ##                 is not positive definite;
 ##                 use lavInspect(fit, &quot;cov.lv&quot;) to investigate.</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(pop_cog_mood_neuroveg.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 57 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         36
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                       
-##   Test statistic                              4568.581
-##   Degrees of freedom                                29
-##   P-value (Chi-square)                           0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.971
-##   Tucker-Lewis Index (TLI)                       0.954
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -521836.493
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1043744.986
-##   Bayesian (BIC)                           1044103.735
-##   Sample-size adjusted Bayesian (BIC)      1043989.325
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.032
-##   90 Percent confidence interval - lower         0.031
-##   90 Percent confidence interval - upper         0.032
-##   P-value RMSEA &lt;= 0.05                          1.000
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.060
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 =~                                               
-##     PopGuilt          0.167    0.005   30.739    0.000
-##     PopConc           0.309    0.003  114.194    0.000
-##     PopSui            0.155    0.003   56.723    0.000
-##   A2 =~                                               
-##     PopDep            0.386    0.001  264.707    0.000
-##     PopAnh            0.414    0.001  281.333    0.000
-##     PopGuilt          0.135    0.007   19.733    0.000
-##   A3 =~                                               
-##     PopSleDec         0.207    0.003   81.401    0.000
-##     PopSleInc         0.134    0.002   63.118    0.000
-##     PopFatig          0.274    0.002  117.753    0.000
-##     PopAppDec         0.131    0.003   47.581    0.000
-##     PopAppInc         0.135    0.002   56.998    0.000
-## 
-## Covariances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##  .PopSleDec ~~                                        
-##    .PopSleInc        -0.023    0.001  -41.642    0.000
-##  .PopAppDec ~~                                        
-##    .PopAppInc        -0.049    0.001  -64.027    0.000
-##   A1 ~~                                               
-##     A2                0.840    0.007  119.498    0.000
-##     A3                1.013    0.005  185.055    0.000
-##   A2 ~~                                               
-##     A3                0.802    0.006  141.638    0.000
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopGuilt          0.321    0.004   89.272    0.000
-##    .PopConc           0.601    0.003  197.072    0.000
-##    .PopSui            0.432    0.003  163.154    0.000
-##    .PopDep            0.547    0.001  435.921    0.000
-##    .PopAnh            0.396    0.001  320.707    0.000
-##    .PopSleDec         0.632    0.003  249.041    0.000
-##    .PopSleInc         0.089    0.002   43.952    0.000
-##    .PopFatig          0.661    0.003  253.147    0.000
-##    .PopAppDec         0.350    0.003  138.930    0.000
-##    .PopAppInc         0.165    0.002   74.505    0.000
-##     A1                0.000                           
-##     A2                0.000                           
-##     A3                0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##     A2                1.000                           
-##     A3                1.000                           
-##    .PopGuilt          0.203    0.001  184.262    0.000
-##    .PopConc           0.105    0.001  102.739    0.000
-##    .PopSui            0.234    0.001  197.700    0.000
-##    .PopDep            0.099    0.001  115.273    0.000
-##    .PopAnh            0.068    0.001   72.906    0.000
-##    .PopSleDec         0.158    0.001  173.937    0.000
-##    .PopSleInc         0.127    0.001  184.086    0.000
-##    .PopFatig          0.097    0.001  139.480    0.000
-##    .PopAppDec         0.232    0.001  189.288    0.000
-##    .PopAppInc         0.170    0.001  186.714    0.000</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">standardizedSolution</span>(pop_cog_mood_neuroveg.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se       z pvalue ci.lower ci.upper
+## 1         A1 =~  PopGuilt   0.312 0.010  30.116      0    0.291    0.332
+## 2         A1 =~   PopConc   0.690 0.004 165.382      0    0.681    0.698
+## 3         A1 =~    PopSui   0.305 0.005  60.764      0    0.295    0.315
+## 4         A2 =~    PopDep   0.775 0.002 341.975      0    0.771    0.780
+## 5         A2 =~    PopAnh   0.846 0.002 361.818      0    0.841    0.851
+## 6         A2 =~  PopGuilt   0.252 0.012  20.478      0    0.228    0.276
+## 7         A3 =~ PopSleDec   0.461 0.005  95.532      0    0.452    0.470
+## 8         A3 =~ PopSleInc   0.353 0.005  68.941      0    0.343    0.363
+## 9         A3 =~  PopFatig   0.660 0.004 172.764      0    0.652    0.667
+## 10        A3 =~ PopAppDec   0.262 0.005  49.868      0    0.251    0.272
+## 11        A3 =~ PopAppInc   0.311 0.005  60.983      0    0.301    0.321
+## 12        A1 ~~        A1   1.000 0.000      NA     NA    1.000    1.000
+## 13        A2 ~~        A2   1.000 0.000      NA     NA    1.000    1.000
+## 14        A3 ~~        A3   1.000 0.000      NA     NA    1.000    1.000
+## 15 PopSleDec ~~ PopSleInc  -0.166 0.004 -41.998      0   -0.173   -0.158
+## 16 PopAppDec ~~ PopAppInc  -0.246 0.004 -68.704      0   -0.253   -0.239
+## 17  PopGuilt ~~  PopGuilt   0.708 0.005 131.638      0    0.697    0.718
+## 18   PopConc ~~   PopConc   0.525 0.006  91.223      0    0.513    0.536
+## 19    PopSui ~~    PopSui   0.907 0.003 296.572      0    0.901    0.913
+## 20    PopDep ~~    PopDep   0.399 0.004 113.355      0    0.392    0.406
+## 21    PopAnh ~~    PopAnh   0.284 0.004  71.864      0    0.277    0.292
+## 22 PopSleDec ~~ PopSleDec   0.787 0.004 176.973      0    0.779    0.796
+## 23 PopSleInc ~~ PopSleInc   0.875 0.004 242.034      0    0.868    0.882
+## 24  PopFatig ~~  PopFatig   0.565 0.005 112.142      0    0.555    0.575
+## 25 PopAppDec ~~ PopAppDec   0.932 0.003 339.398      0    0.926    0.937
+## 26 PopAppInc ~~ PopAppInc   0.903 0.003 284.753      0    0.897    0.909
+## 27        A1 ~~        A2   0.840 0.007 119.498      0    0.826    0.854
+## 28        A1 ~~        A3   1.013 0.005 185.055      0    1.002    1.024
+## 29        A2 ~~        A3   0.802 0.006 141.638      0    0.791    0.813
+## 30  PopGuilt ~1             0.600 0.008  71.148      0    0.584    0.617
+## 31   PopConc ~1             1.339 0.011 117.641      0    1.317    1.362
+## 32    PopSui ~1             0.851 0.006 133.199      0    0.839    0.864
+## 33    PopDep ~1             1.100 0.003 344.019      0    1.094    1.106
+## 34    PopAnh ~1             0.809 0.003 278.388      0    0.804    0.815
+## 35 PopSleDec ~1             1.410 0.009 162.960      0    1.393    1.427
+## 36 PopSleInc ~1             0.235 0.006  41.677      0    0.224    0.246
+## 37  PopFatig ~1             1.592 0.011 143.611      0    1.570    1.614
+## 38 PopAppDec ~1             0.702 0.006 119.637      0    0.690    0.713
+## 39 PopAppInc ~1             0.380 0.006  68.664      0    0.369    0.391
+## 40        A1 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 41        A2 ~1             0.000 0.000      NA     NA    0.000    0.000
+## 42        A3 ~1             0.000 0.000      NA     NA    0.000    0.000</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">pop_cog_mood_neuroveg_bif.model &lt;-<span class="st"> &quot;</span>
 <span class="st">A1 =~ NA*PopGuilt + PopConc + PopSui</span>
 <span class="st">A2 =~ NA*PopDep + PopAnh + PopGuilt</span>
@@ -1155,134 +557,63 @@ pop_cog_mood_neuroveg.fit &lt;-<span class="st"> </span><span class="kw">cfa</sp
 <span class="st">&quot;</span>
 pop_cog_mood_neuroveg_bif.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_cog_mood_neuroveg_bif.model, <span class="dt">data=</span>ukb_symp, <span class="dt">missing=</span><span class="st">&quot;ML&quot;</span>)
 
-<span class="kw">summary</span>(pop_cog_mood_neuroveg_bif.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
-<pre><code>## lavaan 0.6-7 ended normally after 113 iterations
-## 
-##   Estimator                                         ML
-##   Optimization method                           NLMINB
-##   Number of free parameters                         42
-##                                                       
-##   Number of observations                        157196
-##   Number of missing patterns                       136
-##                                                       
-## Model Test User Model:
-##                                                       
-##   Test statistic                              4244.884
-##   Degrees of freedom                                23
-##   P-value (Chi-square)                           0.000
-## 
-## Model Test Baseline Model:
-## 
-##   Test statistic                            154800.316
-##   Degrees of freedom                                45
-##   P-value                                        0.000
-## 
-## User Model versus Baseline Model:
-## 
-##   Comparative Fit Index (CFI)                    0.973
-##   Tucker-Lewis Index (TLI)                       0.947
-## 
-## Loglikelihood and Information Criteria:
-## 
-##   Loglikelihood user model (H0)            -521674.644
-##   Loglikelihood unrestricted model (H1)    -519552.202
-##                                                       
-##   Akaike (AIC)                             1043433.289
-##   Bayesian (BIC)                           1043851.829
-##   Sample-size adjusted Bayesian (BIC)      1043718.351
-## 
-## Root Mean Square Error of Approximation:
-## 
-##   RMSEA                                          0.034
-##   90 Percent confidence interval - lower         0.033
-##   90 Percent confidence interval - upper         0.035
-##   P-value RMSEA &lt;= 0.05                          1.000
-## 
-## Standardized Root Mean Square Residual:
-## 
-##   SRMR                                           0.054
-## 
-## Parameter Estimates:
-## 
-##   Standard errors                             Standard
-##   Information                                 Observed
-##   Observed information based on                Hessian
-## 
-## Latent Variables:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 =~                                               
-##     PopGuilt          0.037    0.020    1.839    0.066
-##     PopConc          -0.019    0.011   -1.753    0.080
-##     PopSui            0.359    0.199    1.806    0.071
-##   A2 =~                                               
-##     PopDep            0.292    0.005   59.900    0.000
-##     PopAnh            0.211    0.004   59.614    0.000
-##     PopGuilt          0.134    0.005   26.356    0.000
-##   A3 =~                                               
-##     PopSleDec         0.069    0.003   25.966    0.000
-##     PopSleInc        -0.068    0.003  -27.097    0.000
-##     PopFatig         -0.021    0.002   -9.962    0.000
-##     PopAppDec         0.262    0.006   47.362    0.000
-##     PopAppInc        -0.178    0.004  -47.981    0.000
-##   A =~                                                
-##     PopDep            0.822   10.355    0.079    0.937
-##     PopGuilt          0.820   10.326    0.079    0.937
-##     PopSui            0.417    5.254    0.079    0.937
-##     PopAnh            0.916   11.545    0.079    0.937
-##     PopAppInc         0.343    4.326    0.079    0.937
-##     PopAppDec         0.362    4.555    0.079    0.937
-##     PopSleInc         0.323    4.073    0.079    0.937
-##     PopSleDec         0.530    6.677    0.079    0.937
-##     PopFatig          0.742    9.351    0.079    0.937
-##     PopConc           0.859   10.824    0.079    0.937
-## 
-## Covariances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##   A1 ~~                                               
-##     A                 0.000                           
-##   A2 ~~                                               
-##     A                 0.000                           
-##   A3 ~~                                               
-##     A                 0.000                           
-##   A1 ~~                                               
-##     A2                0.000                           
-##     A3                0.000                           
-##   A2 ~~                                               
-##     A3                0.000                           
-## 
-## Intercepts:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##    .PopGuilt          0.286    0.004   63.809    0.000
-##    .PopConc           0.614    0.003  198.129    0.000
-##    .PopSui            0.442    0.003  170.425    0.000
-##    .PopDep            0.547    0.001  435.921    0.000
-##    .PopAnh            0.396    0.001  320.707    0.000
-##    .PopSleDec         0.644    0.003  253.473    0.000
-##    .PopSleInc         0.102    0.002   51.416    0.000
-##    .PopFatig          0.669    0.003  245.117    0.000
-##    .PopAppDec         0.353    0.003  137.285    0.000
-##    .PopAppInc         0.174    0.002   78.495    0.000
-##     A1                0.000                           
-##     A2                0.000                           
-##     A3                0.000                           
-##     A                 0.000                           
-## 
-## Variances:
-##                    Estimate  Std.Err  z-value  P(&gt;|z|)
-##     A1                1.000                           
-##     A2                1.000                           
-##     A3                1.000                           
-##    .PopGuilt          0.199    0.002   96.321    0.000
-##    .PopConc           0.098    0.001  100.018    0.000
-##    .PopSui            0.105    0.142    0.734    0.463
-##    .PopDep            0.075    0.002   40.510    0.000
-##    .PopAnh            0.085    0.001   88.047    0.000
-##    .PopSleDec         0.156    0.001  167.074    0.000
-##    .PopSleInc         0.124    0.001  171.941    0.000
-##    .PopFatig          0.096    0.001  141.715    0.000
-##    .PopAppDec         0.163    0.003   55.799    0.000
-##    .PopAppInc         0.139    0.001   99.066    0.000
-##     A                 0.130    3.282    0.040    0.968</code></pre>
+<span class="kw">standardizedSolution</span>(pop_cog_mood_neuroveg_bif.fit)</code></pre>
+<pre><code>##          lhs op       rhs est.std    se      z pvalue ci.lower ci.upper
+## 1         A1 =~  PopGuilt   0.067 0.059  1.121  0.262   -0.050    0.183
+## 2         A1 =~   PopConc  -0.042 0.064 -0.660  0.509   -0.168    0.083
+## 3         A1 =~    PopSui   0.709 0.393  1.805  0.071   -0.061    1.479
+## 4         A2 =~    PopDep   0.586 0.052 11.372  0.000    0.485    0.687
+## 5         A2 =~    PopAnh   0.431 0.054  8.001  0.000    0.326    0.537
+## 6         A2 =~  PopGuilt   0.242 0.047  5.186  0.000    0.150    0.333
+## 7         A3 =~ PopSleDec   0.155 0.059  2.636  0.008    0.040    0.270
+## 8         A3 =~ PopSleInc  -0.181 0.069 -2.613  0.009   -0.317   -0.045
+## 9         A3 =~  PopFatig  -0.052 0.064 -0.818  0.413   -0.178    0.073
+## 10        A3 =~ PopAppDec   0.526 0.047 11.103  0.000    0.433    0.619
+## 11        A3 =~ PopAppInc  -0.412 0.058 -7.044  0.000   -0.526   -0.297
+## 12         A =~    PopDep   0.596 0.055 10.893  0.000    0.489    0.703
+## 13         A =~  PopGuilt   0.535 0.047 11.389  0.000    0.443    0.628
+## 14         A =~    PopSui   0.298 0.037  7.968  0.000    0.224    0.371
+## 15         A =~    PopAnh   0.677 0.056 12.131  0.000    0.567    0.786
+## 16         A =~ PopAppInc   0.287 0.040  7.236  0.000    0.209    0.365
+## 17         A =~ PopAppDec   0.262 0.034  7.675  0.000    0.195    0.328
+## 18         A =~ PopSleInc   0.309 0.046  6.687  0.000    0.218    0.399
+## 19         A =~ PopSleDec   0.431 0.049  8.804  0.000    0.335    0.526
+## 20         A =~  PopFatig   0.652 0.065 10.072  0.000    0.525    0.779
+## 21         A =~   PopConc   0.703 0.060 11.618  0.000    0.584    0.821
+## 22        A1 ~~        A1   1.000 0.000     NA     NA    1.000    1.000
+## 23        A2 ~~        A2   1.000 0.000     NA     NA    1.000    1.000
+## 24        A3 ~~        A3   1.000 0.000     NA     NA    1.000    1.000
+## 25        A1 ~~         A   0.000 0.000     NA     NA    0.000    0.000
+## 26        A2 ~~         A   0.000 0.000     NA     NA    0.000    0.000
+## 27        A3 ~~         A   0.000 0.000     NA     NA    0.000    0.000
+## 28        A1 ~~        A2   0.000 0.000     NA     NA    0.000    0.000
+## 29        A1 ~~        A3   0.000 0.000     NA     NA    0.000    0.000
+## 30        A2 ~~        A3   0.000 0.000     NA     NA    0.000    0.000
+## 31  PopGuilt ~~  PopGuilt   0.650 0.052 12.432  0.000    0.548    0.753
+## 32   PopConc ~~   PopConc   0.504 0.085  5.925  0.000    0.338    0.671
+## 33    PopSui ~~    PopSui   0.409 0.558  0.733  0.464   -0.685    1.502
+## 34    PopDep ~~    PopDep   0.301 0.080  3.774  0.000    0.145    0.457
+## 35    PopAnh ~~    PopAnh   0.356 0.080  4.435  0.000    0.199    0.514
+## 36 PopSleDec ~~ PopSleDec   0.791 0.046 17.367  0.000    0.701    0.880
+## 37 PopSleInc ~~ PopSleInc   0.872 0.039 22.487  0.000    0.796    0.948
+## 38  PopFatig ~~  PopFatig   0.572 0.085  6.746  0.000    0.406    0.738
+## 39 PopAppDec ~~ PopAppDec   0.655 0.053 12.440  0.000    0.552    0.758
+## 40 PopAppInc ~~ PopAppInc   0.748 0.054 13.864  0.000    0.642    0.854
+## 41         A ~~         A   1.000 0.000     NA     NA    1.000    1.000
+## 42  PopGuilt ~1             0.518 0.055  9.393  0.000    0.410    0.627
+## 43   PopConc ~1             1.392 0.133 10.483  0.000    1.132    1.652
+## 44    PopSui ~1             0.874 0.076 11.439  0.000    0.724    1.024
+## 45    PopDep ~1             1.100 0.095 11.553  0.000    0.913    1.287
+## 46    PopAnh ~1             0.809 0.082  9.865  0.000    0.648    0.970
+## 47 PopSleDec ~1             1.450 0.118 12.296  0.000    1.219    1.681
+## 48 PopSleInc ~1             0.270 0.074  3.644  0.000    0.125    0.415
+## 49  PopFatig ~1             1.630 0.161 10.154  0.000    1.315    1.944
+## 50 PopAppDec ~1             0.707 0.068 10.432  0.000    0.574    0.840
+## 51 PopAppInc ~1             0.402 0.068  5.910  0.000    0.269    0.535
+## 52        A1 ~1             0.000 0.000     NA     NA    0.000    0.000
+## 53        A2 ~1             0.000 0.000     NA     NA    0.000    0.000
+## 54        A3 ~1             0.000 0.000     NA     NA    0.000    0.000
+## 55         A ~1             0.000 0.000     NA     NA    0.000    0.000</code></pre>
 <h1 id="model-comparison">Model comparison</h1>
 <pre class="sourceCode r"><code class="sourceCode r">fits &lt;-<span class="st"> </span><span class="kw">list</span>(
 pop_commonfactor.fit,
@@ -1330,6 +661,133 @@ model_fits %&gt;%
 ## 8  2c(ii)   Affect-Neuroveg (BiF) 1047043 0.9493371 0.14436362 4068.1377
 ## 9       3       Cog-Mood-Neuroveg 1043745 0.9706661 0.05950532  770.3651
 ## 10  3(ii) Cog-Mood-Neuroveg (BiF) 1043433 0.9727190 0.05434575  458.6680</code></pre>
+<h2 id="categorical-models">Categorical models</h2>
+<p>Treat symptoms as ordered categorical variables</p>
+<pre class="sourceCode r"><code class="sourceCode r">pop_commonfactor_ord.fit &lt;-<span class="st"> </span><span class="kw">cfa</span>(<span class="dt">model=</span>pop_commonfactor.model, <span class="dt">data=</span>ukb_symp, <span class="dt">ordered=</span><span class="ot">TRUE</span>, <span class="dt">missing=</span><span class="st">'pairwise'</span>)</code></pre>
+<pre><code>## Warning in lav_object_post_check(object): lavaan WARNING: some estimated ov
+## variances are negative</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(pop_commonfactor_ord.fit, <span class="dt">fit.measures=</span><span class="ot">TRUE</span>)</code></pre>
+<pre><code>## lavaan 0.6-7 ended normally after 15 iterations
+## 
+##   Estimator                                       DWLS
+##   Optimization method                           NLMINB
+##   Number of free parameters                         20
+##                                                       
+##   Number of observations                        157196
+##   Number of missing patterns                       136
+##                                                       
+## Model Test User Model:
+##                                                Standard      Robust
+##   Test Statistic                              61711.408   59905.839
+##   Degrees of freedom                                 35          35
+##   P-value (Chi-square)                            0.000       0.000
+##   Scaling correction factor                                   1.030
+##   Shift parameter                                             2.302
+##        simple second-order correction                              
+## 
+## Model Test Baseline Model:
+## 
+##   Test statistic                            587591.796  516633.465
+##   Degrees of freedom                                45          45
+##   P-value                                        0.000       0.000
+##   Scaling correction factor                                  1.137
+## 
+## User Model versus Baseline Model:
+## 
+##   Comparative Fit Index (CFI)                    0.895       0.884
+##   Tucker-Lewis Index (TLI)                       0.865       0.851
+##                                                                   
+##   Robust Comparative Fit Index (CFI)                            NA
+##   Robust Tucker-Lewis Index (TLI)                               NA
+## 
+## Root Mean Square Error of Approximation:
+## 
+##   RMSEA                                          0.106       0.104
+##   90 Percent confidence interval - lower         0.105       0.104
+##   90 Percent confidence interval - upper         0.107       0.105
+##   P-value RMSEA &lt;= 0.05                          0.000       0.000
+##                                                                   
+##   Robust RMSEA                                                  NA
+##   90 Percent confidence interval - lower                        NA
+##   90 Percent confidence interval - upper                        NA
+## 
+## Standardized Root Mean Square Residual:
+## 
+##   SRMR                                           0.200       0.200
+## 
+## Parameter Estimates:
+## 
+##   Standard errors                           Robust.sem
+##   Information                                 Expected
+##   Information saturated (h1) model        Unstructured
+## 
+## Latent Variables:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##   A1 =~                                               
+##     PopDep            0.486    0.004  118.050    0.000
+##     PopAnh            1.833    0.016  115.618    0.000
+##     PopAppDec         0.088    0.002   39.492    0.000
+##     PopAppInc         0.107    0.002   44.089    0.000
+##     PopSleDec         0.137    0.002   56.303    0.000
+##     PopSleInc         0.153    0.003   59.775    0.000
+##     PopFatig          0.234    0.002   96.639    0.000
+##     PopGuilt          0.200    0.002   90.744    0.000
+##     PopConc           0.242    0.002   99.752    0.000
+##     PopSui            0.117    0.002   54.203    0.000
+## 
+## Intercepts:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##    .PopDep            0.000                           
+##    .PopAnh            0.000                           
+##    .PopAppDec         0.000                           
+##    .PopAppInc         0.000                           
+##    .PopSleDec         0.000                           
+##    .PopSleInc         0.000                           
+##    .PopFatig          0.000                           
+##    .PopGuilt          0.000                           
+##    .PopConc           0.000                           
+##    .PopSui            0.000                           
+##     A1                0.000                           
+## 
+## Thresholds:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     PopDep|t1        -0.120    0.003  -37.752    0.000
+##     PopAnh|t1         0.265    0.003   82.799    0.000
+##     PopAppDec|t1      0.195    0.005   42.504    0.000
+##     PopAppInc|t1      0.708    0.005  141.690    0.000
+##     PopSleDec|t1     -0.678    0.005 -137.119    0.000
+##     PopSleInc|t1      0.967    0.005  178.945    0.000
+##     PopFatig|t1      -0.912    0.005 -176.127    0.000
+##     PopGuilt|t1      -0.024    0.004   -5.556    0.000
+##     PopConc|t1       -0.795    0.005 -158.068    0.000
+##     PopSui|t1        -0.052    0.004  -12.105    0.000
+## 
+## Variances:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     A1                1.000                           
+##    .PopDep            0.764                           
+##    .PopAnh           -2.359                           
+##    .PopAppDec         0.992                           
+##    .PopAppInc         0.988                           
+##    .PopSleDec         0.981                           
+##    .PopSleInc         0.977                           
+##    .PopFatig          0.945                           
+##    .PopGuilt          0.960                           
+##    .PopConc           0.941                           
+##    .PopSui            0.986                           
+## 
+## Scales y*:
+##                    Estimate  Std.Err  z-value  P(&gt;|z|)
+##     PopDep            1.000                           
+##     PopAnh            1.000                           
+##     PopAppDec         1.000                           
+##     PopAppInc         1.000                           
+##     PopSleDec         1.000                           
+##     PopSleInc         1.000                           
+##     PopFatig          1.000                           
+##     PopGuilt          1.000                           
+##     PopConc           1.000                           
+##     PopSui            1.000</code></pre>
 
 </body>
 </html>

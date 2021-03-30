@@ -510,31 +510,35 @@ pop_affect_veg_bif_constr.fit$results[c(1,2,3,6,7)]
 ```{r}
 
 model_fits <- 
-data.frame(Model=c('1a', '1b', '2a', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)', '3'),
+data.frame(Model=c('1a', '1b', '1c', '1d', '2a', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)'),
        Name=c('Common',
 	          'Common (gating)',
+			  'Common (App)',
+			  'Common (Sle)',
 			  'Psych-Somatic',
               'Psych-Somatic (BiF)',
               'Psych-Neuroveg',
               'Psych-Neuroveg (BiF)',
 			  'Affect-Neuroveg',
-			  'Affect-Neuroveg (BiF)',
-			  'Cog-Mood-Neuroveg')) %>%
+			  'Affect-Neuroveg (BiF)')) %>%
 bind_cols(
 bind_rows(
 lapply(list(pop_commonfactor.fit,
             pop_commonfactor_gating.fit,
+			pop_commonfactor_app.fit,
+			pop_commonfactor_sle.fit,
 			pop_psych_soma_constr.fit,
             pop_psych_soma_bif.fit,
             pop_psych_veg.fit,
             pop_psych_veg_bif.fit,
 			pop_affect_veg.fit,
-			pop_affect_veg_bif_constr.fit,
-            pop_kendler_neale_constr.fit),
+			pop_affect_veg_bif_constr.fit),
        function(fit) signif(fit$modelfit))
 ))
 rownames(model_fits) <- NULL
-model_fits
+model_fits %>%
+select(-chisq, -df) %>%
+mutate(dAIC=AIC-min(AIC))
 
 
 ```
