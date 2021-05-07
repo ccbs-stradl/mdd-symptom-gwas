@@ -287,11 +287,28 @@ pop_commonfactor_sle.fit$modelfit
 
 ```
 
-### Kendler Neale model
+```{r pop_commonfactor_app_sle, cache=TRUE}
 
-```{r pop_kendler_neale, cache=TRUE}
+pop_commonfactor_app_sle.model <- "
+A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
+A1 ~~ 1*A1
+PopDep ~~ PopAnh
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
+c2 > 0.001
+PopAnh ~~ c2*PopAnh
+"
+pop_commonfactor_app_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor_app_sle.model)
 
-pop_kendler_neale.model <- "
+pop_commonfactor_app_sle.fit$modelfit
+
+```
+
+### Cognitive-Mood-Neuroveg (Kendler Neale) model
+
+```{r pop_cog_mood_neuroveg, cache=TRUE}
+
+pop_cog_mood_neuroveg.model <- "
 A1 =~ NA*PopGuilt + PopConc + PopSui
 A2 =~ NA*PopDep + PopAnh + PopGuilt
 A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
@@ -302,14 +319,14 @@ PopDep ~~ PopAnh
 PopSleDec ~~ PopSleInc
 PopAppDec ~~ PopAppInc
 "
-pop_kendler_neale.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_kendler_neale.model)
+pop_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg.model)
 
 ```
 
 Add constraints to prevent variances from being negative and correlations from going out of bounds.
-```{r pop_kendler_neale_constr, cache=TRUE}
+```{r pop_cog_mood_neuroveg_constr, cache=TRUE}
 
-pop_kendler_neale_constr.model <- "
+pop_cog_mood_neuroveg_constr.model <- "
 A1 =~ NA*PopGuilt + PopConc + PopSui
 A2 =~ NA*PopDep + PopAnh + PopGuilt
 A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
@@ -324,10 +341,10 @@ PopAnh ~~ c2*PopAnh
 a13 > -1.0
 A1 ~~ a13*A3
 "
-pop_kendler_neale_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_kendler_neale_constr.model, fix_resid=FALSE)
+pop_cog_mood_neuroveg_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg_constr.model, fix_resid=FALSE)
 
-pop_kendler_neale_constr.fit$modelfit
-pop_kendler_neale_constr.fit$results[c(1, 2, 3, 6, 7)]
+pop_cog_mood_neuroveg_constr.fit$modelfit
+pop_cog_mood_neuroveg_constr.fit$results[c(1, 2, 3, 6, 7)]
 
 ```
 
@@ -510,11 +527,13 @@ pop_affect_veg_bif_constr.fit$results[c(1,2,3,6,7)]
 ```{r}
 
 model_fits <- 
-data.frame(Model=c('1a', '1b', '1c', '1d', '2a', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)'),
+data.frame(Model=c('1a', '1b', '1c', '1d', '1e',
+                   '2a', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)'),
        Name=c('Common',
 	          'Common (gating)',
 			  'Common (App)',
 			  'Common (Sle)',
+			  'Common(App,Sle)',
 			  'Psych-Somatic',
               'Psych-Somatic (BiF)',
               'Psych-Neuroveg',
@@ -527,6 +546,7 @@ lapply(list(pop_commonfactor.fit,
             pop_commonfactor_gating.fit,
 			pop_commonfactor_app.fit,
 			pop_commonfactor_sle.fit,
+			pop_commonfactor_app_sle.fit,
 			pop_psych_soma_constr.fit,
             pop_psych_soma_bif.fit,
             pop_psych_veg.fit,
