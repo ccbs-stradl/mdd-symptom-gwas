@@ -545,7 +545,8 @@ lapply(list(pop_commonfactor.fit,
 rownames(model_fits) <- NULL
 model_fits %>%
 select(-chisq, -df) %>%
-mutate(dAIC=AIC-min(AIC))
+mutate(dAIC=AIC-min(AIC)) %>%
+mutate_if(is.numeric, ~signif(., 4))
 
 
 ```
