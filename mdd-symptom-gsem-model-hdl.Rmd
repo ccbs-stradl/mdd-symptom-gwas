@@ -321,11 +321,8 @@ A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
-PopAppDec ~~ PopAppInc
 "
-pop_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg.model)
+pop_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg.model, fix_resid=FALSE)
 
 ```
 
@@ -339,32 +336,15 @@ A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
-PopAppDec ~~ PopAppInc
-c1 > 0.001
-PopDep ~~ c1*PopDep
-c2 > 0.001
-PopAnh ~~ c2*PopAnh
-c3a > 0.001
-PopAppDec ~~ c3a*PopAppDec
-c3b > 0.001
-PopAppInc ~~ c3b*PopAppInc
-c4a > 0.001
-PopSleDec ~~ c4a*PopSleDec
-c4b > 0.001
-PopSleInc ~~ c4b*PopSleInc
-c6 > 0.001
-PopFatig ~~ c6*PopFatig
-c7 > 0.001
-PopGuilt ~~ c7*PopGuilt
-c8 > 0.001
-PopConc ~~ c8*PopConc
-c9 > 0.001
-PopSui ~~ c9*PopSui
+a13 < 1
 a13 > -1.0
 A1 ~~ a13*A3
+a23 < 1
+A2 ~~ a23*A3
+c7 > 0.001
+PopGuilt ~~ c7*PopGuilt
 "
+
 pop_cog_mood_neuroveg_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg_constr.model, fix_resid=FALSE)
 
 pop_cog_mood_neuroveg_constr.fit$modelfit
@@ -395,8 +375,8 @@ PopAnh ~~ c2*PopAnh
 "
 pop_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_soma.model)
 
-pop_psych_soma.fit$model_fit
-pop_psych_soma.fit$results[c(1, 2, 3, 6, 7)]
+pop_psych_soma.fit$modelfit
+pop_psych_soma.fit$results[c(1, 2, 3, 6, 7, 9)]
 
 ```
 
@@ -418,7 +398,7 @@ A1 ~~ 0*A2
 "
 pop_psych_soma_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_soma_bif.model)
 
-pop_psych_soma_bif.fit$model
+pop_psych_soma_bif.fit$modelfit
 pop_psych_soma_bif.fit$results[c(1,2,3,6,7)]
 
 ```
@@ -432,9 +412,6 @@ A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
 A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
-PopDep ~~ PopAnh
-c2 > 0.001
-PopAnh ~~ c2*PopAnh
 "
 pop_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg.model)
 
@@ -543,6 +520,7 @@ lapply(list(pop_commonfactor.fit,
        function(fit) fit$modelfit)
 ))
 rownames(model_fits) <- NULL
+
 model_fits %>%
 select(-chisq, -df) %>%
 mutate(dAIC=AIC-min(AIC)) %>%

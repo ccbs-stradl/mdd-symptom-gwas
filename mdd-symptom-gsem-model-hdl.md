@@ -55,7 +55,7 @@ require(GenomicSEM)
 packageVersion("GenomicSEM")
 ```
 
-    ## [1] '0.0.2'
+    ## [1] '0.0.3'
 
 # Symptom labels
 
@@ -194,42 +194,12 @@ pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
-
-    ## Warning in lav_partable_flat(FLAT, blocks = "group", meanstructure = meanstructure, : duplicated elements in model syntax have been ignored:
-    ##      V1 ~~ V2
-
-    ## Warning in lav_object_post_check(object): lavaan WARNING: the covariance matrix of the residuals of the observed
-    ##                 variables (theta) is not positive definite;
-    ##                 use lavInspect(fit, "theta") to investigate.
-
-    ## Warning in sqrt(1/diag(V)): 計算結果が NaN になりました
-
-    ## Warning in cov2cor(Sigma.hat): diag(.) had 0 or NA entries; non-finite result is
-    ## doubtful
-
-    ## Warning in sqrt(1/diag(V)): 計算結果が NaN になりました
-
-    ## Warning in cov2cor(Sigma.hat): diag(.) had 0 or NA entries; non-finite result is
-    ## doubtful
-
     ## [1] "Calculating SRMR"
-
-    ## Warning in sqrt(1/diag(V)): 計算結果が NaN になりました
-
-    ## Warning in sqrt(1/diag(V)): diag(.) had 0 or NA entries; non-finite result is
-    ## doubtful
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## pgc_commonfactor.model): CFI estimates below 0 should not be trusted, and
-    ## indicate that the other model fit estimates should be interpreted with caution.
-    ## A negative CFI estimates typically appears due to negative residual variances.
-
     ## elapsed 
-    ##   8.328 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0413841400171649 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  Inf . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   7.227 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0413841400171649 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.61167313211103 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pgc_commonfactor.model): A difference greater than .025 was observed pre-
@@ -253,28 +223,28 @@ pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
 pgc_commonfactor.fit$modelfit
 ```
 
-    ##       chisq df p_chisq      AIC       CFI     SRMR
-    ## df 5060.763  8       0 5086.763 -344.7137 4.173172
+    ##       chisq df   p_chisq      AIC CFI      SRMR
+    ## df 6.338686  8 0.6093507 32.33869   1 0.1104514
 
 ``` r
 pgc_commonfactor.fit$results[c(1,2,3,6,7)]
 ```
 
     ##            lhs op         rhs STD_Genotype   STD_Genotype_SE
-    ## 1           A1 =~  ClinAppDec   0.47271484 0.277466263502441
-    ## 2           A1 =~  ClinAppInc   0.07791973 0.251847211537343
-    ## 3           A1 =~  ClinSleDec   0.79084849 0.468792642740463
-    ## 4           A1 =~  ClinSleInc  -0.16669966 0.292382046629736
-    ## 5           A1 =~ ClinPsycInc   0.92289013 0.511221543230232
-    ## 6           A1 =~     ClinSui   0.15801167 0.301647613223022
-    ## 7           A1 ~~          A1   1.00000000                  
-    ## 8   ClinAppDec ~~  ClinAppDec   0.77654047 0.293579336789171
-    ## 9   ClinAppDec ~~  ClinAppInc  -0.87888180 0.240238866964962
-    ## 10  ClinAppInc ~~  ClinAppInc   0.99392848 0.123240692120005
-    ## 11  ClinSleDec ~~  ClinSleDec   0.37455876 0.745504502471768
-    ## 12  ClinSleInc ~~  ClinSleInc   0.97221126 0.254603943881006
-    ## 13 ClinPsycInc ~~ ClinPsycInc   0.14827349   1.0162181761825
-    ## 14     ClinSui ~~     ClinSui   0.97503241  0.21224591024852
+    ## 1           A1 =~  ClinAppDec   0.47271476 0.277466282981371
+    ## 2           A1 =~  ClinAppInc   0.07791909  0.25184716442219
+    ## 4           A1 =~  ClinSleDec   0.79084668 0.468791995580508
+    ## 5           A1 =~  ClinSleInc  -0.16669965 0.292382008062987
+    ## 3           A1 =~ ClinPsycInc   0.92289189 0.511222649772673
+    ## 6           A1 =~     ClinSui   0.15801195 0.301647560740464
+    ## 9   ClinAppDec ~~  ClinAppInc  -0.87888086 0.240238896024384
+    ## 8   ClinAppDec ~~  ClinAppDec   0.77654088 0.293579323921997
+    ## 10  ClinAppInc ~~  ClinAppInc   0.99392846 0.123240625374627
+    ## 12  ClinSleDec ~~  ClinSleDec   0.37456199 0.745501840695423
+    ## 13  ClinSleInc ~~  ClinSleInc   0.97221145 0.254603937431703
+    ## 11 ClinPsycInc ~~ ClinPsycInc   0.14827057  1.01622178126558
+    ## 14     ClinSui ~~     ClinSui   0.97503239 0.212245979178621
+    ## 7           A1 ~~          A1   1.00000000
 
 ``` r
 fit_graph <- function(results, ...) {
@@ -352,13 +322,12 @@ pop_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##    2.73 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.384 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_commonfactor.model): A difference greater than .025 was observed pre- and
@@ -373,35 +342,35 @@ pop_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
 pop_commonfactor.fit$modelfit
 ```
 
-    ##       chisq df      p_chisq      AIC       CFI      SRMR
-    ## df 245.2898 35 2.129054e-33 285.2898 0.8227775 0.1111411
+    ##     chisq df      p_chisq    AIC       CFI      SRMR
+    ## df 245.29 35 2.128852e-33 285.29 0.8227773 0.1111411
 
 ``` r
 pop_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
 ```
 
     ##          lhs op       rhs STD_Genotype    STD_Genotype_SE
-    ## 1         A1 =~    PopDep   0.73460021 0.0740542039341801
-    ## 2         A1 =~    PopSui   0.41087862  0.128534558295552
-    ## 3         A1 =~    PopAnh   0.95016648 0.0663930478540932
-    ## 4         A1 =~ PopAppDec   0.03904371 0.0974078976913486
-    ## 5         A1 =~ PopAppInc   0.41273435 0.0952632970077201
-    ## 6         A1 =~ PopSleDec   0.51548347  0.117153334635342
-    ## 7         A1 =~ PopSleInc   0.49496506  0.086329277654511
-    ## 8         A1 =~  PopFatig   0.61717068  0.120138230489785
-    ## 9         A1 =~  PopGuilt   0.57586174 0.0850086552581239
-    ## 10        A1 =~   PopConc   0.79005027  0.103433363509584
-    ## 11        A1 ~~        A1   1.00000000                   
-    ## 12    PopSui ~~    PopSui   0.83117988  0.174781896420657
-    ## 13    PopDep ~~    PopDep   0.46036242 0.0972049716878203
-    ## 14    PopAnh ~~    PopAnh   0.09718396  0.112184120149549
-    ## 15 PopAppDec ~~ PopAppDec   0.99847568  0.170918302877543
-    ## 16 PopAppInc ~~ PopAppInc   0.82965030  0.148711133820439
-    ## 17 PopSleDec ~~ PopSleDec   0.73427690  0.217346735183567
-    ## 18 PopSleInc ~~ PopSleInc   0.75500949   0.17737971078773
-    ## 19  PopFatig ~~  PopFatig   0.61910108  0.177071518447015
-    ## 20  PopGuilt ~~  PopGuilt   0.66838393  0.156451871586094
-    ## 21   PopConc ~~   PopConc   0.37582075  0.201340098838106
+    ## 5         A1 =~    PopDep   0.73459939 0.0740541788888165
+    ## 1         A1 =~    PopAnh   0.95016705 0.0663930755585794
+    ## 2         A1 =~ PopAppDec   0.03904363 0.0974078842155281
+    ## 3         A1 =~ PopAppInc   0.41273431 0.0952632993430307
+    ## 8         A1 =~ PopSleDec   0.51548333  0.117153315316936
+    ## 9         A1 =~ PopSleInc   0.49496516 0.0863292719867939
+    ## 6         A1 =~  PopFatig   0.61717106  0.120138231313934
+    ## 7         A1 =~  PopGuilt   0.57586175 0.0850086537778342
+    ## 4         A1 =~   PopConc   0.79005037   0.10343335644677
+    ## 10        A1 =~    PopSui   0.41087866     0.128534540529
+    ## 16    PopDep ~~    PopDep   0.46036450 0.0972048661280005
+    ## 12    PopAnh ~~    PopAnh   0.09718340  0.112184217025714
+    ## 13 PopAppDec ~~ PopAppDec   0.99847587  0.170918305904594
+    ## 14 PopAppInc ~~ PopAppInc   0.82965050  0.148711128276946
+    ## 19 PopSleDec ~~ PopSleDec   0.73427721   0.21734670420609
+    ## 20 PopSleInc ~~ PopSleInc   0.75500932  0.177379711077006
+    ## 17  PopFatig ~~  PopFatig   0.61910017  0.177071556987961
+    ## 18  PopGuilt ~~  PopGuilt   0.66838399  0.156451870798687
+    ## 15   PopConc ~~   PopConc   0.37582099  0.201340106328004
+    ## 21    PopSui ~~    PopSui   0.83117828  0.174781904705795
+    ## 11        A1 ~~        A1   1.00000000
 
 Remove common variance shared between the gating items (Mood:
 `UKB_CIDI1`, Interest: `UKB_CIDI2`) that is uncorrelated with the common
@@ -419,21 +388,12 @@ pop_commonfactor_gating.fit <- usermodel(symptoms_covstruct, estimation='DWLS', 
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
-
-    ## Warning in lav_partable_flat(FLAT, blocks = "group", meanstructure = meanstructure, : duplicated elements in model syntax have been ignored:
-    ##      V1 ~~ V2
-
-    ## Warning in lav_object_post_check(object): lavaan WARNING: the covariance matrix of the residuals of the observed
-    ##                 variables (theta) is not positive definite;
-    ##                 use lavInspect(fit, "theta") to investigate.
-
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  16.187 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   5.221 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_commonfactor_gating.model): A difference greater than .025 was observed
@@ -449,35 +409,35 @@ pop_commonfactor_gating.fit$modelfit
 ```
 
     ##       chisq df      p_chisq      AIC       CFI      SRMR
-    ## df 188.8045 34 2.292324e-23 230.8045 0.8695379 0.1106203
+    ## df 188.8044 34 2.292465e-23 230.8044 0.8695381 0.1106203
 
 ``` r
 pop_commonfactor_gating.fit$results[c(1, 2, 3, 6, 7)]
 ```
 
-    ##          lhs op       rhs STD_Genotype    STD_Genotype_SE
-    ## 1         A1 =~    PopDep  0.811066842  0.123875372318493
-    ## 2         A1 =~    PopSui  0.412803497  0.125482235939184
-    ## 3         A1 =~    PopAnh  1.004617937  0.111460513601276
-    ## 4         A1 =~ PopAppDec  0.038825689 0.0938965917062236
-    ## 5         A1 =~ PopAppInc  0.400199516 0.0969013153986057
-    ## 6         A1 =~ PopSleDec  0.497146694  0.111028608752283
-    ## 7         A1 =~ PopSleInc  0.480149241 0.0857452030915976
-    ## 8         A1 =~  PopFatig  0.590805900  0.116755536418035
-    ## 9         A1 =~  PopGuilt  0.558648196 0.0830007770341956
-    ## 10        A1 =~   PopConc  0.755150631  0.102716104236685
-    ## 11        A1 ~~        A1  1.000000000                   
-    ## 12    PopSui ~~    PopSui  0.829593223   0.17263333948902
-    ## 13    PopDep ~~    PopDep  0.342170336  0.193305543206936
-    ## 14    PopDep ~~    PopAnh -0.188755750  0.195671759398809
-    ## 15    PopAnh ~~    PopAnh  0.001000514   0.21045646705555
-    ## 16 PopAppDec ~~ PopAppDec  0.998492536  0.170935981862467
-    ## 17 PopAppInc ~~ PopAppInc  0.839840147  0.148311070963703
-    ## 18 PopSleDec ~~ PopSleDec  0.752843845  0.214380199416821
-    ## 19 PopSleInc ~~ PopSleInc  0.769456497   0.17672307052953
-    ## 20  PopFatig ~~  PopFatig  0.650947794   0.17308846266628
-    ## 21  PopGuilt ~~  PopGuilt  0.687911601  0.152601974646333
-    ## 22   PopConc ~~   PopConc  0.429746028   0.19417383228781
+    ##          lhs op       rhs  STD_Genotype    STD_Genotype_SE
+    ## 5         A1 =~    PopDep  0.8110678900  0.123875437194804
+    ## 1         A1 =~    PopAnh  1.0046180126  0.111460541253658
+    ## 2         A1 =~ PopAppDec  0.0388258670 0.0938965696407361
+    ## 3         A1 =~ PopAppInc  0.4001994714 0.0969012941296678
+    ## 8         A1 =~ PopSleDec  0.4971465919  0.111028590305811
+    ## 9         A1 =~ PopSleInc  0.4801488074 0.0857451843498241
+    ## 6         A1 =~  PopFatig  0.5908056682   0.11675550967206
+    ## 7         A1 =~  PopGuilt  0.5586482371 0.0830007707288808
+    ## 4         A1 =~   PopConc  0.7551504862  0.102716102793676
+    ## 10        A1 =~    PopSui  0.4128034571  0.125482229852113
+    ## 16    PopDep ~~    PopAnh -0.1887563632  0.195671938875042
+    ## 12    PopAnh ~~    PopAnh  0.0009996957  0.210456536543998
+    ## 17    PopDep ~~    PopDep  0.3421705846  0.193305868605353
+    ## 13 PopAppDec ~~ PopAppDec  0.9984925460  0.170935976545918
+    ## 14 PopAppInc ~~ PopAppInc  0.8398401696  0.148311061706044
+    ## 20 PopSleDec ~~ PopSleDec  0.7528437743  0.214380190035318
+    ## 21 PopSleInc ~~ PopSleInc  0.7694566030  0.176723030130906
+    ## 18  PopFatig ~~  PopFatig  0.6509475826  0.173088433584497
+    ## 19  PopGuilt ~~  PopGuilt  0.6879117430  0.152601969375699
+    ## 15   PopConc ~~   PopConc  0.4297459385  0.194173808761118
+    ## 22    PopSui ~~    PopSui  0.8295932030  0.172633321635609
+    ## 11        A1 ~~        A1  1.0000000000
 
 Check if model is improved by allowing residual correlations between the
 directional symptoms.
@@ -495,22 +455,12 @@ pop_commonfactor_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
-
-    ## Warning in lav_partable_flat(FLAT, blocks = "group", meanstructure = meanstructure, : duplicated elements in model syntax have been ignored:
-    ##      V1 ~~ V2
-    ##      V3 ~~ V4
-
-    ## Warning in lav_object_post_check(object): lavaan WARNING: the covariance matrix of the residuals of the observed
-    ##                 variables (theta) is not positive definite;
-    ##                 use lavInspect(fit, "theta") to investigate.
-
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  16.116 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   5.174 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_commonfactor_app.model): A difference greater than .025 was observed pre-
@@ -525,8 +475,8 @@ pop_commonfactor_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
 pop_commonfactor_app.fit$modelfit
 ```
 
-    ##      chisq df      p_chisq     AIC       CFI      SRMR
-    ## df 181.732 33 1.809393e-22 225.732 0.8746556 0.1096971
+    ##       chisq df      p_chisq      AIC       CFI      SRMR
+    ## df 181.7319 33 1.809454e-22 225.7319 0.8746557 0.1096971
 
 ``` r
 pop_commonfactor_sle.model <- "
@@ -541,22 +491,12 @@ pop_commonfactor_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
-
-    ## Warning in lav_partable_flat(FLAT, blocks = "group", meanstructure = meanstructure, : duplicated elements in model syntax have been ignored:
-    ##      V1 ~~ V2
-    ##      V5 ~~ V6
-
-    ## Warning in lav_object_post_check(object): lavaan WARNING: the covariance matrix of the residuals of the observed
-    ##                 variables (theta) is not positive definite;
-    ##                 use lavInspect(fit, "theta") to investigate.
-
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  19.963 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   6.728 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_commonfactor_sle.model): A difference greater than .025 was observed pre-
@@ -571,8 +511,8 @@ pop_commonfactor_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
 pop_commonfactor_sle.fit$modelfit
 ```
 
-    ##       chisq df      p_chisq      AIC      CFI      SRMR
-    ## df 174.3415 33 3.859838e-21 218.3415 0.880884 0.1050545
+    ##       chisq df      p_chisq      AIC       CFI      SRMR
+    ## df 174.3416 33 3.859602e-21 218.3416 0.8808838 0.1050545
 
 ``` r
 pop_commonfactor_app_sle.model <- "
@@ -588,23 +528,12 @@ pop_commonfactor_app_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS',
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
-
-    ## Warning in lav_partable_flat(FLAT, blocks = "group", meanstructure = meanstructure, : duplicated elements in model syntax have been ignored:
-    ##      V1 ~~ V2
-    ##      V3 ~~ V4
-    ##      V5 ~~ V6
-
-    ## Warning in lav_object_post_check(object): lavaan WARNING: the covariance matrix of the residuals of the observed
-    ##                 variables (theta) is not positive definite;
-    ##                 use lavInspect(fit, "theta") to investigate.
-
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  19.697 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   6.752 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_commonfactor_app_sle.model): A difference greater than .025 was observed
@@ -619,8 +548,8 @@ pop_commonfactor_app_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS',
 pop_commonfactor_app_sle.fit$modelfit
 ```
 
-    ##       chisq df      p_chisq      AIC       CFI      SRMR
-    ## df 168.0816 32 2.170051e-20 214.0816 0.8853168 0.1040781
+    ##       chisq df      p_chisq      AIC      CFI      SRMR
+    ## df 168.0813 32 2.170292e-20 214.0813 0.885317 0.1040781
 
 ### Cognitive-Mood-Neuroveg (Kendler Neale) model
 
@@ -632,43 +561,45 @@ A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
-PopAppDec ~~ PopAppInc
 "
-pop_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg.model)
+pop_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg.model, fix_resid=FALSE)
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Error: The primary model produced correlations among your latent variables that are either greater than 1 or less than -1, or the latent variables have negative variances. \n              Consequently, model fit estimates could not be computed and results should likely not be interpreted. Results are provided below \n              to enable troubleshooting. A model constraint that constrains the latent correlations to be above -1, less than 1, or to have positive variances is suggested."
-    ##           lhs op       rhs Unstandardized_Estimate          SE
-    ## 1          A1 =~  PopGuilt             0.002554378 0.044488979
-    ## 2          A1 =~   PopConc            -0.121489840 0.060372290
-    ## 3          A1 =~    PopSui            -0.051530141 0.029553662
-    ## 4          A2 =~    PopDep             0.220252862 0.035731040
-    ## 5          A2 =~    PopAnh             0.289266640 0.036589628
-    ## 6          A2 =~  PopGuilt             0.126891816 0.071048562
-    ## 7          A3 =~ PopSleDec             0.115049052 0.025860795
-    ## 8          A3 =~ PopSleInc             0.134802203 0.026724128
-    ## 9          A3 =~  PopFatig             0.148061609 0.032913100
-    ## 10         A3 =~ PopAppDec             0.009787161 0.019741769
-    ## 11         A3 =~ PopAppInc             0.114204359 0.028240291
-    ## 15     PopDep ~~    PopAnh            -0.023290065 0.017672076
-    ## 16  PopSleDec ~~ PopSleInc            -0.014133550 0.006796112
-    ## 17  PopAppDec ~~ PopAppInc            -0.004994801 0.007958542
-    ## 133    PopDep ~~    PopDep             0.012878398 0.015432891
-    ## 134    PopAnh ~~    PopAnh            -0.015769184 0.020887055
-    ## 135 PopAppDec ~~ PopAppDec             0.035450287 0.006046625
-    ## 136 PopAppInc ~~ PopAppInc             0.052753995 0.010873312
-    ## 137 PopSleDec ~~ PopSleDec             0.026120441 0.009239080
-    ## 138 PopSleInc ~~ PopSleInc             0.038940899 0.011066009
-    ## 139  PopFatig ~~  PopFatig             0.031946309 0.010240296
-    ## 140  PopGuilt ~~  PopGuilt             0.037495926 0.008292734
-    ## 141   PopConc ~~   PopConc             0.039028524 0.016673048
-    ## 142    PopSui ~~    PopSui             0.028319690 0.005905530
-    ## 195        A1 ~~        A2            -1.317226872 0.678457363
-    ## 196        A1 ~~        A3            -1.536299470 0.731959780
-    ## 197        A2 ~~        A3             0.788587577 0.157746438
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## pop_cog_mood_neuroveg.model, : The model failed to converge on a solution.
+    ## Please try specifying an alternative model.
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = pop_cog_mood_neuroveg.model, : Error: The primary model did not converge! Additional warnings or errors are likely being printed by lavaan. 
+    ##             The model output is also printed below (without standard errors) in case this is helpful for troubleshooting. Please note
+    ##             that these results should not be interpreted.
+
+    ##          lhs op       rhs Unstandardized_Estimate
+    ## 1         A1 =~  PopGuilt            68.156794071
+    ## 2         A1 =~   PopConc            -0.189954611
+    ## 3         A1 =~    PopSui            -0.071080330
+    ## 4         A2 =~    PopDep             0.176813040
+    ## 5         A2 =~    PopAnh             0.235365563
+    ## 6         A2 =~  PopGuilt            68.286473057
+    ## 7         A3 =~ PopSleDec             0.098152323
+    ## 8         A3 =~ PopSleInc             0.117163477
+    ## 9         A3 =~  PopFatig             0.137054628
+    ## 10        A3 =~ PopAppDec             0.007219916
+    ## 11        A3 =~ PopAppInc             0.104724821
+    ## 15  PopGuilt ~~  PopGuilt            -3.092132840
+    ## 16   PopConc ~~   PopConc             0.017705593
+    ## 17    PopSui ~~    PopSui             0.025922648
+    ## 18    PopDep ~~    PopDep             0.030126916
+    ## 19    PopAnh ~~    PopAnh             0.012509036
+    ## 20 PopSleDec ~~ PopSleDec             0.029722851
+    ## 21 PopSleInc ~~ PopSleInc             0.043385294
+    ## 22  PopFatig ~~  PopFatig             0.035084606
+    ## 23 PopAppDec ~~ PopAppDec             0.035493933
+    ## 24 PopAppInc ~~ PopAppInc             0.054829351
+    ## 25        A1 ~~        A2            -0.999663951
+    ## 26        A1 ~~        A3            -1.105362098
+    ## 27        A2 ~~        A3             1.104835897
 
 Add constraints to prevent variances from being negative and
 correlations from going out of bounds.
@@ -681,57 +612,25 @@ A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
-PopAppDec ~~ PopAppInc
-c1 > 0.001
-PopDep ~~ c1*PopDep
-c2 > 0.001
-PopAnh ~~ c2*PopAnh
-c3a > 0.001
-PopAppDec ~~ c3a*PopAppDec
-c3b > 0.001
-PopAppInc ~~ c3b*PopAppInc
-c4a > 0.001
-PopSleDec ~~ c4a*PopSleDec
-c4b > 0.001
-PopSleInc ~~ c4b*PopSleInc
-c6 > 0.001
-PopFatig ~~ c6*PopFatig
-c7 > 0.001
-PopGuilt ~~ c7*PopGuilt
-c8 > 0.001
-PopConc ~~ c8*PopConc
-c9 > 0.001
-PopSui ~~ c9*PopSui
+a13 < 1
 a13 > -1.0
 A1 ~~ a13*A3
+a23 < 1
+A2 ~~ a23*A3
+c7 > 0.001
+PopGuilt ~~ c7*PopGuilt
 "
+
 pop_cog_mood_neuroveg_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg_constr.model, fix_resid=FALSE)
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
-
-    ## Warning in lav_partable_flat(FLAT, blocks = "group", meanstructure = meanstructure, : duplicated elements in model syntax have been ignored:
-    ##      V1 ~~ V2
-    ##      V3 ~~ V4
-    ##      V5 ~~ V6
-
-    ## Warning in lav_object_post_check(object): lavaan WARNING: covariance matrix of latent variables
-    ##                 is not positive definite;
-    ##                 use lavInspect(fit, "cov.lv") to investigate.
-
-    ## Warning in lav_object_post_check(object): lavaan WARNING: the covariance matrix of the residuals of the observed
-    ##                 variables (theta) is not positive definite;
-    ##                 use lavInspect(fit, "theta") to investigate.
-
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  31.804 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##  10.329 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_cog_mood_neuroveg_constr.model, : A difference greater than .025 was
@@ -746,44 +645,41 @@ pop_cog_mood_neuroveg_constr.fit <- usermodel(symptoms_covstruct, estimation='DW
 pop_cog_mood_neuroveg_constr.fit$modelfit
 ```
 
-    ##       chisq df      p_chisq      AIC       CFI       SRMR
-    ## df 218.3239 28 2.221665e-31 272.3239 0.8396038 0.09974221
+    ##       chisq df      p_chisq      AIC      CFI      SRMR
+    ## df 253.2524 31 1.049617e-36 301.2524 0.812696 0.1093165
 
 ``` r
 pop_cog_mood_neuroveg_constr.fit$results[c(1, 2, 3, 6, 7)]
 ```
 
-    ##          lhs op       rhs STD_Genotype   STD_Genotype_SE
-    ## 1         A1 =~    PopSui  0.298116572 0.165775507593409
-    ## 2         A1 =~  PopGuilt -0.029640789 0.207877795059465
-    ## 3         A1 =~   PopConc  0.533669742 0.255802806614133
-    ## 4         A1 ~~        A1  1.000000000                  
-    ## 5         A1 ~~        A2  1.377495066 0.680124013260674
-    ## 6         A1 ~~        A3  1.516514837 0.696889379834329
-    ## 7         A2 =~    PopDep  0.838211226 0.126897017082778
-    ## 8         A2 =~    PopAnh  1.010559782 0.113456710734873
-    ## 9         A2 =~  PopGuilt  0.601303793 0.319274217881704
-    ## 10        A2 ~~        A2  1.000000000                  
-    ## 11        A2 ~~        A3  0.842264128 0.151427604919671
-    ## 12        A3 =~ PopAppDec  0.052474243 0.105244581978908
-    ## 13        A3 =~ PopAppInc  0.443389688 0.109968225740271
-    ## 14        A3 =~ PopSleDec  0.586981285 0.131165593711453
-    ## 15        A3 =~ PopSleInc  0.561301366 0.111533808323672
-    ## 16        A3 =~  PopFatig  0.636923894  0.14200481470741
-    ## 17        A3 ~~        A3  1.000000000                  
-    ## 18    PopSui ~~    PopSui  0.911126452 0.190631915219373
-    ## 19    PopDep ~~    PopDep  0.297402845 0.207296210341494
-    ## 20    PopDep ~~    PopAnh -0.221006149 0.211648076303015
-    ## 21    PopAnh ~~    PopAnh  0.001000027 0.223778116140706
-    ## 22 PopAppDec ~~ PopAppDec  0.997246464 0.170075180853537
-    ## 23 PopAppDec ~~ PopAppInc -0.103435624 0.164709921819383
-    ## 24 PopAppInc ~~ PopAppInc  0.803405667 0.164901410445947
-    ## 25 PopSleDec ~~ PopSleDec  0.655452954 0.236035909514906
-    ## 26 PopSleDec ~~ PopSleInc -0.300464735 0.142960451512499
-    ## 27 PopSleInc ~~ PopSleInc  0.684940929 0.193322054679044
-    ## 28  PopFatig ~~  PopFatig  0.594327913 0.189851754316611
-    ## 29  PopGuilt ~~  PopGuilt  0.686657476  0.15492351254405
-    ## 30   PopConc ~~   PopConc  0.715196411  0.30996441310434
+    ##          lhs op       rhs STD_Genotype    STD_Genotype_SE
+    ## 2         A1 =~  PopGuilt   0.79426458   1.17210232398693
+    ## 1         A1 =~   PopConc   0.72633692  0.175709385766923
+    ## 3         A1 =~    PopSui   0.39848355  0.136843000905949
+    ## 8         A2 =~    PopDep   0.71338578  0.068887246127998
+    ## 7         A2 =~    PopAnh   0.90284254 0.0710265620261954
+    ## 9         A2 =~  PopGuilt  -0.29597755   1.15971161430218
+    ## 15        A3 =~ PopSleDec   0.53130873  0.131648752863833
+    ## 16        A3 =~ PopSleInc   0.52000179  0.111109262079607
+    ## 14        A3 =~  PopFatig   0.64201810  0.152199748899107
+    ## 12        A3 =~ PopAppDec   0.04100644  0.100555322304331
+    ## 13        A3 =~ PopAppInc   0.43492211    0.1114832392973
+    ## 6         A1 ~~        A3   1.00000068  0.194507855016951
+    ## 11        A2 ~~        A3   0.99999990  0.194350242781778
+    ## 24  PopGuilt ~~  PopGuilt   0.84281571  0.402114750640346
+    ## 21   PopConc ~~   PopConc   0.47243434  0.290811406049029
+    ## 27    PopSui ~~    PopSui   0.84121060  0.179495536800677
+    ## 22    PopDep ~~    PopDep   0.49108117 0.0836974257090599
+    ## 18    PopAnh ~~    PopAnh   0.18487507  0.118257468928668
+    ## 25 PopSleDec ~~ PopSleDec   0.71771075  0.228102079136565
+    ## 26 PopSleInc ~~ PopSleInc   0.72959699  0.189786148562718
+    ## 23  PopFatig ~~  PopFatig   0.58781256  0.200557621924838
+    ## 19 PopAppDec ~~ PopAppDec   0.99831845  0.170851584312349
+    ## 20 PopAppInc ~~ PopAppInc   0.81084173  0.162641856912014
+    ## 5         A1 ~~        A2   1.19377150  0.339341496704266
+    ## 4         A1 ~~        A1   1.00000000                   
+    ## 10        A2 ~~        A2   1.00000000                   
+    ## 17        A3 ~~        A3   1.00000000
 
 ### Two-factor models
 
@@ -817,21 +713,12 @@ pop_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
-
-    ## Warning in lav_partable_flat(FLAT, blocks = "group", meanstructure = meanstructure, : duplicated elements in model syntax have been ignored:
-    ##      V1 ~~ V2
-
-    ## Warning in lav_object_post_check(object): lavaan WARNING: the covariance matrix of the residuals of the observed
-    ##                 variables (theta) is not positive definite;
-    ##                 use lavInspect(fit, "theta") to investigate.
-
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  17.962 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   9.357 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_psych_soma.model): A difference greater than .025 was observed pre- and
@@ -843,40 +730,41 @@ pop_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop
     ## for each SNP.
 
 ``` r
-pop_psych_soma.fit$model_fit
+pop_psych_soma.fit$modelfit
 ```
 
-    ## NULL
+    ##       chisq df      p_chisq      AIC       CFI      SRMR
+    ## df 189.9393 33 5.874201e-24 233.9393 0.8677388 0.1106088
 
 ``` r
-pop_psych_soma.fit$results[c(1, 2, 3, 6, 7)]
+pop_psych_soma.fit$results[c(1, 2, 3, 6, 7, 9)]
 ```
 
-    ##          lhs op       rhs  STD_Genotype    STD_Genotype_SE
-    ## 1         A1 =~    PopDep  0.8121982324   0.12011912655653
-    ## 2         A1 =~    PopSui  0.4130642596  0.125528393301666
-    ## 3         A1 =~    PopAnh  1.0049819707  0.107798702171231
-    ## 4         A1 =~  PopGuilt  0.5587550728 0.0830908314289445
-    ## 5         A1 =~   PopConc  0.7548743494  0.102324308041983
-    ## 6         A1 ~~        A1  1.0000000000                   
-    ## 7         A1 ~~        A2  0.9890376326  0.170599449266343
-    ## 8         A2 =~ PopAppDec  0.0391191732 0.0942373666410064
-    ## 9         A2 =~ PopAppInc  0.4036288165  0.110621495504342
-    ## 10        A2 =~ PopSleDec  0.5006964781  0.130847925351322
-    ## 11        A2 =~ PopSleInc  0.4841037418  0.112168002709122
-    ## 12        A2 =~  PopFatig  0.5959057325  0.152676369137024
-    ## 13        A2 ~~        A2  1.0000000000                   
-    ## 14    PopSui ~~    PopSui  0.8293778570  0.172633115111257
-    ## 15    PopDep ~~    PopDep  0.3403346223  0.188788690224937
-    ## 16    PopDep ~~    PopAnh -0.1901880320  0.191270827251159
-    ## 17    PopAnh ~~    PopAnh  0.0009995526  0.203920396754825
-    ## 18 PopAppDec ~~ PopAppDec  0.9984696889  0.170919856912131
-    ## 19 PopAppInc ~~ PopAppInc  0.8370838457  0.159030789210037
-    ## 20 PopSleDec ~~ PopSleDec  0.7493029061  0.225278743673301
-    ## 21 PopSleInc ~~ PopSleInc  0.7656437222  0.185752019594159
-    ## 22  PopFatig ~~  PopFatig  0.6448966552  0.193542915428449
-    ## 23  PopGuilt ~~  PopGuilt  0.6877923904  0.152698482430686
-    ## 24   PopConc ~~   PopConc  0.4301634953  0.195557265300109
+    ##          lhs op       rhs STD_Genotype    STD_Genotype_SE      p_value
+    ## 3         A1 =~    PopDep  0.812197567  0.120119051584396 1.332634e-11
+    ## 1         A1 =~    PopAnh  1.004981740  0.107798643964376 1.285554e-20
+    ## 4         A1 =~  PopGuilt  0.558755177 0.0830908289099119 1.689411e-11
+    ## 2         A1 =~   PopConc  0.754874743  0.102324306259034 1.442261e-13
+    ## 5         A1 =~    PopSui  0.413064239  0.125528388197096 1.007294e-03
+    ## 8         A2 =~ PopAppDec  0.039119140  0.094237312566533 6.779517e-01
+    ## 9         A2 =~ PopAppInc  0.403628673  0.110621486773089 2.646794e-04
+    ## 11        A2 =~ PopSleDec  0.500696449  0.130847923722335 1.292429e-04
+    ## 12        A2 =~ PopSleInc  0.484103451   0.11216798372287 1.598583e-05
+    ## 10        A2 =~  PopFatig  0.595905450   0.15267636115817 9.550284e-05
+    ## 18    PopDep ~~    PopAnh -0.190187245  0.191270639458531 3.342076e-01
+    ## 14    PopAnh ~~    PopAnh  0.001000601  0.203920242426442 9.418715e-01
+    ## 19    PopDep ~~    PopDep  0.340335730  0.188788439263611 6.707130e-02
+    ## 21  PopGuilt ~~  PopGuilt  0.687792329  0.152698493665171 7.098511e-06
+    ## 17   PopConc ~~   PopConc  0.430162649  0.195557309984006 2.927226e-02
+    ## 24    PopSui ~~    PopSui  0.829377934  0.172633123657772 1.574977e-06
+    ## 15 PopAppDec ~~ PopAppDec  0.998469694  0.170919858030751 5.163532e-09
+    ## 16 PopAppInc ~~ PopAppInc  0.837084090  0.159030774437493 1.405892e-07
+    ## 22 PopSleDec ~~ PopSleDec  0.749303299   0.22527874528502 8.912650e-04
+    ## 23 PopSleInc ~~ PopSleInc  0.765644092   0.18575197559287 3.728901e-05
+    ## 20  PopFatig ~~  PopFatig  0.644897219  0.193542861959685 8.520188e-04
+    ## 7         A1 ~~        A2  0.989038658  0.170599708401843 6.629975e-09
+    ## 6         A1 ~~        A1  1.000000000                              NA
+    ## 13        A2 ~~        A2  1.000000000                              NA
 
 Bifactor model
 
@@ -896,14 +784,12 @@ pop_psych_soma_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model
 ```
 
     ## [1] "Running primary model"
-    ## [1] "The model as initially specified failed to converge. A lower bound of 0 on residual variances has been automatically added to try and troubleshoot this."
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  10.622 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.679 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_psych_soma_bif.model): A difference greater than .025 was observed pre- and
@@ -915,50 +801,53 @@ pop_psych_soma_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model
     ## for each SNP.
 
 ``` r
-pop_psych_soma_bif.fit$model
+pop_psych_soma_bif.fit$modelfit
 ```
 
     ##       chisq df      p_chisq      AIC       CFI       SRMR
-    ## df 157.3711 25 3.642595e-21 217.3711 0.8884438 0.07667287
+    ## df 157.3713 25 3.642399e-21 217.3713 0.8884436 0.07667286
 
 ``` r
 pop_psych_soma_bif.fit$results[c(1,2,3,6,7)]
 ```
 
     ##          lhs op       rhs STD_Genotype    STD_Genotype_SE
-    ## 1         A1 =~    PopDep   0.49210870  0.208350043461164
-    ## 2         A1 =~    PopSui   0.57880498  0.270045807988457
-    ## 3         A1 =~    PopAnh   0.26150804  0.221700845585849
-    ## 4         A1 =~  PopGuilt   0.44381883  0.156247599105692
-    ## 5         A1 =~   PopConc  -0.17956157   0.25007461255207
-    ## 6         A1 ~~        A1   1.00000000                   
-    ## 7         A2 =~ PopAppDec   0.39533314  0.225719509848835
-    ## 8         A2 =~ PopAppInc   0.02374781   0.17907803139249
-    ## 9         A2 =~ PopSleDec   0.73585385  0.416654612513434
-    ## 10        A2 =~ PopSleInc  -0.44411932  0.270370590395605
-    ## 11        A2 =~  PopFatig  -0.11999356   0.21139593476011
-    ## 12        A2 ~~        A2   1.00000000                   
-    ## 13         A =~    PopDep   0.63242495   0.12427343910244
-    ## 14         A =~    PopSui   0.29160703   0.14781067601039
-    ## 15         A =~    PopAnh   0.87316227  0.111959968148489
-    ## 16         A =~ PopAppDec   0.04666475  0.109346127671242
-    ## 17         A =~ PopAppInc   0.43906487  0.104845148413239
-    ## 18         A =~ PopSleDec   0.58468225  0.111998805426304
-    ## 19         A =~ PopSleInc   0.57527742 0.0956861252472358
-    ## 20         A =~  PopFatig   0.66411866  0.132655659825603
-    ## 21         A =~  PopGuilt   0.46029752  0.102009788036928
-    ## 22         A =~   PopConc   0.93831611   0.12545869393947
-    ## 23         A ~~         A   1.00000000                   
-    ## 24    PopSui ~~    PopSui   0.57995062  0.301354697527665
-    ## 25    PopDep ~~    PopDep   0.35786782  0.131253539726122
-    ## 26    PopAnh ~~    PopAnh   0.16920093  0.113478418041406
-    ## 27 PopAppDec ~~ PopAppDec   0.84153375  0.218316766835928
-    ## 28 PopAppInc ~~ PopAppInc   0.80665839  0.157019402926113
-    ## 29 PopSleDec ~~ PopSleDec   0.11666525  0.646367345984255
-    ## 30 PopSleInc ~~ PopSleInc   0.47181355  0.282622294533816
-    ## 31  PopFatig ~~  PopFatig   0.54454806   0.19004930863963
-    ## 32  PopGuilt ~~  PopGuilt   0.59115104  0.192721155908038
-    ## 33   PopConc ~~   PopConc   0.08732129  0.291067751061609
+    ## 3         A1 =~    PopDep   0.49211078  0.208349781947625
+    ## 1         A1 =~    PopAnh   0.26150815  0.221700212837712
+    ## 4         A1 =~  PopGuilt   0.44381967  0.156247261555027
+    ## 2         A1 =~   PopConc  -0.17956274  0.250074324785046
+    ## 5         A1 =~    PopSui   0.57880456  0.270044704649589
+    ## 9         A2 =~ PopAppDec   0.39533203  0.225719896010101
+    ## 10        A2 =~ PopAppInc   0.02374671  0.179078586955821
+    ## 12        A2 =~ PopSleDec   0.73584946  0.416654332397173
+    ## 13        A2 =~ PopSleInc  -0.44412029  0.270372100111193
+    ## 11        A2 =~  PopFatig  -0.11999426  0.211396611373545
+    ## 20         A =~    PopDep   0.63242509  0.124273508678313
+    ## 16         A =~    PopAnh   0.87316185  0.111959918665058
+    ## 22         A =~  PopGuilt   0.46029723  0.102009782883923
+    ## 19         A =~   PopConc   0.93831706  0.125458760730763
+    ## 25         A =~    PopSui   0.29160742  0.147810565942447
+    ## 17         A =~ PopAppDec   0.04666501  0.109346109857196
+    ## 18         A =~ PopAppInc   0.43906532  0.104845165866019
+    ## 23         A =~ PopSleDec   0.58468212  0.111998773540051
+    ## 24         A =~ PopSleInc   0.57527702 0.0956861213264915
+    ## 21         A =~  PopFatig   0.66411825  0.132655671814305
+    ## 31    PopDep ~~    PopDep   0.35786596  0.131254011246536
+    ## 27    PopAnh ~~    PopAnh   0.16920218   0.11347842358566
+    ## 33  PopGuilt ~~  PopGuilt   0.59115073  0.192721191785757
+    ## 30   PopConc ~~   PopConc   0.08731826  0.291068307203814
+    ## 36    PopSui ~~    PopSui   0.57995095  0.301353446246212
+    ## 28 PopAppDec ~~ PopAppDec   0.84153456  0.218316595114773
+    ## 29 PopAppInc ~~ PopAppInc   0.80665785  0.157019433276939
+    ## 34 PopSleDec ~~ PopSleDec   0.11667276  0.646363682951895
+    ## 35 PopSleInc ~~ PopSleInc   0.47181356  0.282623643616062
+    ## 32  PopFatig ~~  PopFatig   0.54454830  0.190049247561631
+    ## 7         A1 ~~        A1   1.00000000                   
+    ## 15        A2 ~~        A2   1.00000000                   
+    ## 26         A ~~         A   1.00000000                   
+    ## 6         A1 ~~         A   0.00000000                   
+    ## 14        A2 ~~         A   0.00000000                   
+    ## 8         A1 ~~        A2   0.00000000
 
 ### Psychological-Neurovegetative (Elhai Model 2b)
 
@@ -968,29 +857,17 @@ A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
 A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
-PopDep ~~ PopAnh
-c2 > 0.001
-PopAnh ~~ c2*PopAnh
 "
 pop_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg.model)
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
-
-    ## Warning in lav_partable_flat(FLAT, blocks = "group", meanstructure = meanstructure, : duplicated elements in model syntax have been ignored:
-    ##      V1 ~~ V2
-
-    ## Warning in lav_object_post_check(object): lavaan WARNING: the covariance matrix of the residuals of the observed
-    ##                 variables (theta) is not positive definite;
-    ##                 use lavInspect(fit, "theta") to investigate.
-
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  23.518 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.578 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_psych_veg.model): A difference greater than .025 was observed pre- and post-
@@ -1005,38 +882,37 @@ pop_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_
 pop_psych_veg.fit$modelfit
 ```
 
-    ##       chisq df      p_chisq      AIC      CFI      SRMR
-    ## df 228.0072 33 5.232636e-31 272.0072 0.835657 0.1050372
+    ##       chisq df      p_chisq      AIC       CFI      SRMR
+    ## df 302.9293 34 6.795233e-45 344.9293 0.7733588 0.1082493
 
 ``` r
 pop_psych_veg.fit$results[c(1,2,3,6,7)]
 ```
 
     ##          lhs op       rhs STD_Genotype    STD_Genotype_SE
-    ## 1         A1 =~    PopDep  0.860209282  0.125774590559705
-    ## 2         A1 =~    PopSui  0.425404931  0.127419713925847
-    ## 3         A1 =~    PopAnh  1.017605528  0.114886701000852
-    ## 4         A1 =~  PopGuilt  0.559804836 0.0835229466091209
-    ## 5         A1 ~~        A1  1.000000000                   
-    ## 6         A1 ~~        A2  0.830009310  0.122581545676084
-    ## 7         A2 =~ PopAppDec  0.041161562  0.103117973840855
-    ## 8         A2 =~ PopAppInc  0.444557388  0.105346844403099
-    ## 9         A2 =~ PopSleDec  0.538439814  0.119668023593489
-    ## 10        A2 =~ PopSleInc  0.534767070 0.0995457069494672
-    ## 11        A2 =~  PopFatig  0.649052868  0.133637061672706
-    ## 12        A2 =~   PopConc  0.849226901  0.120907035435344
-    ## 13        A2 ~~        A2  1.000000000                   
-    ## 14    PopSui ~~    PopSui  0.819030637  0.172700131082373
-    ## 15    PopDep ~~    PopDep  0.260040614   0.20647261402124
-    ## 16    PopDep ~~    PopAnh -0.249296854   0.21029927799201
-    ## 17    PopAnh ~~    PopAnh  0.000999951  0.226191100833992
-    ## 18 PopAppDec ~~ PopAppDec  0.998305739  0.170847301414536
-    ## 19 PopAppInc ~~ PopAppInc  0.802368617  0.157955995748618
-    ## 20 PopSleDec ~~ PopSleDec  0.710082331  0.220398665308702
-    ## 21 PopSleInc ~~ PopSleInc  0.714024284   0.18133221802745
-    ## 22  PopFatig ~~  PopFatig  0.578730156  0.188939617157687
-    ## 23  PopGuilt ~~  PopGuilt  0.686618778  0.154935314880014
-    ## 24   PopConc ~~   PopConc  0.278813569  0.227578167577055
+    ## 2         A1 =~    PopDep   0.74342324 0.0711979087947631
+    ## 1         A1 =~    PopAnh   0.97240731 0.0633738882504082
+    ## 3         A1 =~  PopGuilt   0.58104100 0.0855757022831426
+    ## 4         A1 =~    PopSui   0.42117468  0.130137125313658
+    ## 7         A2 =~ PopAppDec   0.03980696   0.10280424069063
+    ## 8         A2 =~ PopAppInc   0.44002696  0.105406679773286
+    ## 11        A2 =~ PopSleDec   0.53937083  0.119269340471053
+    ## 12        A2 =~ PopSleInc   0.52972636 0.0989504389318408
+    ## 10        A2 =~  PopFatig   0.65673085  0.134932333964674
+    ## 9         A2 =~   PopConc   0.85177617  0.121193391869228
+    ## 18    PopDep ~~    PopDep   0.44732165 0.0928425919269107
+    ## 14    PopAnh ~~    PopAnh   0.05442347  0.112953425298037
+    ## 20  PopGuilt ~~  PopGuilt   0.66239133   0.15661658439155
+    ## 23    PopSui ~~    PopSui   0.82261103  0.174322791002633
+    ## 15 PopAppDec ~~ PopAppDec   0.99841595  0.170895673968596
+    ## 16 PopAppInc ~~ PopAppInc   0.80637653  0.157289415387494
+    ## 21 PopSleDec ~~ PopSleDec   0.70907848  0.219600171245435
+    ## 22 PopSleInc ~~ PopSleInc   0.71938780  0.180963567842297
+    ## 19  PopFatig ~~  PopFatig   0.56870365  0.190449467916519
+    ## 17   PopConc ~~   PopConc   0.27447759  0.228872995452354
+    ## 6         A1 ~~        A2   0.88497646  0.125331254455294
+    ## 5         A1 ~~        A1   1.00000000                   
+    ## 13        A2 ~~        A2   1.00000000
 
 ``` r
 pop_psych_veg_bif.model <- "
@@ -1054,14 +930,12 @@ pop_psych_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
 ```
 
     ## [1] "Running primary model"
-    ## [1] "The model as initially specified failed to converge. A lower bound of 0 on residual variances has been automatically added to try and troubleshoot this."
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  11.619 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.588 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_psych_veg_bif.model): A difference greater than .025 was observed pre- and
@@ -1077,46 +951,49 @@ pop_psych_veg_bif.fit$modelfit
 ```
 
     ##       chisq df      p_chisq      AIC       CFI       SRMR
-    ## df 185.2042 25 2.090154e-26 245.2042 0.8649873 0.07579891
+    ## df 185.2048 25 2.089636e-26 245.2048 0.8649868 0.07579896
 
 ``` r
 pop_psych_veg_bif.fit$results[c(1,2,3,6,7)]
 ```
 
     ##          lhs op       rhs STD_Genotype   STD_Genotype_SE
-    ## 1         A1 =~    PopDep   0.51805341 0.181111025168094
-    ## 2         A1 =~    PopSui   0.60182174 0.282689607126111
-    ## 3         A1 =~    PopAnh   0.31713617 0.195212218756617
-    ## 4         A1 =~  PopGuilt   0.47537875 0.156612914336056
-    ## 5         A1 ~~        A1   1.00000000                  
-    ## 6         A2 =~ PopAppDec   0.38244668 0.214728585688646
-    ## 7         A2 =~ PopAppInc   0.01497321 0.182138028390462
-    ## 8         A2 =~ PopSleDec   0.69327212 0.394452126994624
-    ## 9         A2 =~ PopSleInc  -0.50693503 0.286420731474122
-    ## 10        A2 =~  PopFatig  -0.13428862 0.213585849576709
-    ## 11        A2 =~   PopConc  -0.15950759 0.233348513846825
-    ## 12        A2 ~~        A2   1.00000000                  
-    ## 13         A =~    PopDep   0.60403371 0.113576664756892
-    ## 14         A =~    PopSui   0.25117305 0.130258258459355
-    ## 15         A =~    PopAnh   0.85542480 0.119451198842198
-    ## 16         A =~ PopAppDec   0.06232734 0.113727090702018
-    ## 17         A =~ PopAppInc   0.45026223 0.103600882607298
-    ## 18         A =~ PopSleDec   0.61782173 0.118948807979117
-    ## 19         A =~ PopSleInc   0.57967022  0.11003349098494
-    ## 20         A =~  PopFatig   0.68000543 0.136097887346088
-    ## 21         A =~  PopGuilt   0.43436932 0.102086457452211
-    ## 22         A =~   PopConc   0.87875791  0.12114894768441
-    ## 23         A ~~         A   1.00000000                  
-    ## 24    PopSui ~~    PopSui   0.57472254 0.322530773635682
-    ## 25    PopDep ~~    PopDep   0.36676421  0.12868091966476
-    ## 26    PopAnh ~~    PopAnh   0.16767294 0.116381823166634
-    ## 27 PopAppDec ~~ PopAppDec   0.84985014  0.20934420107158
-    ## 28 PopAppInc ~~ PopAppInc   0.79704048 0.159166455474374
-    ## 29 PopSleDec ~~ PopSleDec   0.13767035 0.603158359304208
-    ## 30 PopSleInc ~~ PopSleInc   0.40699938  0.31679188774605
-    ## 31  PopFatig ~~  PopFatig   0.51955829 0.191751507677245
-    ## 32  PopGuilt ~~  PopGuilt   0.58533837 0.195382381347063
-    ## 33   PopConc ~~   PopConc   0.20234151 0.236243329027963
+    ## 2         A1 =~    PopDep   0.51805448 0.181111321410719
+    ## 1         A1 =~    PopAnh   0.31713591 0.195212216225118
+    ## 3         A1 =~  PopGuilt   0.47537814 0.156612822063979
+    ## 4         A1 =~    PopSui   0.60182061 0.282689357929817
+    ## 8         A2 =~ PopAppDec   0.38244594 0.214728153294402
+    ## 9         A2 =~ PopAppInc   0.01497302 0.182137765440783
+    ## 12        A2 =~ PopSleDec   0.69327495 0.394453671945534
+    ## 13        A2 =~ PopSleInc  -0.50693446 0.286420383880355
+    ## 11        A2 =~  PopFatig  -0.13428788 0.213585530486942
+    ## 10        A2 =~   PopConc  -0.15950868 0.233348493142716
+    ## 20         A =~    PopDep   0.60403391 0.113576775223297
+    ## 16         A =~    PopAnh   0.85542393 0.119451220642454
+    ## 22         A =~  PopGuilt   0.43436967 0.102086421000473
+    ## 25         A =~    PopSui   0.25117375 0.130258257958509
+    ## 17         A =~ PopAppDec   0.06232718 0.113727135106564
+    ## 18         A =~ PopAppInc   0.45026244 0.103600926190577
+    ## 23         A =~ PopSleDec   0.61782263  0.11894891301482
+    ## 24         A =~ PopSleInc   0.57967017  0.11003349169157
+    ## 21         A =~  PopFatig   0.68000416 0.136097840942651
+    ## 19         A =~   PopConc   0.87875817 0.121149015731465
+    ## 31    PopDep ~~    PopDep   0.36676255 0.128681382418342
+    ## 27    PopAnh ~~    PopAnh   0.16767504 0.116381722365407
+    ## 33  PopGuilt ~~  PopGuilt   0.58533935 0.195382221817953
+    ## 36    PopSui ~~    PopSui   0.57472321 0.322529946553126
+    ## 28 PopAppDec ~~ PopAppDec   0.84984974 0.209343811479297
+    ## 29 PopAppInc ~~ PopAppInc   0.79703973 0.159166476072443
+    ## 34 PopSleDec ~~ PopSleDec   0.13766461  0.60316257639131
+    ## 35 PopSleInc ~~ PopSleInc   0.40699999 0.316791321597887
+    ## 32  PopFatig ~~  PopFatig   0.51956161  0.19175125899549
+    ## 30   PopConc ~~   PopConc   0.20234092  0.23624363124074
+    ## 6         A1 ~~        A1   1.00000000                  
+    ## 15        A2 ~~        A2   1.00000000                  
+    ## 26         A ~~         A   1.00000000                  
+    ## 5         A1 ~~         A   0.00000000                  
+    ## 14        A2 ~~         A   0.00000000                  
+    ## 7         A1 ~~        A2   0.00000000
 
 ### Affective-Neurovegetative (Elhai Model 2c)
 
@@ -1131,13 +1008,12 @@ pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   3.761 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.651 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_affect_veg.model): A difference greater than .025 was observed pre- and
@@ -1153,36 +1029,36 @@ pop_affect_veg.fit$modelfit
 ```
 
     ##       chisq df      p_chisq      AIC       CFI      SRMR
-    ## df 212.5519 34 1.040688e-27 254.5519 0.8495248 0.1044869
+    ## df 212.5519 34 1.040678e-27 254.5519 0.8495248 0.1044869
 
 ``` r
 pop_affect_veg.fit$results[c(1,2,3,6,7)]
 ```
 
     ##          lhs op       rhs STD_Genotype    STD_Genotype_SE
-    ## 1         A1 =~    PopDep   0.85867613 0.0863146412946434
-    ## 2         A1 =~    PopSui   0.47576131  0.145382830116123
-    ## 3         A1 =~  PopGuilt   0.63323054 0.0950077193408101
+    ## 1         A1 =~    PopDep   0.85867542 0.0863145798213635
+    ## 2         A1 =~  PopGuilt   0.63323153 0.0950077740661715
+    ## 3         A1 =~    PopSui   0.47576125  0.145382907276489
+    ## 6         A2 =~    PopAnh   0.98645080  0.073223789215362
+    ## 8         A2 =~ PopAppInc   0.42214761 0.0969763678847308
+    ## 7         A2 =~ PopAppDec   0.03705036 0.0978701957153523
+    ## 12        A2 =~ PopSleInc   0.51242766  0.088326119878467
+    ## 11        A2 =~ PopSleDec   0.50832807  0.117597378531202
+    ## 10        A2 =~  PopFatig   0.63681014  0.122269587188202
+    ## 9         A2 =~   PopConc   0.80974139  0.105242912732544
+    ## 18    PopDep ~~    PopDep   0.26267614  0.136873349482703
+    ## 20  PopGuilt ~~  PopGuilt   0.59901800   0.16959072990749
+    ## 23    PopSui ~~    PopSui   0.77365100  0.181225351145555
+    ## 14    PopAnh ~~    PopAnh   0.02691481  0.124590666252897
+    ## 16 PopAppInc ~~ PopAppInc   0.82179149  0.150145626589912
+    ## 15 PopAppDec ~~ PopAppDec   0.99862657  0.171007637258376
+    ## 22 PopSleInc ~~ PopSleInc   0.73741898  0.178022512522675
+    ## 21 PopSleDec ~~ PopSleDec   0.74160229   0.21619705766633
+    ## 19  PopFatig ~~  PopFatig   0.59447320   0.18029995068395
+    ## 17   PopConc ~~   PopConc   0.34431814  0.205653337345481
+    ## 5         A1 ~~        A2   0.77683239 0.0589751068238246
     ## 4         A1 ~~        A1   1.00000000                   
-    ## 5         A1 ~~        A2   0.77683286 0.0589751533905018
-    ## 6         A2 =~    PopAnh   0.98645005 0.0732237310251043
-    ## 7         A2 =~ PopAppDec   0.03705118 0.0978702153354257
-    ## 8         A2 =~ PopAppInc   0.42214768  0.096976366422368
-    ## 9         A2 =~ PopSleDec   0.50832798  0.117597382325426
-    ## 10        A2 =~ PopSleInc   0.51242793 0.0883261283584641
-    ## 11        A2 =~  PopFatig   0.63681023  0.122269582062303
-    ## 12        A2 =~   PopConc   0.80974229  0.105242905370241
-    ## 13        A2 ~~        A2   1.00000000                   
-    ## 14    PopSui ~~    PopSui   0.77365136  0.181225332673877
-    ## 15    PopDep ~~    PopDep   0.26267575    0.1368735636345
-    ## 16    PopAnh ~~    PopAnh   0.02691648  0.124590488548716
-    ## 17 PopAppDec ~~ PopAppDec   0.99862724  0.171007613183638
-    ## 18 PopAppInc ~~ PopAppInc   0.82179196  0.150145642257348
-    ## 19 PopSleDec ~~ PopSleDec   0.74160567  0.216197061201847
-    ## 20 PopSleInc ~~ PopSleInc   0.73741777  0.178022543515969
-    ## 21  PopFatig ~~  PopFatig   0.59447380  0.180299965202853
-    ## 22  PopGuilt ~~  PopGuilt   0.59902002   0.16959056413185
-    ## 23   PopConc ~~   PopConc   0.34431638   0.20565344102517
+    ## 13        A2 ~~        A2   1.00000000
 
 Bifactor model
 
@@ -1202,13 +1078,12 @@ pop_affect_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Calculating model chi-square"
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   3.971 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.503272846601034 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.658 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228444 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.371393316703468 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## pop_affect_veg_bif.model): A difference greater than .025 was observed pre- and
@@ -1223,47 +1098,50 @@ pop_affect_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model
 pop_affect_veg_bif.fit$modelfit
 ```
 
-    ##       chisq df     p_chisq      AIC       CFI       SRMR
-    ## df 61.07608 25 7.41915e-05 121.0761 0.9695968 0.06869807
+    ##       chisq df      p_chisq      AIC       CFI       SRMR
+    ## df 61.07619 25 7.418895e-05 121.0762 0.9695967 0.06869808
 
 ``` r
 pop_affect_veg_bif.fit$results[c(1,2,3,6,7)]
 ```
 
     ##          lhs op       rhs STD_Genotype    STD_Genotype_SE
-    ## 1         A1 =~    PopDep   0.69574378  0.805589917931264
-    ## 2         A1 =~    PopSui   0.35692152  0.427797282110984
-    ## 3         A1 =~  PopGuilt   0.20053655   0.25367143711592
-    ## 4         A1 ~~        A1   1.00000000                   
-    ## 5         A2 =~    PopAnh   0.35475408  0.140171887676837
-    ## 6         A2 =~ PopAppDec  -0.30865327  0.207639790024029
-    ## 7         A2 =~ PopAppInc   0.08182395  0.179169892499523
-    ## 8         A2 =~ PopSleDec  -0.54248801  0.320231617369739
-    ## 9         A2 =~ PopSleInc   0.56418895  0.223162642800546
-    ## 10        A2 =~  PopFatig   0.36640298  0.212965494509706
-    ## 11        A2 =~   PopConc   0.38864891  0.230603369166615
-    ## 12        A2 ~~        A2   1.00000000                   
-    ## 13         A =~    PopDep   0.70377141  0.088208778996249
-    ## 14         A =~    PopSui   0.37422244  0.125449380606646
-    ## 15         A =~    PopAnh   0.90275546 0.0892916972285198
-    ## 16         A =~ PopAppDec   0.13386263   0.11678238329341
-    ## 17         A =~ PopAppInc   0.41028577 0.0978852299243985
-    ## 18         A =~ PopSleDec   0.73285865  0.154803747874663
-    ## 19         A =~ PopSleInc   0.41203693  0.123734056509106
-    ## 20         A =~  PopFatig   0.56827496  0.145636622490822
-    ## 21         A =~  PopGuilt   0.54434247   0.10232320209097
-    ## 22         A =~   PopConc   0.73472954  0.126063738878139
-    ## 23         A ~~         A   1.00000000                   
-    ## 24    PopSui ~~    PopSui   0.73256454   0.31435850671191
-    ## 25    PopDep ~~    PopDep   0.02064632   1.12733011504582
-    ## 26    PopAnh ~~    PopAnh   0.05918188  0.132655309448895
-    ## 27 PopAppDec ~~ PopAppDec   0.88681354  0.197888632939398
-    ## 28 PopAppInc ~~ PopAppInc   0.82497044  0.150209281746549
-    ## 29 PopSleDec ~~ PopSleDec   0.16862532  0.513989902811879
-    ## 30 PopSleInc ~~ PopSleInc   0.51191715  0.251185890877732
-    ## 31  PopFatig ~~  PopFatig   0.54281202  0.190297700876164
-    ## 32  PopGuilt ~~  PopGuilt   0.66347577  0.180645236750232
-    ## 33   PopConc ~~   PopConc   0.30912489  0.212222863717288
+    ## 1         A1 =~    PopDep   0.69574366  0.805590687939006
+    ## 2         A1 =~  PopGuilt   0.20053677  0.253671901113721
+    ## 3         A1 =~    PopSui   0.35692072  0.427796844377091
+    ## 7         A2 =~    PopAnh   0.35475414  0.140171910876905
+    ## 9         A2 =~ PopAppInc   0.08182344  0.179169920769294
+    ## 8         A2 =~ PopAppDec  -0.30865414  0.207639955675216
+    ## 13        A2 =~ PopSleInc   0.56418920  0.223162671387789
+    ## 12        A2 =~ PopSleDec  -0.54248712  0.320230841210609
+    ## 11        A2 =~  PopFatig   0.36640284  0.212965458199533
+    ## 10        A2 =~   PopConc   0.38864891  0.230603303263513
+    ## 20         A =~    PopDep   0.70377123 0.0882088285712728
+    ## 22         A =~  PopGuilt   0.54434268  0.102323226546004
+    ## 25         A =~    PopSui   0.37422215  0.125449411699404
+    ## 16         A =~    PopAnh   0.90275518 0.0892916751257913
+    ## 18         A =~ PopAppInc   0.41028571 0.0978852662169668
+    ## 17         A =~ PopAppDec   0.13386271  0.116782439773261
+    ## 24         A =~ PopSleInc   0.41203749  0.123734070311824
+    ## 23         A =~ PopSleDec   0.73285768  0.154803692196419
+    ## 21         A =~  PopFatig   0.56827506   0.14563668428004
+    ## 19         A =~   PopConc   0.73472929  0.126063761490279
+    ## 31    PopDep ~~    PopDep   0.02064676    1.1273309571286
+    ## 33  PopGuilt ~~  PopGuilt   0.66347615  0.180645430520063
+    ## 36    PopSui ~~    PopSui   0.73256550  0.314357657270499
+    ## 27    PopAnh ~~    PopAnh   0.05918273  0.132655265003809
+    ## 29 PopAppInc ~~ PopAppInc   0.82497044  0.150209298869276
+    ## 28 PopAppDec ~~ PopAppDec   0.88681309  0.197888898080925
+    ## 35 PopSleInc ~~ PopSleInc   0.51191552  0.251185975929673
+    ## 34 PopSleDec ~~ PopSleDec   0.16862684  0.513988382945569
+    ## 32  PopFatig ~~  PopFatig   0.54281247  0.190297637612833
+    ## 30   PopConc ~~   PopConc   0.30912518  0.212222833590301
+    ## 5         A1 ~~        A1   1.00000000                   
+    ## 15        A2 ~~        A2   1.00000000                   
+    ## 26         A ~~         A   1.00000000                   
+    ## 4         A1 ~~         A   0.00000000                   
+    ## 14        A2 ~~         A   0.00000000                   
+    ## 6         A1 ~~        A2   0.00000000
 
 ### Model comparisons
 
@@ -1303,6 +1181,7 @@ lapply(list(pop_commonfactor.fit,
        function(fit) fit$modelfit)
 ))
 rownames(model_fits) <- NULL
+
 model_fits %>%
 select(-chisq, -df) %>%
 mutate(dAIC=AIC-min(AIC)) %>%
@@ -1317,11 +1196,11 @@ mutate_if(is.numeric, ~signif(., 4))
     ## 5      1e       Common(App,Sle) 2.170e-20 214.1 0.8853 0.10410  93.01
     ## 6      2a         Psych-Somatic 5.874e-24 233.9 0.8677 0.11060 112.90
     ## 7  2a(ii)   Psych-Somatic (BiF) 3.643e-21 217.4 0.8884 0.07667  96.30
-    ## 8   2b(i)        Psych-Neuroveg 5.233e-31 272.0 0.8357 0.10500 150.90
+    ## 8   2b(i)        Psych-Neuroveg 6.791e-45 344.9 0.7734 0.10820 223.90
     ## 9  2b(ii)  Psych-Neuroveg (BiF) 2.090e-26 245.2 0.8650 0.07580 124.10
     ## 10  2c(i)       Affect-Neuroveg 1.041e-27 254.6 0.8495 0.10450 133.50
     ## 11 2c(ii) Affect-Neuroveg (BiF) 7.419e-05 121.1 0.9696 0.06870   0.00
-    ## 12   3(i)     Cog-Mood-Neuroveg 2.222e-31 272.3 0.8396 0.09974 151.20
+    ## 12   3(i)     Cog-Mood-Neuroveg 1.050e-36 301.3 0.8127 0.10930 180.20
 
 # Exploratory factor analysis
 
@@ -1520,40 +1399,40 @@ summary(S_sim_pos_ev)
 ```
 
     ##        1                2               3               4        
-    ##  Min.   : 6.590   Min.   :4.100   Min.   :2.948   Min.   :2.335  
-    ##  1st Qu.: 7.532   1st Qu.:5.110   1st Qu.:3.473   1st Qu.:2.752  
-    ##  Median : 8.218   Median :5.698   Median :3.857   Median :2.998  
-    ##  Mean   : 8.347   Mean   :5.759   Mean   :3.834   Mean   :3.045  
-    ##  3rd Qu.: 8.885   3rd Qu.:6.246   3rd Qu.:4.177   3rd Qu.:3.334  
-    ##  Max.   :13.751   Max.   :8.989   Max.   :5.171   Max.   :4.411  
+    ##  Min.   : 6.409   Min.   :3.897   Min.   :2.894   Min.   :2.386  
+    ##  1st Qu.: 7.486   1st Qu.:4.900   1st Qu.:3.348   1st Qu.:2.779  
+    ##  Median : 8.166   Median :5.591   Median :3.639   Median :3.013  
+    ##  Mean   : 8.371   Mean   :5.738   Mean   :3.760   Mean   :3.046  
+    ##  3rd Qu.: 9.066   3rd Qu.:6.461   3rd Qu.:4.112   3rd Qu.:3.251  
+    ##  Max.   :12.441   Max.   :9.862   Max.   :5.830   Max.   :4.291  
     ##        5               6               7               8         
-    ##  Min.   :1.925   Min.   :1.417   Min.   :1.196   Min.   :0.9558  
-    ##  1st Qu.:2.254   1st Qu.:1.807   1st Qu.:1.500   1st Qu.:1.1875  
-    ##  Median :2.391   Median :1.914   Median :1.574   Median :1.2959  
-    ##  Mean   :2.440   Mean   :1.939   Mean   :1.600   Mean   :1.2925  
-    ##  3rd Qu.:2.606   3rd Qu.:2.057   3rd Qu.:1.717   3rd Qu.:1.3944  
-    ##  Max.   :3.286   Max.   :2.399   Max.   :1.993   Max.   :1.6686  
-    ##        9                10               11               12        
-    ##  Min.   :0.7846   Min.   :0.5994   Min.   :0.2844   Min.   :0.1358  
-    ##  1st Qu.:0.9074   1st Qu.:0.7038   1st Qu.:0.5063   1st Qu.:0.3205  
-    ##  Median :0.9834   Median :0.7760   Median :0.5585   Median :0.3698  
-    ##  Mean   :0.9958   Mean   :0.7797   Mean   :0.5616   Mean   :0.3694  
-    ##  3rd Qu.:1.0733   3rd Qu.:0.8590   3rd Qu.:0.6215   3rd Qu.:0.4157  
-    ##  Max.   :1.2368   Max.   :1.0093   Max.   :0.8797   Max.   :0.6312  
-    ##        13                14                 15                16         
-    ##  Min.   :-0.1356   Min.   :-0.48936   Min.   :-0.8062   Min.   :-1.2613  
-    ##  1st Qu.: 0.1159   1st Qu.:-0.09822   1st Qu.:-0.3558   1st Qu.:-0.6680  
-    ##  Median : 0.1730   Median :-0.01095   Median :-0.2227   Median :-0.5575  
-    ##  Mean   : 0.1685   Mean   :-0.02463   Mean   :-0.2660   Mean   :-0.5763  
-    ##  3rd Qu.: 0.2421   3rd Qu.: 0.07199   3rd Qu.:-0.1388   3rd Qu.:-0.4476  
-    ##  Max.   : 0.3967   Max.   : 0.22543   Max.   : 0.1163   Max.   :-0.1324  
-    ##        17                18                19               20        
-    ##  Min.   :-1.9296   Min.   :-4.5600   Min.   :-5.321   Min.   :-8.823  
-    ##  1st Qu.:-1.1839   1st Qu.:-1.9424   1st Qu.:-3.091   1st Qu.:-5.505  
-    ##  Median :-0.9943   Median :-1.6058   Median :-2.620   Median :-4.681  
-    ##  Mean   :-1.0035   Mean   :-1.7123   Mean   :-2.716   Mean   :-4.834  
-    ##  3rd Qu.:-0.7904   3rd Qu.:-1.3674   3rd Qu.:-2.173   3rd Qu.:-3.949  
-    ##  Max.   :-0.4514   Max.   :-0.9007   Max.   :-1.481   Max.   :-2.750
+    ##  Min.   :1.761   Min.   :1.516   Min.   :1.253   Min.   :0.9794  
+    ##  1st Qu.:2.184   1st Qu.:1.791   1st Qu.:1.422   1st Qu.:1.1728  
+    ##  Median :2.374   Median :1.949   Median :1.524   Median :1.2594  
+    ##  Mean   :2.399   Mean   :1.961   Mean   :1.558   Mean   :1.2639  
+    ##  3rd Qu.:2.566   3rd Qu.:2.159   3rd Qu.:1.647   3rd Qu.:1.3480  
+    ##  Max.   :3.232   Max.   :2.561   Max.   :2.073   Max.   :1.6433  
+    ##        9                10               11               12          
+    ##  Min.   :0.5971   Min.   :0.4949   Min.   :0.2551   Min.   :-0.06495  
+    ##  1st Qu.:0.9261   1st Qu.:0.6976   1st Qu.:0.4900   1st Qu.: 0.30010  
+    ##  Median :0.9938   Median :0.7677   Median :0.5361   Median : 0.36475  
+    ##  Mean   :0.9915   Mean   :0.7690   Mean   :0.5460   Mean   : 0.35386  
+    ##  3rd Qu.:1.0625   3rd Qu.:0.8357   3rd Qu.:0.6166   3rd Qu.: 0.41352  
+    ##  Max.   :1.3287   Max.   :1.0605   Max.   :0.7461   Max.   : 0.60311  
+    ##        13                 14                 15                16         
+    ##  Min.   :-0.23757   Min.   :-0.40701   Min.   :-0.9230   Min.   :-1.5359  
+    ##  1st Qu.: 0.09831   1st Qu.:-0.09188   1st Qu.:-0.3712   1st Qu.:-0.6711  
+    ##  Median : 0.16479   Median :-0.02601   Median :-0.2380   Median :-0.5145  
+    ##  Mean   : 0.16756   Mean   :-0.02865   Mean   :-0.2648   Mean   :-0.5608  
+    ##  3rd Qu.: 0.24926   3rd Qu.: 0.04588   3rd Qu.:-0.1506   3rd Qu.:-0.4326  
+    ##  Max.   : 0.37242   Max.   : 0.24742   Max.   : 0.1115   Max.   :-0.2028  
+    ##        17                18                19               20         
+    ##  Min.   :-1.8305   Min.   :-3.1944   Min.   :-4.369   Min.   :-11.286  
+    ##  1st Qu.:-1.1616   1st Qu.:-1.8591   1st Qu.:-3.008   1st Qu.: -5.369  
+    ##  Median :-0.9128   Median :-1.6031   Median :-2.511   Median : -4.578  
+    ##  Mean   :-0.9510   Mean   :-1.6377   Mean   :-2.607   Mean   : -4.874  
+    ##  3rd Qu.:-0.7552   3rd Qu.:-1.3257   3rd Qu.:-2.114   3rd Qu.: -3.852  
+    ##  Max.   :-0.3795   Max.   :-0.6497   Max.   :-1.356   Max.   : -2.852
 
 ``` r
 symptoms_efa3 <- factanal(covmat=symptoms_cov_pd, factors=3, rotation='varimax')
