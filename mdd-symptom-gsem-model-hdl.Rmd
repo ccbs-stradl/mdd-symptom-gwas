@@ -552,7 +552,7 @@ pop_affect_veg_bif.fit$results[c(1,2,3,6,7)]
 
 model_fits <- 
 data.frame(Model=c('1a', '1b', '1c', '1d', '1e',
-                   '2a', '2a(ii)', '2b(i)', '2b(ii)',
+                   '2a(i)', '2a(ii)', '2b(i)', '2b(ii)',
 				   '2c(i)', '2c(ii)',
 				   '3(i)'),
        Name=c('Common',

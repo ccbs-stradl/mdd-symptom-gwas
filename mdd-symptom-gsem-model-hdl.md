@@ -193,7 +193,7 @@ pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.498 
+    ##   0.913 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -271,7 +271,7 @@ pgc_commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.412 
+    ##   0.444 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -435,7 +435,7 @@ clin_psych_soma_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mode
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   3.531 
+    ##   3.815 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -535,7 +535,7 @@ clin_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cli
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   2.455 
+    ##   2.391 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -625,7 +625,7 @@ clin_psych_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   2.881 
+    ##   2.893 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -722,7 +722,7 @@ pop_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.197 
+    ##   0.184 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -788,7 +788,7 @@ pop_commonfactor_gating.fit <- usermodel(symptoms_covstruct, estimation='DWLS', 
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##    0.94 
+    ##   0.712 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -855,7 +855,7 @@ pop_commonfactor_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.707 
+    ##    0.74 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -891,7 +891,7 @@ pop_commonfactor_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.919 
+    ##   0.939 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -928,7 +928,7 @@ pop_commonfactor_app_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS',
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.954 
+    ##   1.029 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -1026,7 +1026,7 @@ pop_cog_mood_neuroveg_constr.fit <- usermodel(symptoms_covstruct, estimation='DW
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   2.056 
+    ##   1.993 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -1119,7 +1119,7 @@ pop_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.347 
+    ##    1.14 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -1273,7 +1273,7 @@ pop_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.268 
+    ##   0.249 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -1344,7 +1344,7 @@ pop_psych_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.236 
+    ##   0.238 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -1425,7 +1425,7 @@ pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.225 
+    ##   0.249 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -1498,7 +1498,7 @@ pop_affect_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##    0.24 
+    ##   0.256 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00320242979228456 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.37139331670346 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -1564,7 +1564,7 @@ pop_affect_veg_bif.fit$results[c(1,2,3,6,7)]
 ``` r
 model_fits <- 
 data.frame(Model=c('1a', '1b', '1c', '1d', '1e',
-                   '2a', '2a(ii)', '2b(i)', '2b(ii)',
+                   '2a(i)', '2a(ii)', '2b(i)', '2b(ii)',
                    '2c(i)', '2c(ii)',
                    '3(i)'),
        Name=c('Common',
@@ -1610,7 +1610,7 @@ mutate_if(is.numeric, ~signif(., 4))
     ## 3      1c          Common (App) 1.809e-22 225.7 0.8747 0.10970 104.70
     ## 4      1d          Common (Sle) 3.860e-21 218.3 0.8809 0.10510  97.27
     ## 5      1e       Common(App,Sle) 2.170e-20 214.1 0.8853 0.10410  93.01
-    ## 6      2a         Psych-Somatic 8.529e-26 243.6 0.8613 0.10300 122.50
+    ## 6   2a(i)         Psych-Somatic 8.529e-26 243.6 0.8613 0.10300 122.50
     ## 7  2a(ii)   Psych-Somatic (BiF) 3.642e-21 217.4 0.8884 0.07667  96.30
     ## 8   2b(i)        Psych-Neuroveg 5.474e-35 292.3 0.8202 0.09397 171.20
     ## 9  2b(ii)  Psych-Neuroveg (BiF) 2.090e-26 245.2 0.8650 0.07580 124.10
@@ -1814,48 +1814,48 @@ S_sim_pos_ev <- plyr::aaply(S_sim_pos, 1, function(x) eigen(cov2cor(x))$values)
 summary(S_sim_pos_ev)
 ```
 
-    ##        1                2                3               4        
-    ##  Min.   : 6.358   Min.   : 4.468   Min.   :3.329   Min.   :2.506  
-    ##  1st Qu.: 7.819   1st Qu.: 5.541   1st Qu.:4.068   1st Qu.:3.107  
-    ##  Median : 8.692   Median : 6.006   Median :4.419   Median :3.341  
-    ##  Mean   : 8.914   Mean   : 6.188   Mean   :4.496   Mean   :3.352  
-    ##  3rd Qu.: 9.515   3rd Qu.: 6.643   3rd Qu.:4.802   3rd Qu.:3.568  
-    ##  Max.   :17.241   Max.   :10.247   Max.   :6.884   Max.   :4.561  
+    ##        1                2               3               4        
+    ##  Min.   : 6.508   Min.   :4.750   Min.   :3.407   Min.   :2.695  
+    ##  1st Qu.: 7.898   1st Qu.:5.618   1st Qu.:4.116   1st Qu.:3.166  
+    ##  Median : 8.675   Median :6.134   Median :4.643   Median :3.425  
+    ##  Mean   : 8.912   Mean   :6.366   Mean   :4.666   Mean   :3.459  
+    ##  3rd Qu.: 9.478   3rd Qu.:6.972   3rd Qu.:5.150   3rd Qu.:3.738  
+    ##  Max.   :15.738   Max.   :9.755   Max.   :6.630   Max.   :4.521  
     ##        5               6               7               8        
-    ##  Min.   :2.091   Min.   :1.715   Min.   :1.369   Min.   :1.057  
-    ##  1st Qu.:2.508   1st Qu.:2.014   1st Qu.:1.628   1st Qu.:1.291  
-    ##  Median :2.725   Median :2.138   Median :1.756   Median :1.379  
-    ##  Mean   :2.724   Mean   :2.194   Mean   :1.756   Mean   :1.391  
-    ##  3rd Qu.:2.932   3rd Qu.:2.368   3rd Qu.:1.886   3rd Qu.:1.498  
-    ##  Max.   :3.395   Max.   :2.923   Max.   :2.190   Max.   :1.900  
+    ##  Min.   :2.166   Min.   :1.716   Min.   :1.199   Min.   :1.029  
+    ##  1st Qu.:2.606   1st Qu.:1.997   1st Qu.:1.581   1st Qu.:1.282  
+    ##  Median :2.749   Median :2.211   Median :1.740   Median :1.409  
+    ##  Mean   :2.836   Mean   :2.222   Mean   :1.745   Mean   :1.404  
+    ##  3rd Qu.:3.079   3rd Qu.:2.404   3rd Qu.:1.900   3rd Qu.:1.509  
+    ##  Max.   :3.619   Max.   :3.101   Max.   :2.375   Max.   :1.954  
     ##        9                10               11               12        
-    ##  Min.   :0.7528   Min.   :0.5730   Min.   :0.3305   Min.   :0.1922  
-    ##  1st Qu.:1.0095   1st Qu.:0.8003   1st Qu.:0.5813   1st Qu.:0.3797  
-    ##  Median :1.1136   Median :0.8683   Median :0.6656   Median :0.4559  
-    ##  Mean   :1.1156   Mean   :0.8685   Mean   :0.6530   Mean   :0.4540  
-    ##  3rd Qu.:1.2023   3rd Qu.:0.9438   3rd Qu.:0.7413   3rd Qu.:0.5234  
-    ##  Max.   :1.4899   Max.   :1.1395   Max.   :0.9686   Max.   :0.7026  
-    ##        13                14                15                 16          
-    ##  Min.   :0.02305   Min.   :-0.2311   Min.   :-0.51177   Min.   :-0.80793  
-    ##  1st Qu.:0.19731   1st Qu.: 0.0300   1st Qu.:-0.23340   1st Qu.:-0.48767  
-    ##  Median :0.28426   Median : 0.1017   Median :-0.11729   Median :-0.39091  
-    ##  Mean   :0.27576   Mean   : 0.1059   Mean   :-0.12567   Mean   :-0.38497  
-    ##  3rd Qu.:0.35252   3rd Qu.: 0.2056   3rd Qu.:-0.03981   3rd Qu.:-0.28035  
-    ##  Max.   :0.52853   Max.   : 0.3051   Max.   : 0.21137   Max.   : 0.02593  
+    ##  Min.   :0.7591   Min.   :0.5356   Min.   :0.3569   Min.   :0.2367  
+    ##  1st Qu.:0.9944   1st Qu.:0.7945   1st Qu.:0.5885   1st Qu.:0.3891  
+    ##  Median :1.1075   Median :0.8711   Median :0.6644   Median :0.4542  
+    ##  Mean   :1.1117   Mean   :0.8693   Mean   :0.6648   Mean   :0.4626  
+    ##  3rd Qu.:1.2174   3rd Qu.:0.9628   3rd Qu.:0.7345   3rd Qu.:0.5300  
+    ##  Max.   :1.5115   Max.   :1.1621   Max.   :0.9492   Max.   :0.7806  
+    ##        13                14                  15                 16          
+    ##  Min.   :0.01697   Min.   :-0.253745   Min.   :-0.66408   Min.   :-1.00461  
+    ##  1st Qu.:0.20104   1st Qu.: 0.005646   1st Qu.:-0.19554   1st Qu.:-0.55929  
+    ##  Median :0.26536   Median : 0.088012   Median :-0.09583   Median :-0.39819  
+    ##  Mean   :0.26486   Mean   : 0.087327   Mean   :-0.12747   Mean   :-0.43317  
+    ##  3rd Qu.:0.33224   3rd Qu.: 0.159616   3rd Qu.:-0.04322   3rd Qu.:-0.28762  
+    ##  Max.   :0.48736   Max.   : 0.322849   Max.   : 0.11118   Max.   :-0.03694  
     ##        17                18                19                20        
-    ##  Min.   :-1.2173   Min.   :-2.3708   Min.   :-3.4838   Min.   :-5.671  
-    ##  1st Qu.:-0.8881   1st Qu.:-1.4195   1st Qu.:-2.0910   1st Qu.:-3.430  
-    ##  Median :-0.7190   Median :-1.1184   Median :-1.8658   Median :-2.850  
-    ##  Mean   :-0.7214   Mean   :-1.1998   Mean   :-1.8901   Mean   :-2.962  
-    ##  3rd Qu.:-0.5521   3rd Qu.:-0.9648   3rd Qu.:-1.5507   3rd Qu.:-2.421  
-    ##  Max.   :-0.1970   Max.   :-0.5418   Max.   :-0.8999   Max.   :-1.655  
+    ##  Min.   :-1.6929   Min.   :-2.3755   Min.   :-5.4061   Min.   :-7.413  
+    ##  1st Qu.:-0.9855   1st Qu.:-1.4765   1st Qu.:-2.2810   1st Qu.:-3.772  
+    ##  Median :-0.7302   Median :-1.2537   Median :-1.9170   Median :-2.898  
+    ##  Mean   :-0.7776   Mean   :-1.2892   Mean   :-2.0340   Mean   :-3.176  
+    ##  3rd Qu.:-0.5914   3rd Qu.:-1.0355   3rd Qu.:-1.6065   3rd Qu.:-2.338  
+    ##  Max.   :-0.3061   Max.   :-0.6951   Max.   :-0.9767   Max.   :-1.509  
     ##        21         
-    ##  Min.   :-14.438  
-    ##  1st Qu.: -6.605  
-    ##  Median : -5.913  
-    ##  Mean   : -6.204  
-    ##  3rd Qu.: -5.240  
-    ##  Max.   : -3.760
+    ##  Min.   :-11.898  
+    ##  1st Qu.: -7.097  
+    ##  Median : -6.062  
+    ##  Mean   : -6.235  
+    ##  3rd Qu.: -5.147  
+    ##  Max.   : -4.208
 
 ``` r
 symptoms_efa3 <- factanal(covmat=symptoms_cov_pd, factors=3, rotation='varimax')
