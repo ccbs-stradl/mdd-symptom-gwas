@@ -22,12 +22,10 @@ Package installation
 
 ```{r packages, output='hide', warning=FALSE, message=FALSE, eval=FALSE}
 
-required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr', 'corrplot')
+required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr', 'corrplot', 'mvtnorm')
 for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.packages(pack)
 
 if(!require(GenomicSEM)) remotes::install_github("MichelNivard/GenomicSEM")
-
-if(!require(tidySEM)) remotes::install_github("cjvanlissa/tidySEM")
 
 ```
 
@@ -41,7 +39,6 @@ require(stringr)
 require(dplyr)
 require(ggplot2)
 require(corrplot)
-require(tidySEM)
 require(GenomicSEM)
 
 packageVersion("GenomicSEM")
@@ -372,6 +369,9 @@ pop_cog_mood_neuroveg.model <- "
 A1 =~ NA*PopGuilt + PopConc + PopSui
 A2 =~ NA*PopDep + PopAnh + PopGuilt
 A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
+PopDep ~~ PopAnh
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
@@ -387,6 +387,9 @@ pop_cog_mood_neuroveg_constr.model <- "
 A1 =~ NA*PopGuilt + PopConc + PopSui
 A2 =~ NA*PopDep + PopAnh + PopGuilt
 A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
+PopDep ~~ PopAnh
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
@@ -424,6 +427,8 @@ A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 PopDep ~~ PopAnh
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
 c2 > 0.001
 PopAnh ~~ c2*PopAnh
 "
@@ -464,6 +469,9 @@ pop_psych_soma_bif.fit$results[c(1,2,3,6,7)]
 pop_psych_veg.model <- "
 A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
 A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
+PopDep ~~ PopAnh
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 "
@@ -502,6 +510,9 @@ pop_psych_veg_bif.fit$results[c(1,2,3,6,7)]
 pop_affect_veg.model <- "
 A1 =~ NA*PopDep + PopGuilt + PopSui
 A2 =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
+PopDep ~~ PopAnh
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 "

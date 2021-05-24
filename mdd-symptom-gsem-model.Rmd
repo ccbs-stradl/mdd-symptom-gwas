@@ -27,8 +27,6 @@ for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.p
 
 if(!require(GenomicSEM)) remotes::install_github("MichelNivard/GenomicSEM")
 
-if(!require(tidySEM)) remotes::install_github("cjvanlissa/tidySEM")
-
 ```
 
 GenomicSEM version
@@ -41,7 +39,6 @@ require(stringr)
 require(dplyr)
 require(ggplot2)
 require(corrplot)
-require(tidySEM)
 require(GenomicSEM)
 
 packageVersion("GenomicSEM")
