@@ -137,38 +137,38 @@ as.vector(sample_symptoms[dimnames(symptoms_covstruct$S)[[2]]])
 
 
 
-## ADGS-PGC
+## ADGS-PGC (Clinical)
 
 ### Common factor
 
 Common factor model. Allow residual negative correlation between directional symptoms
 
-```{r agds_pgc_commonfactor_hdl, cache=TRUE}
+```{r clin_commonfactor_hdl, cache=TRUE}
 
-pgc_commonfactor.model <- "
+clin_commonfactor.model <- "
 A1 =~ NA*ClinDep + ClinAnh + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinPsycDec + ClinFatig + ClinGuilt + ClinConc + ClinSui
 A1 ~~ 1*A1
 "
-pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor.model)
+clin_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor.model)
 
-pgc_commonfactor.fit$modelfit
-pgc_commonfactor.fit$results[c(1,2,3,6,7)]
+clin_commonfactor.fit$modelfit
+clin_commonfactor.fit$results[c(1,2,3,6,7)]
 
 ```
 
 Add negative correlations for directional symptoms
-```{r agds_pgc_commonfactor_dir_hdl, cache=TRUE}
+```{r clin_commonfactor_dir_hdl, cache=TRUE}
 
-pgc_commonfactor_dir.model <- "
+clin_commonfactor_dir.model <- "
 A1 =~ NA*ClinDep + ClinAnh + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinPsycDec + ClinFatig + ClinGuilt + ClinConc + ClinSui
 A1 ~~ 1*A1
 ClinAppDec ~~ ClinAppInc
 ClinSleDec ~~ ClinSleInc
 "
-pgc_commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor_dir.model)
+clin_commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor_dir.model)
 
-pgc_commonfactor_dir.fit$modelfit
-pgc_commonfactor_dir.fit$results[c(1,2,3,6,7,9)]
+clin_commonfactor_dir.fit$modelfit
+clin_commonfactor_dir.fit$results[c(1,2,3,6,7,9)]
 
 ```
 
@@ -193,7 +193,6 @@ A2 ~~ 1*A2
 ClinAppDec ~~ ClinAppInc
 ClinSleDec ~~ ClinSleInc
 a12 > -1
-a12 < 1
 A1 ~~ a12*A2
 "
 clin_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_psych_soma.model, fix_resid=FALSE)
@@ -272,6 +271,109 @@ clin_psych_veg_bif.fit$modelfit
 clin_psych_veg_bif.fit$results[c(1, 2, 3, 6, 7, 9)]
 
 ```
+
+
+### Affective-Neurovegetative (Elhai Model 2c)
+
+```{r clin_affect_veg_hdl, cache=TRUE}
+
+clin_affect_veg.model <- "
+A1 =~ NA*ClinDep + ClinAnh + ClinGuilt + ClinSui 
+A2 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycDec + ClinPsycInc + ClinFatig + ClinConc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+ClinAppDec ~~ ClinAppInc
+ClinSleDec ~~ ClinSleInc
+a12 > -1
+a12 < 1
+A1 ~~ a12*A2
+"
+clin_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_affect_veg.model, fix_resid=FALSE)
+
+clin_affect_veg.fit$modelfit
+clin_affect_veg.fit$results[c(1, 2, 3, 6, 7, 9)]
+
+```
+
+Bifactor model
+```{r clin_affect_veg_bif_hdl, cache=TRUE}
+
+clin_affect_veg_bif.model <- "
+A =~ NA*ClinDep + ClinAnh + ClinGuilt + ClinConc + ClinSui + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycDec + ClinPsycInc + ClinFatig
+A1 =~ NA*ClinDep + ClinAnh + ClinGuilt + ClinSui 
+A2 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycDec + ClinPsycInc + ClinFatig + ClinConc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A ~~ 1*A
+A ~~ 0*A1 + 0*A2
+A1 ~~ 0*A2
+c2 > 0.001
+ClinAnh ~~ c2*ClinAnh
+c3a > 0.001
+ClinAppDec ~~ c3a*ClinAppDec
+"
+clin_affect_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_affect_veg_bif.model)
+
+clin_affect_veg_bif.fit$modelfit
+clin_affect_veg_bif.fit$results[c(1, 2, 3, 6, 7, 9)]
+
+```
+
+### Cognitive-Mood-Neuroveg (Kendler Neale) model
+
+```{r clin_cog_mood_neuroveg_hdl, cache=TRUE}
+
+clin_cog_mood_neuroveg.model <- "
+A1 =~ NA*ClinPsycInc + ClinPsycDec + ClinGuilt + ClinConc + ClinSui
+A2 =~ NA*ClinDep + ClinAnh + ClinGuilt
+A3 =~ NA*ClinSleDec + ClinSleInc + ClinFatig + ClinAppDec + ClinAppInc
+ClinAppDec ~~ ClinAppInc
+ClinSleDec ~~ ClinSleInc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3
+c2 > 0.001
+ClinAnh ~~ c2*ClinAnh
+"
+clin_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_cog_mood_neuroveg.model, fix_resid=FALSE)
+
+clin_cog_mood_neuroveg.fit$modelfit
+clin_cog_mood_neuroveg.fit$results[c(1, 2, 3, 6, 7, 9)]
+
+```
+
+### Clin Model Fit
+
+```{r clin_model_fits}
+
+clin_model_list=
+list("1a"=list(name="Common", model=clin_commonfactor.fit),
+     "1b"=list(name="Common (Dir)", model=clin_commonfactor_dir.fit),
+		 "2a(i)"=list(name="Psych-Somatic", model=clin_psych_soma.fit),
+		 "2a(ii)"=list(name="Psych-Somatic (BiF)", model=clin_psych_soma_bif.fit),
+		 "2b(i)"=list(name="Psych-Neuroveg", model=clin_psych_veg.fit),
+		 "2b(ii)"=list(name="Psych-Neuroveg (BiF)", model=clin_psych_veg_bif.fit),
+		 "2c(i)"=list(name="Affect-Neuroveg", model=clin_affect_veg.fit),
+		 "2c(ii)"=list(name="Affect-Neuroveg (BiF)", model=clin_affect_veg_bif.fit),
+		 "3"=list(name="Cog-Mood-Neuroveg", model=clin_cog_mood_neuroveg.fit)
+		 )
+
+clin_model_fits <- 
+data.frame(Model=names(clin_model_list),
+			     Name=sapply(clin_model_list, function(m) m$name)) %>%
+bind_cols(
+bind_rows(
+lapply(clin_model_list, function(m) m$model$modelfit)
+))
+rownames(clin_model_fits) <- NULL
+
+clin_model_fits %>%
+select(-chisq, -df) %>%
+mutate(dAIC=AIC-min(AIC)) %>%
+mutate_if(is.numeric, ~round(., 3))
+
+```
+
 
 ## ALSPAC-UKB (Population)
 

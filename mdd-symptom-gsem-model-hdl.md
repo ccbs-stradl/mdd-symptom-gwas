@@ -173,7 +173,7 @@ as.vector(sample_symptoms[dimnames(symptoms_covstruct$S)[[2]]])
 
 # Structural models
 
-## ADGS-PGC
+## ADGS-PGC (Clinical)
 
 ### Common factor
 
@@ -181,11 +181,11 @@ Common factor model. Allow residual negative correlation between
 directional symptoms
 
 ``` r
-pgc_commonfactor.model <- "
+clin_commonfactor.model <- "
 A1 =~ NA*ClinDep + ClinAnh + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinPsycDec + ClinFatig + ClinGuilt + ClinConc + ClinSui
 A1 ~~ 1*A1
 "
-pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor.model)
+clin_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor.model)
 ```
 
     ## [1] "Running primary model"
@@ -193,11 +193,11 @@ pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.913 
+    ##   0.477 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## pgc_commonfactor.model): A difference greater than .025 was observed pre-
+    ## clin_commonfactor.model): A difference greater than .025 was observed pre-
     ## and post-smoothing in the genetic covariance matrix. This reflects a large
     ## difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
@@ -206,7 +206,7 @@ pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
     ## SNP.
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## pgc_commonfactor.model): A difference greater than .025 was observed pre- and
+    ## clin_commonfactor.model): A difference greater than .025 was observed pre- and
     ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
     ## a large difference and results should be interpreted with caution!! This can
     ## often result from including low powered traits, and you might consider removing
@@ -217,14 +217,14 @@ pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=p
     ## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.68614501877486e-10 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
 ``` r
-pgc_commonfactor.fit$modelfit
+clin_commonfactor.fit$modelfit
 ```
 
     ##       chisq df p_chisq      AIC       CFI      SRMR
     ## df 38626871 54       0 38626919 0.4890952 0.2197145
 
 ``` r
-pgc_commonfactor.fit$results[c(1,2,3,6,7)]
+clin_commonfactor.fit$results[c(1,2,3,6,7)]
 ```
 
     ##            lhs op         rhs STD_Genotype    STD_Genotype_SE
@@ -257,13 +257,13 @@ pgc_commonfactor.fit$results[c(1,2,3,6,7)]
 Add negative correlations for directional symptoms
 
 ``` r
-pgc_commonfactor_dir.model <- "
+clin_commonfactor_dir.model <- "
 A1 =~ NA*ClinDep + ClinAnh + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinPsycDec + ClinFatig + ClinGuilt + ClinConc + ClinSui
 A1 ~~ 1*A1
 ClinAppDec ~~ ClinAppInc
 ClinSleDec ~~ ClinSleInc
 "
-pgc_commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor_dir.model)
+clin_commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor_dir.model)
 ```
 
     ## [1] "Running primary model"
@@ -271,11 +271,11 @@ pgc_commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.444 
+    ##    0.42 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## pgc_commonfactor_dir.model): A difference greater than .025 was observed pre-
+    ## clin_commonfactor_dir.model): A difference greater than .025 was observed pre-
     ## and post-smoothing in the genetic covariance matrix. This reflects a large
     ## difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
@@ -284,7 +284,7 @@ pgc_commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
     ## SNP.
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## pgc_commonfactor_dir.model): A difference greater than .025 was observed pre-
+    ## clin_commonfactor_dir.model): A difference greater than .025 was observed pre-
     ## and post-smoothing for Z-statistics in the genetic covariance matrix. This
     ## reflects a large difference and results should be interpreted with caution!!
     ## This can often result from including low powered traits, and you might consider
@@ -295,14 +295,14 @@ pgc_commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mod
     ## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.68614501877486e-10 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
 ``` r
-pgc_commonfactor_dir.fit$modelfit
+clin_commonfactor_dir.fit$modelfit
 ```
 
     ##       chisq df p_chisq      AIC      CFI      SRMR
     ## df 33158398 52       0 33158450 0.561425 0.2119889
 
 ``` r
-pgc_commonfactor_dir.fit$results[c(1,2,3,6,7,9)]
+clin_commonfactor_dir.fit$results[c(1,2,3,6,7,9)]
 ```
 
     ##            lhs op         rhs STD_Genotype    STD_Genotype_SE      p_value
@@ -361,54 +361,80 @@ A2 ~~ 1*A2
 ClinAppDec ~~ ClinAppInc
 ClinSleDec ~~ ClinSleInc
 a12 > -1
-a12 < 1
 A1 ~~ a12*A2
 "
 clin_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_psych_soma.model, fix_resid=FALSE)
 ```
 
     ## [1] "Running primary model"
-    ## [1] "Error: The primary model produced correlations among your latent variables that are either greater than 1 or less than -1, or the latent variables have negative variances. \n              Consequently, model fit estimates could not be computed and results should likely not be interpreted. Results are provided below \n              to enable troubleshooting. A model constraint that constrains the latent correlations to be above -1, less than 1, or to have positive variances is suggested."
-    ##            lhs op         rhs Unstandardized_Estimate          SE
-    ## 1           A1 =~     ClinDep             0.085707463 0.092620532
-    ## 2           A1 =~     ClinAnh             0.195201558 0.073450946
-    ## 3           A1 =~   ClinGuilt             0.144754560 0.044523206
-    ## 4           A1 =~    ClinConc             0.327052163 0.071992936
-    ## 5           A1 =~     ClinSui             0.169717414 0.034193966
-    ## 6           A1 =~ ClinPsycDec             0.170590869 0.029092217
-    ## 7           A1 =~ ClinPsycInc             0.008911857 0.025516895
-    ## 8           A2 =~  ClinAppDec             0.002080627 0.041277209
-    ## 9           A2 =~  ClinAppInc            -0.244341981 0.043644379
-    ## 10          A2 =~  ClinSleDec             0.032124696 0.048232139
-    ## 11          A2 =~  ClinSleInc            -0.172024564 0.028611869
-    ## 12          A2 =~   ClinFatig            -0.294971935 0.070838118
-    ## 15  ClinAppDec ~~  ClinAppInc            -0.051602643 0.017196571
-    ## 16  ClinSleDec ~~  ClinSleInc            -0.020755227 0.015992263
-    ## 17          A1 ~~          A2            -1.000000057 0.180430003
-    ## 18     ClinDep ~~     ClinDep             0.466368435 0.030068636
-    ## 19     ClinAnh ~~     ClinAnh             0.404188983 0.031444197
-    ## 20   ClinGuilt ~~   ClinGuilt             0.075721246 0.021812872
-    ## 21    ClinConc ~~    ClinConc             0.024516007 0.047185781
-    ## 22     ClinSui ~~     ClinSui             0.042388754 0.013549763
-    ## 23 ClinPsycDec ~~ ClinPsycDec             0.017385346 0.010254641
-    ## 24 ClinPsycInc ~~ ClinPsycInc             0.015502792 0.004488919
-    ## 25  ClinAppDec ~~  ClinAppDec             0.064861528 0.007917880
-    ## 26  ClinAppInc ~~  ClinAppInc             0.064228972 0.021526432
-    ## 27  ClinSleDec ~~  ClinSleDec             0.069075035 0.010319988
-    ## 28  ClinSleInc ~~  ClinSleInc             0.032710091 0.011616897
-    ## 29   ClinFatig ~~   ClinFatig             0.062945493 0.044866499
+    ## [1] "Calculating CFI"
+    ## [1] "Calculating Standardized Results"
+    ## [1] "Calculating SRMR"
+    ## elapsed 
+    ##     2.5 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## clin_psych_soma.model, : A difference greater than .025 was observed pre-
+    ## and post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
+    ## SNP.
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## clin_psych_soma.model, : A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
+
+    ## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.68614501877486e-10 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
 ``` r
 clin_psych_soma.fit$modelfit
 ```
 
-    ## NULL
+    ##       chisq df p_chisq      AIC       CFI      SRMR
+    ## df 33158477 51       0 33158531 0.5614239 0.2119888
 
 ``` r
 clin_psych_soma.fit$results[c(1, 2, 3, 6, 7, 9)]
 ```
 
-    ## NULL
+    ##            lhs op         rhs STD_Genotype    STD_Genotype_SE      p_value
+    ## 3           A1 =~     ClinDep  0.124526622   0.13457022223756 3.547792e-01
+    ## 1           A1 =~     ClinAnh  0.293513541  0.110444084285779 7.870493e-03
+    ## 4           A1 =~   ClinGuilt  0.465558941  0.143195281830877 1.149131e-03
+    ## 2           A1 =~    ClinConc  0.901968455  0.198546223592579 5.550253e-06
+    ## 7           A1 =~     ClinSui  0.636075451  0.128153709057402 6.927981e-07
+    ## 5           A1 =~ ClinPsycDec  0.791212118  0.134931392389933 4.524035e-09
+    ## 6           A1 =~ ClinPsycInc  0.071392690  0.204415381706415 7.268994e-01
+    ## 10          A2 =~  ClinAppDec  0.008169618  0.162069620942445 9.597987e-01
+    ## 11          A2 =~  ClinAppInc -0.694073000  0.123975468878971 2.162473e-08
+    ## 13          A2 =~  ClinSleDec  0.121326665   0.18216119515072 5.053841e-01
+    ## 14          A2 =~  ClinSleInc -0.689187803  0.114628694714647 1.828547e-09
+    ## 12          A2 =~   ClinFatig -0.761732337  0.182931389168636 3.126834e-05
+    ## 18  ClinAppDec ~~  ClinAppInc -0.575534720  0.191796978838626 2.693137e-03
+    ## 27  ClinSleDec ~~  ClinSleInc -0.314046796  0.241978216939586 1.943457e-01
+    ## 9           A1 ~~          A2 -0.999999684   0.18042963861312 2.984998e-08
+    ## 21     ClinDep ~~     ClinDep  0.984493320 0.0634742657896156 2.962328e-54
+    ## 16     ClinAnh ~~     ClinAnh  0.913849703 0.0710935880616538 8.149346e-38
+    ## 23   ClinGuilt ~~   ClinGuilt  0.783254171  0.225630449957773 5.177454e-04
+    ## 20    ClinConc ~~    ClinConc  0.186451308  0.358886537110247 6.033672e-01
+    ## 29     ClinSui ~~     ClinSui  0.595408220  0.190325010082308 1.757755e-03
+    ## 24 ClinPsycDec ~~ ClinPsycDec  0.373982821   0.22059394580583 9.000655e-02
+    ## 25 ClinPsycInc ~~ ClinPsycInc  0.994902799  0.288079907744239 5.532307e-04
+    ## 17  ClinAppDec ~~  ClinAppDec  0.999933251   0.12206549916337 2.573944e-16
+    ## 19  ClinAppInc ~~  ClinAppInc  0.518261669  0.173694818228835 2.847601e-03
+    ## 26  ClinSleDec ~~  ClinSleDec  0.985279883  0.147203248185419 2.181530e-11
+    ## 28  ClinSleInc ~~  ClinSleInc  0.525020861  0.186459421956692 4.866599e-03
+    ## 22   ClinFatig ~~   ClinFatig  0.419763272  0.299202386329754 1.606311e-01
+    ## 8           A1 ~~          A1  1.000000000                              NA
+    ## 15          A2 ~~          A2  1.000000000                              NA
 
 Bifactor model
 
@@ -702,6 +728,329 @@ clin_psych_veg_bif.fit$results[c(1, 2, 3, 6, 7, 9)]
     ## 14           A ~~          A1  0.0000000000                             NA
     ## 15           A ~~          A2  0.0000000000                             NA
     ## 22          A1 ~~          A2  0.0000000000                             NA
+
+### Affective-Neurovegetative (Elhai Model 2c)
+
+``` r
+clin_affect_veg.model <- "
+A1 =~ NA*ClinDep + ClinAnh + ClinGuilt + ClinSui 
+A2 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycDec + ClinPsycInc + ClinFatig + ClinConc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+ClinAppDec ~~ ClinAppInc
+ClinSleDec ~~ ClinSleInc
+a12 > -1
+a12 < 1
+A1 ~~ a12*A2
+"
+clin_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_affect_veg.model, fix_resid=FALSE)
+```
+
+    ## [1] "Running primary model"
+    ## [1] "Calculating CFI"
+    ## [1] "Calculating Standardized Results"
+    ## [1] "Calculating SRMR"
+    ## elapsed 
+    ##   2.027 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## clin_affect_veg.model, : A difference greater than .025 was observed pre-
+    ## and post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
+    ## SNP.
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## clin_affect_veg.model, : A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
+
+    ## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.68614501877486e-10 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+
+``` r
+clin_affect_veg.fit$modelfit
+```
+
+    ##       chisq df p_chisq      AIC       CFI      SRMR
+    ## df 34494768 51       0 34494822 0.5437492 0.2088852
+
+``` r
+clin_affect_veg.fit$results[c(1, 2, 3, 6, 7, 9)]
+```
+
+    ##            lhs op         rhs STD_Genotype    STD_Genotype_SE      p_value
+    ## 2           A1 =~     ClinDep   0.14248371  0.147242678817483 3.332091e-01
+    ## 1           A1 =~     ClinAnh   0.31105147  0.119677204768935 9.347433e-03
+    ## 3           A1 =~   ClinGuilt   0.53480286  0.154094759093705 5.192764e-04
+    ## 4           A1 =~     ClinSui   0.73780146  0.212633641547623 5.207837e-04
+    ## 7           A2 =~  ClinAppDec   0.01382936  0.162124265201199 9.320251e-01
+    ## 8           A2 =~  ClinAppInc  -0.69415322  0.108698635503618 1.702381e-10
+    ## 13          A2 =~  ClinSleDec   0.11072852  0.182215637738683 5.434251e-01
+    ## 14          A2 =~  ClinSleInc  -0.69168463  0.111709826046773 5.948505e-10
+    ## 11          A2 =~ ClinPsycDec  -0.80560145  0.135674298245868 2.889385e-09
+    ## 12          A2 =~ ClinPsycInc  -0.06691358  0.204708171473318 7.437552e-01
+    ## 10          A2 =~   ClinFatig  -0.76975310    0.1828905039701 2.567346e-05
+    ## 9           A2 =~    ClinConc  -0.91258810  0.198905044779977 4.474011e-06
+    ## 18  ClinAppDec ~~  ClinAppInc  -0.57160740  0.191929003049497 2.899293e-03
+    ## 27  ClinSleDec ~~  ClinSleInc  -0.32106728  0.243091791475208 1.865629e-01
+    ## 6           A1 ~~          A2  -0.83302852  0.218094537622672 1.336796e-04
+    ## 21     ClinDep ~~     ClinDep   0.97969842 0.0670307187291395 2.230228e-48
+    ## 16     ClinAnh ~~     ClinAnh   0.90324714 0.0804965049942105 3.216370e-29
+    ## 23   ClinGuilt ~~   ClinGuilt   0.71398398  0.246311546481216 3.746963e-03
+    ## 29     ClinSui ~~     ClinSui   0.45565080  0.322296152988234 1.574511e-01
+    ## 17  ClinAppDec ~~  ClinAppDec   0.99980811  0.122629112397461 3.546693e-16
+    ## 19  ClinAppInc ~~  ClinAppInc   0.51815140  0.154898251417338 8.225223e-04
+    ## 26  ClinSleDec ~~  ClinSleDec   0.98773852  0.146500156444029 1.559303e-11
+    ## 28  ClinSleInc ~~  ClinSleInc   0.52157194  0.186826272342516 5.242350e-03
+    ## 24 ClinPsycDec ~~ ClinPsycDec   0.35100647  0.220293864823006 1.110855e-01
+    ## 25 ClinPsycInc ~~ ClinPsycInc   0.99552523  0.287417887625642 5.328547e-04
+    ## 22   ClinFatig ~~   ClinFatig   0.40747938   0.30165526938892 1.767430e-01
+    ## 20    ClinConc ~~    ClinConc   0.16718296  0.365049683641449 6.469628e-01
+    ## 5           A1 ~~          A1   1.00000000                              NA
+    ## 15          A2 ~~          A2   1.00000000                              NA
+
+Bifactor model
+
+``` r
+clin_affect_veg_bif.model <- "
+A =~ NA*ClinDep + ClinAnh + ClinGuilt + ClinConc + ClinSui + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycDec + ClinPsycInc + ClinFatig
+A1 =~ NA*ClinDep + ClinAnh + ClinGuilt + ClinSui 
+A2 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycDec + ClinPsycInc + ClinFatig + ClinConc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A ~~ 1*A
+A ~~ 0*A1 + 0*A2
+A1 ~~ 0*A2
+c2 > 0.001
+ClinAnh ~~ c2*ClinAnh
+c3a > 0.001
+ClinAppDec ~~ c3a*ClinAppDec
+"
+clin_affect_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_affect_veg_bif.model)
+```
+
+    ## [1] "Running primary model"
+    ## [1] "Calculating CFI"
+    ## [1] "Calculating Standardized Results"
+    ## [1] "Calculating SRMR"
+    ## elapsed 
+    ##   4.074 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## clin_affect_veg_bif.model): A difference greater than .025 was observed pre-
+    ## and post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
+    ## SNP.
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## clin_affect_veg_bif.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
+
+    ## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.68614501877486e-10 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+
+``` r
+clin_affect_veg_bif.fit$modelfit
+```
+
+    ##       chisq df p_chisq      AIC       CFI      SRMR
+    ## df 26100595 42       0 26100667 0.6547762 0.1584626
+
+``` r
+clin_affect_veg_bif.fit$results[c(1, 2, 3, 6, 7, 9)]
+```
+
+    ##            lhs op         rhs  STD_Genotype   STD_Genotype_SE      p_value
+    ## 5            A =~     ClinDep  0.1305767397 0.153657948037931 3.960937e-01
+    ## 1            A =~     ClinAnh  0.3422847584 0.110910875838661 2.034333e-03
+    ## 7            A =~   ClinGuilt  0.5071903551 0.145955941777168 5.083230e-04
+    ## 4            A =~    ClinConc  0.7978603559 0.218103468068125 2.640157e-04
+    ## 12           A =~     ClinSui  0.7159635406 0.157707969122746 5.805233e-06
+    ## 2            A =~  ClinAppDec  0.1434456603    0.219496276432 5.154558e-01
+    ## 3            A =~  ClinAppInc  0.5884562639 0.143106186974926 4.020342e-05
+    ## 10           A =~  ClinSleDec -0.1070128925  0.20002661846076 5.967726e-01
+    ## 11           A =~  ClinSleInc  0.6435888669  0.13445014354752 1.852686e-06
+    ## 8            A =~ ClinPsycDec  0.7923649247 0.140031813715056 1.629972e-08
+    ## 9            A =~ ClinPsycInc  0.2748663973 0.268909294645226 3.040522e-01
+    ## 6            A =~   ClinFatig  0.6066631398 0.223452663875753 6.841304e-03
+    ## 17          A1 =~     ClinDep  0.9547582964 0.567643826075807 9.264562e-02
+    ## 16          A1 =~     ClinAnh  0.9392455053 0.554406658932479 9.033183e-02
+    ## 18          A1 =~   ClinGuilt -0.1842252844 0.198417595759884 3.531374e-01
+    ## 19          A1 =~     ClinSui -0.1343872685 0.136287439154553 3.238112e-01
+    ## 22          A2 =~  ClinAppDec  0.9950575874 0.309097077530136 1.239877e-03
+    ## 23          A2 =~  ClinAppInc -0.5014496547 0.206731686614554 1.514445e-02
+    ## 28          A2 =~  ClinSleDec  0.3174412189 0.205442693398648 1.212759e-01
+    ## 29          A2 =~  ClinSleInc -0.2249812106 0.195694820654991 2.466089e-01
+    ## 26          A2 =~ ClinPsycDec -0.0578870559 0.209978947783817 7.815766e-01
+    ## 27          A2 =~ ClinPsycInc  0.4907658333 0.306656708779576 1.087120e-01
+    ## 25          A2 =~   ClinFatig -0.5359263998 0.296870456495518 7.058983e-02
+    ## 24          A2 =~    ClinConc -0.3680599452  0.36040930044003 3.061974e-01
+    ## 31     ClinAnh ~~     ClinAnh  0.0009999978   1.0451250105252 9.982726e-01
+    ## 32  ClinAppDec ~~  ClinAppDec  0.0009998674  0.59836277927468 9.790858e-01
+    ## 35     ClinDep ~~     ClinDep  0.0713862649  1.08787459409662 9.486103e-01
+    ## 37   ClinGuilt ~~   ClinGuilt  0.7088191545 0.254614428506697 5.418085e-03
+    ## 34    ClinConc ~~    ClinConc  0.2279508985 0.352979026451816 5.190849e-01
+    ## 42     ClinSui ~~     ClinSui  0.4693366784 0.259723391536353 7.179541e-02
+    ## 33  ClinAppInc ~~  ClinAppInc  0.4022674226 0.210164632014156 5.509913e-02
+    ## 40  ClinSleDec ~~  ClinSleDec  0.8877793223 0.175062780160802 4.448282e-07
+    ## 41  ClinSleInc ~~  ClinSleInc  0.5351768070 0.182481295815446 3.330065e-03
+    ## 38 ClinPsycDec ~~ ClinPsycDec  0.3688071588 0.216622538895295 8.933317e-02
+    ## 39 ClinPsycInc ~~ ClinPsycInc  0.6836001327 0.526682135472707 1.989219e-01
+    ## 36   ClinFatig ~~   ClinFatig  0.3447428010 0.336375462990615 3.099410e-01
+    ## 20          A1 ~~          A1  1.0000000000                             NA
+    ## 30          A2 ~~          A2  1.0000000000                             NA
+    ## 13           A ~~           A  1.0000000000                             NA
+    ## 14           A ~~          A1  0.0000000000                             NA
+    ## 15           A ~~          A2  0.0000000000                             NA
+    ## 21          A1 ~~          A2  0.0000000000                             NA
+
+### Cognitive-Mood-Neuroveg (Kendler Neale) model
+
+``` r
+clin_cog_mood_neuroveg.model <- "
+A1 =~ NA*ClinPsycInc + ClinPsycDec + ClinGuilt + ClinConc + ClinSui
+A2 =~ NA*ClinDep + ClinAnh + ClinGuilt
+A3 =~ NA*ClinSleDec + ClinSleInc + ClinFatig + ClinAppDec + ClinAppInc
+ClinAppDec ~~ ClinAppInc
+ClinSleDec ~~ ClinSleInc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3
+c2 > 0.001
+ClinAnh ~~ c2*ClinAnh
+"
+clin_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_cog_mood_neuroveg.model, fix_resid=FALSE)
+```
+
+    ## [1] "Running primary model"
+    ## [1] "Calculating CFI"
+    ## [1] "Calculating Standardized Results"
+    ## [1] "Calculating SRMR"
+    ## elapsed 
+    ##   1.591 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.42189770725478 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## clin_cog_mood_neuroveg.model, : A difference greater than .025 was observed
+    ## pre- and post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
+    ## SNP.
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## clin_cog_mood_neuroveg.model, : A difference greater than .025 was observed
+    ## pre- and post-smoothing for Z-statistics in the genetic covariance matrix. This
+    ## reflects a large difference and results should be interpreted with caution!!
+    ## This can often result from including low powered traits, and you might consider
+    ## removing those traits from the model. If you are going to run a multivariate
+    ## GWAS we strongly recommend setting the smooth_check argument to true to check
+    ## smoothing for each SNP.
+
+    ## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.68614501877486e-10 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  4.0842542727239 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+
+``` r
+clin_cog_mood_neuroveg.fit$modelfit
+```
+
+    ##       chisq df p_chisq      AIC       CFI      SRMR
+    ## df 34306164 48       0 34306224 0.5462438 0.1892072
+
+``` r
+clin_cog_mood_neuroveg.fit$results[c(1, 2, 3, 6, 7, 9)]
+```
+
+    ##            lhs op         rhs  STD_Genotype   STD_Genotype_SE      p_value
+    ## 4           A1 =~ ClinPsycInc  0.0712022896 0.208366136064858 7.325798e-01
+    ## 3           A1 =~ ClinPsycDec  0.8450615241 0.146436896623549 7.888081e-09
+    ## 2           A1 =~   ClinGuilt  0.5276850066 0.155622570321243 6.974706e-04
+    ## 1           A1 =~    ClinConc  0.9450885197 0.195969134490545 1.416360e-06
+    ## 5           A1 =~     ClinSui  0.6739025552 0.135088207720763 6.082296e-07
+    ## 10          A2 =~     ClinDep  0.8447403811 0.220657638068447 1.283142e-04
+    ## 9           A2 =~     ClinAnh  1.0007753160 0.283194384234891 4.082276e-04
+    ## 11          A2 =~   ClinGuilt -0.0822761605 0.199683023413138 6.804221e-01
+    ## 17          A3 =~  ClinSleDec  0.1850808500 0.173102290847626 2.849858e-01
+    ## 18          A3 =~  ClinSleInc -0.6869083409  0.11538725967035 2.634279e-09
+    ## 16          A3 =~   ClinFatig -0.7328302433 0.183491884543068 6.502902e-05
+    ## 14          A3 =~  ClinAppDec -0.0445083289 0.161026706030556 7.821873e-01
+    ## 15          A3 =~  ClinAppInc -0.6917986506 0.125504409742689 3.545377e-08
+    ## 22  ClinAppDec ~~  ClinAppInc -0.6119981138 0.194802513851411 1.680125e-03
+    ## 31  ClinSleDec ~~  ClinSleInc -0.2705292584 0.240538178350515 2.607138e-01
+    ## 20     ClinAnh ~~     ClinAnh  0.0009999802 0.569261063138664 9.968270e-01
+    ## 29 ClinPsycInc ~~ ClinPsycInc  0.9949304763 0.288092725550976 5.533265e-04
+    ## 28 ClinPsycDec ~~ ClinPsycDec  0.2858713096 0.252397813171088 2.573639e-01
+    ## 27   ClinGuilt ~~   ClinGuilt  0.7248415452 0.245357203675195 3.135899e-03
+    ## 24    ClinConc ~~    ClinConc  0.1068076860   0.3725670204879 7.743551e-01
+    ## 33     ClinSui ~~     ClinSui  0.5458555760 0.208425798885262 8.820658e-03
+    ## 25     ClinDep ~~     ClinDep  0.2864132285 0.374755447206869 4.456948e-01
+    ## 30  ClinSleDec ~~  ClinSleDec  0.9657442642 0.153420500852089 3.079150e-10
+    ## 32  ClinSleInc ~~  ClinSleInc  0.5281569239 0.186788601761288 4.691108e-03
+    ## 26   ClinFatig ~~   ClinFatig  0.4629597248 0.290557687089033 1.110740e-01
+    ## 21  ClinAppDec ~~  ClinAppDec  0.9980188895 0.117934439060305 2.616168e-17
+    ## 23  ClinAppInc ~~  ClinAppInc  0.5214144457  0.17516079038137 2.913435e-03
+    ## 7           A1 ~~          A2  0.1158816699 0.124652017603238 3.527328e-01
+    ## 8           A1 ~~          A3 -0.9126233797 0.160358398793137 1.261879e-08
+    ## 13          A2 ~~          A3 -0.3975312432 0.168329027132891 1.817424e-02
+    ## 6           A1 ~~          A1  1.0000000000                             NA
+    ## 12          A2 ~~          A2  1.0000000000                             NA
+    ## 19          A3 ~~          A3  1.0000000000                             NA
+
+### Clin Model Fit
+
+``` r
+clin_model_list=
+list("1a"=list(name="Common", model=clin_commonfactor.fit),
+     "1b"=list(name="Common (Dir)", model=clin_commonfactor_dir.fit),
+         "2a(i)"=list(name="Psych-Somatic", model=clin_psych_soma.fit),
+         "2a(ii)"=list(name="Psych-Somatic (BiF)", model=clin_psych_soma_bif.fit),
+         "2b(i)"=list(name="Psych-Neuroveg", model=clin_psych_veg.fit),
+         "2b(ii)"=list(name="Psych-Neuroveg (BiF)", model=clin_psych_veg_bif.fit),
+         "2c(i)"=list(name="Affect-Neuroveg", model=clin_affect_veg.fit),
+         "2c(ii)"=list(name="Affect-Neuroveg (BiF)", model=clin_affect_veg_bif.fit),
+         "3"=list(name="Cog-Mood-Neuroveg", model=clin_cog_mood_neuroveg.fit)
+         )
+
+clin_model_fits <- 
+data.frame(Model=names(clin_model_list),
+                 Name=sapply(clin_model_list, function(m) m$name)) %>%
+bind_cols(
+bind_rows(
+lapply(clin_model_list, function(m) m$model$modelfit)
+))
+rownames(clin_model_fits) <- NULL
+
+clin_model_fits %>%
+select(-chisq, -df) %>%
+mutate(dAIC=AIC-min(AIC)) %>%
+mutate_if(is.numeric, ~round(., 3))
+```
+
+    ##    Model                  Name p_chisq      AIC   CFI  SRMR     dAIC
+    ## 1     1a                Common       0 38626919 0.489 0.220 12526252
+    ## 2     1b          Common (Dir)       0 33158450 0.561 0.212  7057783
+    ## 3  2a(i)         Psych-Somatic       0 33158531 0.561 0.212  7057864
+    ## 4 2a(ii)   Psych-Somatic (BiF)       0 29822220 0.606 0.176  3721553
+    ## 5  2b(i)        Psych-Neuroveg       0 33158515 0.561 0.212  7057848
+    ## 6 2b(ii)  Psych-Neuroveg (BiF)       0 31149269 0.588 0.156  5048601
+    ## 7  2c(i)       Affect-Neuroveg       0 34494822 0.544 0.209  8394155
+    ## 8 2c(ii) Affect-Neuroveg (BiF)       0 26100667 0.655 0.158        0
+    ## 9      3     Cog-Mood-Neuroveg       0 34306224 0.546 0.189  8205557
 
 ## ALSPAC-UKB (Population)
 
