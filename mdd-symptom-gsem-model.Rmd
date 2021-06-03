@@ -135,26 +135,74 @@ as.vector(sample_symptoms[dimnames(symptoms_covstruct$S)[[2]]])
 
 # Structural models
 
+Symptoms with positive variances
 
+```{r}
 
-## ADGS-PGC
+symptoms_S_var <- diag(symptoms_covstruct$S)
+names(symptoms_S_var) <- dimnames(symptoms_covstruct$S)[[2]]
+
+symptoms_S_var[which(symptoms_S_var > 0)]
+
+```
+
+## Common factor
+
+Common factor across symptoms from both cohorts
+
+```{r commonfactor, cache=TRUE}
+
+commonfactor.model <- "
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
+A1 ~~ 1*A1
+"
+
+commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor.model)
+
+commonfactor.fit$modelfit
+commonfactor.fit$results[c(1,2,3,6,7)]
+
+```
+
+Correlation among directional symptoms
+
+```{r commonfactor_dir, cache=TRUE}
+
+commonfactor_dir.model <- "
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
+A1 ~~ 1*A1
+ClinAppDec ~~ ClinAppInc
+ClinSleDec ~~ ClinSleInc
+PopDep ~~ PopAnh
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
+"
+
+commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor_dir.model)
+
+commonfactor_dir.fit$modelfit
+commonfactor_dir.fit$results[c(1,2,3,6,7,9)]
+
+```
+
+## ADGS-PGC (Clinical)
 
 ### Common factor
 
 Common factor model. Allow residual negative correlation between directional symptoms
 
-```{r agds_pgc_commonfactor, cache=TRUE}
+```{r clin_commonfactor, cache=TRUE}
 
-pgc_commonfactor.model <- "
+clin_commonfactor.model <- "
 A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
 A1 ~~ 1*A1
 c3a3b > -1
 ClinAppDec ~~ c3a3b*ClinAppInc
 "
-pgc_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pgc_commonfactor.model)
+clin_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor.model)
 
-pgc_commonfactor.fit$modelfit
-pgc_commonfactor.fit$results[c(1,2,3,6,7)]
+clin_commonfactor.fit$modelfit
+clin_commonfactor.fit$results[c(1,2,3,6,7)]
 
 
 fit_graph <- function(results, ...) {
@@ -284,6 +332,7 @@ pop_commonfactor_sle.fit$modelfit
 
 ```
 
+
 ```{r pop_commonfactor_app_sle, cache=TRUE}
 
 pop_commonfactor_app_sle.model <- "
@@ -314,7 +363,6 @@ A2 ~~ 1*A2
 A3 ~~ 1*A3
 PopDep ~~ PopAnh
 PopSleDec ~~ PopSleInc
-PopAppDec ~~ PopAppInc
 "
 pop_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg.model)
 
@@ -332,7 +380,6 @@ A2 ~~ 1*A2
 A3 ~~ 1*A3
 PopDep ~~ PopAnh
 PopSleDec ~~ PopSleInc
-PopAppDec ~~ PopAppInc
 c2 > 0.001
 PopAnh ~~ c2*PopAnh
 a13 > -1.0
@@ -523,39 +570,33 @@ pop_affect_veg_bif_constr.fit$results[c(1,2,3,6,7)]
 
 ```{r}
 
-model_fits <- 
-data.frame(Model=c('1a', '1b', '1c', '1d', '1e',
-                   '2a(i)', '2a(ii)', '2b(i)', '2b(ii)', '2c(i)', '2c(ii)'),
-       Name=c('Common',
-	          'Common (gating)',
-			  'Common (App)',
-			  'Common (Sle)',
-			  'Common(App,Sle)',
-			  'Psych-Somatic',
-              'Psych-Somatic (BiF)',
-              'Psych-Neuroveg',
-              'Psych-Neuroveg (BiF)',
-			  'Affect-Neuroveg',
-			  'Affect-Neuroveg (BiF)')) %>%
+pop_model_list=
+list("1a"=list(name="Common", model=pop_commonfactor.fit),
+     "1b"=list(name="Common (gating)", model=pop_commonfactor_gating.fit),
+     "1c"=list(name="Common (App)", model=pop_commonfactor_app.fit),
+     "1d"=list(name="Common (Sle)", model=pop_commonfactor_sle.fit),
+     "1er"=list(name="Common (App,Sle)", model=pop_commonfactor_app_sle.fit),
+     "2a(i)"=list(name="Psych-Somatic", model=pop_psych_soma_constr.fit),
+     "2a(ii)"=list(name="Psych-Somatic (BiF)", model=pop_psych_soma_bif.fit),
+     "2b(i)"=list(name="Psych-Neuroveg", model=pop_psych_veg.fit),
+     "2b(ii)"=list(name="Psych-Neuroveg (BiF)", model=pop_psych_veg_bif.fit),
+     "2c(i)"=list(name="Affect-Neuroveg", model=pop_affect_veg.fit),
+     "2c(ii)"=list(name="Affect-Neuroveg (BiF)", model=pop_affect_veg_bif_constr.fit)
+     )
+
+pop_model_fits <- 
+data.frame(Model=names(pop_model_list),
+           Name=sapply(pop_model_list, function(m) m$name)) %>%
 bind_cols(
 bind_rows(
-lapply(list(pop_commonfactor.fit,
-            pop_commonfactor_gating.fit,
-			pop_commonfactor_app.fit,
-			pop_commonfactor_sle.fit,
-			pop_commonfactor_app_sle.fit,
-			pop_psych_soma_constr.fit,
-            pop_psych_soma_bif.fit,
-            pop_psych_veg.fit,
-            pop_psych_veg_bif.fit,
-			pop_affect_veg.fit,
-			pop_affect_veg_bif_constr.fit),
-       function(fit) signif(fit$modelfit))
+lapply(pop_model_list, function(m) m$model$modelfit)
 ))
-rownames(model_fits) <- NULL
-model_fits %>%
+rownames(pop_model_fits) <- NULL
+
+pop_model_fits %>%
 select(-chisq, -df) %>%
-mutate(dAIC=AIC-min(AIC))
+mutate(dAIC=AIC-min(AIC)) %>%
+mutate_if(is.numeric, ~round(., 3))
 
 
 ```
