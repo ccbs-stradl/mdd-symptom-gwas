@@ -3,13 +3,13 @@ title: Stratified GenomicSEM of MDD symptoms setup
 author: Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard 
 output:
   html_document:
-	toc: TRUE
-	code_folding: hide
-	number_sections: TRUE
-	df_print: kable
-	keep_md: true
+    toc: TRUE
+    code_folding: hide
+    number_sections: TRUE
+    df_print: kable
+    keep_md: true
   md_document:
-	variant: markdown_github
+    variant: markdown_github
 ---
 
 Set up [stratified LDSC covariance matrix](https://github.com/GenomicSEM/GenomicSEM/wiki/6.-Stratified-Genomic-SEM).
