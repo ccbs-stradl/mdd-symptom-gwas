@@ -41,37 +41,40 @@ mutate(pop_prev=mean(c(AGDS_PGC, ALSPAC_UKB))) %>%
 select(symptom, pop_prev)
 
 covstruct_prefix <- 'agds_pgc.alspac_ukb.common.covstruct'
+sumstats_prefix <- 'agds_pgc.alspac_ukb.common.sumstats'
 covstruct_r <- here::here('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- here::here('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
-	
-if(!file.exists(covstruct_r)) {
+sumstats_rds <- here::here('sumstats', paste(sumstats_prefix, 'rds', sep='.'))
 
-  # list sumstats distribution directories
-  sumstats_files <- list.files(here::here('meta', 'munged'), '.gz', full.names=TRUE)
+# list sumstats distribution directories
+sumstats_files <- list.files(here::here('meta', 'munged'), '.gz', full.names=TRUE)
 
-  # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
+# pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
+cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
 
-  sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
+sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
 
-  sumstats_prevs <- 
-	symptoms_sample_prev %>%
-	left_join(sumstats_paths, by='sumstats') %>%
-	left_join(pop_prevs_w, by='symptom') %>%
-	left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
-	mutate(Sample=case_when(cohorts %in% 'AGDS_PGC' ~ 'Clin',
-							cohorts %in% 'ALSPAC_UKB' ~ 'Pop',
-							TRUE ~ NA_character_)) %>%
-	mutate(trait_name=paste0(Sample, abbv))
-	
-  sumstats_prevs_keep <- sumstats_prevs %>%
-  filter(trait_name %in% c("ClinAppDec", "ClinAppInc", "ClinSleDec",
-                           "ClinSleInc", "ClinPsycInc", "ClinSui",
-						   "PopDep", "PopAnh", "PopAppDec", "PopAppInc",
-						   "PopSleDec", "PopSleInc", "PopFatig", 
-						   "PopGuilt", "PopConc", "PopSui"))
+sumstats_prevs <- 
+symptoms_sample_prev %>%
+left_join(sumstats_paths, by='sumstats') %>%
+left_join(pop_prevs_w, by='symptom') %>%
+left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
+mutate(Sample=case_when(cohorts %in% 'AGDS_PGC' ~ 'Clin',
+						cohorts %in% 'ALSPAC_UKB' ~ 'Pop',
+						TRUE ~ NA_character_)) %>%
+mutate(trait_name=paste0(Sample, abbv)) %>%
+mutate(daner=paste(here::here('meta', 'distribution', sumstats, paste0('daner_', sumstats, '.gz'))))
+
+sumstats_prevs_keep <- sumstats_prevs %>%
+filter(trait_name %in% c("ClinAppDec", "ClinAppInc", "ClinSleDec",
+					   "ClinSleInc", "ClinPsycInc", "ClinSui",
+					   "PopDep", "PopAnh", "PopAppDec", "PopAppInc",
+					   "PopSleDec", "PopSleInc", "PopFatig", 
+					   "PopGuilt", "PopConc", "PopSui"))
 
   write_tsv(sumstats_prevs, here::here('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
+	
+if(!file.exists(covstruct_r)) {
 
   symptoms_covstruct <- ldsc(traits=sumstats_prevs_keep$filename,
 							 sample.prev=sumstats_prevs_keep$samp_prev,
@@ -90,10 +93,23 @@ if(!file.exists(covstruct_r)) {
 
   symptoms_covstruct <- dget(covstruct_r)
 
-  sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
-
 }
 
 # download 1KG reference file from https://utexas.box.com/s/vkd36n197m8klbaio3yzoxsee6sxo11v
 
-symptoms_sumstats <- 
+if(!file.exists(sumstats_rds)){
+	
+	symptoms_sumstats <- sumstats(files=sumstats_prevs_keep$daner,
+	                              ref=here::here('sumstats', 'reference', 'reference.1000G.maf.0.005.txt'),
+								  trait.names=sumstats_prevs_keep$trait_name,
+								  se.logit=rep(TRUE, nrow(sumstats_prevs_keep)),
+								  OLS=NULL,
+								  linprob=rep(FALSE, nrow(sumstats_prevs_keep)),
+								  info.filter=0.6,
+								  maf.filter=0.01,
+								  keep.indel=FALSE,
+								  parallel=TRUE,
+								  cores=8)
+						
+	saveRDS(symptoms_sumstats, sumstats_rds)
+}
