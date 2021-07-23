@@ -1,9 +1,10 @@
-#$ gsem_sldsc
+#$ -N gsem_sldsc
 #$ -l h_vmem=8G
-#$ -pe sharedmem 6
-#$ -l h_rt=6:00:00
+#$ -pe sharedmem 12
+#$ -l h_rt=12:00:00
 #$ -o logs
 #$ -e logs
+#$ -cwd
 
 . /etc/profile.d/modules.sh
 module load igmm/apps/R/4.1.0
