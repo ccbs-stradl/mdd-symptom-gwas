@@ -185,6 +185,53 @@ commonfactor_dir.fit$results[c(1,2,3,6,7,9)]
 
 ```
 
+Ascertainment-specific factors
+
+```{r clin_pop, cache=TRUE}
+
+clin_pop.model <- "
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui 
+A2 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+a12 > -1
+a12 < 1
+A1 ~~ a12*A2
+ClinAppDec ~~ ClinAppInc
+ClinSleDec ~~ ClinSleInc
+PopDep ~~ PopAnh
+PopAppDec ~~ PopAppInc
+PopSleDec ~~ PopSleInc
+"
+
+clin_pop.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop.model)
+
+clin_pop.fit$modelfit
+clin_pop.fit$results[c(1,2,3,6,7,9)]
+
+```
+
+
+```{r clin_pop_bif, cache=TRUE}
+
+clin_pop_bif.model <- "
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui 
+A2 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
+A =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A ~~ 1*A
+A ~~ 0*A1 + 0*A2
+A1 ~~ 0*A2
+"
+
+clin_pop_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop_bif.model)
+
+clin_pop_bif.fit$modelfit
+clin_pop_bif.fit$results[c(1,2,3,6,7,9)]
+
+```
+
 ## ADGS-PGC (Clinical)
 
 ### Common factor

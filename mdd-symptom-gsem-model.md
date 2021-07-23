@@ -42,13 +42,63 @@ GenomicSEM version
 
 ``` r
 require(readr)
-require(tidyr)
-require(stringr)
-require(dplyr)
-require(ggplot2)
-require(corrplot)
-require(GenomicSEM)
+```
 
+    ## Loading required package: readr
+
+``` r
+require(tidyr)
+```
+
+    ## Loading required package: tidyr
+
+``` r
+require(stringr)
+```
+
+    ## Loading required package: stringr
+
+``` r
+require(dplyr)
+```
+
+    ## Loading required package: dplyr
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
+require(ggplot2)
+```
+
+    ## Loading required package: ggplot2
+
+    ## RStudio Community is a great place to get help:
+    ## https://community.rstudio.com/c/tidyverse
+
+``` r
+require(corrplot)
+```
+
+    ## Loading required package: corrplot
+
+    ## corrplot 0.88 loaded
+
+``` r
+require(GenomicSEM)
+```
+
+    ## Loading required package: GenomicSEM
+
+``` r
 packageVersion("GenomicSEM")
 ```
 
@@ -136,7 +186,7 @@ sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 't
 ```
 
     ## 
-    ## ── Column specification ────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────
     ## cols(
     ##   cohorts = col_character(),
     ##   symptom = col_character(),
