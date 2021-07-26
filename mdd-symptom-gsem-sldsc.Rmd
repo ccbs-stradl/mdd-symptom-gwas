@@ -132,8 +132,8 @@ if(!file.exists(covstruct_r)) {
 			   frq=here::here("sumstats/reference/1000G_Phase3_frq/"),
 			   trait.names=sumstats_prevs$trait_name)
 	
-	dput(symptoms_covstruct, covstruct_r, control=c('all', 'digits17'))
-	saveRDS(symptoms_covstruct, covstruct_rds)
+	dput(symptoms_strat_covstuct, covstruct_r, control=c('all', 'digits17'))
+	saveRDS(symptoms_strat_covstuct, covstruct_rds)
 	
 }
 
