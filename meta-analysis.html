@@ -615,6 +615,28 @@ for(gwas_gz in gwas_files) {
 
         }
 }</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   CHR = col_double(),
+##   SNP = col_character(),
+##   BP = col_double(),
+##   A1 = col_character(),
+##   A2 = col_character(),
+##   FRQ_A_10281 = col_double(),
+##   FRQ_U_1421 = col_double(),
+##   INFO = col_double(),
+##   OR = col_double(),
+##   SE = col_double(),
+##   P = col_double(),
+##   ngt = col_double(),
+##   Direction = col_character(),
+##   HetISqt = col_double(),
+##   HetDf = col_double(),
+##   HetPVa = col_double(),
+##   Nca = col_double(),
+##   Nco = col_double(),
+##   Neff_half = col_double()
+## )</code></pre>
 <p>Number of SNPs pre- and post-alignment</p>
 <pre class="r"><code>aligned_count_files &lt;- list.files(&#39;sumstats/aligned&#39;, pattern=&#39;aligned_snpcount&#39;, full.names=TRUE)
 
@@ -800,81 +822,86 @@ bind_rows(lapply(aligned_count_files, read_tsv, col_types=cols(gwas = col_charac
 <td align="right">7227271</td>
 </tr>
 <tr class="odd">
+<td align="left">daner_MDD8_CasesAllCohorts.meta.gz</td>
+<td align="right">9260475</td>
+<td align="right">8723084</td>
+</tr>
+<tr class="even">
 <td align="left">daner_MDD8_UKBB_CIDI_glm.eur.txt.gz</td>
 <td align="right">8080287</td>
 <td align="right">8051380</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">daner_MDD9_ALSPAC_CISR.txt.gz</td>
 <td align="right">7244363</td>
 <td align="right">7227222</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">daner_MDD9_CasesAllCohorts.meta.gz</td>
 <td align="right">9294566</td>
 <td align="right">8754275</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">daner_MDD9_UKBB_CIDI_glm.eur.txt.gz</td>
 <td align="right">8080287</td>
 <td align="right">8051380</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">death_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619401</td>
 <td align="right">7592785</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">depressed_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619596</td>
 <td align="right">7593004</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">fatigue_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619831</td>
 <td align="right">7593227</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">psychomotor_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619315</td>
 <td align="right">7592706</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">restless_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619483</td>
 <td align="right">7592872</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">sleepChange_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619689</td>
 <td align="right">7593073</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">sleepMore_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619460</td>
 <td align="right">7592840</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">sleepProb_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619488</td>
 <td align="right">7592876</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">weightChange_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619537</td>
 <td align="right">7592927</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">weightGain_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619020</td>
 <td align="right">7592366</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">weightLost_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7618991</td>
 <td align="right">7592341</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">worthless_GWASsumstats_QCed.dat_daner.gz</td>
 <td align="right">7619646</td>
 <td align="right">7593039</td>

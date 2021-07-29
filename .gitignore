@@ -19,3 +19,11 @@ meta/pcaer_sub
 meta/pi_sub
 meta/reference_info
 meta/refiex_templ
+meta/j._*
+meta/errandout
+meta/resdaner
+meta/emptyinfo
+meta/datasets_info*
+meta/empty_info
+*.meta
+*.done
