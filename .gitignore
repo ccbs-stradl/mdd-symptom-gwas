@@ -4,6 +4,7 @@ config.yaml
 *.rds
 *.info
 *.csv
+*.txt
 *.enc
 *.enc_ukb
 *.xlsx
