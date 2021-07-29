@@ -4,6 +4,7 @@ config.yaml
 *.rds
 *.info
 *.csv
+*.txt
 *.enc
 *.enc_ukb
 *.xlsx
@@ -27,3 +28,8 @@ meta/datasets_info*
 meta/empty_info
 *.meta
 *.done
+meta/distribution/*
+**/logs/*
+pheno/*
+*.RData
+mtag/mtag/

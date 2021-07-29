@@ -1,0 +1,158 @@
+---
+title: Stratified GenomicSEM of MDD symptoms setup
+author: Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard 
+output:
+  html_document:
+    toc: TRUE
+    code_folding: hide
+    number_sections: TRUE
+    df_print: kable
+    keep_md: true
+  md_document:
+    variant: markdown_github
+---
+
+Set up [stratified LDSC covariance matrix](https://github.com/GenomicSEM/GenomicSEM/wiki/6.-Stratified-Genomic-SEM).
+
+```{r library}
+library(GenomicSEM)
+library(stringr)
+library(readr)
+library(dplyr)
+library(tidyr)
+```
+
+# LD Score annotation files
+
+Download the baseline annotations
+
+```{bash, eval=FALSE}
+# LD Score annotation weights
+mkdir -p sumstats/reference
+curl -L https://data.broadinstitute.org/alkesgroup/LDSCORE/1000G_Phase3_baselineLD_v2.2_ldscores.tgz > sumstats/reference/1000G_Phase3_baselineLD_v2.2_ldscores.tgz
+curl -L https://data.broadinstitute.org/alkesgroup/LDSCORE/1000G_Phase3_weights_hm3_no_MHC.tgz > sumstats/reference/1000G_Phase3_weights_hm3_no_MHC.tgz
+curl -L https://data.broadinstitute.org/alkesgroup/LDSCORE/1000G_Phase3_frq.tgz > sumstats/reference/1000G_Phase3_frq.tgz
+
+mkdir -p sumstats/reference/1000G_Phase3_baselineLD_v2.2_ldscores
+tar -xzf sumstats/reference/1000G_Phase3_baselineLD_v2.2_ldscores.tgz -C sumstats/reference/1000G_Phase3_baselineLD_v2.2_ldscores
+tar -xzf sumstats/reference/1000G_Phase3_weights_hm3_no_MHC.tgz -C sumstats/reference
+tar -xzf sumstats/reference/1000G_Phase3_frq.tgz -C sumstats/reference
+rm sumstats/reference/1000G_Phase3_weights_hm3_no_MHC.tgz sumstats/reference/1000G_Phase3_frq.tgz
+```
+
+# Trait information
+
+
+```{r symptom_labels}
+
+dsm_mdd_symptoms_labels <-
+read_delim("
+MDD1;Mood;Mood;Dep
+MDD2;Interest;Interest;Anh
+MDD3;Weight⇅;Weight⇆;App
+MDD3a;Weight⇊;Weight⇇;AppDec
+MDD3b;Weight⇈;Weight⇉;AppInc
+MDD4;Sleep⇅;Sleep⇆;Sle
+MDD4a;Sleep⇊;Sleep⇇;SleDec
+MDD4b;Sleep⇈;Sleep⇉;SleInc
+MDD5;Motor⇅;Motor⇆;Psyc
+MDD5a;Motor⇈;Motor⇉;PsycInc
+MDD5b;Motor⇊;Motor⇇;PsycDec
+MDD6;Fatigue;Fatigue;Fatig
+MDD7;Guilt;Guilt;Guilt
+MDD8;Concentrate;Concentrate;Conc
+MDD9;Suicidality;Suicidality;Sui
+", col_names=c('ref', 'h', 'v', 'abbv'), delim=';')
+
+```
+
+## Sample prevalences
+
+```{r sample_prev}
+
+symptoms_sample_prev_file <- here::here('meta', 'symptoms_prev.txt')
+symptoms_sample_prev <- read_tsv(symptoms_sample_prev_file)
+
+pop_prevs_w <-
+symptoms_sample_prev %>%
+mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
+				   symptom %in% c('MDD1', 'MDD2') ~ 1.0,
+				   TRUE ~ 0.57)) %>%
+mutate(pop_prev=samp_prev*w) %>%
+select(symptom, cohorts, pop_prev) %>%
+pivot_wider(names_from=cohorts, values_from=pop_prev) %>%
+group_by(symptom) %>%
+mutate(pop_prev=mean(c(AGDS_PGC, ALSPAC_UKB))) %>%
+select(symptom, pop_prev)
+
+```
+
+
+## Summary statistics
+
+```{r sumstats}
+
+# list sumstats distribution directories
+sumstats_files <- list.files(here::here('meta', 'munged'), '.gz', full.names=TRUE)
+
+# pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
+cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
+
+sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
+
+sumstats_prevs <- 
+symptoms_sample_prev %>%
+left_join(sumstats_paths, by='sumstats') %>%
+left_join(pop_prevs_w, by='symptom') %>%
+left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
+mutate(Sample=case_when(cohorts %in% 'AGDS_PGC' ~ 'Clin',
+						cohorts %in% 'ALSPAC_UKB' ~ 'Pop',
+						TRUE ~ NA_character_)) %>%
+mutate(trait_name=paste0(Sample, abbv)) %>%
+mutate(daner=paste(here::here('meta', 'distribution', sumstats, paste0('daner_', sumstats, '.gz'))))
+
+```
+
+# Statified LDSC
+
+```{r s_ldcs}
+
+covstruct_prefix <- 'agds_pgc.alspac_ukb.s_ldsc.baseline.covstruct'
+covstruct_r <- here::here('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
+covstruct_dir <- here::here('ldsc', covstruct_prefix)
+covstruct_rds <- here::here('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
+	
+symptoms_strat_covstruct <-
+	s_ldsc(traits=sumstats_prevs$filename,
+		   sample.prev=sumstats_prevs$samp_prev,
+		   population.prev=sumstats_prevs$pop_prev,
+		   ld=here::here("sumstats/reference/1000G_Phase3_baselineLD_v2.2_ldscores/"),
+		   wld=here::here("sumstats/reference/1000G_Phase3_weights_hm3_no_MHC/"),
+		   frq=here::here("sumstats/reference/1000G_Phase3_frq/"),
+		   trait.names=sumstats_prevs$trait_name)
+
+
+
+dir.create(covstruct_dir)
+
+for(entry in c('S', 'V', 'S_Tau', 'V_Tau')) {
+
+	cat(paste(entry, '\n'))
+	entry_dir <- here::here(covstruct_dir, entry)
+	dir.create(entry_dir)
+		
+	for(annot in names(symptoms_strat_covstruct[[entry]])) {
+		annotation_matrix <- symptoms_strat_covstruct[[entry]][[annot]]
+		annotation_matrix_r <- here::here(entry_dir, paste(annot, 'deparse', 'R', sep='.'))
+		dput(annotation_matrix, annotation_matrix_r, control=c('all', 'digits17'))	
+	}
+
+}
+
+
+dput(symptoms_strat_covstruct[c('I', 'N', 'm', 'Prop', 'Select')], covstruct_r, control=c('all', 'digits17'))
+
+saveRDS(symptoms_strat_covstuct, covstruct_rds)
+	
+
+```
