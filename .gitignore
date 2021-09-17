@@ -25,3 +25,9 @@ meta/distribution/*
 pheno/*
 *.RData
 mtag/mtag/
+prs/genscot
+prs/lib
+*.best
+*.mismatch
+*.prsice
+*.summary
