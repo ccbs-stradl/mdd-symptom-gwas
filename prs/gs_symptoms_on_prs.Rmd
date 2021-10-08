@@ -1,0 +1,148 @@
+---
+title: Polygenic index of depression symptoms predicting symptoms in GS
+---
+
+Polygenic indices were calculated from GWAS of MDD symptoms and common factor GWAS of sypmtoms in MDD-enriched ("Clinical") and non-enriched ("Population") cohorts and tested in Generation Scotland (GS). PRS were calculated using clumping and thresholding in PRSice at the p-value that was the best predictor of MDD status in GS.
+
+```{r}
+
+library(dplyr)
+library(readr)
+library(tidyr)
+
+```
+
+List of symptoms PRS:
+```{r}
+
+gwas_symptoms <- c('clinappinc', 'clinsui', 'neuroveg', 'popaffect')
+names(gwas_symptoms) <- gwas_symptoms
+
+gwas_scores <- lapply(gwas_symptoms, function(gwas) read_table(here::here('prs', paste(gwas, 'best', sep='.'))) %>% mutate(PRSz=scale(PRS)[,1]))
+
+
+```
+
+Get GenScot MDD SCID and CIDI symptoms and covariates
+
+```{r}
+
+scid <- read_csv(here::here('prs/genscot/phenotypes/SCID_QC_201113_GWASids.csv'))
+cidi <- local({load(here::here("prs/genscot/phenotypes/GS_Recontact/STRADL.Rdata")); return(as_tibble(x))})
+agesex <- read_csv(here::here("prs/genscot//phenotypes/agesex_all.csv"))
+
+```
+
+Harmonise the symptoms data
+
+```{r}
+
+scid_threshold <- function(A) {
+    case_when(A == 1 ~ 0L,
+              A %in% 2:3 ~ 1L,
+              TRUE ~ NA_integer_)
+}
+
+scid_symptoms_current <- scid %>%
+transmute(IID=gwas,
+Dep=scid_threshold(A1),
+Anh=scid_threshold(A2),
+App=scid_threshold(A3),
+Sle=scid_threshold(A6),
+Psyc=scid_threshold(A9),
+Fatig=scid_threshold(A12),
+Guilt=scid_threshold(A13),
+Conc=scid_threshold(A16),
+Sui=scid_threshold(A19))
+
+scid_symptoms_past <- scid %>%
+transmute(IID=gwas,
+Dep=scid_threshold(A52),
+Anh=scid_threshold(A53),
+App=scid_threshold(A54),
+Sle=scid_threshold(A57),
+Psyc=scid_threshold(A61),
+Fatig=scid_threshold(A63),
+Guilt=scid_threshold(A64),
+Conc=scid_threshold(A67),
+Sui=scid_threshold(A70))
+
+cidi_weight_threshold <- function(A) {
+    case_when(A == 3 ~ 0L,
+              A %in% 1:2 ~ 1L,
+              TRUE ~ NA_integer_)
+}
+
+cidi_symptoms_past <- cidi %>%
+transmute(IID=id, 
+Dep=CIDI1,
+Anh=CIDI2,
+Fatig=CIDI5,
+App=cidi_weight_threshold(CIDI6),
+Sle=CIDI7,
+Conc=CIDI8,
+Guilt=CIDI9,
+Sui=CIDI10)
+
+```
+
+Merge symptoms into single binary variables
+
+```{r}
+
+symptom_values <- 
+bind_rows(scid_symptoms_current, scid_symptoms_past, cidi_symptoms_past) %>%
+pivot_longer(cols=Dep:Sui) %>%
+filter(!is.na(value)) %>%
+group_by(IID, name) %>%
+summarize(value=max(value, na.rm=T)) %>%
+pivot_wider(id_cols=IID)
+
+```
+
+Average age across measurement occasions
+
+```{r}
+
+avgage_sex <- 
+bind_rows(
+agesex %>% select(IID=id, sex, age),
+cidi %>% select(IID=id, age=Age)) %>%
+group_by(IID) %>%
+summarize(age=mean(age), sex=first(sex))
+
+
+```
+
+Compare to polygenic indices
+
+```{r}
+
+symptom_names <- c('Dep', 'Anh', 'App', 'Sle', 'Psyc', 'Fatig', 'Guilt', 'Conc', 'Sui')
+names(symptom_names) <- symptom_names
+
+prs_glm <- function(symptom_values, symptom, prs) {
+    
+    symp_prs <- symptom_values %>% inner_join(prs, by='IID') %>% left_join(avgage_sex, by='IID')
+    glm_formula <- as.formula(paste(symptom, '~', 'PRSz', '+ age + sex'))
+    
+    glm_model <- glm(glm_formula, data=symp_prs, family='binomial')
+    
+    return(glm_model)
+}
+
+prs_models <- lapply(gwas_scores, function(prs) lapply(symptom_names, function(symptom) prs_glm(symptom_values, symptom, prs)))
+
+```
+
+Examine models
+
+```{r}
+
+model_coefs_list <-
+plyr::llply(prs_models, function(prs) plyr::ldply(prs, function(m) data.frame(t(summary(m)$coefficients['PRSz',]))))
+
+model_coefs <-
+plyr::ldply(model_coefs_list, function(pvalues) pvalues %>% rename(Symptom=.id))
+
+```
