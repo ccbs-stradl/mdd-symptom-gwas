@@ -9,9 +9,13 @@ Polygenic indices were calculated from GWAS of MDD symptoms and common factor GW
 library(dplyr)
 library(readr)
 library(tidyr)
+library(stringr)
 library(ggplot2)
 library(lme4)
 library(fdrtool)
+library(doParallel)
+
+registerDoParallel(cores=4)
 
 ```
 
@@ -27,7 +31,7 @@ gwas_all_scores <- lapply(gwas_symptoms,
     function(gwas)
     read_table(here::here('prs', paste0(gwas, '_all.all.score'))) %>%
     mutate(across(!c(FID, IID), ~scale(.)[,1])) %>%
-    rename_with(~paste0('PRS', .x), !c(FID, IID)))
+    rename_with(~paste0('PT', .x), !c(FID, IID)))
 
 
 ```
@@ -59,14 +63,16 @@ select(IID=gwas,
 Dep=A1,    Anh=A2,   App=A3,
 Sle=A6,    Psyc=A9,  Fatig=A12,
 Guilt=A13, Conc=A16, Sui=A19) %>%
-mutate(across(Dep:Sui, scid_threshold))
+mutate(across(Dep:Sui, scid_threshold)) %>%
+mutate(instrument='SCID', timeframe='current')
 
 scid_symptoms_past <- scid %>%
 select(IID=gwas,
 Dep=A52,    Anh=A53,   App=A54,
 Sle=A57,    Psyc=A61,  Fatig=A63,
 Guilt=A64,  Conc=A67,  Sui=A70) %>%
-mutate(across(Dep:Sui, scid_threshold))
+mutate(across(Dep:Sui, scid_threshold)) %>%
+mutate(instrument='SCID', timeframe='past')
 
 cidi_weight_threshold <- function(A) {
     case_when(A == 3 ~ 0L,
@@ -83,35 +89,36 @@ App=cidi_weight_threshold(CIDI6),
 Sle=CIDI7,
 Conc=CIDI8,
 Guilt=CIDI9,
-Sui=CIDI10)
+Sui=CIDI10) %>%
+mutate(instrument='CIDI', timeframe='past')
 
 ```
 
-Merge symptoms into single binary variables
+Arrange symptoms into repeated measures format
 
 ```{r}
 
 symptom_values <- 
 bind_rows(scid_symptoms_current, scid_symptoms_past, cidi_symptoms_past) %>%
-pivot_longer(cols=Dep:Sui) %>%
-filter(!is.na(value)) %>%
-group_by(IID, name) %>%
-summarize(value=max(value, na.rm=T)) %>%
-pivot_wider(id_cols=IID)
+pivot_longer(cols=Dep:Sui, names_to='symptom', values_to='affected') %>%
+filter(!is.na(affected)) %>%
+mutate(sym_factorAvN=case_when(symptom %in% c("Dep", "Guilt", "Sui") ~ 0.5,
+                       symptom %in% c("Anh", "App", "Sle", "Psyc", "Fatig", "Conc") ~ -0.5,
+                       TRUE ~ NA_real_),
+       sym_cardinal=case_when(symptom %in% c("Dep", "Anh") ~ 0.5,
+                              TRUE ~ -0.5))
 
 ```
 
-Average age across measurement occasions
+Age at measurement occasions
 
 ```{r}
 
 covariates <- 
 bind_rows(
-agesex %>% select(IID=id, sex, age),
-cidi %>% select(IID=id, age=Age)) %>%
-group_by(IID) %>%
-summarize(age=mean(age), sex=first(sex)) %>%
-ungroup() %>%
+agesex %>% transmute(IID=id, age, instrument='SCID'),
+cidi %>% transmute(IID=id, age=Age, instrument='CIDI')) %>%
+inner_join(agesex %>% select(IID=id, sex)) %>%
 mutate(agez=scale(age)[,1])
 
 
@@ -138,8 +145,8 @@ Transform PRS to long format
 
 gwas_all_scores_long <-
 plyr::ldply(gwas_all_scores, I) %>%
-pivot_longer(cols=PRS0.025:PRS1, names_to='threshold', values_to='PRS') %>%
-rename(symptom=.id)
+pivot_longer(cols=PT0.025:PT1, names_to='threshold', values_to='PRS') %>%
+rename(discovery=.id)
 
 ```
 
@@ -149,7 +156,7 @@ Calculate within/between siblings PRS
 siblings_scores <- 
 siblings %>%
 left_join(gwas_all_scores_long, by=c('IID')) %>%
-group_by(father, mother, threshold, symptom) %>%
+group_by(father, mother, threshold, discovery) %>%
 mutate(PRSfam=mean(PRS)) %>%
 ungroup()
 
@@ -159,26 +166,25 @@ ungroup()
 Compare to polygenic indices. 
 
 ```{r sibling_prs_models, cache=TRUE}
-# formula for the within and between sibling model
-sibling_formula <- . ~ 1 + agez + sex + I(PRS-PRSfam) + PRSfam + (1 | famid)
-
-# outcomes symptoms that PRS are being compared to
-outcome_names <- c('Dep', 'Anh', 'App', 'Sle', 'Psyc', 'Fatig', 'Guilt', 'Conc', 'Sui')
-names(outcome_names) <- outcome_names
 
 sibling_prs_models <-
-plyr::daply(siblings_scores,
-c("symptom", "threshold"),
-function(sib_score) {
+plyr::dlply(.data=siblings_scores,
+.variables=c("discovery", "threshold"),
+.parallel=TRUE,
+.fun=function(sib_score) {
     # merge the selected predictor symptom PRS and threshold with outcome data
-    symp_prs <- sib_score %>%
+    sym_prs <- sib_score %>%
     inner_join(symptom_values, by='IID') %>%
-    left_join(covariates, by='IID')
+    left_join(covariates, by=c('IID', 'instrument'))
     
-    # apply formula and data to each outcome symptom
-    symp_thresh_models <- lapply(outcome_names, function(outcome) glmer(update(sibling_formula, paste(outcome, '~ .')), data=symp_prs, family='binomial'))
-    
-    return(symp_thresh_models)
+    # fit repeated measures family model
+    sym_thresh_model <- glmer(affected ~ 1 + agez + sex +
+        timeframe + symptom +
+        I(PRS-PRSfam) + PRSfam + 
+        I(PRS-PRSfam):sym_factorAvN + PRSfam:sym_factorAvN +
+        (1|IID) + (1|famid), data=sym_prs, family='binomial', nAGQ=0)
+
+    return(sym_thresh_model)
 })
 
 
@@ -190,35 +196,50 @@ Examine models and get within, between, and total effects
 
 # constant (fixed) effects
 model_coefs <-
-plyr::adply(sibling_prs_models, 1:3, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
-as_tibble() %>%
-mutate(qval=fdrtool(`Pr(>|z|)`, statistic='pvalue')$qval)
+plyr::ldply(sibling_prs_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
+as_tibble()
+
+ggplot(model_coefs %>% filter(str_detect(term, 'PRS')), aes(x=term, y=Estimate, ymax=Estimate+2*`Std. Error`, ymin=Estimate-2*`Std. Error`, colour=threshold)) +
+geom_hline(yintercept=0, color='gray') +
+geom_pointrange(position=position_dodge(width = 0.5)) +
+facet_wrap(~discovery) +
+coord_flip() +
+theme_minimal()
 
 # varying (random) effects
 model_var <- 
-plyr::adply(sibling_prs_models, 1:3, function(model) summary(model)$varcor$famid[[1]]) %>%
+plyr::ldply(sibling_prs_models, function(model) as.data.frame(summary(model)$varcor)) %>%
 as_tibble() %>%
-select(symptom, threshold, outcome=X1, Vf=V1)
+select(discovery, threshold, grp, vcov) %>%
+pivot_wider(names_from='grp', names_prefix='V.', values_from='vcov') %>%
+mutate(V.R=pi^2/3)
 
 # calculate total effects
 model_coefs_total <- 
-model_coefs %>% filter(term %in% c('I(PRS - PRSfam)', 'PRSfam')) %>%
-mutate(effect=if_else(term == 'PRSfam', true='Between', false='Within')) %>%
-select(symptom, threshold, outcome=X1, effect, beta=Estimate, se=`Std. Error`) %>%
+model_coefs %>% filter(str_detect(term, 'PRS')) %>%
+separate(term, into=c('prs_term', 'contrast_term'), sep=':', fill='right') %>%
+mutate(effect=if_else(prs_term == 'PRSfam', true='Between', false='Within'),
+       contrast=case_when(is.na(contrast_term) ~ 'Main',
+                          contrast_term == 'sym_factorAvN' ~ 'Aff. v NeuV',
+                          TRUE ~ NA_character_)) %>%
+select(threshold, discovery, effect, contrast, beta=Estimate, se=`Std. Error`) %>%
 pivot_wider(names_from='effect', values_from=c('beta', 'se')) %>%
 inner_join(model_var) %>%
-mutate(ICC=Vf/(Vf + pi^2/3)) %>%
+mutate(ICC=V.famid/(V.IID + V.famid + V.R)) %>%
 mutate(beta_Total=beta_Within*(1-ICC) + beta_Between*ICC,
        se_Total=sqrt((se_Within*(1-ICC))^2 + (se_Between*ICC)^2))
        
 model_coefs_long <- model_coefs_total %>%
-select(-Vf, -ICC) %>%
+select(-starts_with('V.'), -ICC) %>%
 pivot_longer(beta_Within:se_Total, names_to=c('estimate', 'effect'), names_sep='_') %>%
 pivot_wider(names_from='estimate', values_from='value')
 
-ggplot(model_coefs_long, aes(x=effect, y=beta, ymin=beta-2*se, ymax=beta+2*se, color=threshold)) +
-geom_pointrange(position='jitter') +
-facet_grid(outcome ~ symptom) +
-coord_flip()
+ggplot(filter(model_coefs_long, effect %in% c('Within', 'Between')),
+     aes(x=effect, y=beta, ymin=beta-2*se, ymax=beta+2*se, color=threshold)) +
+geom_hline(yintercept=0, color='gray') +
+geom_pointrange(position=position_dodge(width = 0.5)) +
+facet_grid(contrast ~ discovery) +
+coord_flip() +
+theme_minimal() 
 
 ```
