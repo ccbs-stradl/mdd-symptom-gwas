@@ -35,6 +35,7 @@ Rscript $(which PRSice.R) \
 --no-regress \
 --nonfounders \
 --target genscot/genetics/imputed/HRC/updated_bims/GS20K_HRC_0.8_GCTA_# \
+--pheno-file scid.pheno.txt \
 --maf 0.05 \
 --type bed \
 --out ${OUT}_all \
