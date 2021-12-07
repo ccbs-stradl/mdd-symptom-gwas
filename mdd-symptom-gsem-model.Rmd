@@ -445,7 +445,7 @@ pop_cog_mood_neuroveg_constr.fit$results[c(1, 2, 3, 6, 7)]
 
 ### Psychological-Somatic (Elhai Model 2a)
 
-[Kruse Rehab Psychol 2008](https://psycnet.apa.org/record/2008-17022-011), [Kruse Arch Psys Med Rehab 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
+[Krause Rehab Psychol 2008](https://psycnet.apa.org/record/2008-17022-011), [Krause Arch Psys Med Rehab 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
 
 > the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor retardation as a fourth somatic item
 
