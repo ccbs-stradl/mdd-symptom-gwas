@@ -1,0 +1,245 @@
+---
+title: Polygenic index of depression symptoms predicting symptoms in GS
+---
+
+Polygenic indices were calculated from GWAS of MDD symptoms and common factor GWAS of sypmtoms in MDD-enriched ("Clinical") and non-enriched ("Population") cohorts and tested in Generation Scotland (GS). PRS were calculated using clumping and thresholding in PRSice at the p-value that was the best predictor of MDD status in GS.
+
+```{r}
+
+library(dplyr)
+library(readr)
+library(tidyr)
+library(stringr)
+library(ggplot2)
+library(lme4)
+library(fdrtool)
+library(doParallel)
+
+registerDoParallel(cores=4)
+
+```
+
+List of symptoms PRS:
+```{r}
+
+gwas_symptoms <- c('clinappinc', 'clinsui', 'popneuroveg', 'popaffect')
+names(gwas_symptoms) <- gwas_symptoms
+
+gwas_best_scores <- lapply(gwas_symptoms, function(gwas) read_table(here::here('prs', paste(gwas, 'best', sep='.'))) %>% mutate(PRSz=scale(PRS)[,1]))
+
+gwas_all_scores <- lapply(gwas_symptoms,
+    function(gwas)
+    read_table(here::here('prs', paste0(gwas, '_all.all.score'))) %>%
+    mutate(across(!c(FID, IID), ~scale(.)[,1])) %>%
+    rename_with(~paste0('PT', .x), !c(FID, IID)))
+
+
+```
+
+Get GenScot MDD SCID and CIDI symptoms, covariates, pedigree, and PCs
+
+```{r}
+
+scid <- read_csv(here::here('prs/genscot/phenotypes/SCID_QC_201113_GWASids.csv'))
+cidi <- local({load(here::here("prs/genscot/phenotypes/GS_Recontact/STRADL.Rdata")); return(as_tibble(x))})
+agesex <- read_csv(here::here("prs/genscot//phenotypes/agesex_all.csv"))
+pedigree <- read_csv(here::here("prs/genscot/phenotypes/PEDIGREES/pedigree_031116.csv"))
+pcs <- read_csv(here::here("prs/genscot/genetics/genotypes/GS20K_PLINK_files/PCA_MDS_components/HM3mds2R.mds.csv"))
+
+```
+
+Harmonise the symptoms data
+
+```{r}
+
+scid_threshold <- function(A) {
+    case_when(A == 1 ~ 0L,
+              A %in% 2:3 ~ 1L,
+              TRUE ~ NA_integer_)
+}
+
+scid_symptoms_current <- scid %>%
+select(IID=gwas,
+Dep=A1,    Anh=A2,   App=A3,
+Sle=A6,    Psyc=A9,  Fatig=A12,
+Guilt=A13, Conc=A16, Sui=A19) %>%
+mutate(across(Dep:Sui, scid_threshold)) %>%
+mutate(instrument='SCID', timeframe='current')
+
+scid_symptoms_past <- scid %>%
+select(IID=gwas,
+Dep=A52,    Anh=A53,   App=A54,
+Sle=A57,    Psyc=A61,  Fatig=A63,
+Guilt=A64,  Conc=A67,  Sui=A70) %>%
+mutate(across(Dep:Sui, scid_threshold)) %>%
+mutate(instrument='SCID', timeframe='past')
+
+cidi_weight_threshold <- function(A) {
+    case_when(A == 3 ~ 0L,
+              A %in% 1:2 ~ 1L,
+              TRUE ~ NA_integer_)
+}
+
+cidi_symptoms_past <- cidi %>%
+transmute(IID=id, 
+Dep=CIDI1,
+Anh=CIDI2,
+Fatig=CIDI5,
+App=cidi_weight_threshold(CIDI6),
+Sle=CIDI7,
+Conc=CIDI8,
+Guilt=CIDI9,
+Sui=CIDI10) %>%
+mutate(instrument='CIDI', timeframe='past')
+
+```
+
+Arrange symptoms into repeated measures format
+
+```{r}
+
+symptom_values <- 
+bind_rows(scid_symptoms_current, scid_symptoms_past, cidi_symptoms_past) %>%
+pivot_longer(cols=Dep:Sui, names_to='symptom', values_to='affected') %>%
+filter(!is.na(affected)) %>%
+mutate(sym_factorAvN=case_when(symptom %in% c("Dep", "Guilt", "Sui") ~ 0.5,
+                       symptom %in% c("Anh", "App", "Sle", "Psyc", "Fatig", "Conc") ~ -0.5,
+                       TRUE ~ NA_real_),
+       sym_cardinal=case_when(symptom %in% c("Dep", "Anh") ~ 0.5,
+                              TRUE ~ -0.5))
+
+```
+
+Age at measurement occasions
+
+```{r}
+
+covariates <- 
+bind_rows(
+agesex %>% transmute(IID=id, age, instrument='SCID'),
+cidi %>% transmute(IID=id, age=Age, instrument='CIDI')) %>%
+inner_join(agesex %>% select(IID=id, sex)) %>%
+mutate(agez=scale(age)[,1])
+
+
+```
+
+Sibling groups (minus siblings who are parents)
+
+```{r}
+
+siblings <- 
+pedigree %>%
+filter(volid %in% gwas_all_scores[[1]]$IID) %>%
+mutate(mother=if_else(mother==0, true=volid+0.1, false=mother),
+       father=if_else(father==0, true=volid+0.1, false=father)) %>%
+filter(!volid %in% father, !volid %in% mother) %>%
+select(IID=volid, famid, father, mother)
+
+```
+
+Transform PRS to long format
+
+
+```{r}
+
+gwas_all_scores_long <-
+plyr::ldply(gwas_all_scores, I) %>%
+pivot_longer(cols=PT0.025:PT1, names_to='threshold', values_to='PRS') %>%
+rename(discovery=.id)
+
+```
+
+Calculate within/between siblings PRS
+```{r}
+
+siblings_scores <- 
+siblings %>%
+left_join(gwas_all_scores_long, by=c('IID')) %>%
+group_by(father, mother, threshold, discovery) %>%
+mutate(PRSfam=mean(PRS)) %>%
+ungroup()
+
+
+```
+
+Compare to polygenic indices. 
+
+```{r sibling_prs_models, cache=TRUE}
+
+sibling_prs_models <-
+plyr::dlply(.data=siblings_scores,
+.variables=c("discovery", "threshold"),
+.parallel=TRUE,
+.fun=function(sib_score) {
+    # merge the selected predictor symptom PRS and threshold with outcome data
+    sym_prs <- sib_score %>%
+    inner_join(symptom_values, by='IID') %>%
+    left_join(covariates, by=c('IID', 'instrument'))
+    
+    # fit repeated measures family model
+    sym_thresh_model <- glmer(affected ~ 1 + agez + sex +
+        timeframe + symptom +
+        I(PRS-PRSfam) + PRSfam + 
+        I(PRS-PRSfam):sym_factorAvN + PRSfam:sym_factorAvN +
+        (1|IID) + (1|famid), data=sym_prs, family='binomial', nAGQ=0)
+
+    return(sym_thresh_model)
+})
+
+
+```
+
+Examine models and get within, between, and total effects
+
+```{r}
+
+# constant (fixed) effects
+model_coefs <-
+plyr::ldply(sibling_prs_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
+as_tibble()
+
+ggplot(model_coefs %>% filter(str_detect(term, 'PRS')), aes(x=term, y=Estimate, ymax=Estimate+2*`Std. Error`, ymin=Estimate-2*`Std. Error`, colour=threshold)) +
+geom_hline(yintercept=0, color='gray') +
+geom_pointrange(position=position_dodge(width = 0.5)) +
+facet_wrap(~discovery) +
+coord_flip() +
+theme_minimal()
+
+# varying (random) effects
+model_var <- 
+plyr::ldply(sibling_prs_models, function(model) as.data.frame(summary(model)$varcor)) %>%
+as_tibble() %>%
+select(discovery, threshold, grp, vcov) %>%
+pivot_wider(names_from='grp', names_prefix='V.', values_from='vcov') %>%
+mutate(V.R=pi^2/3)
+
+# calculate total effects
+model_coefs_total <- 
+model_coefs %>% filter(str_detect(term, 'PRS')) %>%
+separate(term, into=c('prs_term', 'contrast_term'), sep=':', fill='right') %>%
+mutate(effect=if_else(prs_term == 'PRSfam', true='Between', false='Within'),
+       contrast=case_when(is.na(contrast_term) ~ 'Main',
+                          contrast_term == 'sym_factorAvN' ~ 'Aff. v NeuV',
+                          TRUE ~ NA_character_)) %>%
+select(threshold, discovery, effect, contrast, beta=Estimate, se=`Std. Error`) %>%
+pivot_wider(names_from='effect', values_from=c('beta', 'se')) %>%
+inner_join(model_var) %>%
+mutate(ICC=V.famid/(V.IID + V.famid + V.R)) %>%
+mutate(beta_Total=beta_Within*(1-ICC) + beta_Between*ICC,
+       se_Total=sqrt((se_Within*(1-ICC))^2 + (se_Between*ICC)^2))
+       
+model_coefs_long <- model_coefs_total %>%
+select(-starts_with('V.'), -ICC) %>%
+pivot_longer(beta_Within:se_Total, names_to=c('estimate', 'effect'), names_sep='_') %>%
+pivot_wider(names_from='estimate', values_from='value')
+
+ggplot(filter(model_coefs_long, effect %in% c('Within', 'Between')),
+     aes(x=effect, y=beta, ymin=beta-2*se, ymax=beta+2*se, color=threshold)) +
+geom_hline(yintercept=0, color='gray') +
+geom_pointrange(position=position_dodge(width = 0.5)) +
+facet_grid(contrast ~ discovery) +
+coord_flip() +
+theme_minimal() 
+
+```

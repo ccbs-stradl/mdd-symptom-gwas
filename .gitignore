@@ -26,3 +26,11 @@ pheno/*
 *.RData
 mtag/mtag/
 ext/sumstats
+prs/genscot
+prs/lib
+*.best
+*.mismatch
+*.prsice
+*.summary
+*.score
+Rplots.pdf
