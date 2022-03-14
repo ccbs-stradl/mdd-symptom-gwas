@@ -19,7 +19,7 @@ depressed_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD1
 fatigue_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD6
 psychomotor_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD5b
 restless_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD5a
-sleepChange_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD3
+sleepChange_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD4
 sleepMore_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD4b
 sleepProb_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD4a
 weightChange_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD3
