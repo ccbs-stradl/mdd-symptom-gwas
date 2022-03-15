@@ -133,7 +133,7 @@ write_tsv(neu_sumstats, 'sumstats/Neu.txt')
 
 ## Munge
 
-```{r ext, eval=FALSE}
+```{r ext, eval=TRUE}
 
 ext_traits <- c('AlcDep'=0.159, 'Anxiety'=0.16, 'BIP'=0.01, 'BMI'=NA, 'PTSD'=0.3,
 'Pain'=NA, 'Sleep'=0.11, 'Smoking'=NA)
@@ -376,6 +376,35 @@ clin_pop_ext_mult.fit$modelfit
 clin_pop_ext_mult.fit$results %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
 filter(lhs %in% ext_trait_names, rhs %in% c('Soma', 'ClinSui', 'Affect', 'Neuroveg'))
+
+```
+
+```{r clin_pop_ex_plot}
+
+clin_pop_ext_full <-
+clin_pop_ext.fit$results %>%
+select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
+filter(rhs %in% ext_trait_names, lhs %in% c('Soma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
+mutate(Beta='Full', Factor=lhs, Phenotype=rhs)
+
+clin_pop_ext_partial <-
+clin_pop_ext_mult.fit$results %>%
+select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
+filter(lhs %in% ext_trait_names, rhs %in% c('Soma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
+mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
+
+ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
+       aes(x=Factor, y=STD_Genotype, color=Beta,
+          ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
+          ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
+geom_hline(yintercept=0, col='gray') +
+geom_pointrange(position=position_dodge(width=0.5)) +
+facet_grid(~Phenotype) +
+scale_y_continuous('rg', breaks=c(-1, 0, 1)) +
+coord_flip(ylim=c(-1, 1)) +
+theme_bw() +
+theme(axis.text.y=element_text(size=16),
+      strip.text=element_text(size=16))
 
 ```
 

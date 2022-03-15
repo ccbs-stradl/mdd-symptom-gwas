@@ -352,11 +352,9 @@ MDD7;Guilt;Guilt;Guilt
 MDD8;Concentrate;Concentrate;Conc
 MDD9;Suicidality;Suicidality;Sui
 &quot;, col_names=c(&#39;ref&#39;, &#39;h&#39;, &#39;v&#39;, &#39;abbv&#39;), delim=&#39;;&#39;)</code></pre>
-<pre><code>## Rows: 15 Columns: 4</code></pre>
-<pre><code>## ── Column specification ──────────────────────────────────────────────────────────────────────────
+<pre><code>## Rows: 15 Columns: 4── Column specification ──────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
-## chr (4): ref, h, v, abbv</code></pre>
-<pre><code>## 
+## chr (4): ref, h, v, abbv
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <pre class="r"><code>dsm_mdd_symptoms_reference &lt;-
@@ -377,11 +375,9 @@ MDD7;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;Diminished ability to think or concentrate, or indecisiveness
 MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide
 &quot;, col_names=c(&#39;Reference&#39;, &#39;Description&#39;), delim=&#39;;&#39;)</code></pre>
-<pre><code>## Rows: 15 Columns: 2</code></pre>
-<pre><code>## ── Column specification ──────────────────────────────────────────────────────────────────────────
+<pre><code>## Rows: 15 Columns: 2── Column specification ──────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
-## chr (2): Reference, Description</code></pre>
-<pre><code>## 
+## chr (2): Reference, Description
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
@@ -389,12 +385,10 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 <h1 number="4"><span class="header-section-number">4</span> Symptom prevalences</h1>
 <p>Load previously calculated symptom prevalences:</p>
 <pre class="r"><code>symptoms_sample_prev &lt;- read_tsv(here::here(&#39;meta/symptoms_prev.txt&#39;))</code></pre>
-<pre><code>## Rows: 24 Columns: 6</code></pre>
-<pre><code>## ── Column specification ──────────────────────────────────────────────────────────────────────────
+<pre><code>## Rows: 24 Columns: 6── Column specification ──────────────────────────────────────────────────────────────
 ## Delimiter: &quot;\t&quot;
 ## chr (3): cohorts, symptom, sumstats
-## dbl (3): Nca, Nco, samp_prev</code></pre>
-<pre><code>## 
+## dbl (3): Nca, Nco, samp_prev
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <pre class="r"><code>pop_prevs_w &lt;-

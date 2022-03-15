@@ -195,17 +195,9 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
 ```
-## Rows: 15 Columns: 4
-```
-
-```
-## ── Column specification ──────────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 4── Column specification ──────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
-```
-
-```
-## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -232,17 +224,9 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
 ```
-## Rows: 15 Columns: 2
-```
-
-```
-## ── Column specification ──────────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 2── Column specification ──────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
-```
-
-```
-## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -258,18 +242,10 @@ symptoms_sample_prev <- read_tsv(here::here('meta/symptoms_prev.txt'))
 ```
 
 ```
-## Rows: 24 Columns: 6
-```
-
-```
-## ── Column specification ──────────────────────────────────────────────────────────────────────────
+## Rows: 24 Columns: 6── Column specification ──────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (3): cohorts, symptom, sumstats
 ## dbl (3): Nca, Nco, samp_prev
-```
-
-```
-## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```

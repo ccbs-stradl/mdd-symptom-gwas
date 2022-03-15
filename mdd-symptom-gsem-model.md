@@ -81,13 +81,9 @@ MDD9;Suicidality;Suicidality;Sui
 ", col_names=c('ref', 'h', 'v', 'abbv'), delim=';')
 ```
 
-    ## Rows: 15 Columns: 4
-
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────
+    ## Rows: 15 Columns: 4── Column specification ──────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
-
-    ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
@@ -112,13 +108,9 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ", col_names=c('Reference', 'Description'), delim=';')
 ```
 
-    ## Rows: 15 Columns: 2
-
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────
+    ## Rows: 15 Columns: 2── Column specification ──────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
-
-    ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
@@ -128,24 +120,24 @@ left_join(dsm_mdd_symptoms_labels, by=c('Reference'='ref')) %>%
 select(Reference, Abbreviation=abbv, Label=h, Description)
 ```
 
-    ## # A tibble: 15 x 4
-    ##    Reference Abbreviation Label     Description                                 
-    ##    <chr>     <chr>        <chr>     <chr>                                       
-    ##  1 MDD1      Dep          Mood      Depressed mood most of the day, nearly ever…
-    ##  2 MDD2      Anh          Interest  Markedly diminished interest or pleasure in…
-    ##  3 MDD3      App          Weight⇅   Significant change in weight or appetite    
-    ##  4 MDD3a     AppDec       Weight⇊   Significant weight loss or decrease in appe…
-    ##  5 MDD3b     AppInc       Weight⇈   Significant weight gain or increase in appe…
-    ##  6 MDD4      Sle          Sleep⇅    Sleeping too much or not sleeping enough    
-    ##  7 MDD4a     SleDec       Sleep⇊    Insomnia nearly every day                   
-    ##  8 MDD4b     SleInc       Sleep⇈    Hypersomnia nearly every day                
-    ##  9 MDD5      Psyc         Motor⇅    Changes in speed/amount of moving or speaki…
-    ## 10 MDD5a     PsycInc      Motor⇈    Psychomotor agitation nearly every day      
-    ## 11 MDD5b     PsycDec      Motor⇊    Psychomotor retardation nearly every day    
-    ## 12 MDD6      Fatig        Fatigue   Fatigue or loss of energy nearly every day  
-    ## 13 MDD7      Guilt        Guilt     Feelings of worthlessness or excessive or i…
-    ## 14 MDD8      Conc         Concentr… Diminished ability to think or concentrate,…
-    ## 15 MDD9      Sui          Suicidal… Recurrent thoughts of death or suicide or a…
+    ## # A tibble: 15 × 4
+    ##    Reference Abbreviation Label       Description                               
+    ##    <chr>     <chr>        <chr>       <chr>                                     
+    ##  1 MDD1      Dep          Mood        Depressed mood most of the day, nearly ev…
+    ##  2 MDD2      Anh          Interest    Markedly diminished interest or pleasure …
+    ##  3 MDD3      App          Weight⇅     Significant change in weight or appetite  
+    ##  4 MDD3a     AppDec       Weight⇊     Significant weight loss or decrease in ap…
+    ##  5 MDD3b     AppInc       Weight⇈     Significant weight gain or increase in ap…
+    ##  6 MDD4      Sle          Sleep⇅      Sleeping too much or not sleeping enough  
+    ##  7 MDD4a     SleDec       Sleep⇊      Insomnia nearly every day                 
+    ##  8 MDD4b     SleInc       Sleep⇈      Hypersomnia nearly every day              
+    ##  9 MDD5      Psyc         Motor⇅      Changes in speed/amount of moving or spea…
+    ## 10 MDD5a     PsycInc      Motor⇈      Psychomotor agitation nearly every day    
+    ## 11 MDD5b     PsycDec      Motor⇊      Psychomotor retardation nearly every day  
+    ## 12 MDD6      Fatig        Fatigue     Fatigue or loss of energy nearly every day
+    ## 13 MDD7      Guilt        Guilt       Feelings of worthlessness or excessive or…
+    ## 14 MDD8      Conc         Concentrate Diminished ability to think or concentrat…
+    ## 15 MDD9      Sui          Suicidality Recurrent thoughts of death or suicide or…
 
 # GenomicSEM covariance structure
 
@@ -159,14 +151,10 @@ symptoms_covstruct <- dget(covstruct_r)
 sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 ```
 
-    ## Rows: 24 Columns: 9
-
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────
+    ## Rows: 24 Columns: 9── Column specification ──────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
-
-    ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
@@ -1083,8 +1071,8 @@ compared 3 two-factor models
 
 ### Psychological-Somatic (Elhai Model 2a)
 
-[Kruse Rehab Psychol
-2008](https://psycnet.apa.org/record/2008-17022-011), [Kruse Arch Psys
+[Krause Rehab Psychol
+2008](https://psycnet.apa.org/record/2008-17022-011), [Krause Arch Psys
 Med Rehab
 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
 

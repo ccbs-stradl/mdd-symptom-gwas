@@ -513,16 +513,19 @@ left_join(dsm_mdd_symptoms_labels, by='ref')
 #                  h2=rep(c(0, 0.26), each=4),
 #                  se=0.0))
 
-ggplot(sumstats_h2_labels, aes(x=h, y=h2, ymin=h2+se*qnorm(0.025), ymax=h2+se*qnorm(0.975))) +
+# filter out traits below sample size cutoff
+ggplot(sumstats_h2_labels %>% mutate(Neff=4*Nca*Nco/(Nca+Nco)) %>% filter(Neff >= 5000), aes(x=h, y=h2, ymin=h2+se*qnorm(0.025), ymax=h2+se*qnorm(0.975))) +
 geom_hline(yintercept=0, col='grey') +
 geom_pointrange() + 
 facet_grid(cols=vars(study), scale='free') +
 scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$h))) +
 scale_y_continuous(expression(h[SNP]^2)) +
-scale_alpha_identity() +
-coord_flip(ylim=c(-0.25, 0.25)) +
+coord_flip(ylim=c(0, 0.175)) +
 theme_bw() + 
-theme(axis.text.y=element_text(size=12, family='Apple Symbols'))
+theme(axis.text.y=element_text(size=36, family='Apple Symbols'),
+      strip.text=element_text(size=24, family='Apple Symbols'),
+      axis.text=element_text(size=16, family='Apple Symbols'),
+      axis.title=element_text(size=16, family='Apple Symbols'))
 
 ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=10, height=4)
 
