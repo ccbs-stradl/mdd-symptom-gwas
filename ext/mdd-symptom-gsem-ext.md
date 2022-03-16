@@ -37,20 +37,20 @@ R.version
 
 ```
 ##                _                           
-## platform       aarch64-apple-darwin20      
-## arch           aarch64                     
-## os             darwin20                    
-## system         aarch64, darwin20           
+## platform       x86_64-generic-linux-gnu    
+## arch           x86_64                      
+## os             linux-gnu                   
+## system         x86_64, linux-gnu           
 ## status                                     
 ## major          4                           
-## minor          1.0                         
-## year           2021                        
-## month          05                          
-## day            18                          
-## svn rev        80317                       
+## minor          1.3                         
+## year           2022                        
+## month          03                          
+## day            10                          
+## svn rev        81868                       
 ## language       R                           
-## version.string R version 4.1.0 (2021-05-18)
-## nickname       Camp Pontanezen
+## version.string R version 4.1.3 (2022-03-10)
+## nickname       One Push-Up
 ```
 
 Package installation
@@ -82,7 +82,7 @@ packageVersion("GenomicSEM")
 ```
 
 ```
-## [1] '0.0.3'
+## [1] '0.0.5'
 ```
 
 # Process external sumstats
@@ -195,9 +195,11 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
 ```
-## Rows: 15 Columns: 4── Column specification ──────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 4
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -224,9 +226,11 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
 ```
-## Rows: 15 Columns: 2── Column specification ──────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 2
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -242,10 +246,12 @@ symptoms_sample_prev <- read_tsv(here::here('meta/symptoms_prev.txt'))
 ```
 
 ```
-## Rows: 24 Columns: 6── Column specification ──────────────────────────────────────────────────────────────
+## Rows: 24 Columns: 6
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (3): cohorts, symptom, sumstats
 ## dbl (3): Nca, Nco, samp_prev
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -357,7 +363,7 @@ clin_pop.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop.
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   0.526 
+##   3.715 
 ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0289190810466153 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.11962312826334 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
@@ -402,42 +408,42 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
 
 |   |lhs         |op |rhs         | STD_Genotype|STD_Genotype_SE    |   p_value|
 |:--|:-----------|:--|:-----------|------------:|:------------------|---------:|
-|32 |Soma        |=~ |ClinAppInc  |    0.6331167|0.249315964519457  | 0.0111036|
-|34 |Soma        |=~ |ClinSleDec  |    0.3999701|0.285148917125793  | 0.1607155|
-|35 |Soma        |=~ |ClinSleInc  |    0.5250231|0.323796141120907  | 0.1049170|
-|33 |Soma        |=~ |ClinPsycInc |    0.5512468|0.25174645840795   | 0.0285469|
-|1  |Affect      |=~ |PopDep      |    0.7422368|0.0711883555737437 | 0.0000000|
-|2  |Affect      |=~ |PopGuilt    |    0.7564180|0.0966276584782838 | 0.0000000|
-|3  |Affect      |=~ |PopSui      |    0.6751448|0.108369010956031  | 0.0000000|
-|12 |Neuroveg    |=~ |PopAnh      |    0.8126224|0.0662731036391753 | 0.0000000|
-|14 |Neuroveg    |=~ |PopAppInc   |    0.4284819|0.0822715940548262 | 0.0000002|
-|13 |Neuroveg    |=~ |PopAppDec   |    0.2005954|0.0874704946013147 | 0.0218309|
-|18 |Neuroveg    |=~ |PopSleInc   |    0.4973924|0.10316347276632   | 0.0000014|
-|17 |Neuroveg    |=~ |PopSleDec   |    0.6304220|0.0996274695454949 | 0.0000000|
-|16 |Neuroveg    |=~ |PopFatig    |    0.7402491|0.0930793821925011 | 0.0000000|
-|15 |Neuroveg    |=~ |PopConc     |    0.7922114|0.0918017359133528 | 0.0000000|
-|25 |PopDep      |~~ |PopAnh      |    0.4044683|0.0925563300546037 | 0.0000124|
-|37 |Soma        |~~ |ClinSui     |    0.1227571|0.255142309699773  | 0.6304178|
-|5  |Affect      |~~ |ClinSui     |    0.7333826|0.135314986147383  | 0.0000001|
-|19 |Neuroveg    |~~ |ClinSui     |    0.6574773|0.132218363326867  | 0.0000007|
-|7  |ClinAppInc  |~~ |ClinAppInc  |    0.5991668|0.444388081648688  | 0.1775706|
-|9  |ClinSleDec  |~~ |ClinSleDec  |    0.8400303|0.628750873516738  | 0.1815427|
-|10 |ClinSleInc  |~~ |ClinSleInc  |    0.7243430|0.882588601524437  | 0.4118152|
-|8  |ClinPsycInc |~~ |ClinPsycInc |    0.6961301|0.544701812791315  | 0.2012489|
-|26 |PopDep      |~~ |PopDep      |    0.4490840|0.124940164766387  | 0.0003252|
-|28 |PopGuilt    |~~ |PopGuilt    |    0.4278329|0.18078959434519   | 0.0179597|
-|31 |PopSui      |~~ |PopSui      |    0.5441828|0.241437218583002  | 0.0242019|
-|21 |PopAnh      |~~ |PopAnh      |    0.3396447|0.111071711535022  | 0.0022290|
-|23 |PopAppInc   |~~ |PopAppInc   |    0.8164036|0.154946833406514  | 0.0000001|
-|22 |PopAppDec   |~~ |PopAppDec   |    0.9597593|0.231342547177408  | 0.0000334|
-|30 |PopSleInc   |~~ |PopSleInc   |    0.7526031|0.252689112396902  | 0.0028979|
-|29 |PopSleDec   |~~ |PopSleDec   |    0.6025688|0.295152478043393  | 0.0411962|
-|27 |PopFatig    |~~ |PopFatig    |    0.4520298|0.275301216035336  | 0.1006003|
-|24 |PopConc     |~~ |PopConc     |    0.3723983|0.251346509715041  | 0.1384421|
-|11 |ClinSui     |~~ |ClinSui     |    1.0000004|0.328014352733054  | 0.0022987|
-|36 |Soma        |~~ |Affect      |    0.0878338|0.13818625888964   | 0.5250331|
-|38 |Soma        |~~ |Neuroveg    |    0.4679749|0.180711881874794  | 0.0096082|
-|6  |Affect      |~~ |Neuroveg    |    0.8283105|0.066491144265082  | 0.0000000|
+|32 |Soma        |=~ |ClinAppInc  |    0.6331167|0.249315964519487  | 0.0111036|
+|34 |Soma        |=~ |ClinSleDec  |    0.3999701|0.28514891712612   | 0.1607154|
+|35 |Soma        |=~ |ClinSleInc  |    0.5250231|0.32379614112126   | 0.1049170|
+|33 |Soma        |=~ |ClinPsycInc |    0.5512468|0.251746458408462  | 0.0285469|
+|1  |Affect      |=~ |PopDep      |    0.7422368|0.0711883555737093 | 0.0000000|
+|2  |Affect      |=~ |PopGuilt    |    0.7564180|0.0966276584783182 | 0.0000000|
+|3  |Affect      |=~ |PopSui      |    0.6751448|0.108369010956025  | 0.0000000|
+|12 |Neuroveg    |=~ |PopAnh      |    0.8126224|0.0662731036391502 | 0.0000000|
+|14 |Neuroveg    |=~ |PopAppInc   |    0.4284819|0.0822715940548333 | 0.0000002|
+|13 |Neuroveg    |=~ |PopAppDec   |    0.2005954|0.0874704946013171 | 0.0218309|
+|18 |Neuroveg    |=~ |PopSleInc   |    0.4973924|0.103163472766322  | 0.0000014|
+|17 |Neuroveg    |=~ |PopSleDec   |    0.6304220|0.0996274695455007 | 0.0000000|
+|16 |Neuroveg    |=~ |PopFatig    |    0.7402491|0.0930793821924976 | 0.0000000|
+|15 |Neuroveg    |=~ |PopConc     |    0.7922114|0.0918017359133495 | 0.0000000|
+|25 |PopDep      |~~ |PopAnh      |    0.4044683|0.0925563300545413 | 0.0000124|
+|37 |Soma        |~~ |ClinSui     |    0.1227571|0.255142309699146  | 0.6304177|
+|5  |Affect      |~~ |ClinSui     |    0.7333826|0.13531498614748   | 0.0000001|
+|19 |Neuroveg    |~~ |ClinSui     |    0.6574773|0.132218363326854  | 0.0000007|
+|7  |ClinAppInc  |~~ |ClinAppInc  |    0.5991668|0.444388081649053  | 0.1775707|
+|9  |ClinSleDec  |~~ |ClinSleDec  |    0.8400303|0.628750873516943  | 0.1815426|
+|10 |ClinSleInc  |~~ |ClinSleInc  |    0.7243430|0.88258860152466   | 0.4118152|
+|8  |ClinPsycInc |~~ |ClinPsycInc |    0.6961301|0.544701812792492  | 0.2012488|
+|26 |PopDep      |~~ |PopDep      |    0.4490840|0.124940164766279  | 0.0003252|
+|28 |PopGuilt    |~~ |PopGuilt    |    0.4278329|0.180789594345253  | 0.0179597|
+|31 |PopSui      |~~ |PopSui      |    0.5441828|0.241437218582954  | 0.0242019|
+|21 |PopAnh      |~~ |PopAnh      |    0.3396447|0.111071711534987  | 0.0022290|
+|23 |PopAppInc   |~~ |PopAppInc   |    0.8164036|0.154946833406535  | 0.0000001|
+|22 |PopAppDec   |~~ |PopAppDec   |    0.9597593|0.231342547177412  | 0.0000334|
+|30 |PopSleInc   |~~ |PopSleInc   |    0.7526031|0.252689112396908  | 0.0028979|
+|29 |PopSleDec   |~~ |PopSleDec   |    0.6025688|0.295152478043401  | 0.0411962|
+|27 |PopFatig    |~~ |PopFatig    |    0.4520298|0.275301216035336  | 0.1006004|
+|24 |PopConc     |~~ |PopConc     |    0.3723983|0.251346509715028  | 0.1384421|
+|11 |ClinSui     |~~ |ClinSui     |    1.0000004|0.328014352733054  | 0.0022988|
+|36 |Soma        |~~ |Affect      |    0.0878338|0.138186258889343  | 0.5250331|
+|38 |Soma        |~~ |Neuroveg    |    0.4679749|0.180711881873901  | 0.0096082|
+|6  |Affect      |~~ |Neuroveg    |    0.8283105|0.0664911442650997 | 0.0000000|
 |39 |Soma        |~~ |Soma        |    1.0000000|                   |        NA|
 |4  |Affect      |~~ |Affect      |    1.0000000|                   |        NA|
 |20 |Neuroveg    |~~ |Neuroveg    |    1.0000000|                   |        NA|
@@ -477,8 +483,8 @@ clin_pop_ext.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   3.922 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0336919131811916 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  15.469 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0336919131811917 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -503,7 +509,7 @@ clin_pop_ext.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_
 ```
 
 ```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.34184139765226e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.34184139934633e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```r
@@ -514,7 +520,7 @@ clin_pop_ext.fit$modelfit
 
 |   |     chisq|  df| p_chisq|       AIC|       CFI|      SRMR|
 |:--|---------:|---:|-------:|---------:|---------:|---------:|
-|df | 581249315| 200|       0| 581249467| 0.5395976| 0.1737964|
+|df | 581248698| 200|       0| 581248850| 0.5395984| 0.1737964|
 
 </div>
 
@@ -528,38 +534,38 @@ filter(rhs %in% ext_trait_names, lhs %in% c('Soma', 'ClinSui', 'Affect', 'Neurov
 
 |lhs      |op |rhs     | STD_Genotype|STD_Genotype_SE    |   p_value|
 |:--------|:--|:-------|------------:|:------------------|---------:|
-|Soma     |~~ |AlcDep  |    0.2780752|0.143514750833153  | 0.0526695|
-|ClinSui  |~~ |AlcDep  |    0.2959872|0.160005269787055  | 0.0643311|
-|Affect   |~~ |AlcDep  |    0.3939265|0.0877868464005697 | 0.0000072|
-|Neuroveg |~~ |AlcDep  |    0.5073037|0.0789705021507985 | 0.0000000|
-|Soma     |~~ |Anxiety |   -0.0326535|0.10468040908051   | 0.7550655|
-|ClinSui  |~~ |Anxiety |    0.3524858|0.104441116722825  | 0.0007383|
-|Affect   |~~ |Anxiety |    0.6885040|0.0647737109470202 | 0.0000000|
-|Neuroveg |~~ |Anxiety |    0.6212882|0.0588772299963252 | 0.0000000|
-|Soma     |~~ |BIP     |   -0.1173502|0.0738812818674143 | 0.1121961|
-|ClinSui  |~~ |BIP     |    0.2109282|0.0794844053408988 | 0.0079616|
-|Affect   |~~ |BIP     |    0.5278194|0.045934022342397  | 0.0000000|
-|Neuroveg |~~ |BIP     |    0.4069568|0.0418173585225546 | 0.0000000|
-|Soma     |~~ |BMI     |    0.6592451|0.178376461583585  | 0.0002191|
-|ClinSui  |~~ |BMI     |    0.0846267|0.061595764404679  | 0.1694691|
-|Affect   |~~ |BMI     |    0.1101282|0.0310084699446303 | 0.0003829|
-|Neuroveg |~~ |BMI     |    0.4221668|0.0328202004187998 | 0.0000000|
-|Soma     |~~ |PTSD    |    0.0393150|0.125686665123264  | 0.7544243|
-|ClinSui  |~~ |PTSD    |    0.2218192|0.142981375574093  | 0.1208057|
-|Affect   |~~ |PTSD    |    0.6623001|0.0753816046138474 | 0.0000000|
-|Neuroveg |~~ |PTSD    |    0.7420623|0.0689061431271898 | 0.0000000|
-|Soma     |~~ |Pain    |    0.3058112|0.105557161526068  | 0.0037654|
-|ClinSui  |~~ |Pain    |    0.2476201|0.0771901249342636 | 0.0013370|
-|Affect   |~~ |Pain    |    0.4880444|0.0487725084028269 | 0.0000000|
-|Neuroveg |~~ |Pain    |    0.6594585|0.046475066059629  | 0.0000000|
-|Soma     |~~ |Sleep   |    0.0527131|0.0977311537592454 | 0.5896132|
-|ClinSui  |~~ |Sleep   |    0.1359738|0.109276962298019  | 0.2133911|
-|Affect   |~~ |Sleep   |    0.1458957|0.0512829307026997 | 0.0044422|
-|Neuroveg |~~ |Sleep   |    0.3338159|0.0553809600459288 | 0.0000000|
-|Soma     |~~ |Smoking |    0.3070760|0.102084266944023  | 0.0026286|
-|ClinSui  |~~ |Smoking |    0.1537106|0.0832170049725576 | 0.0647341|
-|Affect   |~~ |Smoking |    0.2011443|0.0405571729178043 | 0.0000007|
-|Neuroveg |~~ |Smoking |    0.3515944|0.0368702864129443 | 0.0000000|
+|Soma     |~~ |AlcDep  |    0.2780752|0.143514750830567  | 0.0526667|
+|ClinSui  |~~ |AlcDep  |    0.2959872|0.160005269787055  | 0.0643325|
+|Affect   |~~ |AlcDep  |    0.3939265|0.0877868463997958 | 0.0000072|
+|Neuroveg |~~ |AlcDep  |    0.5073037|0.0789705021510745 | 0.0000000|
+|Soma     |~~ |Anxiety |   -0.0326535|0.104680409081424  | 0.7550651|
+|ClinSui  |~~ |Anxiety |    0.3524858|0.104441116722825  | 0.0007382|
+|Affect   |~~ |Anxiety |    0.6885040|0.0647737109461219 | 0.0000000|
+|Neuroveg |~~ |Anxiety |    0.6212882|0.0588772299964682 | 0.0000000|
+|Soma     |~~ |BIP     |   -0.1173502|0.0738812818654783 | 0.1121947|
+|ClinSui  |~~ |BIP     |    0.2109282|0.0794844053408987 | 0.0079617|
+|Affect   |~~ |BIP     |    0.5278194|0.0459340223420515 | 0.0000000|
+|Neuroveg |~~ |BIP     |    0.4069568|0.0418173585227186 | 0.0000000|
+|Soma     |~~ |BMI     |    0.6592451|0.178376461580182  | 0.0002190|
+|ClinSui  |~~ |BMI     |    0.0846267|0.061595764404679  | 0.1694696|
+|Affect   |~~ |BMI     |    0.1101282|0.0310084699443982 | 0.0003829|
+|Neuroveg |~~ |BMI     |    0.4221668|0.0328202004187987 | 0.0000000|
+|Soma     |~~ |PTSD    |    0.0393150|0.125686665122271  | 0.7544095|
+|ClinSui  |~~ |PTSD    |    0.2218192|0.142981375574092  | 0.1208030|
+|Affect   |~~ |PTSD    |    0.6623001|0.0753816046131675 | 0.0000000|
+|Neuroveg |~~ |PTSD    |    0.7420623|0.0689061431275109 | 0.0000000|
+|Soma     |~~ |Pain    |    0.3058112|0.105557161523999  | 0.0037647|
+|ClinSui  |~~ |Pain    |    0.2476201|0.0771901249342637 | 0.0013369|
+|Affect   |~~ |Pain    |    0.4880444|0.0487725084025144 | 0.0000000|
+|Neuroveg |~~ |Pain    |    0.6594585|0.0464750660599162 | 0.0000000|
+|Soma     |~~ |Sleep   |    0.0527131|0.0977311537591925 | 0.5896186|
+|ClinSui  |~~ |Sleep   |    0.1359738|0.109276962298019  | 0.2133864|
+|Affect   |~~ |Sleep   |    0.1458957|0.0512829307021244 | 0.0044424|
+|Neuroveg |~~ |Sleep   |    0.3338159|0.0553809600459304 | 0.0000000|
+|Soma     |~~ |Smoking |    0.3070760|0.102084266942511  | 0.0026281|
+|ClinSui  |~~ |Smoking |    0.1537106|0.0832170049725576 | 0.0647329|
+|Affect   |~~ |Smoking |    0.2011443|0.0405571729173207 | 0.0000007|
+|Neuroveg |~~ |Smoking |    0.3515944|0.0368702864130281 | 0.0000000|
 
 </div>
 
@@ -594,8 +600,8 @@ clin_pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   5.348 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0336919131811916 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  29.777 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0336919131811917 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -621,7 +627,7 @@ clin_pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
 ```
 
 ```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.34184139765226e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.34184139934633e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```r
@@ -632,7 +638,7 @@ clin_pop_ext_mult.fit$modelfit
 
 |   |     chisq|  df| p_chisq|       AIC|       CFI|      SRMR|
 |:--|---------:|---:|-------:|---------:|---------:|---------:|
-|df | 288962598| 172|       0| 288962806| 0.7711153| 0.1394206|
+|df | 288962491| 172|       0| 288962699| 0.7711156| 0.1394206|
 
 </div>
 
@@ -646,38 +652,68 @@ filter(lhs %in% ext_trait_names, rhs %in% c('Soma', 'ClinSui', 'Affect', 'Neurov
 
 |lhs     |op |rhs      | STD_Genotype|STD_Genotype_SE   |   p_value|
 |:-------|:--|:--------|------------:|:-----------------|---------:|
-|AlcDep  |~  |Soma     |    0.1272449|0.230271644476955 | 0.5805496|
-|AlcDep  |~  |ClinSui  |   -0.0341642|0.373489345765639 | 0.9271230|
-|AlcDep  |~  |Affect   |    0.0860307|0.438340908942944 | 0.8443990|
-|AlcDep  |~  |Neuroveg |    0.4142525|0.36803257807073  | 0.2603581|
-|Anxiety |~  |Soma     |   -0.1786843|0.219713910102516 | 0.4160523|
-|Anxiety |~  |ClinSui  |   -0.2832502|0.34428433361045  | 0.4106676|
-|Anxiety |~  |Affect   |    0.5611641|0.380487339071434 | 0.1402555|
-|Anxiety |~  |Neuroveg |    0.4196128|0.388908593579599 | 0.2805883|
-|BIP     |~  |Soma     |   -0.1796147|0.199213447106638 | 0.3672412|
-|BIP     |~  |ClinSui  |   -0.3088479|0.355599359193678 | 0.3850993|
-|BIP     |~  |Affect   |    0.5973688|0.354135031878556 | 0.0916304|
-|BIP     |~  |Neuroveg |    0.1929671|0.358507719733664 | 0.5903680|
-|BMI     |~  |Soma     |    0.5105922|0.258006240464149 | 0.0478271|
-|BMI     |~  |ClinSui  |   -0.1189202|0.277623499482623 | 0.6683856|
-|BMI     |~  |Affect   |   -0.1864617|0.339282272452309 | 0.5826647|
-|BMI     |~  |Neuroveg |    0.4573630|0.377142908393295 | 0.2253085|
-|PTSD    |~  |Soma     |   -0.2526023|0.338882992541762 | 0.4560168|
-|PTSD    |~  |ClinSui  |   -0.5611895|0.576550719199555 | 0.3303638|
-|PTSD    |~  |Affect   |    0.3406657|0.537009174059581 | 0.5258871|
-|PTSD    |~  |Neuroveg |    0.9145428|0.565200169168175 | 0.1056365|
-|Pain    |~  |Soma     |    0.0649967|0.184563757409198 | 0.7247247|
-|Pain    |~  |ClinSui  |   -0.2913024|0.339661444875342 | 0.3910860|
-|Pain    |~  |Affect   |    0.1158615|0.310498263205434 | 0.7090738|
-|Pain    |~  |Neuroveg |    0.7256565|0.315082944409445 | 0.0212744|
-|Sleep   |~  |Soma     |   -0.2114777|0.242754382448565 | 0.3836758|
-|Sleep   |~  |ClinSui  |   -0.0121398|0.29606296252933  | 0.9672820|
-|Sleep   |~  |Affect   |   -0.4478450|0.427000304891984 | 0.2942587|
-|Sleep   |~  |Neuroveg |    0.7721500|0.412867775402503 | 0.0614628|
-|Smoking |~  |Soma     |    0.1832433|0.141940981586371 | 0.1967158|
-|Smoking |~  |ClinSui  |   -0.0491380|0.208841083959067 | 0.8139873|
-|Smoking |~  |Affect   |   -0.0538131|0.232243576906063 | 0.8167856|
-|Smoking |~  |Neuroveg |    0.3578988|0.210069692645402 | 0.0884591|
+|AlcDep  |~  |Soma     |    0.1272462|0.230273215280035 | 0.5805460|
+|AlcDep  |~  |ClinSui  |   -0.0341650|0.373489759689543 | 0.9271216|
+|AlcDep  |~  |Affect   |    0.0860318|0.438343917563618 | 0.8443975|
+|AlcDep  |~  |Neuroveg |    0.4142522|0.368035016462278 | 0.2603643|
+|Anxiety |~  |Soma     |   -0.1786844|0.219715218588425 | 0.4160655|
+|Anxiety |~  |ClinSui  |   -0.2832497|0.344284181079098 | 0.4106682|
+|Anxiety |~  |Affect   |    0.5611628|0.380489496279383 | 0.1402571|
+|Anxiety |~  |Neuroveg |    0.4196138|0.388910440025492 | 0.2806029|
+|BIP     |~  |Soma     |   -0.1796155|0.199214929809461 | 0.3672507|
+|BIP     |~  |ClinSui  |   -0.3088487|0.355599874297263 | 0.3851015|
+|BIP     |~  |Affect   |    0.5973676|0.354137407123818 | 0.0916353|
+|BIP     |~  |Neuroveg |    0.1929690|0.358509785624791 | 0.5903786|
+|BMI     |~  |Soma     |    0.5105944|0.258008599293463 | 0.0478282|
+|BMI     |~  |ClinSui  |   -0.1189198|0.277624181402695 | 0.6683897|
+|BMI     |~  |Affect   |   -0.1864597|0.339286230875837 | 0.5826655|
+|BMI     |~  |Neuroveg |    0.4573600|0.377146766738317 | 0.2253084|
+|PTSD    |~  |Soma     |   -0.2526021|0.338885151828546 | 0.4560218|
+|PTSD    |~  |ClinSui  |   -0.5611903|0.576551197921983 | 0.3303689|
+|PTSD    |~  |Affect   |    0.3406645|0.537013006190922 | 0.5258863|
+|PTSD    |~  |Neuroveg |    0.9145444|0.565203280180129 | 0.1056428|
+|Pain    |~  |Soma     |    0.0649969|0.184565064051876 | 0.7247282|
+|Pain    |~  |ClinSui  |   -0.2913035|0.339661993193538 | 0.3910900|
+|Pain    |~  |Affect   |    0.1158625|0.310500701372164 | 0.7090621|
+|Pain    |~  |Neuroveg |    0.7256564|0.31508466558227  | 0.0212768|
+|Sleep   |~  |Soma     |   -0.2114788|0.242756446092891 | 0.3836750|
+|Sleep   |~  |ClinSui  |   -0.0121407|0.296063729522205 | 0.9672805|
+|Sleep   |~  |Affect   |   -0.4478453|0.427004064091696 | 0.2942627|
+|Sleep   |~  |Neuroveg |    0.7721514|0.41287127098915  | 0.0614646|
+|Smoking |~  |Soma     |    0.1832439|0.141941842450455 | 0.1967184|
+|Smoking |~  |ClinSui  |   -0.0491367|0.208840760631604 | 0.8139947|
+|Smoking |~  |Affect   |   -0.0538115|0.232245092736351 | 0.8167805|
+|Smoking |~  |Neuroveg |    0.3578965|0.210070952220897 | 0.0884599|
 
 </div>
+
+
+```r
+clin_pop_ext_full <-
+clin_pop_ext.fit$results %>%
+select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
+filter(rhs %in% ext_trait_names, lhs %in% c('Soma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
+mutate(Beta='Full', Factor=lhs, Phenotype=rhs)
+
+clin_pop_ext_partial <-
+clin_pop_ext_mult.fit$results %>%
+select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
+filter(lhs %in% ext_trait_names, rhs %in% c('Soma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
+mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
+
+ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
+       aes(x=Factor, y=STD_Genotype, color=Beta,
+          ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
+          ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
+geom_hline(yintercept=0, col='gray') +
+geom_pointrange(position=position_dodge(width=0.5)) +
+facet_grid(~Phenotype) +
+scale_y_continuous('rg', breaks=c(-1, 0, 1)) +
+coord_flip(ylim=c(-1, 1)) +
+theme_bw() +
+theme(axis.text.y=element_text(size=16),
+      strip.text=element_text(size=16))
+```
+
+![](mdd-symptom-gsem-ext_files/figure-html/clin_pop_ex_plot-1.png)<!-- -->
 

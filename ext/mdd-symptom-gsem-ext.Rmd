@@ -299,14 +299,14 @@ Base model of symptom factors
 ```{r clin_pop_affect_veg, cache=TRUE}
 
 clin_pop.model <- "
-Soma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
-Soma ~~ 1*Soma
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma ~~ 1*ClinSoma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
 Affect ~~ 1*Affect
 Neuroveg ~~ 1*Neuroveg
 PopDep ~~ PopAnh
-ClinSui ~~ Soma + Affect + Neuroveg
+ClinSui ~~ ClinSoma + Affect + Neuroveg
 "
 clin_pop.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop.model)
 
@@ -319,63 +319,106 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
 
 Compare symptom factors against each external phenotype. Correlation of each phenotype with the symptom factors.
 
-```{r clin_pop_ext, cache=TRUE}
+```{r pop_ext, cache=TRUE}
 
-clin_pop_ext.model <- "
-Soma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
-Soma ~~ 1*Soma
+pop_ext.model <- "
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
 Affect ~~ 1*Affect
 Neuroveg ~~ 1*Neuroveg
 PopDep ~~ PopAnh
-ClinSui ~~ Soma + Affect + Neuroveg
-AlcDep ~~ Soma + ClinSui + Affect + Neuroveg
-Anxiety ~~ Soma + ClinSui + Affect + Neuroveg
-BIP ~~ Soma + ClinSui + Affect + Neuroveg
-BMI ~~ Soma + ClinSui + Affect + Neuroveg
-PTSD ~~ Soma + ClinSui + Affect + Neuroveg
-Pain ~~ Soma + ClinSui + Affect + Neuroveg
-Sleep ~~ Soma + ClinSui + Affect + Neuroveg
-Smoking ~~ Soma + ClinSui + Affect + Neuroveg
+AlcDep ~~ Affect + Neuroveg
+Anxiety ~~  Affect + Neuroveg
+BIP ~~ Affect + Neuroveg
+BMI ~~ Affect + Neuroveg
+PTSD ~~ Affect + Neuroveg
+Pain ~~ Affect + Neuroveg
+Sleep ~~ Affect + Neuroveg
+Smoking ~~ Affect + Neuroveg
 "
-clin_pop_ext.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop_ext.model)
+pop_ext.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_ext.model)
 
-clin_pop_ext.fit$modelfit
-clin_pop_ext.fit$results %>%
+pop_ext.fit$modelfit
+pop_ext.fit$results %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(rhs %in% ext_trait_names, lhs %in% c('Soma', 'ClinSui', 'Affect', 'Neuroveg'))
+filter(rhs %in% ext_trait_names, lhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg'))
+
+```
+
+```{r clin_ext, cache=TRUE}
+
+clin_ext.model <- "
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma ~~ 1*ClinSoma
+AlcDep ~ ClinSoma
+Anxiety ~ ClinSoma
+BIP ~ ClinSoma
+BMI ~ ClinSoma
+PTSD ~ ClinSoma
+Pain ~ ClinSoma
+Sleep ~ ClinSoma 
+Smoking ~ ClinSoma
+"
+
+clin_ext.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_ext.model)
+
+clin_ext.fit$modelfit
+clin_ext.fit$results %>%
+select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
+filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg'))
 
 ```
 
 Regression of each phenotype on the symptom factors, to estimate relationship after condition on each of the other factors. 
 
-```{r clin_pop_ext_mult, cache=TRUE}
+```{r clin_ext_mult, cache=TRUE}
 
-clin_pop_ext_mult.model <- "
-Soma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
-Soma ~~ 1*Soma
+clin_ext_mult.model <- "
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma ~~ 1*ClinSoma
+AlcDep ~ ClinSoma + ClinSui
+Anxiety ~ ClinSoma+ ClinSui
+BIP ~ ClinSoma + ClinSui
+BMI ~ ClinSoma + ClinSui
+PTSD ~ ClinSoma + ClinSui
+Pain ~ ClinSoma + ClinSui
+Sleep ~ ClinSoma + ClinSui
+Smoking ~ ClinSoma + ClinSui
+"
+
+clin_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_ext_mult.model)
+
+clin_ext_mult.fit$modelfit
+clin_ext_mult.fit$results %>%
+select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
+filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg'))
+
+```
+
+
+```{r pop_ext_mult, cache=TRUE}
+
+pop_ext_mult.model <- "
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
 Affect ~~ 1*Affect
 Neuroveg ~~ 1*Neuroveg
 PopDep ~~ PopAnh
-ClinSui ~~ Soma + Affect + Neuroveg
-AlcDep ~ Soma + ClinSui + Affect + Neuroveg
-Anxiety ~ Soma + ClinSui + Affect + Neuroveg
-BIP ~ Soma + ClinSui + Affect + Neuroveg
-BMI ~ Soma + ClinSui + Affect + Neuroveg
-PTSD ~ Soma + ClinSui + Affect + Neuroveg
-Pain ~ Soma + ClinSui + Affect + Neuroveg
-Sleep ~ Soma + ClinSui + Affect + Neuroveg
-Smoking ~ Soma + ClinSui + Affect + Neuroveg
+AlcDep ~ Affect + Neuroveg
+Anxiety ~ Affect + Neuroveg
+BIP ~ Affect + Neuroveg
+BMI ~ Affect + Neuroveg
+PTSD ~ Affect + Neuroveg
+Pain ~ Affect + Neuroveg
+Sleep ~ Affect + Neuroveg
+Smoking ~ Affect + Neuroveg
 "
-clin_pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop_ext_mult.model)
+pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_ext_mult.model)
 
-clin_pop_ext_mult.fit$modelfit
-clin_pop_ext_mult.fit$results %>%
+pop_ext_mult.fit$modelfit
+pop_ext_mult.fit$results %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('Soma', 'ClinSui', 'Affect', 'Neuroveg'))
+filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg'))
 
 ```
 
@@ -384,13 +427,13 @@ filter(lhs %in% ext_trait_names, rhs %in% c('Soma', 'ClinSui', 'Affect', 'Neurov
 clin_pop_ext_full <-
 clin_pop_ext.fit$results %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(rhs %in% ext_trait_names, lhs %in% c('Soma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
+filter(rhs %in% ext_trait_names, lhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
 mutate(Beta='Full', Factor=lhs, Phenotype=rhs)
 
 clin_pop_ext_partial <-
 clin_pop_ext_mult.fit$results %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('Soma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
+filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
 mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
 
 ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
