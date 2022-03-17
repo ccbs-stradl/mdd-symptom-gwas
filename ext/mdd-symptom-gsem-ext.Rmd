@@ -19,7 +19,8 @@ Test genetic relationship between [symptom factors](mdd-symptom-gsem-model.md) a
 - PTSD: [Nievergelt et al](https://pubmed.ncbi.nlm.nih.gov/31594949/). Download from [PGC](https://figshare.com/articles/dataset/ptsd2019/14672133)
 - tobacco use. Cigarettes per day [Liu et al](https://www.nature.com/articles/s41588-018-0307-5). Download from [UofM](https://conservancy.umn.edu/handle/11299/201564)
 - alcohol dependence. [Walters et al](https://www.nature.com/articles/s41593-018-0275-1). Download from [PGC](https://doi.org/10.6084/m9.figshare.14672187)
-- BMI, sex combined [Pulit et al](https://academic.oup.com/hmg/article/28/1/166/5098227). Download from [GIANT/Broad](https://portals.broadinstitute.org/collaboration/giant/index.php/Main_Page).php/GIANT_consortium_data_files#2018_GIANT_and_UK_BioBank_Meta-analysis)
+- educational attainment. [Lee et. al](https://www.nature.com/articles/s41588-018-0147-3). Download from [SSGAC Data Portal](https://thessgac.com).
+- BMI, sex combined [Pulit et al](https://academic.oup.com/hmg/article/28/1/166/5098227). Download from [GIANT/Broad](https://portals.broadinstitute.org/collaboration/giant/index.php/GIANT_consortium_data_files#2018_GIANT_and_UK_BioBank_Meta-analysis).
 - neuroticism: [Nagel et al](https://www.nature.com/articles/s41588-018-0151-7). Download from [CNCR](https://ctg.cncr.nl/software/summary_statistics)
 - pain: multisite chronic pain [Johnston et al](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1008164). Download from [UoG](https://researchdata.gla.ac.uk/822/)
 - chronotype: long sleep duration. [Dashti et al](https://www.ncbi.nlm.nih.gov/pubmed/30846698). Download from [SDKP](https://sleep.hugeamp.org/downloads.html).
@@ -95,6 +96,12 @@ bmi_sumstats <- bmi %>%
     select(SNP, A1=Tested_Allele, A2=Other_Allele, BETA, SE, P, INFO, N)
 write_tsv(bmi_sumstats, 'sumstats/BMI.txt')
 
+# educational attainment
+ea <- read_table('sumstats/GWAS_EA_excl23andMe.txt.gz')
+ea_sumstats <-  ea %>%
+    transmute(SNP=MarkerName, A1, A2, FREQ=EAF, BETA=Beta, SE, P=Pval, N=766345)
+write_tsv(ea_sumstats, 'sumstats/EA.txt')
+
 pain <- read_tsv('sumstats/chronic_pain-bgen.stats.gz')
 pain_sumstats <- pain %>%
     filter(INFO >= 0.6) %>%
@@ -135,8 +142,9 @@ write_tsv(neu_sumstats, 'sumstats/Neu.txt')
 
 ```{r ext, eval=TRUE}
 
-ext_traits <- c('AlcDep'=0.159, 'Anxiety'=0.16, 'BIP'=0.01, 'BMI'=NA, 'PTSD'=0.3,
-'Pain'=NA, 'Sleep'=0.11, 'Smoking'=NA)
+ext_traits <- c('AlcDep'=0.159, 'Anxiety'=0.16, 'BIP'=0.01,
+                'BMI'=NA, 'EA'=NA, 'PTSD'=0.3,
+                'Pain'=NA, 'Sleep'=0.11, 'Smoking'=NA)
 ext_trait_names <- names(ext_traits)
 
 ```
@@ -333,6 +341,7 @@ AlcDep ~ {symptom}
 Anxiety ~  {symptom}
 BIP ~ {symptom}
 BMI ~ {symptom}
+EA ~ {symptom}
 PTSD ~ {symptom}
 Pain ~ {symptom}
 Sleep ~ {symptom}
@@ -364,6 +373,7 @@ AlcDep ~ ClinSoma + ClinSui
 Anxiety ~ ClinSoma+ ClinSui
 BIP ~ ClinSoma + ClinSui
 BMI ~ ClinSoma + ClinSui
+EA ~ ClinSoma + ClinSui
 PTSD ~ ClinSoma + ClinSui
 Pain ~ ClinSoma + ClinSui
 Sleep ~ ClinSoma + ClinSui
@@ -387,6 +397,7 @@ AlcDep ~ Affect + Neuroveg
 Anxiety ~ Affect + Neuroveg
 BIP ~ Affect + Neuroveg
 BMI ~ Affect + Neuroveg
+EA ~ Affect + Neuroveg
 PTSD ~ Affect + Neuroveg
 Pain ~ Affect + Neuroveg
 Sleep ~ Affect + Neuroveg
