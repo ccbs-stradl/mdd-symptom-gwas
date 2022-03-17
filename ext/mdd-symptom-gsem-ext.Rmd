@@ -317,59 +317,43 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
 
 ## External phenotypes
 
-Compare symptom factors against each external phenotype. Correlation of each phenotype with the symptom factors.
+Compare symptom factors against each external phenotype. Single regression of each external phenotype on each symptom or symptom cluster.
 
 ```{r pop_ext, cache=TRUE}
 
-pop_ext.model <- "
+pop_ext.glue <- "
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma ~~ 1*ClinSoma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
 Affect ~~ 1*Affect
 Neuroveg ~~ 1*Neuroveg
 PopDep ~~ PopAnh
-AlcDep ~~ Affect + Neuroveg
-Anxiety ~~  Affect + Neuroveg
-BIP ~~ Affect + Neuroveg
-BMI ~~ Affect + Neuroveg
-PTSD ~~ Affect + Neuroveg
-Pain ~~ Affect + Neuroveg
-Sleep ~~ Affect + Neuroveg
-Smoking ~~ Affect + Neuroveg
+AlcDep ~ {symptom}
+Anxiety ~  {symptom}
+BIP ~ {symptom}
+BMI ~ {symptom}
+PTSD ~ {symptom}
+Pain ~ {symptom}
+Sleep ~ {symptom}
+Smoking ~ {symptom}
+an < 1
+Affect ~~ an*Neuroveg
 "
-pop_ext.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_ext.model)
 
-pop_ext.fit$modelfit
-pop_ext.fit$results %>%
+ext.model_list <- lapply(c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg'), function(symptom) str_glue_data(list(symptom=symptom), pop_ext.glue))
+
+ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
+
+clin_pop_ext_full <-
+bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(rhs %in% ext_trait_names, lhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg'))
+filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
+mutate(Beta='Unadjusted', Factor=rhs, Phenotype=lhs)
 
 ```
 
-```{r clin_ext, cache=TRUE}
-
-clin_ext.model <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
-ClinSoma ~~ 1*ClinSoma
-AlcDep ~ ClinSoma
-Anxiety ~ ClinSoma
-BIP ~ ClinSoma
-BMI ~ ClinSoma
-PTSD ~ ClinSoma
-Pain ~ ClinSoma
-Sleep ~ ClinSoma 
-Smoking ~ ClinSoma
-"
-
-clin_ext.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_ext.model)
-
-clin_ext.fit$modelfit
-clin_ext.fit$results %>%
-select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg'))
-
-```
-
-Regression of each phenotype on the symptom factors, to estimate relationship after condition on each of the other factors. 
+Multiple regression of each phenotype on the clinical/population symptom factors, to estimate relationship after condition on each of the other factors. 
 
 ```{r clin_ext_mult, cache=TRUE}
 
@@ -387,11 +371,6 @@ Smoking ~ ClinSoma + ClinSui
 "
 
 clin_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_ext_mult.model)
-
-clin_ext_mult.fit$modelfit
-clin_ext_mult.fit$results %>%
-select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg'))
 
 ```
 
@@ -415,35 +394,29 @@ Smoking ~ Affect + Neuroveg
 "
 pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_ext_mult.model)
 
-pop_ext_mult.fit$modelfit
-pop_ext_mult.fit$results %>%
-select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg'))
+clin_pop_ext_partial <-
+bind_rows(lapply(list(clin_ext_mult.fit, pop_ext_mult.fit),
+                 function(fit) fit$results)) %>%
+  select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
+  filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
+  mutate(Beta='Adjusted', Factor=rhs, Phenotype=lhs)
 
 ```
 
-```{r clin_pop_ex_plot}
-
-clin_pop_ext_full <-
-clin_pop_ext.fit$results %>%
-select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(rhs %in% ext_trait_names, lhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
-mutate(Beta='Full', Factor=lhs, Phenotype=rhs)
-
-clin_pop_ext_partial <-
-clin_pop_ext_mult.fit$results %>%
-select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
-mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
+```{r clin_pop_ex_plot, fig.width=13, fig.height=6}
 
 ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
-       aes(x=Factor, y=STD_Genotype, color=Beta,
+       aes(x=factor(Factor, levels=c('ClinSui', 'ClinSoma', 'Neuroveg', 'Affect')),
+           y=STD_Genotype,
+           color=factor(Beta, levels=c('Adjusted', 'Unadjusted')),
           ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
           ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
 geom_hline(yintercept=0, col='gray') +
 geom_pointrange(position=position_dodge(width=0.5)) +
 facet_grid(~Phenotype) +
+scale_x_discrete('Symptom/Factor') +
 scale_y_continuous('rg', breaks=c(-1, 0, 1)) +
+scale_color_discrete('') +
 coord_flip(ylim=c(-1, 1)) +
 theme_bw() +
 theme(axis.text.y=element_text(size=16),
