@@ -60,17 +60,21 @@ scid_threshold <- function(A) {
 
 scid_symptoms_current <- scid %>%
 select(IID=gwas,
-Dep=A1,    Anh=A2,   App=A3,
-Sle=A6,    Psyc=A9,  Fatig=A12,
-Guilt=A13, Conc=A16, Sui=A19) %>%
-mutate(across(Dep:Sui, scid_threshold)) %>%
+Dep=A1,    Anh=A2, 
+App=A3, #AppDec=A4, AppInc=A5,
+Sle=A6,   #SleDec=A7, SleInc=A8,
+Psyc=A9,  #PsycInc=A10, PsycDec=A11,
+Fatig=A12, Guilt=A13, Conc=A16, Sui=A19) %>%
+mutate(across(Dep:Sui, .fns=scid_threshold)) %>%
 mutate(instrument='SCID', timeframe='current')
 
 scid_symptoms_past <- scid %>%
 select(IID=gwas,
-Dep=A52,    Anh=A53,   App=A54,
-Sle=A57,    Psyc=A61,  Fatig=A63,
-Guilt=A64,  Conc=A67,  Sui=A70) %>%
+Dep=A52,    Anh=A53, 
+App=A54, #AppDec=A55, AppInc=A56,
+Sle=A57,    #SleDec=A58, SleInc=A59, 
+Psyc=A60,  #PsycInc=A61, PsycDec=A62,
+Fatig=A63, Guilt=A64,  Conc=A67,  Sui=A70) %>%
 mutate(across(Dep:Sui, scid_threshold)) %>%
 mutate(instrument='SCID', timeframe='past')
 
@@ -158,7 +162,8 @@ siblings %>%
 left_join(gwas_all_scores_long, by=c('IID')) %>%
 group_by(father, mother, threshold, discovery) %>%
 mutate(PRSfam=mean(PRS)) %>%
-ungroup()
+ungroup() %>%
+mutate(sibid=paste(father, mother, sep=":"))
 
 
 ```
@@ -182,7 +187,7 @@ plyr::dlply(.data=siblings_scores,
         timeframe + symptom +
         I(PRS-PRSfam) + PRSfam + 
         I(PRS-PRSfam):sym_factorAvN + PRSfam:sym_factorAvN +
-        (1|IID) + (1|famid), data=sym_prs, family='binomial', nAGQ=0)
+        (1|IID) + (1|sibid), data=sym_prs, family='binomial', nAGQ=0)
 
     return(sym_thresh_model)
 })
@@ -225,7 +230,7 @@ mutate(effect=if_else(prs_term == 'PRSfam', true='Between', false='Within'),
 select(threshold, discovery, effect, contrast, beta=Estimate, se=`Std. Error`) %>%
 pivot_wider(names_from='effect', values_from=c('beta', 'se')) %>%
 inner_join(model_var) %>%
-mutate(ICC=V.famid/(V.IID + V.famid + V.R)) %>%
+mutate(ICC=V.sibid/(V.IID + V.sibid + V.R)) %>%
 mutate(beta_Total=beta_Within*(1-ICC) + beta_Between*ICC,
        se_Total=sqrt((se_Within*(1-ICC))^2 + (se_Between*ICC)^2))
        
@@ -241,5 +246,23 @@ geom_pointrange(position=position_dodge(width = 0.5)) +
 facet_grid(contrast ~ discovery) +
 coord_flip() +
 theme_minimal() 
+
+```
+
+Get sample counts
+
+
+```{r sibling_prs_counts, cache=TRUE}
+
+symptom_values %>%
+group_by(IID, symptom) %>%
+summarise(affected=max(affected)) %>%
+ungroup() %>%
+filter(IID %in% siblings_scores$IID, IID %in% covariates$IID) %>%
+count(symptom, affected) %>%
+mutate(absence_presence=if_else(affected == 0, true='absent', false='present')) %>%
+select(-affected) %>%
+pivot_wider(names_from=absence_presence, values_from=n) %>%
+mutate(PresenceAbsence=str_glue("{present} : {absent}"))
 
 ```
