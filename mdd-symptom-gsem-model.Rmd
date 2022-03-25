@@ -313,6 +313,22 @@ add_rank_same <- function(gv, top, bottom) {
 
 ```
 
+### Somatic factor
+
+```{r clin_soma, cache=TRUE}
+
+clin_soma.model <- "
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleInc + ClinPsycInc
+A1 ~~ 1*A1
+ClinAppDec ~~ ClinAppInc
+"
+clin_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_soma.model)
+
+clin_soma.fit$modelfit
+clin_soma.fit$results[c(1,2,3,6,7, 9)]
+
+```
+
 
 ## ALSPAC-UKB (Population)
 
