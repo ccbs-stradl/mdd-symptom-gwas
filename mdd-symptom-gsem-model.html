@@ -84,13 +84,9 @@ body {
 <span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="st">MDD8;Concentrate;Concentrate;Conc</span></span>
 <span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="st">MDD9;Suicidality;Suicidality;Sui</span></span>
 <span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span>, <span class="at">col_names=</span><span class="fu">c</span>(<span class="st">&#39;ref&#39;</span>, <span class="st">&#39;h&#39;</span>, <span class="st">&#39;v&#39;</span>, <span class="st">&#39;abbv&#39;</span>), <span class="at">delim=</span><span class="st">&#39;;&#39;</span>)</span></code></pre></div>
-<pre><code>## Rows: 15 Columns: 4
-
-## ── Column specification ──────────────────────────────────────────────────────────────────────────────────
+<pre><code>## Rows: 15 Columns: 4── Column specification ──────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
 ## chr (4): ref, h, v, abbv
-
-## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dsm_mdd_symptoms_reference <span class="ot">&lt;-</span></span>
@@ -111,36 +107,32 @@ body {
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="st">MDD8;Diminished ability to think or concentrate, or indecisiveness</span></span>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="st">MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide</span></span>
 <span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;</span>, <span class="at">col_names=</span><span class="fu">c</span>(<span class="st">&#39;Reference&#39;</span>, <span class="st">&#39;Description&#39;</span>), <span class="at">delim=</span><span class="st">&#39;;&#39;</span>)</span></code></pre></div>
-<pre><code>## Rows: 15 Columns: 2
-
-## ── Column specification ──────────────────────────────────────────────────────────────────────────────────
+<pre><code>## Rows: 15 Columns: 2── Column specification ──────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
 ## chr (2): Reference, Description
-
-## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dsm_mdd_symptoms_reference <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">left_join</span>(dsm_mdd_symptoms_labels, <span class="at">by=</span><span class="fu">c</span>(<span class="st">&#39;Reference&#39;</span><span class="ot">=</span><span class="st">&#39;ref&#39;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(Reference, <span class="at">Abbreviation=</span>abbv, <span class="at">Label=</span>h, Description)</span></code></pre></div>
-<pre><code>## # A tibble: 15 x 4
-##    Reference Abbreviation Label     Description                                 
-##    &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;     &lt;chr&gt;                                       
-##  1 MDD1      Dep          Mood      Depressed mood most of the day, nearly ever…
-##  2 MDD2      Anh          Interest  Markedly diminished interest or pleasure in…
-##  3 MDD3      App          Weight⇅   Significant change in weight or appetite    
-##  4 MDD3a     AppDec       Weight⇊   Significant weight loss or decrease in appe…
-##  5 MDD3b     AppInc       Weight⇈   Significant weight gain or increase in appe…
-##  6 MDD4      Sle          Sleep⇅    Sleeping too much or not sleeping enough    
-##  7 MDD4a     SleDec       Sleep⇊    Insomnia nearly every day                   
-##  8 MDD4b     SleInc       Sleep⇈    Hypersomnia nearly every day                
-##  9 MDD5      Psyc         Motor⇅    Changes in speed/amount of moving or speaki…
-## 10 MDD5a     PsycInc      Motor⇈    Psychomotor agitation nearly every day      
-## 11 MDD5b     PsycDec      Motor⇊    Psychomotor retardation nearly every day    
-## 12 MDD6      Fatig        Fatigue   Fatigue or loss of energy nearly every day  
-## 13 MDD7      Guilt        Guilt     Feelings of worthlessness or excessive or i…
-## 14 MDD8      Conc         Concentr… Diminished ability to think or concentrate,…
-## 15 MDD9      Sui          Suicidal… Recurrent thoughts of death or suicide or a…</code></pre>
+<pre><code>## # A tibble: 15 × 4
+##    Reference Abbreviation Label       Description                               
+##    &lt;chr&gt;     &lt;chr&gt;        &lt;chr&gt;       &lt;chr&gt;                                     
+##  1 MDD1      Dep          Mood        Depressed mood most of the day, nearly ev…
+##  2 MDD2      Anh          Interest    Markedly diminished interest or pleasure …
+##  3 MDD3      App          Weight⇅     Significant change in weight or appetite  
+##  4 MDD3a     AppDec       Weight⇊     Significant weight loss or decrease in ap…
+##  5 MDD3b     AppInc       Weight⇈     Significant weight gain or increase in ap…
+##  6 MDD4      Sle          Sleep⇅      Sleeping too much or not sleeping enough  
+##  7 MDD4a     SleDec       Sleep⇊      Insomnia nearly every day                 
+##  8 MDD4b     SleInc       Sleep⇈      Hypersomnia nearly every day              
+##  9 MDD5      Psyc         Motor⇅      Changes in speed/amount of moving or spea…
+## 10 MDD5a     PsycInc      Motor⇈      Psychomotor agitation nearly every day    
+## 11 MDD5b     PsycDec      Motor⇊      Psychomotor retardation nearly every day  
+## 12 MDD6      Fatig        Fatigue     Fatigue or loss of energy nearly every day
+## 13 MDD7      Guilt        Guilt       Feelings of worthlessness or excessive or…
+## 14 MDD8      Conc         Concentrate Diminished ability to think or concentrat…
+## 15 MDD9      Sui          Suicidality Recurrent thoughts of death or suicide or…</code></pre>
 <h1 id="genomicsem-covariance-structure">GenomicSEM covariance structure</h1>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>covstruct_prefix <span class="ot">&lt;-</span> <span class="st">&#39;agds_pgc.alspac_ukb.covstruct&#39;</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>covstruct_r <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">&#39;ldsc&#39;</span>, <span class="fu">paste</span>(covstruct_prefix, <span class="st">&#39;deparse.R&#39;</span>, <span class="at">sep=</span><span class="st">&#39;.&#39;</span>))</span>
@@ -149,14 +141,10 @@ body {
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>symptoms_covstruct <span class="ot">&lt;-</span> <span class="fu">dget</span>(covstruct_r)</span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>sumstats_prevs <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="fu">file.path</span>(<span class="st">&#39;ldsc&#39;</span>, <span class="fu">paste</span>(covstruct_prefix, <span class="st">&#39;prevs&#39;</span>, <span class="st">&#39;txt&#39;</span>, <span class="at">sep=</span><span class="st">&#39;.&#39;</span>)))</span></code></pre></div>
-<pre><code>## Rows: 24 Columns: 9
-
-## ── Column specification ──────────────────────────────────────────────────────────────────────────────────
+<pre><code>## Rows: 24 Columns: 9── Column specification ──────────────────────────────────────────────────────────────
 ## Delimiter: &quot;\t&quot;
 ## chr (5): cohorts, symptom, sumstats, filename, trait_name
 ## dbl (4): Nca, Nco, samp_prev, pop_prev
-
-## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <p>Rename samples: AGDS/PGC is the <strong>Clin</strong>ical sample (<code>Clin</code>) and ALSPAC/UKB is the <strong>Pop</strong>ulation sample (<code>Pop</code>); and rename symptoms numbers (<code>MDD1</code>, <code>MDD2</code>) to abbreviations (<code>Dep</code>, <code>Anh</code>)</p>
@@ -909,7 +897,7 @@ body {
 <h3 id="two-factor-models">Two-factor models</h3>
 <p><a href="https://www.sciencedirect.com/science/article/pii/S0165178112002685">Elhai Psychiat Res 2012</a> compared 3 two-factor models</p>
 <h3 id="psychological-somatic-elhai-model-2a">Psychological-Somatic (Elhai Model 2a)</h3>
-<p><a href="https://psycnet.apa.org/record/2008-17022-011">Kruse Rehab Psychol 2008</a>, <a href="https://www.sciencedirect.com/science/article/pii/S0003999310002443">Kruse Arch Psys Med Rehab 2010</a>:</p>
+<p><a href="https://psycnet.apa.org/record/2008-17022-011">Krause Rehab Psychol 2008</a>, <a href="https://www.sciencedirect.com/science/article/pii/S0003999310002443">Krause Arch Psys Med Rehab 2010</a>:</p>
 <blockquote>
 <p>the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor retardation as a fourth somatic item</p>
 </blockquote>

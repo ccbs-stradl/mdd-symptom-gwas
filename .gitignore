@@ -25,6 +25,7 @@ meta/distribution/*
 pheno/*
 *.RData
 mtag/mtag/
+ext/sumstats
 prs/genscot
 prs/lib
 *.best
