@@ -1,12 +1,9 @@
----
-title: Polygenic index of depression symptoms predicting symptoms in GS
-output: github_document
----
+Polygenic index of depression symptoms predicting symptoms in GS
+================
 
 Polygenic indices were calculated from GWAS of MDD symptoms and common factor GWAS of sypmtoms in MDD-enriched ("Clinical") and non-enriched ("Population") cohorts and tested in Generation Scotland (GS). PRS were calculated using clumping and thresholding in PRSice at the p-value that was the best predictor of MDD status in GS.
 
-```{r}
-
+``` {.r}
 library(dplyr)
 library(readr)
 library(tidyr)
@@ -17,12 +14,11 @@ library(fdrtool)
 library(doParallel)
 
 registerDoParallel(cores=1)
-
 ```
 
 List of symptoms PRS:
-```{r, warning=FALSE, message=FALSE}
 
+``` {.r}
 gwas_symptoms <- c('clinappinc', 'clinsui', 'popneuroveg', 'popaffect')
 names(gwas_symptoms) <- gwas_symptoms
 
@@ -33,27 +29,22 @@ gwas_all_scores <- lapply(gwas_symptoms,
     read_table(here::here('prs', paste0(gwas, '_all.all.score'))) %>%
     mutate(across(!c(FID, IID), ~scale(.)[,1])) %>%
     rename_with(~paste0('PT', .x), !c(FID, IID)))
-
-
 ```
 
 Get GenScot MDD SCID and CIDI symptoms, covariates, pedigree, and PCs
 
-```{r, warning=FALSE, message=FALSE}
-
+``` {.r}
 scid <- read_csv(here::here('prs/genscot/phenotypes/SCID_QC_201113_GWASids.csv'))
 cidi <- local({load(here::here("prs/genscot/phenotypes/GS_Recontact/STRADL.Rdata")); return(as_tibble(x))})
 agesex <- read_csv(here::here("prs/genscot//phenotypes/agesex_all.csv"))
 pedigree <- read_csv(here::here("prs/genscot/phenotypes/PEDIGREES/pedigree_031116.csv"))
 pcs <- read_csv(here::here("prs/genscot/genetics/genotypes/GS20K_PLINK_files/PCA_MDS_components/HM3mds2R.mds.csv"))
 unrel <- read_table(here::here('prs/genscot/genetics/genotypes/GRMs/unrelated_t0.025_7388/QCdGS20K_unrelated_t0.025.grm.id'), col_names=c('FID', 'IID'))
-
 ```
 
 Harmonise the symptoms data
 
-```{r}
-
+``` {.r}
 scid_threshold <- function(A) {
     case_when(A == 1 ~ 0L,
               A %in% 2:3 ~ 1L,
@@ -97,13 +88,11 @@ Conc=CIDI8,
 Guilt=CIDI9,
 Sui=CIDI10) %>%
 mutate(instrument='CIDI', timeframe='past')
-
 ```
 
 Arrange symptoms into repeated measures format
 
-```{r}
-
+``` {.r}
 symptom_values <- 
 bind_rows(scid_symptoms_current, scid_symptoms_past, cidi_symptoms_past) %>%
 pivot_longer(cols=Dep:Sui, names_to='symptom', values_to='affected') %>%
@@ -113,47 +102,40 @@ mutate(sym_factorAvN=case_when(symptom %in% c("Dep", "Guilt", "Sui") ~ 0.5,
                        TRUE ~ NA_real_),
        sym_cardinal=case_when(symptom %in% c("Dep", "Anh") ~ 0.5,
                               TRUE ~ -0.5))
-
 ```
 
 Age at measurement occasions
 
-```{r}
-
+``` {.r}
 covariates <- 
 bind_rows(
 agesex %>% transmute(IID=id, age, instrument='SCID'),
 cidi %>% transmute(IID=id, age=Age, instrument='CIDI')) %>%
 inner_join(agesex %>% select(IID=id, sex)) %>%
 mutate(agez=scale(age)[,1])
-
-
 ```
+
+    ## Joining, by = "IID"
 
 Transform PRS to long format
 
-
-```{r}
-
+``` {.r}
 gwas_all_scores_long <-
 plyr::ldply(gwas_all_scores, I) %>%
 pivot_longer(cols=PT0.025:PT1, names_to='threshold', values_to='PRS') %>%
 rename(discovery=.id)
-
 ```
 
 Unrelated sample
-```{r}
 
+``` {.r}
 unrel_scores <- gwas_all_scores_long %>%
 filter(IID %in% unrel$IID)
-
 ```
 
-Compare to polygenic indices. 
+Compare to polygenic indices.
 
-```{r prs_models, cache=TRUE}
-
+``` {.r}
 prs_models <-
 plyr::dlply(.data=unrel_scores,
 .variables=c("discovery", "threshold"),
@@ -172,14 +154,13 @@ plyr::dlply(.data=unrel_scores,
 
     return(sym_thresh_model)
 })
-
-
 ```
+
+    ## Warning in setup_parallel(): No parallel backend registered
 
 Examine models and get within, between, and total effects
 
-```{r model_coefs}
-
+``` {.r}
 # constant (fixed) effects
 model_coefs <-
 plyr::ldply(prs_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
@@ -190,14 +171,13 @@ geom_hline(yintercept=0, color='gray') +
 geom_pointrange(position=position_dodge(width = 0.5)) +
 facet_wrap(~discovery) +
 coord_flip() 
-
 ```
+
+![](gs_symptoms_on_prs_files/figure-markdown_github/model_coefs-1.png)
 
 Get sample counts
 
-
-```{r prs_counts, cache=TRUE}
-
+``` {.r}
 symptom_values %>%
 group_by(IID, symptom) %>%
 summarise(affected=max(affected)) %>%
@@ -208,5 +188,20 @@ mutate(absence_presence=if_else(affected == 0, true='absent', false='present')) 
 select(-affected) %>%
 pivot_wider(names_from=absence_presence, values_from=n) %>%
 mutate(PresenceAbsence=str_glue("{present} : {absent}"))
-
 ```
+
+    ## `summarise()` has grouped output by 'IID'. You can override using the `.groups`
+    ## argument.
+
+    ## # A tibble: 9 × 4
+    ##   symptom absent present PresenceAbsence
+    ##   <chr>    <int>   <int> <glue>         
+    ## 1 Anh       2009    2135 2135 : 2009    
+    ## 2 App       1018    1512 1512 : 1018    
+    ## 3 Conc       525    1998 1998 : 525     
+    ## 4 Dep       1633    2518 2518 : 1633    
+    ## 5 Fatig      358    2176 2176 : 358     
+    ## 6 Guilt      874    1648 1648 : 874     
+    ## 7 Psyc       273     746 746 : 273      
+    ## 8 Sle        434    2098 2098 : 434     
+    ## 9 Sui       1177    1347 1347 : 1177
