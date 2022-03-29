@@ -130,7 +130,7 @@ MDD4a;Insomnia nearly every day
 MDD4b;Hypersomnia nearly every day
 MDD5;Changes in speed/amount of moving or speaking
 MDD5a;Psychomotor agitation nearly every day
-MDD5b;Psychomotor retardation nearly every day
+MDD5b;Psychomotor slowing nearly every day
 MDD6;Fatigue or loss of energy nearly every day
 MDD7;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;Diminished ability to think or concentrate, or indecisiveness
@@ -156,7 +156,7 @@ MDD4a       Sleep⇊        Insomnia nearly every day
 MDD4b       Sleep⇈        Hypersomnia nearly every day                                                                                 
 MDD5        Motor⇅        Changes in speed/amount of moving or speaking                                                                
 MDD5a       Motor⇈        Psychomotor agitation nearly every day                                                                       
-MDD5b       Motor⇊        Psychomotor retardation nearly every day                                                                     
+MDD5b       Motor⇊        Psychomotor slowing nearly every day                                                                     
 MDD6        Fatigue       Fatigue or loss of energy nearly every day                                                                   
 MDD7        Guilt         Feelings of worthlessness or excessive or inappropriate guilt                                                
 MDD8        Concentrate   Diminished ability to think or concentrate, or indecisiveness                                                

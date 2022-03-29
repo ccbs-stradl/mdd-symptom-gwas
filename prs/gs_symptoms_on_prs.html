@@ -67,7 +67,7 @@ scid_symptoms_current &lt;-<span class="st"> </span>scid %&gt;%
 <span class="dt">Dep=</span>A1,    <span class="dt">Anh=</span>A2, 
 <span class="dt">App=</span>A3, <span class="co">#AppDec=A4, AppInc=A5,</span>
 <span class="dt">Sle=</span>A6,   <span class="co">#SleDec=A7, SleInc=A8,</span>
-<span class="dt">Psyc=</span>A9,  <span class="co">#PsycInc=A10, PsycDec=A11,</span>
+<span class="dt">Moto=</span>A9,  <span class="co">#MotoInc=A10, MotoDec=A11,</span>
 <span class="dt">Fatig=</span>A12, <span class="dt">Guilt=</span>A13, <span class="dt">Conc=</span>A16, <span class="dt">Sui=</span>A19) %&gt;%
 <span class="kw">mutate</span>(<span class="kw">across</span>(Dep:Sui, <span class="dt">.fns=</span>scid_threshold)) %&gt;%
 <span class="kw">mutate</span>(<span class="dt">instrument=</span><span class="st">'SCID'</span>, <span class="dt">timeframe=</span><span class="st">'current'</span>)
@@ -77,7 +77,7 @@ scid_symptoms_past &lt;-<span class="st"> </span>scid %&gt;%
 <span class="dt">Dep=</span>A52,    <span class="dt">Anh=</span>A53, 
 <span class="dt">App=</span>A54, <span class="co">#AppDec=A55, AppInc=A56,</span>
 <span class="dt">Sle=</span>A57,    <span class="co">#SleDec=A58, SleInc=A59, </span>
-<span class="dt">Psyc=</span>A60,  <span class="co">#PsycInc=A61, PsycDec=A62,</span>
+<span class="dt">Moto=</span>A60,  <span class="co">#MotoInc=A61, MotoDec=A62,</span>
 <span class="dt">Fatig=</span>A63, <span class="dt">Guilt=</span>A64,  <span class="dt">Conc=</span>A67,  <span class="dt">Sui=</span>A70) %&gt;%
 <span class="kw">mutate</span>(<span class="kw">across</span>(Dep:Sui, scid_threshold)) %&gt;%
 <span class="kw">mutate</span>(<span class="dt">instrument=</span><span class="st">'SCID'</span>, <span class="dt">timeframe=</span><span class="st">'past'</span>)
@@ -105,7 +105,7 @@ cidi_symptoms_past &lt;-<span class="st"> </span>cidi %&gt;%
 <span class="kw">pivot_longer</span>(<span class="dt">cols=</span>Dep:Sui, <span class="dt">names_to=</span><span class="st">'symptom'</span>, <span class="dt">values_to=</span><span class="st">'affected'</span>) %&gt;%
 <span class="kw">filter</span>(!<span class="kw">is.na</span>(affected)) %&gt;%
 <span class="kw">mutate</span>(<span class="dt">sym_factorAvN=</span><span class="kw">case_when</span>(symptom %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Dep&quot;</span>, <span class="st">&quot;Guilt&quot;</span>, <span class="st">&quot;Sui&quot;</span>) ~<span class="st"> </span><span class="fl">0.5</span>,
-                       symptom %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Anh&quot;</span>, <span class="st">&quot;App&quot;</span>, <span class="st">&quot;Sle&quot;</span>, <span class="st">&quot;Psyc&quot;</span>, <span class="st">&quot;Fatig&quot;</span>, <span class="st">&quot;Conc&quot;</span>) ~<span class="st"> </span>-<span class="fl">0.5</span>,
+                       symptom %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Anh&quot;</span>, <span class="st">&quot;App&quot;</span>, <span class="st">&quot;Sle&quot;</span>, <span class="st">&quot;Moto&quot;</span>, <span class="st">&quot;Fatig&quot;</span>, <span class="st">&quot;Conc&quot;</span>) ~<span class="st"> </span>-<span class="fl">0.5</span>,
                        <span class="ot">TRUE</span> ~<span class="st"> </span><span class="ot">NA_real_</span>),
        <span class="dt">sym_cardinal=</span><span class="kw">case_when</span>(symptom %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Dep&quot;</span>, <span class="st">&quot;Anh&quot;</span>) ~<span class="st"> </span><span class="fl">0.5</span>,
                               <span class="ot">TRUE</span> ~<span class="st"> </span>-<span class="fl">0.5</span>))</code></pre>
@@ -180,7 +180,7 @@ plyr::<span class="kw">ldply</span>(prs_models, function(model) <span class="kw"
 ## 4 Dep       1633    2518 2518 : 1633    
 ## 5 Fatig      358    2176 2176 : 358     
 ## 6 Guilt      874    1648 1648 : 874     
-## 7 Psyc       273     746 746 : 273      
+## 7 Moto       273     746 746 : 273      
 ## 8 Sle        434    2098 2098 : 434     
 ## 9 Sui       1177    1347 1347 : 1177</code></pre>
 

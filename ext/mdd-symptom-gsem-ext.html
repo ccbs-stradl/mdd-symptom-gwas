@@ -344,9 +344,9 @@ MDD3b;Weight⇈;Weight⇉;AppInc
 MDD4;Sleep⇅;Sleep⇆;Sle
 MDD4a;Sleep⇊;Sleep⇇;SleDec
 MDD4b;Sleep⇈;Sleep⇉;SleInc
-MDD5;Motor⇅;Motor⇆;Psyc
-MDD5a;Motor⇈;Motor⇉;PsycInc
-MDD5b;Motor⇊;Motor⇇;PsycDec
+MDD5;Motor⇅;Motor⇆;Moto
+MDD5a;Motor⇈;Motor⇉;MotoInc
+MDD5b;Motor⇊;Motor⇇;MotoDec
 MDD6;Fatigue;Fatigue;Fatig
 MDD7;Guilt;Guilt;Guilt
 MDD8;Concentrate;Concentrate;Conc
@@ -369,7 +369,7 @@ MDD4a;Insomnia nearly every day
 MDD4b;Hypersomnia nearly every day
 MDD5;Changes in speed/amount of moving or speaking
 MDD5a;Psychomotor agitation nearly every day
-MDD5b;Psychomotor retardation nearly every day
+MDD5b;Psychomotor slowing nearly every day
 MDD6;Fatigue or loss of energy nearly every day
 MDD7;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;Diminished ability to think or concentrate, or indecisiveness
@@ -429,7 +429,7 @@ if(!file.exists(covstruct_r)) {
     mutate(Sample=if_else(cohorts==&quot;AGDS_PGC&quot;, true=&#39;Clin&#39;, false=&#39;Pop&#39;)) %&gt;%
     mutate(trait_name=paste0(Sample, abbv)) %&gt;%
     filter(trait_name %in% c(&#39;ClinAppInc&#39;, &#39;ClinSleDec&#39;, &#39;ClinSleInc&#39;,
-                             &#39;ClinPsycInc&#39;, &#39;ClinSui&#39;,
+                             &#39;ClinMotoInc&#39;, &#39;ClinSui&#39;,
                              &#39;PopDep&#39;, &#39;PopGuilt&#39;, &#39;PopSui&#39;,
                              &#39;PopAnh&#39;, &#39;PopAppInc&#39;, &#39;PopAppDec&#39;,
                              &#39;PopSleInc&#39;, &#39;PopSleDec&#39;, &#39;PopFatig&#39;,
@@ -470,7 +470,7 @@ if(!file.exists(covstruct_r)) {
 <h2 number="6.1"><span class="header-section-number">6.1</span> Clinical and population factors</h2>
 <p>Base model of symptom factors</p>
 <pre class="r"><code>clin_pop.model &lt;- &quot;
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
@@ -575,7 +575,7 @@ clin_pop.fit &lt;- usermodel(symptoms_covstruct, estimation=&#39;DWLS&#39;, mode
 <td align="left">12</td>
 <td align="left">ClinSoma</td>
 <td align="left">=~</td>
-<td align="left">ClinPsycInc</td>
+<td align="left">ClinMotoInc</td>
 <td align="right">0.5512468</td>
 <td align="left">0.25174645840795</td>
 <td align="right">0.0285469</td>
@@ -735,9 +735,9 @@ clin_pop.fit &lt;- usermodel(symptoms_covstruct, estimation=&#39;DWLS&#39;, mode
 </tr>
 <tr class="even">
 <td align="left">8</td>
-<td align="left">ClinPsycInc</td>
+<td align="left">ClinMotoInc</td>
 <td align="left">~~</td>
-<td align="left">ClinPsycInc</td>
+<td align="left">ClinMotoInc</td>
 <td align="right">0.6961301</td>
 <td align="left">0.544701812791315</td>
 <td align="right">0.2012489</td>
@@ -903,7 +903,7 @@ clin_pop.fit &lt;- usermodel(symptoms_covstruct, estimation=&#39;DWLS&#39;, mode
 <h2 number="6.2"><span class="header-section-number">6.2</span> External phenotypes</h2>
 <p>Compare symptom factors against each external phenotype. Single regression of each external phenotype on each symptom or symptom cluster.</p>
 <pre class="r"><code>pop_ext.glue &lt;- &quot;
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
@@ -1023,7 +1023,7 @@ filter(lhs %in% ext_trait_names, rhs %in% c(&#39;ClinSoma&#39;, &#39;ClinSui&#39
 mutate(Beta=&#39;Unadjusted&#39;, Factor=rhs, Phenotype=lhs)</code></pre>
 <p>Multiple regression of each phenotype on the clinical/population symptom factors, to estimate relationship after condition on each of the other factors.</p>
 <pre class="r"><code>clin_ext_mult.model &lt;- &quot;
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 AlcDep ~ ClinSoma + ClinSui
 Anxiety ~ ClinSoma+ ClinSui

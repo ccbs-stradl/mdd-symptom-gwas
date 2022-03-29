@@ -177,9 +177,9 @@ MDD3b;Weight⇈;Weight⇉;AppInc
 MDD4;Sleep⇅;Sleep⇆;Sle
 MDD4a;Sleep⇊;Sleep⇇;SleDec
 MDD4b;Sleep⇈;Sleep⇉;SleInc
-MDD5;Motor⇅;Motor⇆;Psyc
-MDD5a;Motor⇈;Motor⇉;PsycInc
-MDD5b;Motor⇊;Motor⇇;PsycDec
+MDD5;Motor⇅;Motor⇆;Moto
+MDD5a;Motor⇈;Motor⇉;MotoInc
+MDD5b;Motor⇊;Motor⇇;MotoDec
 MDD6;Fatigue;Fatigue;Fatig
 MDD7;Guilt;Guilt;Guilt
 MDD8;Concentrate;Concentrate;Conc
@@ -198,7 +198,7 @@ MDD4a;Insomnia nearly every day
 MDD4b;Hypersomnia nearly every day
 MDD5;Changes in speed/amount of moving or speaking
 MDD5a;Psychomotor agitation nearly every day
-MDD5b;Psychomotor retardation nearly every day
+MDD5b;Psychomotor slowing nearly every day
 MDD6;Fatigue or loss of energy nearly every day
 MDD7;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;Diminished ability to think or concentrate, or indecisiveness
@@ -260,7 +260,7 @@ if(!file.exists(covstruct_r)) {
     mutate(Sample=if_else(cohorts=="AGDS_PGC", true='Clin', false='Pop')) %>%
     mutate(trait_name=paste0(Sample, abbv)) %>%
     filter(trait_name %in% c('ClinAppInc', 'ClinSleDec', 'ClinSleInc',
-                             'ClinPsycInc', 'ClinSui',
+                             'ClinMotoInc', 'ClinSui',
                              'PopDep', 'PopGuilt', 'PopSui',
                              'PopAnh', 'PopAppInc', 'PopAppDec',
                              'PopSleInc', 'PopSleDec', 'PopFatig',
@@ -307,7 +307,7 @@ Base model of symptom factors
 ```{r clin_pop_affect_veg, cache=TRUE}
 
 clin_pop.model <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
@@ -330,7 +330,7 @@ Compare symptom factors against each external phenotype. Single regression of ea
 ```{r pop_ext, cache=TRUE}
 
 pop_ext.glue <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
@@ -367,7 +367,7 @@ Multiple regression of each phenotype on the clinical/population symptom factors
 ```{r clin_ext_mult, cache=TRUE}
 
 clin_ext_mult.model <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 AlcDep ~ ClinSoma + ClinSui
 Anxiety ~ ClinSoma+ ClinSui

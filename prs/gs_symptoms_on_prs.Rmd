@@ -65,7 +65,7 @@ select(IID=gwas,
 Dep=A1,    Anh=A2, 
 App=A3, #AppDec=A4, AppInc=A5,
 Sle=A6,   #SleDec=A7, SleInc=A8,
-Psyc=A9,  #PsycInc=A10, PsycDec=A11,
+Moto=A9,  #MotoInc=A10, MotoDec=A11,
 Fatig=A12, Guilt=A13, Conc=A16, Sui=A19) %>%
 mutate(across(Dep:Sui, .fns=scid_threshold)) %>%
 mutate(instrument='SCID', timeframe='current')
@@ -75,7 +75,7 @@ select(IID=gwas,
 Dep=A52,    Anh=A53, 
 App=A54, #AppDec=A55, AppInc=A56,
 Sle=A57,    #SleDec=A58, SleInc=A59, 
-Psyc=A60,  #PsycInc=A61, PsycDec=A62,
+Moto=A60,  #MotoInc=A61, MotoDec=A62,
 Fatig=A63, Guilt=A64,  Conc=A67,  Sui=A70) %>%
 mutate(across(Dep:Sui, scid_threshold)) %>%
 mutate(instrument='SCID', timeframe='past')
@@ -109,7 +109,7 @@ bind_rows(scid_symptoms_current, scid_symptoms_past, cidi_symptoms_past) %>%
 pivot_longer(cols=Dep:Sui, names_to='symptom', values_to='affected') %>%
 filter(!is.na(affected)) %>%
 mutate(sym_factorAvN=case_when(symptom %in% c("Dep", "Guilt", "Sui") ~ 0.5,
-                       symptom %in% c("Anh", "App", "Sle", "Psyc", "Fatig", "Conc") ~ -0.5,
+                       symptom %in% c("Anh", "App", "Sle", "Moto", "Fatig", "Conc") ~ -0.5,
                        TRUE ~ NA_real_),
        sym_cardinal=case_when(symptom %in% c("Dep", "Anh") ~ 0.5,
                               TRUE ~ -0.5))

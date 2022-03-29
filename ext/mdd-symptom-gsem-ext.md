@@ -184,9 +184,9 @@ MDD3b;Weight⇈;Weight⇉;AppInc
 MDD4;Sleep⇅;Sleep⇆;Sle
 MDD4a;Sleep⇊;Sleep⇇;SleDec
 MDD4b;Sleep⇈;Sleep⇉;SleInc
-MDD5;Motor⇅;Motor⇆;Psyc
-MDD5a;Motor⇈;Motor⇉;PsycInc
-MDD5b;Motor⇊;Motor⇇;PsycDec
+MDD5;Motor⇅;Motor⇆;Moto
+MDD5a;Motor⇈;Motor⇉;MotoInc
+MDD5b;Motor⇊;Motor⇇;MotoDec
 MDD6;Fatigue;Fatigue;Fatig
 MDD7;Guilt;Guilt;Guilt
 MDD8;Concentrate;Concentrate;Conc
@@ -215,7 +215,7 @@ MDD4a;Insomnia nearly every day
 MDD4b;Hypersomnia nearly every day
 MDD5;Changes in speed/amount of moving or speaking
 MDD5a;Psychomotor agitation nearly every day
-MDD5b;Psychomotor retardation nearly every day
+MDD5b;Psychomotor slowing nearly every day
 MDD6;Fatigue or loss of energy nearly every day
 MDD7;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;Diminished ability to think or concentrate, or indecisiveness
@@ -294,7 +294,7 @@ if(!file.exists(covstruct_r)) {
     mutate(Sample=if_else(cohorts=="AGDS_PGC", true='Clin', false='Pop')) %>%
     mutate(trait_name=paste0(Sample, abbv)) %>%
     filter(trait_name %in% c('ClinAppInc', 'ClinSleDec', 'ClinSleInc',
-                             'ClinPsycInc', 'ClinSui',
+                             'ClinMotoInc', 'ClinSui',
                              'PopDep', 'PopGuilt', 'PopSui',
                              'PopAnh', 'PopAppInc', 'PopAppDec',
                              'PopSleInc', 'PopSleDec', 'PopFatig',
@@ -339,7 +339,7 @@ Base model of symptom factors
 
 ```r
 clin_pop.model <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
@@ -405,7 +405,7 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
 |11 |ClinSoma    |=~ |ClinAppInc  |    0.6331167|0.249315964519457  | 0.0111036|
 |13 |ClinSoma    |=~ |ClinSleDec  |    0.3999701|0.285148917125793  | 0.1607155|
 |14 |ClinSoma    |=~ |ClinSleInc  |    0.5250231|0.323796141120907  | 0.1049170|
-|12 |ClinSoma    |=~ |ClinPsycInc |    0.5512468|0.25174645840795   | 0.0285469|
+|12 |ClinSoma    |=~ |ClinMotoInc |    0.5512468|0.25174645840795   | 0.0285469|
 |1  |Affect      |=~ |PopDep      |    0.7422368|0.0711883555737437 | 0.0000000|
 |2  |Affect      |=~ |PopGuilt    |    0.7564180|0.0966276584782838 | 0.0000000|
 |3  |Affect      |=~ |PopSui      |    0.6751448|0.108369010956031  | 0.0000000|
@@ -423,7 +423,7 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
 |7  |ClinAppInc  |~~ |ClinAppInc  |    0.5991668|0.444388081648688  | 0.1775706|
 |9  |ClinSleDec  |~~ |ClinSleDec  |    0.8400303|0.628750873516738  | 0.1815427|
 |10 |ClinSleInc  |~~ |ClinSleInc  |    0.7243430|0.882588601524437  | 0.4118152|
-|8  |ClinPsycInc |~~ |ClinPsycInc |    0.6961301|0.544701812791315  | 0.2012489|
+|8  |ClinMotoInc |~~ |ClinMotoInc |    0.6961301|0.544701812791315  | 0.2012489|
 |34 |PopDep      |~~ |PopDep      |    0.4490840|0.124940164766387  | 0.0003252|
 |36 |PopGuilt    |~~ |PopGuilt    |    0.4278329|0.18078959434519   | 0.0179597|
 |39 |PopSui      |~~ |PopSui      |    0.5441828|0.241437218583002  | 0.0242019|
@@ -451,7 +451,7 @@ Compare symptom factors against each external phenotype. Single regression of ea
 
 ```r
 pop_ext.glue <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Neuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
@@ -609,7 +609,7 @@ Multiple regression of each phenotype on the clinical/population symptom factors
 
 ```r
 clin_ext_mult.model <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 AlcDep ~ ClinSoma + ClinSui
 Anxiety ~ ClinSoma+ ClinSui

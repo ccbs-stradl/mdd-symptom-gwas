@@ -71,9 +71,9 @@ MDD3b;Weight⇈;Weight⇉;AppInc
 MDD4;Sleep⇅;Sleep⇆;Sle
 MDD4a;Sleep⇊;Sleep⇇;SleDec
 MDD4b;Sleep⇈;Sleep⇉;SleInc
-MDD5;Motor⇅;Motor⇆;Psyc
-MDD5a;Motor⇈;Motor⇉;PsycInc
-MDD5b;Motor⇊;Motor⇇;PsycDec
+MDD5;Motor⇅;Motor⇆;Moto
+MDD5a;Motor⇈;Motor⇉;MotoInc
+MDD5b;Motor⇊;Motor⇇;MotoDec
 MDD6;Fatigue;Fatigue;Fatig
 MDD7;Guilt;Guilt;Guilt
 MDD8;Concentrate;Concentrate;Conc
@@ -100,7 +100,7 @@ MDD4a;Insomnia nearly every day
 MDD4b;Hypersomnia nearly every day
 MDD5;Changes in speed/amount of moving or speaking
 MDD5a;Psychomotor agitation nearly every day
-MDD5b;Psychomotor retardation nearly every day
+MDD5b;Psychomotor slowing nearly every day
 MDD6;Fatigue or loss of energy nearly every day
 MDD7;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;Diminished ability to think or concentrate, or indecisiveness
@@ -131,9 +131,9 @@ select(Reference, Abbreviation=abbv, Label=h, Description)
     ##  6 MDD4      Sle          Sleep⇅      Sleeping too much or not sleeping enough  
     ##  7 MDD4a     SleDec       Sleep⇊      Insomnia nearly every day                 
     ##  8 MDD4b     SleInc       Sleep⇈      Hypersomnia nearly every day              
-    ##  9 MDD5      Psyc         Motor⇅      Changes in speed/amount of moving or spea…
-    ## 10 MDD5a     PsycInc      Motor⇈      Psychomotor agitation nearly every day    
-    ## 11 MDD5b     PsycDec      Motor⇊      Psychomotor retardation nearly every day  
+    ##  9 MDD5      Moto         Motor⇅      Changes in speed/amount of moving or spea…
+    ## 10 MDD5a     MotoInc      Motor⇈      Psychomotor agitation nearly every day    
+    ## 11 MDD5b     MotoDec      Motor⇊      Psychomotor slowing nearly every day  
     ## 12 MDD6      Fatig        Fatigue     Fatigue or loss of energy nearly every day
     ## 13 MDD7      Guilt        Guilt       Feelings of worthlessness or excessive or…
     ## 14 MDD8      Conc         Concentrate Diminished ability to think or concentrat…
@@ -191,11 +191,11 @@ names(symptoms_S_var) <- dimnames(symptoms_covstruct$S)[[2]]
 symptoms_S_var[which(symptoms_S_var > 0)]
 ```
 
-    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinPsycInc     ClinSui 
+    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc     ClinSui 
     ## 0.112544816 0.047192446 0.034299744 0.003892157 0.036548569 0.073599244 
     ##      PopDep      PopAnh   PopAppDec   PopAppInc   PopSleDec   PopSleInc 
     ## 0.080469848 0.086912880 0.034935627 0.078103966 0.039893080 0.044634027 
-    ##  PopPsycInc  PopPsycDec    PopFatig    PopGuilt     PopConc      PopSui 
+    ##  PopMotoInc  PopPsycDec    PopFatig    PopGuilt     PopConc      PopSui 
     ## 0.395771366 0.058092210 0.055211615 0.057321248 0.049088126 0.032192455
 
 ## Common factor
@@ -204,7 +204,7 @@ Common factor across symptoms from both cohorts
 
 ``` r
 commonfactor.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
 "
 
@@ -252,7 +252,7 @@ commonfactor.fit$results[c(1,2,3,6,7)]
     ## 2           A1 =~  ClinAppInc  -0.18187702  0.101563963131273
     ## 4           A1 =~  ClinSleDec  -0.04736174  0.120812396344169
     ## 5           A1 =~  ClinSleInc  -0.16862764  0.166188706209203
-    ## 3           A1 =~ ClinPsycInc  -0.18573946  0.110061754269664
+    ## 3           A1 =~ ClinMotoInc  -0.18573946  0.110061754269664
     ## 6           A1 =~     ClinSui  -0.64896425  0.108682004115011
     ## 11          A1 =~      PopDep  -0.83967242 0.0451478511326653
     ## 7           A1 =~      PopAnh  -0.95001597 0.0431080771676742
@@ -268,7 +268,7 @@ commonfactor.fit$results[c(1,2,3,6,7)]
     ## 19  ClinAppInc ~~  ClinAppInc   0.96691962  0.322114277288335
     ## 21  ClinSleDec ~~  ClinSleDec   0.99776135  0.545818607899078
     ## 22  ClinSleInc ~~  ClinSleInc   0.97156967  0.842333895318451
-    ## 20 ClinPsycInc ~~ ClinPsycInc   0.96550188  0.441518768528219
+    ## 20 ClinMotoInc ~~ ClinMotoInc   0.96550188  0.441518768528219
     ## 23     ClinSui ~~     ClinSui   0.57884564  0.356780235796075
     ## 28      PopDep ~~      PopDep   0.29494933  0.070022263658254
     ## 24      PopAnh ~~      PopAnh   0.09747049 0.0653102308449891
@@ -286,7 +286,7 @@ Correlation among directional symptoms
 
 ``` r
 commonfactor_dir.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
 ClinAppDec ~~ ClinAppInc
 ClinSleDec ~~ ClinSleInc
@@ -340,7 +340,7 @@ commonfactor_dir.fit$results[c(1,2,3,6,7,9)]
     ## 2           A1 =~  ClinAppInc  -0.21337301  0.109824795810457 5.203476e-02
     ## 4           A1 =~  ClinSleDec  -0.04746294  0.125285098422828 7.048143e-01
     ## 5           A1 =~  ClinSleInc  -0.19520115  0.176058457335191 2.675463e-01
-    ## 3           A1 =~ ClinPsycInc  -0.20508141  0.118912061322621 8.459020e-02
+    ## 3           A1 =~ ClinMotoInc  -0.20508141  0.118912061322621 8.459020e-02
     ## 6           A1 =~     ClinSui  -0.70847346  0.117829135736631 1.824429e-09
     ## 11          A1 =~      PopDep  -0.68153483 0.0663157454053075 8.936688e-25
     ## 7           A1 =~      PopAnh  -0.80050755 0.0648225982689927 4.919160e-35
@@ -361,7 +361,7 @@ commonfactor_dir.fit$results[c(1,2,3,6,7,9)]
     ## 20  ClinAppInc ~~  ClinAppInc   0.95447259  0.323125287753196 3.138105e-03
     ## 22  ClinSleDec ~~  ClinSleDec   0.99774973  0.545881129322718 6.758381e-02
     ## 24  ClinSleInc ~~  ClinSleInc   0.96187035  0.841547170982877 2.530342e-01
-    ## 21 ClinPsycInc ~~ ClinPsycInc   0.95794328  0.442328411634951 3.033572e-02
+    ## 21 ClinMotoInc ~~ ClinMotoInc   0.95794328  0.442328411634951 3.033572e-02
     ## 25     ClinSui ~~     ClinSui   0.49806444  0.368726148369894 1.767659e-01
     ## 32      PopDep ~~      PopDep   0.53550937  0.108311550045554 7.646646e-07
     ## 26      PopAnh ~~      PopAnh   0.35918740  0.106215223414417 7.204338e-04
@@ -379,7 +379,7 @@ Ascertainment-specific factors
 
 ``` r
 clin_pop.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui 
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui 
 A2 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
 A2 ~~ 1*A2
@@ -437,7 +437,7 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
     ## 2           A1 =~  ClinAppInc   0.21337282  0.138592824578811 1.236668e-01
     ## 4           A1 =~  ClinSleDec   0.04746212  0.127242216169122 7.091438e-01
     ## 5           A1 =~  ClinSleInc   0.19520394  0.198065455365735 3.243573e-01
-    ## 3           A1 =~ ClinPsycInc   0.20508192  0.156204268559555 1.892144e-01
+    ## 3           A1 =~ ClinMotoInc   0.20508192  0.156204268559555 1.892144e-01
     ## 6           A1 =~     ClinSui   0.70847539  0.364653746989258 5.203238e-02
     ## 13          A2 =~      PopDep   0.68153359 0.0662528712687633 8.077338e-25
     ## 9           A2 =~      PopAnh   0.80050694 0.0647520828293692 4.162259e-35
@@ -459,7 +459,7 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
     ## 22  ClinAppInc ~~  ClinAppInc   0.95447022  0.321812777043377 3.017763e-03
     ## 24  ClinSleDec ~~  ClinSleDec   0.99774725  0.545927684354803 6.760687e-02
     ## 26  ClinSleInc ~~  ClinSleInc   0.96175792   0.84312324416208 2.539230e-01
-    ## 23 ClinPsycInc ~~ ClinPsycInc   0.95793867  0.449351871502651 3.302092e-02
+    ## 23 ClinMotoInc ~~ ClinMotoInc   0.95793867  0.449351871502651 3.302092e-02
     ## 27     ClinSui ~~     ClinSui   0.49804222    0.5536599333717 3.683444e-01
     ## 34      PopDep ~~      PopDep   0.53551207  0.108061605018307 7.210388e-07
     ## 28      PopAnh ~~      PopAnh   0.35918877  0.105959623970949 6.993102e-04
@@ -476,9 +476,9 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
 
 ``` r
 clin_pop_bif.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui 
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui 
 A2 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
-A =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
+A =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A ~~ 1*A
@@ -530,7 +530,7 @@ clin_pop_bif.fit$results[c(1,2,3,6,7,9)]
     ## 19          A1 =~  ClinAppInc -0.168305181 0.330576718163868 6.106325e-01
     ## 21          A1 =~  ClinSleDec -2.674363275  4.97253059249543 5.906603e-01
     ## 22          A1 =~  ClinSleInc -0.203069775 0.418079154074667 6.271358e-01
-    ## 20          A1 =~ ClinPsycInc -0.079607371  0.17357378993375 6.464714e-01
+    ## 20          A1 =~ ClinMotoInc -0.079607371  0.17357378993375 6.464714e-01
     ## 23          A1 =~     ClinSui  0.097638163 0.207017114112648 6.371563e-01
     ## 31          A2 =~      PopDep  0.917708557 0.119949476173568 1.997897e-14
     ## 27          A2 =~      PopAnh  0.734650807 0.146527749587895 5.339590e-07
@@ -546,7 +546,7 @@ clin_pop_bif.fit$results[c(1,2,3,6,7,9)]
     ## 2            A =~  ClinAppInc -0.307212184 0.133167650256063 2.105730e-02
     ## 4            A =~  ClinSleDec -0.067888380 0.161153073338744 6.735605e-01
     ## 5            A =~  ClinSleInc -0.255577838 0.203071232948277 2.081899e-01
-    ## 3            A =~ ClinPsycInc -0.260583471 0.144385864245294 7.110915e-02
+    ## 3            A =~ ClinMotoInc -0.260583471 0.144385864245294 7.110915e-02
     ## 6            A =~     ClinSui -0.875975938 0.186181280999612 2.539214e-06
     ## 11           A =~      PopDep -0.390037335 0.164609765036795 1.781373e-02
     ## 7            A =~      PopAnh -0.587024170  0.15037956092054 9.476156e-05
@@ -562,7 +562,7 @@ clin_pop_bif.fit$results[c(1,2,3,6,7,9)]
     ## 40  ClinAppInc ~~  ClinAppInc  0.877294804 0.363792524048673 1.588618e-02
     ## 42  ClinSleDec ~~  ClinSleDec -6.156826772  26.6176823500605 8.170628e-01
     ## 43  ClinSleInc ~~  ClinSleInc  0.893441476 0.859762832712578 2.987272e-01
-    ## 41 ClinPsycInc ~~ ClinPsycInc  0.925753089 0.445116766289596 3.754383e-02
+    ## 41 ClinMotoInc ~~ ClinMotoInc  0.925753089 0.445116766289596 3.754383e-02
     ## 44     ClinSui ~~     ClinSui  0.223127791 0.478133563610096 6.407259e-01
     ## 49      PopDep ~~      PopDep  0.005681948 0.171375050488871 9.735529e-01
     ## 45      PopAnh ~~      PopAnh  0.115691499 0.088012722177136 1.886798e-01
@@ -590,7 +590,7 @@ directional symptoms
 
 ``` r
 clin_commonfactor.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui
 A1 ~~ 1*A1
 c3a3b > -1
 ClinAppDec ~~ c3a3b*ClinAppInc
@@ -640,14 +640,14 @@ clin_commonfactor.fit$results[c(1,2,3,6,7, 9)]
     ## 2           A1 =~  ClinAppInc  0.729670895  0.52150444440806 0.16176786
     ## 4           A1 =~  ClinSleDec  0.746906301 0.474573261514982 0.11552771
     ## 5           A1 =~  ClinSleInc  0.612275763 0.461873619105848 0.18496312
-    ## 3           A1 =~ ClinPsycInc  0.279998891  0.23717368047761 0.23777824
+    ## 3           A1 =~ ClinMotoInc  0.279998891  0.23717368047761 0.23777824
     ## 6           A1 =~     ClinSui  0.007294712 0.178671946715864 0.96742911
     ## 9   ClinAppDec ~~  ClinAppInc -0.861144952 0.618264546093302 0.16367832
     ## 8   ClinAppDec ~~  ClinAppDec  0.548782969 0.574059361209168 0.33913056
     ## 10  ClinAppInc ~~  ClinAppInc  0.467581888 0.791246118141881 0.55459493
     ## 12  ClinSleDec ~~  ClinSleDec  0.442128708 0.900082705615737 0.62325288
     ## 13  ClinSleInc ~~  ClinSleInc  0.625191085  1.61291824164948 0.69833329
-    ## 11 ClinPsycInc ~~ ClinPsycInc  0.921603214 0.470933722825115 0.05035139
+    ## 11 ClinMotoInc ~~ ClinMotoInc  0.921603214 0.470933722825115 0.05035139
     ## 14     ClinSui ~~     ClinSui  0.999947372 0.363500563648505 0.00594352
     ## 7           A1 ~~          A1  1.000000000                           NA
 
@@ -1079,7 +1079,7 @@ Med Rehab
 > the 2-factor solution with 3 somatic items (sleep disturbance, poor
 > energy, appetite change) was a better solution than either a
 > unidimensional model or 2-factor model that included psychomotor
-> retardation as a fourth somatic item
+> slowing as a fourth somatic item
 
 ``` r
 pop_psych_soma.model <- "
@@ -1661,7 +1661,7 @@ mutate_if(is.numeric, ~round(., 3))
 
 ``` r
 clin_pop_affect_veg.model <- "
-Soma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+Soma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 Soma ~~ 1*Soma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Veg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
@@ -1714,7 +1714,7 @@ clin_pop_affect_veg.fit$results[c(1,2,3,6,7,9)]
     ## 23        Soma =~  ClinAppInc   0.63311669  0.249315964519296 1.110364e-02
     ## 25        Soma =~  ClinSleDec   0.39997011  0.285148917126024 1.607154e-01
     ## 26        Soma =~  ClinSleInc   0.52502307  0.323796141121201 1.049170e-01
-    ## 24        Soma =~ ClinPsycInc   0.55124682   0.25174645840846 2.854691e-02
+    ## 24        Soma =~ ClinMotoInc   0.55124682   0.25174645840846 2.854691e-02
     ## 1       Affect =~      PopDep   0.74223676 0.0711883555737211 1.878874e-25
     ## 2       Affect =~    PopGuilt   0.75641804 0.0966276584782944 4.949729e-15
     ## 3       Affect =~      PopSui   0.67514483   0.10836901095603 4.662396e-10
@@ -1732,7 +1732,7 @@ clin_pop_affect_veg.fit$results[c(1,2,3,6,7,9)]
     ## 7   ClinAppInc ~~  ClinAppInc   0.59916677  0.444388081648588 1.775708e-01
     ## 9   ClinSleDec ~~  ClinSleDec   0.84003033  0.628750873516877 1.815426e-01
     ## 10  ClinSleInc ~~  ClinSleInc   0.72434295  0.882588601524776 4.118152e-01
-    ## 8  ClinPsycInc ~~ ClinPsycInc   0.69613007  0.544701812792597 2.012487e-01
+    ## 8  ClinMotoInc ~~ ClinMotoInc   0.69613007  0.544701812792597 2.012487e-01
     ## 17      PopDep ~~      PopDep   0.44908399  0.124940164766301 3.251602e-04
     ## 19    PopGuilt ~~    PopGuilt   0.42783289  0.180789594345188 1.795970e-02
     ## 22      PopSui ~~      PopSui   0.54418281  0.241437218582983 2.420195e-02
@@ -1806,7 +1806,7 @@ symptoms_clin_efa
     ## factanal(factors = 3, covmat = symptoms_cov_pd[symptoms_clin_idx,     symptoms_clin_idx], rotation = "varimax")
     ## 
     ## Uniquenesses:
-    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinPsycInc     ClinSui 
+    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc     ClinSui 
     ##       0.005       0.173       0.005       0.470       0.918       0.005 
     ## 
     ## Loadings:
@@ -1815,7 +1815,7 @@ symptoms_clin_efa
     ## ClinAppInc   0.767  -0.450   0.191 
     ## ClinSleDec   0.940   0.285  -0.174 
     ## ClinSleInc   0.556   0.104   0.459 
-    ## ClinPsycInc          0.253   0.130 
+    ## ClinMotoInc          0.253   0.130 
     ## ClinSui                      0.997 
     ## 
     ##                Factor1 Factor2 Factor3
@@ -1851,7 +1851,7 @@ symptoms_pop_efa
     ## factanal(factors = 3, covmat = symptoms_cov_pd[symptoms_pop_idx,     symptoms_pop_idx], rotation = "varimax")
     ## 
     ## Uniquenesses:
-    ##     PopDep     PopAnh  PopAppDec  PopAppInc  PopSleDec  PopSleInc PopPsycInc 
+    ##     PopDep     PopAnh  PopAppDec  PopAppInc  PopSleDec  PopSleInc PopMotoInc 
     ##      0.005      0.005      0.811      0.490      0.773      0.437      0.005 
     ## PopPsycDec   PopFatig   PopGuilt    PopConc     PopSui 
     ##      0.416      0.507      0.614      0.497      0.571 
@@ -1864,7 +1864,7 @@ symptoms_pop_efa
     ## PopAppInc   0.194   0.216  -0.652 
     ## PopSleDec   0.297   0.361         
     ## PopSleInc           0.745         
-    ## PopPsycInc          0.208   0.975 
+    ## PopMotoInc          0.208   0.975 
     ## PopPsycDec  0.354           0.675 
     ## PopFatig    0.175   0.658  -0.171 
     ## PopGuilt    0.421   0.408   0.204 
@@ -1970,11 +1970,11 @@ symptoms_efa3
     ## factanal(factors = 3, covmat = symptoms_cov_pd, rotation = "varimax")
     ## 
     ## Uniquenesses:
-    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinPsycInc     ClinSui 
+    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc     ClinSui 
     ##       0.895       0.438       0.545       0.271       0.950       0.226 
     ##      PopDep      PopAnh   PopAppDec   PopAppInc   PopSleDec   PopSleInc 
     ##       0.114       0.016       0.567       0.494       0.581       0.673 
-    ##  PopPsycInc  PopPsycDec    PopFatig    PopGuilt     PopConc      PopSui 
+    ##  PopMotoInc  PopPsycDec    PopFatig    PopGuilt     PopConc      PopSui 
     ##       0.005       0.005       0.609       0.600       0.527       0.661 
     ## 
     ## Loadings:
@@ -1983,7 +1983,7 @@ symptoms_efa3
     ## ClinAppInc   0.140   0.152   0.720 
     ## ClinSleDec                   0.671 
     ## ClinSleInc   0.128   0.690   0.486 
-    ## ClinPsycInc  0.163          -0.154 
+    ## ClinMotoInc  0.163          -0.154 
     ## ClinSui      0.491   0.726         
     ## PopDep       0.903          -0.253 
     ## PopAnh       0.977  -0.161         
@@ -1991,7 +1991,7 @@ symptoms_efa3
     ## PopAppInc    0.316  -0.630         
     ## PopSleDec    0.495           0.405 
     ## PopSleInc    0.537   0.165   0.106 
-    ## PopPsycInc           0.993         
+    ## PopMotoInc           0.993         
     ## PopPsycDec   0.178   0.637  -0.747 
     ## PopFatig     0.586           0.196 
     ## PopGuilt     0.596   0.211         
@@ -2016,11 +2016,11 @@ symptoms_efa4
     ## factanal(factors = 4, covmat = symptoms_cov_pd, rotation = "varimax")
     ## 
     ## Uniquenesses:
-    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinPsycInc     ClinSui 
+    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc     ClinSui 
     ##       0.328       0.413       0.005       0.253       0.902       0.157 
     ##      PopDep      PopAnh   PopAppDec   PopAppInc   PopSleDec   PopSleInc 
     ##       0.088       0.047       0.451       0.467       0.408       0.712 
-    ##  PopPsycInc  PopPsycDec    PopFatig    PopGuilt     PopConc      PopSui 
+    ##  PopMotoInc  PopPsycDec    PopFatig    PopGuilt     PopConc      PopSui 
     ##       0.005       0.005       0.494       0.506       0.497       0.629 
     ## 
     ## Loadings:
@@ -2029,7 +2029,7 @@ symptoms_efa4
     ## ClinAppInc   0.144           0.681  -0.310 
     ## ClinSleDec  -0.148           0.958   0.230 
     ## ClinSleInc   0.106   0.634   0.567  -0.108 
-    ## ClinPsycInc  0.103                   0.297 
+    ## ClinMotoInc  0.103                   0.297 
     ## ClinSui      0.586   0.707                 
     ## PopDep       0.829  -0.126           0.456 
     ## PopAnh       0.915  -0.215           0.253 
@@ -2037,7 +2037,7 @@ symptoms_efa4
     ## PopAppInc    0.326  -0.649                 
     ## PopSleDec    0.408           0.621   0.198 
     ## PopSleInc    0.507   0.138                 
-    ## PopPsycInc   0.137   0.978   0.138         
+    ## PopMotoInc   0.137   0.978   0.138         
     ## PopPsycDec   0.194   0.678  -0.531   0.464 
     ## PopFatig     0.654  -0.126          -0.243 
     ## PopGuilt     0.677   0.182                 
@@ -2062,11 +2062,11 @@ symptoms_efa6
     ## factanal(factors = 6, covmat = symptoms_cov_pd, rotation = "varimax")
     ## 
     ## Uniquenesses:
-    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinPsycInc     ClinSui 
+    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc     ClinSui 
     ##       0.005       0.176       0.005       0.005       0.864       0.005 
     ##      PopDep      PopAnh   PopAppDec   PopAppInc   PopSleDec   PopSleInc 
     ##       0.090       0.005       0.388       0.473       0.246       0.177 
-    ##  PopPsycInc  PopPsycDec    PopFatig    PopGuilt     PopConc      PopSui 
+    ##  PopMotoInc  PopPsycDec    PopFatig    PopGuilt     PopConc      PopSui 
     ##       0.052       0.005       0.163       0.408       0.357       0.574 
     ## 
     ## Loadings:
@@ -2075,7 +2075,7 @@ symptoms_efa6
     ## ClinAppInc                   0.752          -0.493         
     ## ClinSleDec          -0.108   0.935           0.262   0.154 
     ## ClinSleInc   0.556  -0.183   0.470   0.213           0.620 
-    ## ClinPsycInc          0.149           0.105   0.262  -0.165 
+    ## ClinMotoInc          0.149           0.105   0.262  -0.165 
     ## ClinSui      0.779   0.304           0.532                 
     ## PopDep               0.888           0.262   0.226         
     ## PopAnh      -0.141   0.865           0.422   0.111   0.181 
@@ -2083,7 +2083,7 @@ symptoms_efa6
     ## PopAppInc   -0.516   0.340           0.205  -0.251  -0.176 
     ## PopSleDec            0.328   0.683   0.317   0.167  -0.224 
     ## PopSleInc            0.375           0.171           0.799 
-    ## PopPsycInc   0.943           0.168                   0.155 
+    ## PopMotoInc   0.943           0.168                   0.155 
     ## PopPsycDec   0.776   0.313  -0.458           0.273         
     ## PopFatig    -0.101   0.201           0.872           0.159 
     ## PopGuilt     0.250   0.518           0.425  -0.176  -0.210 
