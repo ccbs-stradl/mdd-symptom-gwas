@@ -494,10 +494,10 @@ if(!file.exists(sumstats_h2_txt)) {
 sumstats_h2_labels <-
 as_tibble(sumstats_h2) %>%
 mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
-       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', '-')) %>%
+       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', '+')) %>%
 left_join(dsm_mdd_symptoms_labels, by='ref') %>%
-mutate(cohorts=case_when(study == 'AGDS-PGC' ~ "Clinical (AGDS-PGS)",
-                         study == 'ALSPAC-UKB' ~ "Population (ALSPAC-UKB)",
+mutate(cohorts=case_when(study == 'AGDS+PGC' ~ "Clinical (AGDS+PGS)",
+                         study == 'ALSPAC+UKB' ~ "Population (ALSPAC+UKB)",
                          TRUE ~ NA_character_))
        
 #        %>%
@@ -517,32 +517,31 @@ mutate(cohorts=case_when(study == 'AGDS-PGC' ~ "Clinical (AGDS-PGS)",
 
 # filter out traits below sample size cutoff
 mdd_symptom_gsem_h2.gg <-
-ggplot(sumstats_h2_labels %>% mutate(Neff=4*Nca*Nco/(Nca+Nco)) %>% filter(Neff >= 5000), aes(x=abbv, y=h2, ymin=h2+se*qnorm(0.025), ymax=h2+se*qnorm(0.975))) +
+ggplot(sumstats_h2_labels %>%
+        mutate(Neff=4*Nca*Nco/(Nca+Nco)) %>% filter(Neff >= 5000),
+        aes(x=abbv,
+            y=h2,
+            ymin=h2+se*qnorm(0.025),
+            ymax=h2+se*qnorm(0.975),
+            colour=cohorts, shape=cohorts)) +
 geom_hline(yintercept=0, col='grey') +
-geom_pointrange() + 
-facet_grid(cols=vars(cohorts)) +
+geom_pointrange(position=position_dodge(width=0.5)) + 
 scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$abbv))) +
 scale_y_continuous(expression(h[SNP]^2)) +
 theme_bw() + 
-theme(axis.text.y=element_text(size=36, family='Apple Symbols'),
-      strip.text=element_text(size=24, family='Apple Symbols'),
-      axis.text=element_text(size=16, family='Apple Symbols'),
-      axis.title=element_text(size=16, family='Apple Symbols'))
+theme(axis.text.y=element_text(size=13),
+      axis.text.x=element_text(size=10),
+      axis.title=element_text(size=12),
+      legend.title=element_text(size=12),
+      legend.text=element_text(size=14),
+      legend.position='top') +
+ labs(color  = "Meta-analysis:", linetype = "Meta-analysis:", shape = "Meta-analysis:")
 
-mdd_symptom_gsem_h2.gg + coord_flip(ylim=c(0, 0.175))
-
-ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=10, height=6)
-
-```
-
-```{r mdd_symptom_gsem_h2_full}
-
-mdd_symptom_gsem_h2.gg +
-coord_flip(ylim=c(-0.8, 0.2)) +
+mdd_symptom_gsem_h2.gg + coord_flip(ylim=c(-0.76, 0.16)) +
 scale_y_continuous(expression(h[SNP]^2),
     breaks=c(-0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2))
 
-ggsave('mdd-symptom-gsem_files/symptoms_h2_snp_full.png', width=12, height=6)
+ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=8, height=4)
 
 ```
 

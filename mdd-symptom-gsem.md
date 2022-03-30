@@ -65,14 +65,6 @@ require(stringr)
 require(dplyr)
 require(ggplot2)
 require(corrplot)
-require(tidySEM)
-```
-
-```
-## Loading required package: tidySEM
-```
-
-```r
 require(GenomicSEM)
 
 packageVersion("GenomicSEM")
@@ -120,8 +112,8 @@ MDD4b;Sleep⇈;Sleep⇉;SleInc
 MDD5;Motor⇅;Motor⇆;Moto
 MDD5a;Motor⇈;Motor⇉;MotoInc
 MDD5b;Motor⇊;Motor⇇;MotoDec
-MDD6;Fatigue;Fatigue;Fat
-MDD7;Guilt;Guilt;Self
+MDD6;Fatigue;Fatigue;Fatig
+MDD7;Guilt;Guilt;Guilt
 MDD8;Concentrate;Concentrate;Conc
 MDD9;Suicidality;Suicidality;Sui
 ", col_names=c('ref', 'h', 'v', 'abbv'), delim=';')
@@ -185,8 +177,8 @@ select(Reference, Abbreviation=abbv, Label=h, Description)
 |MDD5      |Moto         |Motor⇅      |Changes in speed/amount of moving or speaking                                                                |
 |MDD5a     |MotoInc      |Motor⇈      |Psychomotor agitation nearly every day                                                                       |
 |MDD5b     |MotoDec      |Motor⇊      |Psychomotor slowing nearly every day                                                                         |
-|MDD6      |Fat          |Fatigue     |Fatigue or loss of energy nearly every day                                                                   |
-|MDD7      |Self         |Guilt       |Feelings of worthlessness or excessive or inappropriate guilt                                                |
+|MDD6      |Fatig        |Fatigue     |Fatigue or loss of energy nearly every day                                                                   |
+|MDD7      |Guilt        |Guilt       |Feelings of worthlessness or excessive or inappropriate guilt                                                |
 |MDD8      |Conc         |Concentrate |Diminished ability to think or concentrate, or indecisiveness                                                |
 |MDD9      |Sui          |Suicidality |Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide        |
 
@@ -763,8 +755,11 @@ if(!file.exists(sumstats_h2_txt)) {
 sumstats_h2_labels <-
 as_tibble(sumstats_h2) %>%
 mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
-       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', ' ')) %>%
-left_join(dsm_mdd_symptoms_labels, by='ref')
+       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', '+')) %>%
+left_join(dsm_mdd_symptoms_labels, by='ref') %>%
+mutate(cohorts=case_when(study == 'AGDS+PGC' ~ "Clinical (AGDS+PGS)",
+                         study == 'ALSPAC+UKB' ~ "Population (ALSPAC+UKB)",
+                         TRUE ~ NA_character_))
        
 #        %>%
 # # split negative estimates into their own facet
@@ -782,25 +777,43 @@ left_join(dsm_mdd_symptoms_labels, by='ref')
 #                  se=0.0))
 
 # filter out traits below sample size cutoff
-ggplot(sumstats_h2_labels %>% mutate(Neff=4*Nca*Nco/(Nca+Nco)) %>% filter(Neff >= 5000), aes(x=h, y=h2, ymin=h2+se*qnorm(0.025), ymax=h2+se*qnorm(0.975))) +
+mdd_symptom_gsem_h2.gg <-
+ggplot(sumstats_h2_labels %>%
+        mutate(Neff=4*Nca*Nco/(Nca+Nco)) %>% filter(Neff >= 5000),
+        aes(x=abbv,
+            y=h2,
+            ymin=h2+se*qnorm(0.025),
+            ymax=h2+se*qnorm(0.975),
+            colour=cohorts, shape=cohorts)) +
 geom_hline(yintercept=0, col='grey') +
-geom_pointrange() + 
-facet_grid(cols=vars(study), scale='free') +
-scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$h))) +
+geom_pointrange(position=position_dodge(width=0.5)) + 
+scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$abbv))) +
 scale_y_continuous(expression(h[SNP]^2)) +
-coord_flip(ylim=c(0, 0.175)) +
 theme_bw() + 
-theme(axis.text.y=element_text(size=36, family='Apple Symbols'),
-      strip.text=element_text(size=24, family='Apple Symbols'),
-      axis.text=element_text(size=16, family='Apple Symbols'),
-      axis.title=element_text(size=16, family='Apple Symbols'))
+theme(axis.text.y=element_text(size=13),
+      axis.text.x=element_text(size=10),
+      axis.title=element_text(size=12),
+      legend.title=element_text(size=12),
+      legend.text=element_text(size=14),
+      legend.position='top') +
+ labs(color  = "Meta-analysis:", linetype = "Meta-analysis:", shape = "Meta-analysis:")
+
+mdd_symptom_gsem_h2.gg + coord_flip(ylim=c(-0.76, 0.16)) +
+scale_y_continuous(expression(h[SNP]^2),
+    breaks=c(-0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2))
+```
+
+```
+## Scale for 'y' is already present. Adding another scale for 'y', which will
+## replace the existing scale.
 ```
 
 ![](mdd-symptom-gsem_files/figure-html/mdd_symptom_gsem_h2-1.png)<!-- -->
 
 ```r
-ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=10, height=4)
+ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=8, height=4)
 ```
+
 
 ## Genetic correlation with MDD
 
