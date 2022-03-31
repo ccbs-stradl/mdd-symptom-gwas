@@ -12,14 +12,16 @@ output:
     variant: markdown_github
 ---
 
-Test genetic relationship between [symptom factors](mdd-symptom-gsem-model.md) and other phenotypes that are genetically correlated with MDD. Phenotypes to examine:
+Test genetic relationship between [symptom factors](mdd-symptom-gsem-model.md) and a selection of other phenotypes that are genetically correlated with MDD, as well as to MDD itself. Phenotypes to examine:
 
+- Major depressive disorder: Clinical cohorts from [Wray et al](https://www.nature.com/articles/s41588-018-0090-3%5C) and all cohorts from [Howard et al](https://www.nature.com/articles/s41593-018-%200326-7). Download from [PGC](https://www.med.unc.edu/pgc/download-results/) and obtain via [data access](https://www.med.unc.edu/pgc/shared-methods/how-to/).
 - bipolar disorder: [Mullins et al](https://pubmed.ncbi.nlm.nih.gov/34002096/). Download from [PGC](https://figshare.com/articles/dataset/PGC3_bipolar_disorder_GWAS_summary_statistics/14102594)
 - anxiety: [meta-analysis](https://drive.google.com/drive/folders/1fguHvz7l2G45sbMI9h_veQun4aXNTy1v) of [UKBB, iPSYCH](https://www.nature.com/articles/s41380-019-0559-1), and [ANGST](https://pubmed.ncbi.nlm.nih.gov/26754954/), from [Grotzinger et al medRxiv](https://www.medrxiv.org/content/10.1101/2020.09.22.20196089v1.full)
 - PTSD: [Nievergelt et al](https://pubmed.ncbi.nlm.nih.gov/31594949/). Download from [PGC](https://figshare.com/articles/dataset/ptsd2019/14672133)
 - tobacco use. Cigarettes per day [Liu et al](https://www.nature.com/articles/s41588-018-0307-5). Download from [UofM](https://conservancy.umn.edu/handle/11299/201564)
 - alcohol dependence. [Walters et al](https://www.nature.com/articles/s41593-018-0275-1). Download from [PGC](https://doi.org/10.6084/m9.figshare.14672187)
-- BMI, sex combined [Pulit et al](https://academic.oup.com/hmg/article/28/1/166/5098227). Download from [GIANT/Broad](https://portals.broadinstitute.org/collaboration/giant/index.php/Main_Page).php/GIANT_consortium_data_files#2018_GIANT_and_UK_BioBank_Meta-analysis)
+- educational attainment. [Lee et. al](https://www.nature.com/articles/s41588-018-0147-3). Download from [SSGAC Data Portal](https://thessgac.com).
+- BMI, sex combined [Pulit et al](https://academic.oup.com/hmg/article/28/1/166/5098227). Download from [GIANT/Broad](https://portals.broadinstitute.org/collaboration/giant/index.php/GIANT_consortium_data_files#2018_GIANT_and_UK_BioBank_Meta-analysis).
 - neuroticism: [Nagel et al](https://www.nature.com/articles/s41588-018-0151-7). Download from [CNCR](https://ctg.cncr.nl/software/summary_statistics)
 - pain: multisite chronic pain [Johnston et al](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1008164). Download from [UoG](https://researchdata.gla.ac.uk/822/)
 - chronotype: long sleep duration. [Dashti et al](https://www.ncbi.nlm.nih.gov/pubmed/30846698). Download from [SDKP](https://sleep.hugeamp.org/downloads.html).
@@ -93,6 +95,22 @@ Format the external sumstats for reading by GenomicSEM with columns `SNP`, `A1` 
 
 
 ```r
+# Major depressive disorder
+mdd <- read_table('sumstats/PGC_UKB_23andMe_depression_genome-wide_info_N.txt.gz')
+mdd_sumstats <- mdd %>%
+    mutate(Nca=UKB_Ncases+PGC_Ncases+X23andMe_Ncases,
+           Nco=UKB_Ncontrols+PGC_Ncontrols+X23andMe_Ncontrols) %>%
+    transmute(SNP=MarkerName, A1=toupper(Allele1), A2=toupper(Allele2),
+              BETA=Effect, SE=StdErr, P=P.value, 
+              FREQ=Freq1, N=4*Nca*Nco/(Nca+Nco))
+write_tsv(mdd_sumstats, 'sumstats/MD.txt')
+
+mdd_clin <- read_tsv('sumstats/daner_MDD29.0515a_mds6.0316.gz')
+mdd_clin_sumstats <- mdd_clin %>%
+    transmute(SNP, A1, A2, BETA=log(OR), SE, FREQ=FRQ_U_25632, INFO, P,
+              N=4*Nca*Nco/(Nca+Nco))
+write_tsv(mdd_clin_sumstats, 'sumstats/MDD.txt')
+
 # Bipolar disorder
 bip <- read_tsv('sumstats/pgc-bip2021-all.vcf.tsv.gz', comment='##')
 bip_sumstats <- bip %>%
@@ -113,6 +131,12 @@ bmi_sumstats <- bmi %>%
     filter(INFO >= 0.6) %>%
     select(SNP, A1=Tested_Allele, A2=Other_Allele, BETA, SE, P, INFO, N)
 write_tsv(bmi_sumstats, 'sumstats/BMI.txt')
+
+# educational attainment
+ea <- read_table('sumstats/GWAS_EA_excl23andMe.txt.gz')
+ea_sumstats <-  ea %>%
+    transmute(SNP=MarkerName, A1, A2, FREQ=EAF, BETA=Beta, SE, P=Pval, N=766345)
+write_tsv(ea_sumstats, 'sumstats/EA.txt')
 
 pain <- read_tsv('sumstats/chronic_pain-bgen.stats.gz')
 pain_sumstats <- pain %>%
@@ -153,8 +177,9 @@ write_tsv(neu_sumstats, 'sumstats/Neu.txt')
 
 
 ```r
-ext_traits <- c('AlcDep'=0.159, 'Anxiety'=0.16, 'BIP'=0.01, 'BMI'=NA, 'PTSD'=0.3,
-'Pain'=NA, 'Sleep'=0.11, 'Smoking'=NA)
+ext_traits <- c('AlcDep'=0.159, 'Anxiety'=0.16, 'BIP'=0.01,
+                'BMI'=NA, 'EA'=NA, 'MD'=0.3, 'MDD'=0.15, 'Neu'=NA,
+                'PTSD'=0.3, 'Pain'=NA, 'Sleep'=0.11, 'Smoking'=NA)
 ext_trait_names <- names(ext_traits)
 ```
 
@@ -195,7 +220,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
 ```
-## Rows: 15 Columns: 4── Column specification ────────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 4── Column specification ──────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
@@ -224,7 +249,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
 ```
-## Rows: 15 Columns: 2── Column specification ────────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 2── Column specification ──────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
@@ -242,7 +267,7 @@ symptoms_sample_prev <- read_tsv(here::here('meta/symptoms_prev.txt'))
 ```
 
 ```
-## Rows: 24 Columns: 6── Column specification ────────────────────────────────────────────────────────────────────────
+## Rows: 24 Columns: 6── Column specification ──────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (3): cohorts, symptom, sumstats
 ## dbl (3): Nca, Nco, samp_prev
@@ -305,7 +330,7 @@ if(!file.exists(covstruct_r)) {
     tibble(filename=paste(ext_trait_names, 'sumstats', 'gz', sep='.'),
            trait_name=ext_trait_names,
            pop_prev=ext_traits) %>%
-    mutate(if_else(!is.na(pop_prev), true=0.5, false=NA_real_))
+    mutate(samp_prev=if_else(!is.na(pop_prev), true=0.5, false=NA_real_))
     
   sumstats_prevs <- bind_rows(symptoms_sumstats_prevs, external_sumstats_prevs)
     
@@ -357,7 +382,7 @@ clin_pop.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop.
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   0.531 
+##   2.572 
 ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0289190810466153 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.11962312826334 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
@@ -462,6 +487,10 @@ AlcDep ~ {symptom}
 Anxiety ~  {symptom}
 BIP ~ {symptom}
 BMI ~ {symptom}
+EA ~ {symptom}
+MD ~ {symptom}
+MDD ~ {symptom}
+Neu ~ {symptom}
 PTSD ~ {symptom}
 Pain ~ {symptom}
 Sleep ~ {symptom}
@@ -481,8 +510,8 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  61.911 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0328771123345711 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.85056882789254 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  36.703 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0343880071995565 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -506,14 +535,14 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```
 
 ```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.2581855462411e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.85056882789254 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  2.37901762888446e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ## [1] "Running primary model"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   46.15 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0336919131811916 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  44.665 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0347200454437891 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.76111746871965 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -535,14 +564,14 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```
 
 ```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.34184139765226e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.84530127815109 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  2.49238231930863e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.76111746871965 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ## [1] "Running primary model"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  44.949 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0328771123345711 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.85056882789254 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  36.675 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0343880071995565 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -564,14 +593,14 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```
 
 ```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.2581855462411e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.85056882789254 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  2.37901762888446e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ## [1] "Running primary model"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  18.583 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0328771123345711 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.85056882789254 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  36.315 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0343880071995565 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -593,7 +622,7 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```
 
 ```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  1.2581855462411e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.85056882789254 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  2.37901762888446e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```r
@@ -601,7 +630,7 @@ clin_pop_ext_full <-
 bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
 filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
-mutate(Beta='Unadjusted', Factor=rhs, Phenotype=lhs)
+mutate(Beta='Full', Factor=rhs, Phenotype=lhs)
 ```
 
 Multiple regression of each phenotype on the clinical/population symptom factors, to estimate relationship after condition on each of the other factors. 
@@ -612,9 +641,13 @@ clin_ext_mult.model <- "
 ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 AlcDep ~ ClinSoma + ClinSui
-Anxiety ~ ClinSoma+ ClinSui
+Anxiety ~ ClinSoma + ClinSui
 BIP ~ ClinSoma + ClinSui
 BMI ~ ClinSoma + ClinSui
+EA ~ ClinSoma + ClinSui
+MD ~ ClinSoma + ClinSui
+MDD ~ ClinSoma + ClinSui
+Neu ~ ClinSoma + ClinSui
 PTSD ~ ClinSoma + ClinSui
 Pain ~ ClinSoma + ClinSui
 Sleep ~ ClinSoma + ClinSui
@@ -630,8 +663,8 @@ clin_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   1.703 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0314084815250265 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.75933931962192 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##    4.17 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0321078230722528 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.7059004143279 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -668,6 +701,10 @@ AlcDep ~ Affect + Neuroveg
 Anxiety ~ Affect + Neuroveg
 BIP ~ Affect + Neuroveg
 BMI ~ Affect + Neuroveg
+EA ~ Affect + Neuroveg
+MD ~ Affect + Neuroveg
+MDD ~ Affect + Neuroveg
+Neu ~ Affect + Neuroveg
 PTSD ~ Affect + Neuroveg
 Pain ~ Affect + Neuroveg
 Sleep ~ Affect + Neuroveg
@@ -682,8 +719,8 @@ pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_e
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   2.881 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00461924635289189 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.379273377149485 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##   7.863 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00518864671740996 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.522242402310806 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -697,13 +734,17 @@ pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_e
 ## SNP.
 ```
 
+```
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  4.68228593443758e-12 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.522242402310806 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+```
+
 ```r
 clin_pop_ext_partial <-
 bind_rows(lapply(list(clin_ext_mult.fit, pop_ext_mult.fit),
                  function(fit) fit$results)) %>%
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
   filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
-  mutate(Beta='Adjusted', Factor=rhs, Phenotype=lhs)
+  mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
 ```
 
 
@@ -711,19 +752,24 @@ bind_rows(lapply(list(clin_ext_mult.fit, pop_ext_mult.fit),
 ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
        aes(x=factor(Factor, levels=c('ClinSui', 'ClinSoma', 'Neuroveg', 'Affect')),
            y=STD_Genotype,
-           color=factor(Beta, levels=c('Adjusted', 'Unadjusted')),
+           color=factor(Beta, levels=c('Partial', 'Full')),
+           shape=factor(Beta, levels=c('Partial', 'Full')),
           ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
           ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
 geom_hline(yintercept=0, col='gray') +
 geom_pointrange(position=position_dodge(width=0.5)) +
-facet_grid(~Phenotype) +
+facet_wrap(~Phenotype) +
 scale_x_discrete('Symptom/Factor') +
-scale_y_continuous('rg', breaks=c(-1, 0, 1)) +
-scale_color_discrete('') +
+scale_y_continuous(expression(r[g]), breaks=c(-1, 0, 1)) +
+scale_color_discrete('Model: ') +
 coord_flip(ylim=c(-1, 1)) +
 theme_bw() +
 theme(axis.text.y=element_text(size=16),
-      strip.text=element_text(size=16))
+      strip.text=element_text(size=16),
+      legend.title=element_text(size=12),
+      legend.text=element_text(size=14),
+      legend.position='top') +
+labs(color  = "Model: ", shape = "Model: ")
 ```
 
 ![](mdd-symptom-gsem-ext_files/figure-html/clin_pop_ex_plot-1.png)<!-- -->

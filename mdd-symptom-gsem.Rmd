@@ -535,7 +535,7 @@ theme(axis.text.y=element_text(size=13),
       legend.title=element_text(size=12),
       legend.text=element_text(size=14),
       legend.position='top') +
- labs(color  = "Meta-analysis:", linetype = "Meta-analysis:", shape = "Meta-analysis:")
+ labs(color  = "Meta-analysis:", shape = "Meta-analysis:")
 
 mdd_symptom_gsem_h2.gg + coord_flip(ylim=c(-0.76, 0.16)) +
 scale_y_continuous(expression(h[SNP]^2),

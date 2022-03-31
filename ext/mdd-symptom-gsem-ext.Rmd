@@ -12,8 +12,9 @@ output:
     variant: markdown_github
 ---
 
-Test genetic relationship between [symptom factors](mdd-symptom-gsem-model.md) and other phenotypes that are genetically correlated with MDD. Phenotypes to examine:
+Test genetic relationship between [symptom factors](mdd-symptom-gsem-model.md) and a selection of other phenotypes that are genetically correlated with MDD, as well as to MDD itself. Phenotypes to examine:
 
+- Major depressive disorder: Clinical cohorts from [Wray et al](https://www.nature.com/articles/s41588-018-0090-3%5C) and all cohorts from [Howard et al](https://www.nature.com/articles/s41593-018-%200326-7). Download from [PGC](https://www.med.unc.edu/pgc/download-results/) and obtain via [data access](https://www.med.unc.edu/pgc/shared-methods/how-to/).
 - bipolar disorder: [Mullins et al](https://pubmed.ncbi.nlm.nih.gov/34002096/). Download from [PGC](https://figshare.com/articles/dataset/PGC3_bipolar_disorder_GWAS_summary_statistics/14102594)
 - anxiety: [meta-analysis](https://drive.google.com/drive/folders/1fguHvz7l2G45sbMI9h_veQun4aXNTy1v) of [UKBB, iPSYCH](https://www.nature.com/articles/s41380-019-0559-1), and [ANGST](https://pubmed.ncbi.nlm.nih.gov/26754954/), from [Grotzinger et al medRxiv](https://www.medrxiv.org/content/10.1101/2020.09.22.20196089v1.full)
 - PTSD: [Nievergelt et al](https://pubmed.ncbi.nlm.nih.gov/31594949/). Download from [PGC](https://figshare.com/articles/dataset/ptsd2019/14672133)
@@ -74,6 +75,22 @@ packageVersion("GenomicSEM")
 Format the external sumstats for reading by GenomicSEM with columns `SNP`, `A1` (effect allele), `A2` (non-effect allele), `BETA`/`OR`, `P`, `INFO`, and `N`.
 
 ```{r ext2txt, eval=FALSE}
+
+# Major depressive disorder
+mdd <- read_table('sumstats/PGC_UKB_23andMe_depression_genome-wide_info_N.txt.gz')
+mdd_sumstats <- mdd %>%
+    mutate(Nca=UKB_Ncases+PGC_Ncases+X23andMe_Ncases,
+           Nco=UKB_Ncontrols+PGC_Ncontrols+X23andMe_Ncontrols) %>%
+    transmute(SNP=MarkerName, A1=toupper(Allele1), A2=toupper(Allele2),
+              BETA=Effect, SE=StdErr, P=P.value, 
+              FREQ=Freq1, N=4*Nca*Nco/(Nca+Nco))
+write_tsv(mdd_sumstats, 'sumstats/MD.txt')
+
+mdd_clin <- read_tsv('sumstats/daner_MDD29.0515a_mds6.0316.gz')
+mdd_clin_sumstats <- mdd_clin %>%
+    transmute(SNP, A1, A2, BETA=log(OR), SE, FREQ=FRQ_U_25632, INFO, P,
+              N=4*Nca*Nco/(Nca+Nco))
+write_tsv(mdd_clin_sumstats, 'sumstats/MDD.txt')
 
 # Bipolar disorder
 bip <- read_tsv('sumstats/pgc-bip2021-all.vcf.tsv.gz', comment='##')
@@ -143,8 +160,8 @@ write_tsv(neu_sumstats, 'sumstats/Neu.txt')
 ```{r ext, eval=TRUE}
 
 ext_traits <- c('AlcDep'=0.159, 'Anxiety'=0.16, 'BIP'=0.01,
-                'BMI'=NA, 'EA'=NA, 'PTSD'=0.3,
-                'Pain'=NA, 'Sleep'=0.11, 'Smoking'=NA)
+                'BMI'=NA, 'EA'=NA, 'MD'=0.3, 'MDD'=0.15, 'Neu'=NA,
+                'PTSD'=0.3, 'Pain'=NA, 'Sleep'=0.11, 'Smoking'=NA)
 ext_trait_names <- names(ext_traits)
 
 ```
@@ -271,7 +288,7 @@ if(!file.exists(covstruct_r)) {
     tibble(filename=paste(ext_trait_names, 'sumstats', 'gz', sep='.'),
            trait_name=ext_trait_names,
            pop_prev=ext_traits) %>%
-    mutate(if_else(!is.na(pop_prev), true=0.5, false=NA_real_))
+    mutate(samp_prev=if_else(!is.na(pop_prev), true=0.5, false=NA_real_))
     
   sumstats_prevs <- bind_rows(symptoms_sumstats_prevs, external_sumstats_prevs)
     
@@ -342,6 +359,9 @@ Anxiety ~  {symptom}
 BIP ~ {symptom}
 BMI ~ {symptom}
 EA ~ {symptom}
+MD ~ {symptom}
+MDD ~ {symptom}
+Neu ~ {symptom}
 PTSD ~ {symptom}
 Pain ~ {symptom}
 Sleep ~ {symptom}
@@ -358,7 +378,7 @@ clin_pop_ext_full <-
 bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
 filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
-mutate(Beta='Unadjusted', Factor=rhs, Phenotype=lhs)
+mutate(Beta='Full', Factor=rhs, Phenotype=lhs)
 
 ```
 
@@ -370,10 +390,13 @@ clin_ext_mult.model <- "
 ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 AlcDep ~ ClinSoma + ClinSui
-Anxiety ~ ClinSoma+ ClinSui
+Anxiety ~ ClinSoma + ClinSui
 BIP ~ ClinSoma + ClinSui
 BMI ~ ClinSoma + ClinSui
 EA ~ ClinSoma + ClinSui
+MD ~ ClinSoma + ClinSui
+MDD ~ ClinSoma + ClinSui
+Neu ~ ClinSoma + ClinSui
 PTSD ~ ClinSoma + ClinSui
 Pain ~ ClinSoma + ClinSui
 Sleep ~ ClinSoma + ClinSui
@@ -398,6 +421,9 @@ Anxiety ~ Affect + Neuroveg
 BIP ~ Affect + Neuroveg
 BMI ~ Affect + Neuroveg
 EA ~ Affect + Neuroveg
+MD ~ Affect + Neuroveg
+MDD ~ Affect + Neuroveg
+Neu ~ Affect + Neuroveg
 PTSD ~ Affect + Neuroveg
 Pain ~ Affect + Neuroveg
 Sleep ~ Affect + Neuroveg
@@ -410,28 +436,33 @@ bind_rows(lapply(list(clin_ext_mult.fit, pop_ext_mult.fit),
                  function(fit) fit$results)) %>%
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
   filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'Affect', 'Neuroveg')) %>%
-  mutate(Beta='Adjusted', Factor=rhs, Phenotype=lhs)
+  mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
 
 ```
 
-```{r clin_pop_ex_plot, fig.width=13, fig.height=6}
+```{r clin_pop_ex_plot, fig.width=10, fig.height=6}
 
 ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
        aes(x=factor(Factor, levels=c('ClinSui', 'ClinSoma', 'Neuroveg', 'Affect')),
            y=STD_Genotype,
-           color=factor(Beta, levels=c('Adjusted', 'Unadjusted')),
+           color=factor(Beta, levels=c('Partial', 'Full')),
+           shape=factor(Beta, levels=c('Partial', 'Full')),
           ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
           ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
 geom_hline(yintercept=0, col='gray') +
 geom_pointrange(position=position_dodge(width=0.5)) +
-facet_grid(~Phenotype) +
+facet_wrap(~Phenotype) +
 scale_x_discrete('Symptom/Factor') +
-scale_y_continuous('rg', breaks=c(-1, 0, 1)) +
-scale_color_discrete('') +
+scale_y_continuous(expression(r[g]), breaks=c(-1, 0, 1)) +
+scale_color_discrete('Model: ') +
 coord_flip(ylim=c(-1, 1)) +
 theme_bw() +
 theme(axis.text.y=element_text(size=16),
-      strip.text=element_text(size=16))
+      strip.text=element_text(size=16),
+      legend.title=element_text(size=12),
+      legend.text=element_text(size=14),
+      legend.position='top') +
+labs(color  = "Model: ", shape = "Model: ")
 
 ```
 
