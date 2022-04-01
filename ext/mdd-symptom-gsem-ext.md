@@ -20,7 +20,7 @@ Test genetic relationship between [symptom factors](mdd-symptom-gsem-model.md) a
 - PTSD: [Nievergelt et al](https://pubmed.ncbi.nlm.nih.gov/31594949/). Download from [PGC](https://figshare.com/articles/dataset/ptsd2019/14672133)
 - tobacco use. Cigarettes per day [Liu et al](https://www.nature.com/articles/s41588-018-0307-5). Download from [UofM](https://conservancy.umn.edu/handle/11299/201564)
 - alcohol dependence. [Walters et al](https://www.nature.com/articles/s41593-018-0275-1). Download from [PGC](https://doi.org/10.6084/m9.figshare.14672187)
-- educational attainment. [Lee et. al](https://www.nature.com/articles/s41588-018-0147-3). Download from [SSGAC Data Portal](https://thessgac.com).
+- educational attainment. [Okbay et. al](https://www.nature.com/articles/s41588-022-01016-z). Download from [SSGAC Data Portal](https://thessgac.com).
 - BMI, sex combined [Pulit et al](https://academic.oup.com/hmg/article/28/1/166/5098227). Download from [GIANT/Broad](https://portals.broadinstitute.org/collaboration/giant/index.php/GIANT_consortium_data_files#2018_GIANT_and_UK_BioBank_Meta-analysis).
 - neuroticism: [Nagel et al](https://www.nature.com/articles/s41588-018-0151-7). Download from [CNCR](https://ctg.cncr.nl/software/summary_statistics)
 - pain: multisite chronic pain [Johnston et al](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1008164). Download from [UoG](https://researchdata.gla.ac.uk/822/)
@@ -39,20 +39,20 @@ R.version
 
 ```
 ##                _                           
-## platform       aarch64-apple-darwin20      
-## arch           aarch64                     
-## os             darwin20                    
-## system         aarch64, darwin20           
+## platform       x86_64-generic-linux-gnu    
+## arch           x86_64                      
+## os             linux-gnu                   
+## system         x86_64, linux-gnu           
 ## status                                     
 ## major          4                           
-## minor          1.0                         
-## year           2021                        
-## month          05                          
-## day            18                          
-## svn rev        80317                       
+## minor          1.3                         
+## year           2022                        
+## month          03                          
+## day            10                          
+## svn rev        81868                       
 ## language       R                           
-## version.string R version 4.1.0 (2021-05-18)
-## nickname       Camp Pontanezen
+## version.string R version 4.1.3 (2022-03-10)
+## nickname       One Push-Up
 ```
 
 Package installation
@@ -84,7 +84,7 @@ packageVersion("GenomicSEM")
 ```
 
 ```
-## [1] '0.0.3'
+## [1] '0.0.5'
 ```
 
 # Process external sumstats
@@ -125,6 +125,7 @@ mutate(SNP=str_split_fixed(SNP, pattern=":", n=2)[,1]) %>%
 select(SNP, A1, A2, BETA=Z, P, N=Weight)
 write_tsv(alcdep_sumstats, 'sumstats/AlcDep.txt')
 
+# body-mass index
 bmi <- read_table('sumstats/Bmi.giant-ukbb.meta-analysis.combined.23May2018.HapMap2_only.txt.gz')
 bmi_sumstats <- bmi %>%
     separate(SNP, into=c('SNP', 'A1', 'A2'), sep=':') %>%
@@ -133,39 +134,45 @@ bmi_sumstats <- bmi %>%
 write_tsv(bmi_sumstats, 'sumstats/BMI.txt')
 
 # educational attainment
-ea <- read_table('sumstats/GWAS_EA_excl23andMe.txt.gz')
+ea <- read_tsv('sumstats/EA4_additive_excl_23andMe.txt.gz')
 ea_sumstats <-  ea %>%
-    transmute(SNP=MarkerName, A1, A2, FREQ=EAF, BETA=Beta, SE, P=Pval, N=766345)
+    transmute(SNP=rsID, A1=Effect_allele, A2=Other_allele, FREQ=EAF_HRC, BETA=Beta, SE_unadj, P=P_unadj, N=765283)
 write_tsv(ea_sumstats, 'sumstats/EA.txt')
 
+# multisite chronic pain
 pain <- read_tsv('sumstats/chronic_pain-bgen.stats.gz')
 pain_sumstats <- pain %>%
     filter(INFO >= 0.6) %>%
     transmute(SNP, A1=ALLELE1, A2=ALLELE0, BETA, SE, P=P_BOLT_LMM_INF, INFO, N=387649) 
 write_tsv(pain_sumstats, 'sumstats/Pain.txt')
 
+# tabacco use
 smoking <- read_table('sumstats/CigarettesPerDay.txt.gz')
 smoking_sumstats <- smoking %>%
     select(SNP=RSID, A1=ALT, A2=REF, BETA, SE, P=PVALUE, N)
 write_tsv(smoking_sumstats, 'sumstats/Smoking.txt')
 
-sleep <- read_table('sumstats/longsumstats.txt')
+# chronotype (long sleep duration)
+sleep <- read_table('sumstats/longsumstats.txt.gz')
 sleep_sumstats <- sleep %>%
     filter(INFO >= 0.6) %>%
     transmute(SNP, A1=ALLELE1, A2=ALLELE0, BETA=BETA_LONGSLEEP, SE=SE_LONGSLEEP, P=P_LONGSLEEP, INFO, N=4*34184*(305742-34184)/305742)
 write_tsv(sleep_sumstats, 'sumstats/Sleep.txt')
 
+# anxiety disorder
 anxiety <- read_table('sumstats/META_UKBB_iPSYCH_ANGST_wNcol.sumstats.gz')
 anxiety_sumstats <- anxiety %>%
     mutate(Nca=25453+12655+7016, Nco=58113+19225+14745) %>%
     transmute(SNP, A1=Allele1, A2=Allele2, BETA=Effect, SE=StdErr, P, N=4*Nca*Nco/(Nca+Nco))
 write_tsv(anxiety_sumstats, 'sumstats/Anxiety.txt')    
 
+# post-traumatic stress disorder
 ptsd <- read_tsv('sumstats/pts_eur_freeze2_overall.results.gz')
 ptsd_sumstats <- ptsd %>%
     transmute(SNP,  A1, A2, OR, SE, P, INFO, N=4*Nca*Nco/(Nca+Nco))
 write_tsv(ptsd_sumstats, 'sumstats/PTSD.txt')
-     
+    
+# neuroticism
 neu <- read_tsv('sumstats/sumstats_neuroticism_ctg_format.txt.gz')
 neu_sumstats <- neu %>%
     filter(!is.na(INFO_UKB)) %>%
@@ -220,9 +227,11 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
 ```
-## Rows: 15 Columns: 4── Column specification ──────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 4
+## ── Column specification ───────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -249,9 +258,11 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
 ```
-## Rows: 15 Columns: 2── Column specification ──────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 2
+## ── Column specification ───────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -267,10 +278,12 @@ symptoms_sample_prev <- read_tsv(here::here('meta/symptoms_prev.txt'))
 ```
 
 ```
-## Rows: 24 Columns: 6── Column specification ──────────────────────────────────────────────────────────────────────
+## Rows: 24 Columns: 6
+## ── Column specification ───────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (3): cohorts, symptom, sumstats
 ## dbl (3): Nca, Nco, samp_prev
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -382,8 +395,8 @@ clin_pop.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop.
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   2.572 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0289190810466153 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.11962312826334 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##   0.969 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0289190810466123 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.19783223907666 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -413,9 +426,9 @@ clin_pop.fit$modelfit
 
 <div class="kable-table">
 
-|   |    chisq| df| p_chisq|      AIC|       CFI|      SRMR|
-|:--|--------:|--:|-------:|--------:|---------:|---------:|
-|df | 166.5296| 84|   2e-07| 238.5296| 0.9895636| 0.1492129|
+|   |    chisq| df|   p_chisq|      AIC|       CFI|     SRMR|
+|:--|--------:|--:|---------:|--------:|---------:|--------:|
+|df | 100.9179| 84| 0.1007464| 172.9179| 0.9954963| 0.149093|
 
 </div>
 
@@ -427,42 +440,42 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
 
 |   |lhs         |op |rhs         | STD_Genotype|STD_Genotype_SE    |   p_value|
 |:--|:-----------|:--|:-----------|------------:|:------------------|---------:|
-|11 |ClinSoma    |=~ |ClinAppInc  |    0.6331167|0.249315964519457  | 0.0111036|
-|13 |ClinSoma    |=~ |ClinSleDec  |    0.3999701|0.285148917125793  | 0.1607155|
-|14 |ClinSoma    |=~ |ClinSleInc  |    0.5250231|0.323796141120907  | 0.1049170|
-|12 |ClinSoma    |=~ |ClinMotoInc |    0.5512468|0.25174645840795   | 0.0285469|
-|1  |Affect      |=~ |PopDep      |    0.7422368|0.0711883555737437 | 0.0000000|
-|2  |Affect      |=~ |PopGuilt    |    0.7564180|0.0966276584782838 | 0.0000000|
-|3  |Affect      |=~ |PopSui      |    0.6751448|0.108369010956031  | 0.0000000|
-|20 |Neuroveg    |=~ |PopAnh      |    0.8126224|0.0662731036391753 | 0.0000000|
-|22 |Neuroveg    |=~ |PopAppInc   |    0.4284819|0.0822715940548262 | 0.0000002|
-|21 |Neuroveg    |=~ |PopAppDec   |    0.2005954|0.0874704946013147 | 0.0218309|
-|26 |Neuroveg    |=~ |PopSleInc   |    0.4973924|0.10316347276632   | 0.0000014|
-|25 |Neuroveg    |=~ |PopSleDec   |    0.6304220|0.0996274695454949 | 0.0000000|
-|24 |Neuroveg    |=~ |PopFatig    |    0.7402491|0.0930793821925011 | 0.0000000|
-|23 |Neuroveg    |=~ |PopConc     |    0.7922114|0.0918017359133528 | 0.0000000|
-|33 |PopDep      |~~ |PopAnh      |    0.4044683|0.0925563300546037 | 0.0000124|
-|17 |ClinSoma    |~~ |ClinSui     |    0.1227571|0.255142309699773  | 0.6304178|
-|5  |Affect      |~~ |ClinSui     |    0.7333826|0.135314986147383  | 0.0000001|
-|27 |Neuroveg    |~~ |ClinSui     |    0.6574773|0.132218363326867  | 0.0000007|
-|7  |ClinAppInc  |~~ |ClinAppInc  |    0.5991668|0.444388081648688  | 0.1775706|
-|9  |ClinSleDec  |~~ |ClinSleDec  |    0.8400303|0.628750873516738  | 0.1815427|
-|10 |ClinSleInc  |~~ |ClinSleInc  |    0.7243430|0.882588601524437  | 0.4118152|
-|8  |ClinMotoInc |~~ |ClinMotoInc |    0.6961301|0.544701812791315  | 0.2012489|
-|34 |PopDep      |~~ |PopDep      |    0.4490840|0.124940164766387  | 0.0003252|
-|36 |PopGuilt    |~~ |PopGuilt    |    0.4278329|0.18078959434519   | 0.0179597|
-|39 |PopSui      |~~ |PopSui      |    0.5441828|0.241437218583002  | 0.0242019|
-|29 |PopAnh      |~~ |PopAnh      |    0.3396447|0.111071711535022  | 0.0022290|
-|31 |PopAppInc   |~~ |PopAppInc   |    0.8164036|0.154946833406514  | 0.0000001|
-|30 |PopAppDec   |~~ |PopAppDec   |    0.9597593|0.231342547177408  | 0.0000334|
-|38 |PopSleInc   |~~ |PopSleInc   |    0.7526031|0.252689112396902  | 0.0028979|
-|37 |PopSleDec   |~~ |PopSleDec   |    0.6025688|0.295152478043393  | 0.0411962|
-|35 |PopFatig    |~~ |PopFatig    |    0.4520298|0.275301216035336  | 0.1006003|
-|32 |PopConc     |~~ |PopConc     |    0.3723983|0.251346509715041  | 0.1384421|
-|19 |ClinSui     |~~ |ClinSui     |    1.0000004|0.328014352733054  | 0.0022987|
-|15 |ClinSoma    |~~ |Affect      |    0.0878338|0.13818625888964   | 0.5250331|
-|18 |ClinSoma    |~~ |Neuroveg    |    0.4679749|0.180711881874794  | 0.0096082|
-|6  |Affect      |~~ |Neuroveg    |    0.8283105|0.066491144265082  | 0.0000000|
+|11 |ClinSoma    |=~ |ClinAppInc  |    0.6770217|0.251413397123272  | 0.0070839|
+|13 |ClinSoma    |=~ |ClinSleDec  |    0.4088066|0.263968456973982  | 0.1214547|
+|14 |ClinSoma    |=~ |ClinSleInc  |    0.5188851|0.312320482815995  | 0.0966337|
+|12 |ClinSoma    |=~ |ClinMotoInc |    0.5526848|0.23538034863995   | 0.0188719|
+|1  |Affect      |=~ |PopDep      |    0.7404462|0.0670489671058393 | 0.0000000|
+|2  |Affect      |=~ |PopGuilt    |    0.7584650|0.0958595391445521 | 0.0000000|
+|3  |Affect      |=~ |PopSui      |    0.6779273|0.100393560914486  | 0.0000000|
+|20 |Neuroveg    |=~ |PopAnh      |    0.8089414|0.0624306053199262 | 0.0000000|
+|22 |Neuroveg    |=~ |PopAppInc   |    0.4248090|0.076229989535937  | 0.0000000|
+|21 |Neuroveg    |=~ |PopAppDec   |    0.2016377|0.0813261866246497 | 0.0131612|
+|26 |Neuroveg    |=~ |PopSleInc   |    0.4955791|0.0991351943274909 | 0.0000006|
+|25 |Neuroveg    |=~ |PopSleDec   |    0.6327544|0.0962537342886455 | 0.0000000|
+|24 |Neuroveg    |=~ |PopFatig    |    0.7452532|0.0912093249313095 | 0.0000000|
+|23 |Neuroveg    |=~ |PopConc     |    0.7947817|0.0977477589117465 | 0.0000000|
+|33 |PopDep      |~~ |PopAnh      |    0.4084219|0.0956364658448115 | 0.0000195|
+|17 |ClinSoma    |~~ |ClinSui     |    0.1119745|0.256815871286024  | 0.6628450|
+|5  |Affect      |~~ |ClinSui     |    0.7379784|0.131453625772179  | 0.0000000|
+|27 |Neuroveg    |~~ |ClinSui     |    0.6687599|0.123067425745151  | 0.0000001|
+|7  |ClinAppInc  |~~ |ClinAppInc  |    0.5416436|0.432215487064736  | 0.2101524|
+|9  |ClinSleDec  |~~ |ClinSleDec  |    0.8328819|0.616706354648586  | 0.1768472|
+|10 |ClinSleInc  |~~ |ClinSleInc  |    0.7307577|0.870963591741624  | 0.4014584|
+|8  |ClinMotoInc |~~ |ClinMotoInc |    0.6945404|0.514612031568388  | 0.1771318|
+|34 |PopDep      |~~ |PopDep      |    0.4517396|0.123107213680944  | 0.0002431|
+|36 |PopGuilt    |~~ |PopGuilt    |    0.4247309|0.183795340828606  | 0.0208393|
+|39 |PopSui      |~~ |PopSui      |    0.5404120|0.256310345033073  | 0.0349944|
+|29 |PopAnh      |~~ |PopAnh      |    0.3456131|0.110111446987639  | 0.0016966|
+|31 |PopAppInc   |~~ |PopAppInc   |    0.8195359|0.151603784556237  | 0.0000001|
+|30 |PopAppDec   |~~ |PopAppDec   |    0.9593399|0.232828466128837  | 0.0000378|
+|38 |PopSleInc   |~~ |PopSleInc   |    0.7544016|0.253685415858216  | 0.0029417|
+|37 |PopSleDec   |~~ |PopSleDec   |    0.5996205|0.286851311611131  | 0.0365854|
+|35 |PopFatig    |~~ |PopFatig    |    0.4445982|0.28218781584907   | 0.1151324|
+|32 |PopConc     |~~ |PopConc     |    0.3683230|0.257726160778752  | 0.1529698|
+|19 |ClinSui     |~~ |ClinSui     |    1.0000008|0.325637976210799  | 0.0021342|
+|15 |ClinSoma    |~~ |Affect      |    0.0931367|0.13803215020663   | 0.4998427|
+|18 |ClinSoma    |~~ |Neuroveg    |    0.4456170|0.169689779741274  | 0.0086376|
+|6  |Affect      |~~ |Neuroveg    |    0.8274942|0.0634784433875358 | 0.0000000|
 |16 |ClinSoma    |~~ |ClinSoma    |    1.0000000|                   |        NA|
 |4  |Affect      |~~ |Affect      |    1.0000000|                   |        NA|
 |28 |Neuroveg    |~~ |Neuroveg    |    1.0000000|                   |        NA|
@@ -510,8 +523,8 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  36.703 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0343880071995565 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  68.175 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0344079562870523 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74381195419824 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -535,14 +548,13 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```
 
 ```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  2.37901762888446e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ## [1] "Running primary model"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  44.665 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0347200454437891 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.76111746871965 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  79.831 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0347302833984335 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.75756736042047 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -564,14 +576,13 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```
 
 ```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  2.49238231930863e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.76111746871965 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ## [1] "Running primary model"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  36.675 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0343880071995565 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  70.483 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0344079562870523 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74381195419824 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -593,14 +604,13 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```
 
 ```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  2.37901762888446e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ## [1] "Running primary model"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  36.315 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0343880071995565 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  75.807 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0344079562870523 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74381195419824 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -619,10 +629,6 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ## including low powered traits, and you might consider removing those traits from
 ## the model. If you are going to run a multivariate GWAS we strongly recommend
 ## setting the smooth_check argument to true to check smoothing for each SNP.
-```
-
-```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  2.37901762888446e-11 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74709658510984 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```r
@@ -663,8 +669,8 @@ clin_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##    4.17 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0321078230722528 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.7059004143279 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##   9.312 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0321200955875233 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.70168239018915 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -719,8 +725,8 @@ pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_e
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   7.863 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00518864671740996 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.522242402310806 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  14.246 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00517308597252639 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.512864024387611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -732,10 +738,6 @@ pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_e
 ## traits from the model. If you are going to run a multivariate GWAS we strongly
 ## recommend setting the smooth_check argument to true to check smoothing for each
 ## SNP.
-```
-
-```
-## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  4.68228593443758e-12 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.522242402310806 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```r

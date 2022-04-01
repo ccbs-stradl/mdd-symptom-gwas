@@ -106,6 +106,7 @@ mutate(SNP=str_split_fixed(SNP, pattern=":", n=2)[,1]) %>%
 select(SNP, A1, A2, BETA=Z, P, N=Weight)
 write_tsv(alcdep_sumstats, 'sumstats/AlcDep.txt')
 
+# body-mass index
 bmi <- read_table('sumstats/Bmi.giant-ukbb.meta-analysis.combined.23May2018.HapMap2_only.txt.gz')
 bmi_sumstats <- bmi %>%
     separate(SNP, into=c('SNP', 'A1', 'A2'), sep=':') %>%
@@ -114,39 +115,45 @@ bmi_sumstats <- bmi %>%
 write_tsv(bmi_sumstats, 'sumstats/BMI.txt')
 
 # educational attainment
-ea <- read_table('sumstats/GWAS_EA_excl23andMe.txt.gz')
+ea <- read_tsv('sumstats/EA4_additive_excl_23andMe.txt.gz')
 ea_sumstats <-  ea %>%
-    transmute(SNP=MarkerName, A1, A2, FREQ=EAF, BETA=Beta, SE, P=Pval, N=766345)
+    transmute(SNP=rsID, A1=Effect_allele, A2=Other_allele, FREQ=EAF_HRC, BETA=Beta, SE_unadj, P=P_unadj, N=765283)
 write_tsv(ea_sumstats, 'sumstats/EA.txt')
 
+# multisite chronic pain
 pain <- read_tsv('sumstats/chronic_pain-bgen.stats.gz')
 pain_sumstats <- pain %>%
     filter(INFO >= 0.6) %>%
     transmute(SNP, A1=ALLELE1, A2=ALLELE0, BETA, SE, P=P_BOLT_LMM_INF, INFO, N=387649) 
 write_tsv(pain_sumstats, 'sumstats/Pain.txt')
 
+# tabacco use
 smoking <- read_table('sumstats/CigarettesPerDay.txt.gz')
 smoking_sumstats <- smoking %>%
     select(SNP=RSID, A1=ALT, A2=REF, BETA, SE, P=PVALUE, N)
 write_tsv(smoking_sumstats, 'sumstats/Smoking.txt')
 
-sleep <- read_table('sumstats/longsumstats.txt')
+# chronotype (long sleep duration)
+sleep <- read_table('sumstats/longsumstats.txt.gz')
 sleep_sumstats <- sleep %>%
     filter(INFO >= 0.6) %>%
     transmute(SNP, A1=ALLELE1, A2=ALLELE0, BETA=BETA_LONGSLEEP, SE=SE_LONGSLEEP, P=P_LONGSLEEP, INFO, N=4*34184*(305742-34184)/305742)
 write_tsv(sleep_sumstats, 'sumstats/Sleep.txt')
 
+# anxiety disorder
 anxiety <- read_table('sumstats/META_UKBB_iPSYCH_ANGST_wNcol.sumstats.gz')
 anxiety_sumstats <- anxiety %>%
     mutate(Nca=25453+12655+7016, Nco=58113+19225+14745) %>%
     transmute(SNP, A1=Allele1, A2=Allele2, BETA=Effect, SE=StdErr, P, N=4*Nca*Nco/(Nca+Nco))
 write_tsv(anxiety_sumstats, 'sumstats/Anxiety.txt')    
 
+# post-traumatic stress disorder
 ptsd <- read_tsv('sumstats/pts_eur_freeze2_overall.results.gz')
 ptsd_sumstats <- ptsd %>%
     transmute(SNP,  A1, A2, OR, SE, P, INFO, N=4*Nca*Nco/(Nca+Nco))
 write_tsv(ptsd_sumstats, 'sumstats/PTSD.txt')
-     
+    
+# neuroticism
 neu <- read_tsv('sumstats/sumstats_neuroticism_ctg_format.txt.gz')
 neu_sumstats <- neu %>%
     filter(!is.na(INFO_UKB)) %>%
