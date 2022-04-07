@@ -382,8 +382,6 @@ A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
 "
 pop_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg.model)
 
@@ -399,11 +397,9 @@ A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
 c2 > 0.001
 PopAnh ~~ c2*PopAnh
-a13 > -1.0
+a13 < 1.0
 A1 ~~ a13*A3
 "
 pop_cog_mood_neuroveg_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg_constr.model, fix_resid=FALSE)
@@ -602,7 +598,8 @@ list("1a"=list(name="Common", model=pop_commonfactor.fit),
      "2b(i)"=list(name="Psych-Neuroveg", model=pop_psych_veg.fit),
      "2b(ii)"=list(name="Psych-Neuroveg (BiF)", model=pop_psych_veg_bif.fit),
      "2c(i)"=list(name="Affect-Neuroveg", model=pop_affect_veg.fit),
-     "2c(ii)"=list(name="Affect-Neuroveg (BiF)", model=pop_affect_veg_bif_constr.fit)
+     "2c(ii)"=list(name="Affect-Neuroveg (BiF)", model=pop_affect_veg_bif_constr.fit),
+     "3"=list(name="Cog-Mood-Neuroveg", model=pop_cog_mood_neuroveg_constr.fit)
      )
 
 pop_model_fits <- 
