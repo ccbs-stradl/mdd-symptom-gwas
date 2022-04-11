@@ -5,14 +5,48 @@ Polygenic indices were calculated from GWAS of MDD symptoms and common factor GW
 
 ``` {.r}
 library(dplyr)
+```
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` {.r}
 library(readr)
 library(tidyr)
 library(stringr)
 library(ggplot2)
 library(lme4)
+```
+
+    ## Loading required package: Matrix
+
+    ## 
+    ## Attaching package: 'Matrix'
+
+    ## The following objects are masked from 'package:tidyr':
+    ## 
+    ##     expand, pack, unpack
+
+``` {.r}
 library(fdrtool)
 library(doParallel)
+```
 
+    ## Loading required package: foreach
+
+    ## Loading required package: iterators
+
+    ## Loading required package: parallel
+
+``` {.r}
 registerDoParallel(cores=1)
 ```
 
@@ -56,7 +90,7 @@ select(IID=gwas,
 Dep=A1,    Anh=A2, 
 App=A3, #AppDec=A4, AppInc=A5,
 Sle=A6,   #SleDec=A7, SleInc=A8,
-Psyc=A9,  #PsycInc=A10, PsycDec=A11,
+Moto=A9,  #MotoInc=A10, MotoDec=A11,
 Fatig=A12, Guilt=A13, Conc=A16, Sui=A19) %>%
 mutate(across(Dep:Sui, .fns=scid_threshold)) %>%
 mutate(instrument='SCID', timeframe='current')
@@ -66,7 +100,7 @@ select(IID=gwas,
 Dep=A52,    Anh=A53, 
 App=A54, #AppDec=A55, AppInc=A56,
 Sle=A57,    #SleDec=A58, SleInc=A59, 
-Psyc=A60,  #PsycInc=A61, PsycDec=A62,
+Moto=A60,  #MotoInc=A61, MotoDec=A62,
 Fatig=A63, Guilt=A64,  Conc=A67,  Sui=A70) %>%
 mutate(across(Dep:Sui, scid_threshold)) %>%
 mutate(instrument='SCID', timeframe='past')
@@ -98,7 +132,7 @@ bind_rows(scid_symptoms_current, scid_symptoms_past, cidi_symptoms_past) %>%
 pivot_longer(cols=Dep:Sui, names_to='symptom', values_to='affected') %>%
 filter(!is.na(affected)) %>%
 mutate(sym_factorAvN=case_when(symptom %in% c("Dep", "Guilt", "Sui") ~ 0.5,
-                       symptom %in% c("Anh", "App", "Sle", "Psyc", "Fatig", "Conc") ~ -0.5,
+                       symptom %in% c("Anh", "App", "Sle", "Moto", "Fatig", "Conc") ~ -0.5,
                        TRUE ~ NA_real_),
        sym_cardinal=case_when(symptom %in% c("Dep", "Anh") ~ 0.5,
                               TRUE ~ -0.5))
@@ -158,22 +192,116 @@ plyr::dlply(.data=unrel_scores,
 
     ## Warning in setup_parallel(): No parallel backend registered
 
-Examine models and get within, between, and total effects
+``` {.r}
+prs_symptoms_models <-
+plyr::dlply(.data=unrel_scores,
+.variables=c("discovery", "threshold"),
+.parallel=TRUE,
+.fun=function(scores) {
+    # merge the selected predictor symptom PRS and threshold with outcome data
+    sym_prs <- scores %>%
+    inner_join(symptom_values, by='IID') %>%
+    left_join(covariates, by=c('IID', 'instrument'))
+    
+    # fit repeated measures family model
+    sym_thresh_model <- glmer(affected ~ 1 + agez + sex +
+        timeframe + symptom +
+        PRS + PRS:symptom +
+        (1|IID), data=sym_prs, family='binomial', nAGQ=0)
+
+    return(sym_thresh_model)
+})
+```
+
+    ## Warning in setup_parallel(): No parallel backend registered
+
+Examine models
 
 ``` {.r}
 # constant (fixed) effects
 model_coefs <-
 plyr::ldply(prs_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
-as_tibble()
+as_tibble() %>%
+mutate(GWAS=recode(discovery, clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
 
-ggplot(model_coefs %>% filter(str_detect(term, 'PRS')), aes(x=term, y=Estimate, ymax=Estimate+2*`Std. Error`, ymin=Estimate-2*`Std. Error`, colour=threshold)) +
+model_coefs_prs <-
+model_coefs %>% filter(str_detect(term, 'PRS')) %>%
+mutate(PRS=case_when(term == 'PRS' ~ 'Main',
+                     term == 'PRS:sym_factorAvN' ~ 'Affect v Neuro'))
+                     
+ggplot(model_coefs_prs, aes(x=PRS, y=Estimate, ymax=Estimate+2*`Std. Error`, ymin=Estimate-2*`Std. Error`, colour=threshold)) +
 geom_hline(yintercept=0, color='gray') +
 geom_pointrange(position=position_dodge(width = 0.5)) +
-facet_wrap(~discovery) +
+facet_wrap(~GWAS) +
 coord_flip() 
 ```
 
 ![](gs_symptoms_on_prs_files/figure-markdown_github/model_coefs-1.png)
+
+Calculate the main PRS effect of each symptom as main PRS effect + symptom interaction, accounting for covariance of coefficients
+
+``` {.r}
+# constant (fixed) effects
+symptom_model_coefs <-
+plyr::ldply(prs_symptoms_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
+as_tibble() %>%
+mutate(GWAS=recode(discovery, clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
+
+# covariance of each parameter with 'PRS'
+symptom_model_coefs_vcov <-
+plyr::ldply(prs_symptoms_models, function(model) as_tibble(vcov(model)[,'PRS'], rownames='term'))
+
+# prs effects
+symptom_model_coefs_prs <-
+symptom_model_coefs %>% filter(str_detect(term, 'PRS')) 
+
+# prs effect covariances
+symptom_model_coefs_vcov_prs <-
+symptom_model_coefs_vcov %>% filter(str_detect(term, 'PRS')) 
+
+
+
+# main effect
+symptom_model_coefs_prs_main <- 
+symptom_model_coefs_prs %>%
+filter(term == 'PRS')
+
+# interaction effects. recode baseline as anhedonia
+symptom_model_coefs_prs_interact <- 
+symptom_model_coefs_prs %>%
+mutate(symptom=if_else(term == 'PRS', true='symptomAnh:PRS', false=term),
+       Estimate=if_else(term == 'PRS', true=0, false=Estimate),
+       `Std. Error`=if_else(term == 'PRS', true=0, false=`Std. Error`),
+       `z value`=if_else(term == 'PRS', true=0, false=`z value`),
+       `Pr(>|z|)`=if_else(term == 'PRS', true=NA_real_, false=`Pr(>|z|)`)) %>%
+mutate(symptom=str_match(symptom, 'symptom([:alpha:]+):PRS')[,2])
+
+# covariances. recode baseline as anhedonia
+symptom_model_coefs_vcov_prs_interact <-
+symptom_model_coefs_vcov_prs %>%
+mutate(symptom=if_else(term == 'PRS', true='symptomAnh:PRS', false=term),
+       vcov=if_else(term == 'PRS', true=0, false=value)) %>%
+       mutate(symptom=str_match(symptom, 'symptom([:alpha:]+):PRS')[,2])
+
+
+symptom_model_coefs_prs_sum <-
+symptom_model_coefs_prs_main %>%
+select(discovery, threshold, main=Estimate, main_se=`Std. Error`) %>%
+right_join(select(symptom_model_coefs_prs_interact, discovery, threshold, GWAS, symptom, beta=Estimate, se=`Std. Error`),
+          by=c('discovery', 'threshold')) %>%
+left_join(select(symptom_model_coefs_vcov_prs_interact, discovery, threshold, symptom, vcov),
+         by=c('discovery', 'threshold', 'symptom')) %>%
+transmute(GWAS, threshold, symptom, beta=main+beta, se=sqrt(main_se^2 + se^2 + 2*vcov))
+
+                     
+ggplot(symptom_model_coefs_prs_sum, aes(x=symptom, y=beta, ymax=beta+2*se, ymin=beta-2*se, colour=threshold)) +
+geom_hline(yintercept=0, color='gray') +
+geom_pointrange(position=position_dodge(width = 0.5)) +
+facet_wrap(~GWAS) +
+coord_flip() 
+```
+
+![](gs_symptoms_on_prs_files/figure-markdown_github/symptom_model_coefs-1.png)
 
 Get sample counts
 
@@ -202,6 +330,6 @@ mutate(PresenceAbsence=str_glue("{present} : {absent}"))
     ## 4 Dep       1633    2518 2518 : 1633    
     ## 5 Fatig      358    2176 2176 : 358     
     ## 6 Guilt      874    1648 1648 : 874     
-    ## 7 Psyc       273     746 746 : 273      
+    ## 7 Moto       273     746 746 : 273      
     ## 8 Sle        434    2098 2098 : 434     
     ## 9 Sui       1177    1347 1347 : 1177
