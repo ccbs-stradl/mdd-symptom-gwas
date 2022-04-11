@@ -63,9 +63,9 @@ MDD3b;Weight⇈;Weight⇉;AppInc
 MDD4;Sleep⇅;Sleep⇆;Sle
 MDD4a;Sleep⇊;Sleep⇇;SleDec
 MDD4b;Sleep⇈;Sleep⇉;SleInc
-MDD5;Motor⇅;Motor⇆;Psyc
-MDD5a;Motor⇈;Motor⇉;PsycInc
-MDD5b;Motor⇊;Motor⇇;PsycDec
+MDD5;Motor⇅;Motor⇆;Moto
+MDD5a;Motor⇈;Motor⇉;MotoInc
+MDD5b;Motor⇊;Motor⇇;MotoDec
 MDD6;Fatigue;Fatigue;Fatig
 MDD7;Guilt;Guilt;Guilt
 MDD8;Concentrate;Concentrate;Conc
@@ -84,7 +84,7 @@ MDD4a;Insomnia nearly every day
 MDD4b;Hypersomnia nearly every day
 MDD5;Changes in speed/amount of moving or speaking
 MDD5a;Psychomotor agitation nearly every day
-MDD5b;Psychomotor retardation nearly every day
+MDD5b;Psychomotor slowing nearly every day
 MDD6;Fatigue or loss of energy nearly every day
 MDD7;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;Diminished ability to think or concentrate, or indecisiveness
@@ -153,7 +153,7 @@ Common factor across symptoms from both cohorts
 ```{r commonfactor, cache=TRUE}
 
 commonfactor.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
 "
 
@@ -169,7 +169,7 @@ Correlation among directional symptoms
 ```{r commonfactor_dir, cache=TRUE}
 
 commonfactor_dir.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
 ClinAppDec ~~ ClinAppInc
 ClinSleDec ~~ ClinSleInc
@@ -190,7 +190,7 @@ Ascertainment-specific factors
 ```{r clin_pop, cache=TRUE}
 
 clin_pop.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui 
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui 
 A2 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
 A2 ~~ 1*A2
@@ -215,9 +215,9 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
 ```{r clin_pop_bif, cache=TRUE}
 
 clin_pop_bif.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui 
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui 
 A2 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
-A =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
+A =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A ~~ 1*A
@@ -241,75 +241,31 @@ Common factor model. Allow residual negative correlation between directional sym
 ```{r clin_commonfactor, cache=TRUE}
 
 clin_commonfactor.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui
 A1 ~~ 1*A1
-c3a3b > -1
-ClinAppDec ~~ c3a3b*ClinAppInc
 "
 clin_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor.model)
 
 clin_commonfactor.fit$modelfit
 clin_commonfactor.fit$results[c(1,2,3,6,7, 9)]
 
+```
 
-fit_graph <- function(results, ...) {
+Add residual covariance between sleep symptoms.
 
-  results_sort <- results %>% arrange(lhs, rhs)
+```{r clin_commonfactor_sle, cache=TRUE}
 
-  node_names <- unique(c(results_sort$lhs, results_sort$rhs))
-  
-  node_idx <- seq_along(node_names)
-  names(node_idx) <- node_names
-  
-  graph <- create_graph(
-    nodes_df=create_node_df(n=length(node_names),
-                            label=node_labels[node_names], 
-                            shape='oval', width=1,
-                            fillcolor=node_colors[node_names],
-                            fontcolor='black'),
-    edges_df=create_edge_df(from=node_idx[results_sort$lhs],
-                            to=node_idx[results_sort$rhs],
-                            label=round(results_sort$STD_Genotype, 2),
-                            penwidth=0.3+abs(2*results_sort$STD_Genotype),
-                            dir=edge_dir[results_sort$op]),
-    attr_theme="tb")
-  
-  return(graph)
+clin_commonfactor_sle.model <- "
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui
+A1 ~~ 1*A1
+c3a3b > -1
+ClinAppDec ~~ c3a3b*ClinAppInc
+"
+clin_commonfactor_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor_sle.model)
 
-}
+clin_commonfactor_sle.fit$modelfit
+clin_commonfactor_sle.fit$results[c(1,2,3,6,7, 9)]
 
-# render_fit <- function(results) render_graph(fit_graph(results))
-
-# render_fit(pgc_commonfactor.fit$results)
-
-# pgc_commonfactor.graph <- fit_graph(pgc_commonfactor.fit$results)
-
-add_rank_same <- function(gv, top, bottom) {
-
-  # add in block to specify node ranks
-  gv.list <- str_split(gv, '\n\n')[[1]]
-  
-  # move the nodes/edges element to the end
-  gv.list[6] <- gv.list[5]
-  
-  # add manually made ranks
-  gv.list[5] <- paste("{rank=same",
-  paste(paste0("'", top, "'"), collapse=' '),
-  "}\n{rank=same",
-  paste(paste0("'", bottom, "'"), collapse=' '),
-  "}")
-  
-  rank.gv <- paste(gv.list, collapse='\n\n')
-
-}
-
-
-# pgc_commonfactor.gv <- add_rank_same(generate_dot(pgc_commonfactor.graph), 1, 2:5)
-# grViz(pgc_commonfactor.gv)
-
-# # output as a GraphViz dot file. Replace single quotes with double quotes 
-# # as that's what the command line utility expects
-# cat(str_replace_all(pgc_commonfactor_rank.gv, "'", '"'), file='mdd-symptom-gsem_files/pgc_commonfactor.gv')
 
 ```
 
@@ -318,8 +274,10 @@ add_rank_same <- function(gv, top, bottom) {
 ```{r clin_soma, cache=TRUE}
 
 clin_soma.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleInc + ClinPsycInc
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleInc + ClinMotoInc
+A2 =~ NA*ClinSui
 A1 ~~ 1*A1
+A2 ~~ 1*A2
 ClinAppDec ~~ ClinAppInc
 "
 clin_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_soma.model)
@@ -424,8 +382,6 @@ A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
 "
 pop_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg.model)
 
@@ -441,11 +397,9 @@ A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
 A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
 c2 > 0.001
 PopAnh ~~ c2*PopAnh
-a13 > -1.0
+a13 < 1.0
 A1 ~~ a13*A3
 "
 pop_cog_mood_neuroveg_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg_constr.model, fix_resid=FALSE)
@@ -463,7 +417,7 @@ pop_cog_mood_neuroveg_constr.fit$results[c(1, 2, 3, 6, 7)]
 
 [Krause Rehab Psychol 2008](https://psycnet.apa.org/record/2008-17022-011), [Krause Arch Psys Med Rehab 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
 
-> the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor retardation as a fourth somatic item
+> the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor slowing as a fourth somatic item
 
 ```{r pop_psych_soma, cache=TRUE}
 
@@ -644,7 +598,8 @@ list("1a"=list(name="Common", model=pop_commonfactor.fit),
      "2b(i)"=list(name="Psych-Neuroveg", model=pop_psych_veg.fit),
      "2b(ii)"=list(name="Psych-Neuroveg (BiF)", model=pop_psych_veg_bif.fit),
      "2c(i)"=list(name="Affect-Neuroveg", model=pop_affect_veg.fit),
-     "2c(ii)"=list(name="Affect-Neuroveg (BiF)", model=pop_affect_veg_bif_constr.fit)
+     "2c(ii)"=list(name="Affect-Neuroveg (BiF)", model=pop_affect_veg_bif_constr.fit),
+     "3"=list(name="Cog-Mood-Neuroveg", model=pop_cog_mood_neuroveg_constr.fit)
      )
 
 pop_model_fits <- 
@@ -656,10 +611,11 @@ lapply(pop_model_list, function(m) m$model$modelfit)
 ))
 rownames(pop_model_fits) <- NULL
 
+knitr::kable(
 pop_model_fits %>%
-select(-chisq, -df) %>%
 mutate(dAIC=AIC-min(AIC)) %>%
-mutate_if(is.numeric, ~round(., 3))
+mutate_if(is.numeric, ~signif(., 3))
+)
 
 
 ```
@@ -669,7 +625,7 @@ mutate_if(is.numeric, ~round(., 3))
 ```{r clin_pop_affect_veg, cache=TRUE}
 
 clin_pop_affect_veg.model <- "
-Soma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc
+Soma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 Soma ~~ 1*Soma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Veg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc

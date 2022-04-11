@@ -16,9 +16,9 @@ MDD3b;Weight⇈;Weight⇉;AppInc
 MDD4;Sleep⇅;Sleep⇆;Sle
 MDD4a;Sleep⇊;Sleep⇇;SleDec
 MDD4b;Sleep⇈;Sleep⇉;SleInc
-MDD5;Motor⇅;Motor⇆;Psyc
-MDD5a;Motor⇈;Motor⇉;PsycInc
-MDD5b;Motor⇊;Motor⇇;PsycDec
+MDD5;Motor⇅;Motor⇆;Moto
+MDD5a;Motor⇈;Motor⇉;MotoInc
+MDD5b;Motor⇊;Motor⇇;MotoDec
 MDD6;Fatigue;Fatigue;Fatig
 MDD7;Guilt;Guilt;Guilt
 MDD8;Concentrate;Concentrate;Conc
@@ -67,7 +67,7 @@ mutate(daner=paste(here::here('meta', 'distribution', sumstats, paste0('daner_',
 
 sumstats_prevs_keep <- sumstats_prevs %>%
 filter(trait_name %in% c("ClinAppDec", "ClinAppInc", "ClinSleDec",
-					   "ClinSleInc", "ClinPsycInc", "ClinSui",
+					   "ClinSleInc", "ClinMotoInc", "ClinSui",
 					   "PopDep", "PopAnh", "PopAppDec", "PopAppInc",
 					   "PopSleDec", "PopSleInc", "PopFatig", 
 					   "PopGuilt", "PopConc", "PopSui"))
