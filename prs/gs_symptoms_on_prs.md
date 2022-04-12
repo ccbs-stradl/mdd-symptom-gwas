@@ -273,7 +273,7 @@ mutate(Symptom=factor(symptom,
         Cluster=paste('Cluster:', cluster))
         
 # quantiles corrected for number of tests        
-qn <- qnorm(0.05/(9*4), lower.tail=F)
+qn <- qnorm(0.05/4, lower.tail=F)
                      
 ggplot(symptom_model_coefs_present,
     aes(x=Symptom,
@@ -297,10 +297,11 @@ ggplot(symptom_model_coefs_present %>% filter(threshold=='PT0.05'),
 geom_hline(yintercept=1, color='gray') +
 geom_pointrange(position=position_dodge(width = 0.5)) +
 scale_x_discrete('Symptom in GS:SFHS') +
-scale_y_continuous('OR of +1SD in PIS') +
+scale_y_continuous('OR of +1SD in PIS', breaks=c(1, 1.25, 1.5)) +
 facet_grid(Cluster~Discovery, scale='free_y', space='free_y') +
 coord_flip() +
-theme_bw()
+theme_bw() +
+theme(axis.text.y=element_text(size='16'))
 ```
 
 ![](gs_symptoms_on_prs_files/figure-markdown_github/symptom_model_coefs_p05-1.png)
