@@ -5,53 +5,14 @@ Polygenic indices were calculated from GWAS of MDD symptoms and common factor GW
 
 ``` {.r}
 library(dplyr)
-```
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-``` {.r}
 library(readr)
 library(tidyr)
 library(stringr)
 library(ggplot2)
-```
-
-    ## Keep up to date with changes at https://www.tidyverse.org/blog/
-
-``` {.r}
 library(lme4)
-```
-
-    ## Loading required package: Matrix
-
-    ## 
-    ## Attaching package: 'Matrix'
-
-    ## The following objects are masked from 'package:tidyr':
-    ## 
-    ##     expand, pack, unpack
-
-``` {.r}
 library(fdrtool)
 library(doParallel)
-```
 
-    ## Loading required package: foreach
-
-    ## Loading required package: iterators
-
-    ## Loading required package: parallel
-
-``` {.r}
 registerDoParallel(cores=1)
 ```
 
@@ -298,15 +259,51 @@ left_join(select(symptom_model_coefs_vcov_prs_interact, discovery, threshold, sy
          by=c('discovery', 'threshold', 'symptom')) %>%
 transmute(GWAS, threshold, symptom, beta=main+beta, se=sqrt(main_se^2 + se^2 + 2*vcov))
 
+write_tsv(symptom_model_coefs_prs_sum, 'gs_symptoms_prs_model_coefs.table')
+
+symptom_model_coefs_present <-
+symptom_model_coefs_prs_sum %>%
+mutate(Symptom=factor(symptom,
+                      levels=c('Conc', 'Fatig', 'Moto',
+                               'Sle', 'App', 'Anh',
+                               'Sui', 'Guilt', 'Dep')),
+        Discovery=paste('Discovery:', GWAS),
+        cluster=if_else(symptom %in% c('Dep', 'Guilt', 'Sui'),
+                    true='Affective', false='Neurovegetative'),
+        Cluster=paste('Cluster:', cluster))
+        
+# quantiles corrected for number of tests        
+qn <- qnorm(0.05/(9*4), lower.tail=F)
                      
-ggplot(symptom_model_coefs_prs_sum, aes(x=symptom, y=beta, ymax=beta+2*se, ymin=beta-2*se, colour=threshold)) +
-geom_hline(yintercept=0, color='gray') +
+ggplot(symptom_model_coefs_present,
+    aes(x=Symptom,
+        y=exp(beta), ymax=exp(beta+qn*se), ymin=exp(beta-qn*se),
+        colour=threshold, shape=threshold)) +
+geom_hline(yintercept=1, color='gray') +
 geom_pointrange(position=position_dodge(width = 0.5)) +
-facet_wrap(~GWAS) +
-coord_flip() 
+scale_x_discrete('Symptom in GS:SFHS') +
+scale_y_continuous('OR of +1SD in PIS') +
+facet_grid(Cluster~Discovery, scale='free_y', space='free_y') +
+coord_flip() +
+theme_bw()
 ```
 
 ![](gs_symptoms_on_prs_files/figure-markdown_github/symptom_model_coefs-1.png)
+
+``` {.r}
+ggplot(symptom_model_coefs_present %>% filter(threshold=='PT0.05'),
+    aes(x=Symptom,
+        y=exp(beta), ymax=exp(beta+qn*se), ymin=exp(beta-qn*se))) +
+geom_hline(yintercept=1, color='gray') +
+geom_pointrange(position=position_dodge(width = 0.5)) +
+scale_x_discrete('Symptom in GS:SFHS') +
+scale_y_continuous('OR of +1SD in PIS') +
+facet_grid(Cluster~Discovery, scale='free_y', space='free_y') +
+coord_flip() +
+theme_bw()
+```
+
+![](gs_symptoms_on_prs_files/figure-markdown_github/symptom_model_coefs_p05-1.png)
 
 Get sample counts
 

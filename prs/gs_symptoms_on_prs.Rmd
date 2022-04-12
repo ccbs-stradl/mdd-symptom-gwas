@@ -309,7 +309,7 @@ theme_bw()
 
 ```
 
-```{r symptom_model_coefs_p05, dpi=200}
+```{r symptom_model_coefs_p05, fig.width=7, fig.height=4, dpi=200}
 
 ggplot(symptom_model_coefs_present %>% filter(threshold=='PT0.05'),
     aes(x=Symptom,
