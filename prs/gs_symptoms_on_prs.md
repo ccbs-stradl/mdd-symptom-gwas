@@ -23,6 +23,11 @@ library(readr)
 library(tidyr)
 library(stringr)
 library(ggplot2)
+```
+
+    ## Keep up to date with changes at https://www.tidyverse.org/blog/
+
+``` {.r}
 library(lme4)
 ```
 

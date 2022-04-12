@@ -279,6 +279,7 @@ left_join(select(symptom_model_coefs_vcov_prs_interact, discovery, threshold, sy
          by=c('discovery', 'threshold', 'symptom')) %>%
 transmute(GWAS, threshold, symptom, beta=main+beta, se=sqrt(main_se^2 + se^2 + 2*vcov))
 
+write_tsv(symptom_model_coefs_prs_sum, 'gs_symptoms_prs_model_coefs.table')
                      
 ggplot(symptom_model_coefs_prs_sum, aes(x=symptom, y=beta, ymax=beta+2*se, ymin=beta-2*se, colour=threshold)) +
 geom_hline(yintercept=0, color='gray') +
