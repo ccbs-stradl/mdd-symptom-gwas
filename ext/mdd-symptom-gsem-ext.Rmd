@@ -473,3 +473,26 @@ labs(color  = "Model: ", shape = "Model: ")
 
 ```
 
+Test for attenuation of correlations
+
+```{r clin_pop_ext_attentuate}
+
+clin_pop_ext_factor_wide <-
+bind_rows(clin_pop_ext_full, clin_pop_ext_partial) %>%
+as_tibble() %>%
+select(Factor, Phenotype, STD_Genotype, STD_Genotype_SE, p_value, Beta) %>%
+pivot_wider(id_cols=c(Phenotype, Factor),
+            names_from=Beta, 
+            values_from=c(STD_Genotype, STD_Genotype_SE, p_value))
+
+clin_pop_ext_attenuation <-     
+clin_pop_ext_factor_wide %>%
+mutate(rg_full=STD_Genotype_Full, rg_partial=STD_Genotype_Partial,
+       se_full=as.numeric(STD_Genotype_SE_Full),
+       se_partial=as.numeric(STD_Genotype_SE_Partial)) %>%
+mutate(attenuation_z=(rg_full-rg_partial)/sqrt(se_full^2+se_partial^2)) %>%
+mutate(attenuation_p=2*pnorm(abs(attenuation_z), lower.tail=F)) %>%
+select(Phenotype, Factor, p_value_Full, p_value_Partial, attenuation_p)
+
+```
+
