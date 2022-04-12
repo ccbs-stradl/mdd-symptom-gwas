@@ -251,6 +251,23 @@ clin_commonfactor.fit$results[c(1,2,3,6,7, 9)]
 
 ```
 
+dd residual covariance between appetite symptoms.
+
+```{r clin_commonfactor_app, cache=TRUE}
+
+clin_commonfactor_app.model <- "
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui
+A1 ~~ 1*A1
+c3a3b > -1
+ClinAppDec ~~ c3a3b*ClinAppInc
+"
+clin_commonfactor_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor_app.model)
+
+clin_commonfactor_app.fit$modelfit
+clin_commonfactor_app.fit$results[c(1,2,3,6,7, 9)]
+
+```
+
 Add residual covariance between sleep symptoms.
 
 ```{r clin_commonfactor_sle, cache=TRUE}
@@ -258,14 +275,12 @@ Add residual covariance between sleep symptoms.
 clin_commonfactor_sle.model <- "
 A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinSui
 A1 ~~ 1*A1
-c3a3b > -1
-ClinAppDec ~~ c3a3b*ClinAppInc
+ClinSleDec ~~ c3a3b*ClinSleInc
 "
 clin_commonfactor_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor_sle.model)
 
 clin_commonfactor_sle.fit$modelfit
 clin_commonfactor_sle.fit$results[c(1,2,3,6,7, 9)]
-
 
 ```
 
@@ -274,7 +289,7 @@ clin_commonfactor_sle.fit$results[c(1,2,3,6,7, 9)]
 ```{r clin_soma, cache=TRUE}
 
 clin_soma.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleInc + ClinMotoInc
+A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 A2 =~ NA*ClinSui
 A1 ~~ 1*A1
 A2 ~~ 1*A2
@@ -286,7 +301,6 @@ clin_soma.fit$modelfit
 clin_soma.fit$results[c(1,2,3,6,7, 9)]
 
 ```
-
 
 ## ALSPAC-UKB (Population)
 
@@ -625,7 +639,7 @@ mutate_if(is.numeric, ~signif(., 3))
 ```{r clin_pop_affect_veg, cache=TRUE}
 
 clin_pop_affect_veg.model <- "
-Soma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
+Soma =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 Soma ~~ 1*Soma
 Affect =~ NA*PopDep + PopGuilt + PopSui
 Veg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
