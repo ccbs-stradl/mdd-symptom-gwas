@@ -379,7 +379,7 @@ an < 1
 PopAffect ~~ an*PopNeuroveg
 "
 
-ext.model_list <- lapply(c('ClinSoma', 'ClinAppDep', 'ClinSui', 'PopAffect', 'PopNeuroveg'), function(symptom) str_glue_data(list(symptom=symptom), pop_ext.glue))
+ext.model_list <- lapply(c('ClinSoma', 'ClinAppDec', 'ClinSui', 'PopAffect', 'PopNeuroveg'), function(symptom) str_glue_data(list(symptom=symptom), pop_ext.glue))
 
 ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
 
@@ -387,9 +387,9 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 clin_pop_ext_full <-
 bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'PopAffect', 'PopNeuroveg')) %>%
-#mutate(STD_Genotype=if_else(rhs == 'ClinSoma',
-#    true=-STD_Genotype, false=STD_Genotype)) %>%
+filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinAppDec', 'ClinSui', 'PopAffect', 'PopNeuroveg')) %>%
+mutate(STD_Genotype=if_else(rhs == 'ClinSoma',
+    true=-STD_Genotype, false=STD_Genotype)) %>%
 mutate(Beta='Full', Factor=rhs, Phenotype=lhs)
 
 ```
