@@ -1,4 +1,4 @@
-# reformat Clin AppInc symptoms gwas into commongwas columns for 
+# reformat Clin Sui symptoms gwas into commongwas columns for 
 # input into PRS calculation
 
 # input columns
@@ -25,4 +25,4 @@
 
 # output columns: SNP     CHR     BP      MAF     A1      A2      est     se_c         Pval_Estimate
 
-zcat meta/distribution/AGDS_PGC.MDD3b_weightGain/daner_AGDS_PGC.MDD3b_weightGain.gz | awk '{if(NR == 1) {print "SNP", "CHR", "BP", "MAF", "A1", "A2", "est", "se_c", "Pval_Estimate"} else {print $2, $1, $3, $6, $4, $5, log($9), $10, $11}}' | gzip -c > meta/usergwas/agds_pgc.appinc.sumstats.txt.gz 
+zcat meta/distribution/AGDS_PGC.MDD9_death/daner_AGDS_PGC.MDD9_death.gz | awk '{if(NR == 1) {print "SNP", "CHR", "BP", "MAF", "A1", "A2", "est", "se_c", "Pval_Estimate"} else {print $2, $1, $3, $6, $4, $5, log($9), $10, $11}}' | gzip -c > meta/usergwas/agds_pgc.sui.sumstats.txt.gz 
