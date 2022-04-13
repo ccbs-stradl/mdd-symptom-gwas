@@ -356,13 +356,12 @@ Compare symptom factors against each external phenotype. Single regression of ea
 ```{r pop_ext, cache=TRUE}
 
 pop_ext.glue <- "
-ClinSoma =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
 PopAffect =~ NA*PopDep + PopGuilt + PopSui
 PopNeuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
 PopAffect ~~ 1*PopAffect
 PopNeuroveg ~~ 1*PopNeuroveg
-ClinAppDec ~~ ClinAppInc
 PopDep ~~ PopAnh
 AlcDep ~ {symptom}
 Anxiety ~  {symptom}
@@ -380,7 +379,7 @@ an < 1
 PopAffect ~~ an*PopNeuroveg
 "
 
-ext.model_list <- lapply(c('ClinSoma', 'ClinSui', 'PopAffect', 'PopNeuroveg'), function(symptom) str_glue_data(list(symptom=symptom), pop_ext.glue))
+ext.model_list <- lapply(c('ClinSoma', 'ClinAppDep', 'ClinSui', 'PopAffect', 'PopNeuroveg'), function(symptom) str_glue_data(list(symptom=symptom), pop_ext.glue))
 
 ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
 
@@ -389,8 +388,8 @@ clin_pop_ext_full <-
 bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
 filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'PopAffect', 'PopNeuroveg')) %>%
-mutate(STD_Genotype=if_else(rhs == 'ClinSoma',
-    true=-STD_Genotype, false=STD_Genotype)) %>%
+#mutate(STD_Genotype=if_else(rhs == 'ClinSoma',
+#    true=-STD_Genotype, false=STD_Genotype)) %>%
 mutate(Beta='Full', Factor=rhs, Phenotype=lhs)
 
 ```
@@ -400,21 +399,20 @@ Multiple regression of each phenotype on the clinical/population symptom factors
 ```{r clin_ext_mult, cache=TRUE}
 
 clin_ext_mult.model <- "
-ClinSoma =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
+ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
 ClinSoma ~~ 1*ClinSoma
-ClinAppDec ~~ ClinAppInc
-AlcDep ~ ClinSoma + ClinSui
-Anxiety ~ ClinSoma + ClinSui
-BIP ~ ClinSoma + ClinSui
-BMI ~ ClinSoma + ClinSui
-EA ~ ClinSoma + ClinSui
-MD ~ ClinSoma + ClinSui
-MDD ~ ClinSoma + ClinSui
-Neu ~ ClinSoma + ClinSui
-PTSD ~ ClinSoma + ClinSui
-Pain ~ ClinSoma + ClinSui
-Sleep ~ ClinSoma + ClinSui
-Smoking ~ ClinSoma + ClinSui
+AlcDep ~ ClinSoma + ClinAppDec + ClinSui
+Anxiety ~ ClinSoma + ClinAppDec + ClinSui
+BIP ~ ClinSoma + ClinAppDec + ClinSui
+BMI ~ ClinSoma + ClinAppDec + ClinSui
+EA ~ ClinSoma + ClinAppDec + ClinSui
+MD ~ ClinSoma + ClinAppDec + ClinSui
+MDD ~ ClinSoma + ClinAppDec + ClinSui
+Neu ~ ClinSoma + ClinAppDec + ClinSui
+PTSD ~ ClinSoma + ClinAppDec + ClinSui
+Pain ~ ClinSoma + ClinAppDec + ClinSui
+Sleep ~ ClinSoma + ClinAppDec + ClinSui
+Smoking ~ ClinSoma + ClinAppDec + ClinSui
 "
 
 clin_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_ext_mult.model)
@@ -449,9 +447,9 @@ clin_pop_ext_partial <-
 bind_rows(lapply(list(clin_ext_mult.fit, pop_ext_mult.fit),
                  function(fit) fit$results)) %>%
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-  filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinSui', 'PopAffect', 'PopNeuroveg')) %>%
-mutate(STD_Genotype=if_else(rhs == 'ClinSoma',
-    true=-STD_Genotype, false=STD_Genotype)) %>%
+  filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinAppDec', 'ClinSui', 'PopAffect', 'PopNeuroveg')) %>%
+#mutate(STD_Genotype=if_else(rhs == 'ClinSoma',
+#    true=-STD_Genotype, false=STD_Genotype)) %>%
   mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
 
 ```
@@ -459,7 +457,7 @@ mutate(STD_Genotype=if_else(rhs == 'ClinSoma',
 ```{r clin_pop_ex_plot, fig.width=10, fig.height=6}
 
 ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
-       aes(x=factor(Factor, levels=c('ClinSui', 'ClinSoma', 'PopNeuroveg', 'PopAffect')),
+       aes(x=factor(Factor, levels=c('ClinSui', 'ClinAppDec', 'ClinSoma', 'PopNeuroveg', 'PopAffect')),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Partial', 'Full')),
            shape=factor(Beta, levels=c('Partial', 'Full')),
