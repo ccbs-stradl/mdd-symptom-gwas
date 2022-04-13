@@ -639,14 +639,15 @@ mutate_if(is.numeric, ~signif(., 3))
 ```{r clin_pop_affect_veg, cache=TRUE}
 
 clin_pop_affect_veg.model <- "
-Soma =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-Soma ~~ 1*Soma
-Affect =~ NA*PopDep + PopGuilt + PopSui
-Veg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-Affect ~~ 1*Affect
-Veg ~~ 1*Veg
+ClinSoma =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
+ClinSoma ~~ 1*ClinSoma
+PopAffect =~ NA*PopDep + PopGuilt + PopSui
+PopVeg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
+PopAffect ~~ 1*PopAffect
+PopVeg ~~ 1*PopVeg
 PopDep ~~ PopAnh
-ClinSui ~~ Soma + Affect + Veg
+ClinAppDec ~~ ClinAppInc
+ClinSui ~~ ClinSoma + PopAffect + PopVeg
 "
 clin_pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop_affect_veg.model)
 
