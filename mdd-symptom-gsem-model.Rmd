@@ -302,6 +302,29 @@ clin_soma.fit$results[c(1,2,3,6,7, 9)]
 
 ```
 
+
+```{r clin_soma_a, cache=TRUE}
+
+clin_soma_a.model <- "
+A1 =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
+A2 =~ NA*ClinAppDec
+A3 =~ NA*ClinSui
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3
+ClinAppDec ~~ 0*ClinAppDec
+ClinSui ~~ 0*ClinSui
+c4a > 0.001
+ClinSleDec ~~ c4a*ClinSleDec
+"
+
+clin_soma_a.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_soma_a.model)
+
+clin_soma_a.fit$modelfit
+clin_soma_a.fit$results[c(1,2,3,6,7, 9)]
+
+```
+
 ## ALSPAC-UKB (Population)
 
 ### Common factor
@@ -639,15 +662,19 @@ mutate_if(is.numeric, ~signif(., 3))
 ```{r clin_pop_affect_veg, cache=TRUE}
 
 clin_pop_affect_veg.model <- "
-ClinSoma =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-ClinSoma ~~ 1*ClinSoma
-PopAffect =~ NA*PopDep + PopGuilt + PopSui
-PopVeg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-PopAffect ~~ 1*PopAffect
-PopVeg ~~ 1*PopVeg
+ClinSOMA =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
+ClinAPPDEC =~ ClinAppDec
+ClinSUI =~ ClinSui
+PopAFFECT =~ NA*PopDep + PopGuilt + PopSui
+PopNEUROVEG =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
+ClinSOMA ~~ 1*ClinSOMA
+ClinAPPDEC ~~ 1*ClinAPPDEC
+ClinSUI ~~ 1*ClinSUI
+PopAFFECT ~~ 1*PopAFFECT
+PopNEUROVEG ~~ 1*PopNEUROVEG
 PopDep ~~ PopAnh
-ClinAppDec ~~ ClinAppInc
-ClinSui ~~ ClinSoma + PopAffect + PopVeg
+ClinAppDec ~~ 0*ClinAppDec
+ClinSui ~~ 0*ClinSui
 "
 clin_pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop_affect_veg.model)
 
