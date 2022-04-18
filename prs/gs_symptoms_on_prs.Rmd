@@ -16,17 +16,15 @@ library(lme4)
 library(fdrtool)
 library(doParallel)
 
-registerDoParallel(cores=1)
+registerDoParallel(cores=4)
 
 ```
 
 List of symptoms PRS:
-```{r, warning=FALSE, message=FALSE}
+```{r prsice, warning=FALSE, message=FALSE}
 
-gwas_symptoms <- c('clinappinc', 'clinsui', 'popneuroveg', 'popaffect')
+gwas_symptoms <- c('clinappdec', 'clinappinc', 'clinsui', 'popneuroveg', 'popaffect')
 names(gwas_symptoms) <- gwas_symptoms
-
-gwas_best_scores <- lapply(gwas_symptoms, function(gwas) read_table(here::here('prs', paste(gwas, 'best', sep='.'))) %>% mutate(PRSz=scale(PRS)[,1]))
 
 gwas_all_scores <- lapply(gwas_symptoms,
     function(gwas)
@@ -39,7 +37,7 @@ gwas_all_scores <- lapply(gwas_symptoms,
 
 Get GenScot MDD SCID and CIDI symptoms, covariates, pedigree, and PCs
 
-```{r, warning=FALSE, message=FALSE}
+```{r genscot, warning=FALSE, message=FALSE}
 
 scid <- read_csv(here::here('prs/genscot/phenotypes/SCID_QC_201113_GWASids.csv'))
 cidi <- local({load(here::here("prs/genscot/phenotypes/GS_Recontact/STRADL.Rdata")); return(as_tibble(x))})
@@ -52,7 +50,7 @@ unrel <- read_table(here::here('prs/genscot/genetics/genotypes/GRMs/unrelated_t0
 
 Harmonise the symptoms data
 
-```{r}
+```{r genscot_symptoms}
 
 scid_threshold <- function(A) {
     case_when(A == 1 ~ 0L,
@@ -102,7 +100,7 @@ mutate(instrument='CIDI', timeframe='past')
 
 Arrange symptoms into repeated measures format
 
-```{r}
+```{r genscot_symptom_values}
 
 symptom_values <- 
 bind_rows(scid_symptoms_current, scid_symptoms_past, cidi_symptoms_past) %>%
@@ -118,7 +116,7 @@ mutate(sym_factorAvN=case_when(symptom %in% c("Dep", "Guilt", "Sui") ~ 0.5,
 
 Age at measurement occasions
 
-```{r}
+```{r genscot_covars}
 
 covariates <- 
 bind_rows(
@@ -133,7 +131,7 @@ mutate(agez=scale(age)[,1])
 Transform PRS to long format
 
 
-```{r}
+```{r scores_long}
 
 gwas_all_scores_long <-
 plyr::ldply(gwas_all_scores, I) %>%
@@ -143,7 +141,7 @@ rename(discovery=.id)
 ```
 
 Unrelated sample
-```{r}
+```{r unrelated}
 
 unrel_scores <- gwas_all_scores_long %>%
 filter(IID %in% unrel$IID)
@@ -176,7 +174,7 @@ plyr::dlply(.data=unrel_scores,
 
 ```
 
-```{r prs__symptoms_models, cache=TRUE}
+```{r prs_symptoms_models, cache=TRUE}
 
 prs_symptoms_models <-
 plyr::dlply(.data=unrel_scores,
@@ -208,7 +206,7 @@ Examine models
 model_coefs <-
 plyr::ldply(prs_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
 as_tibble() %>%
-mutate(GWAS=recode(discovery, clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
+mutate(GWAS=recode(discovery, clinappdec='ClinAppDec', clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
 
 model_coefs_prs <-
 model_coefs %>% filter(str_detect(term, 'PRS')) %>%
@@ -231,7 +229,7 @@ Calculate the main PRS effect of each symptom as main PRS effect + symptom inter
 symptom_model_coefs <-
 plyr::ldply(prs_symptoms_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
 as_tibble() %>%
-mutate(GWAS=recode(discovery, clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
+mutate(GWAS=recode(discovery, clinappdec='ClinAppDec', clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
 
 # covariance of each parameter with 'PRS'
 symptom_model_coefs_vcov <-
@@ -292,8 +290,8 @@ mutate(Symptom=factor(symptom,
                     true='Affective', false='Neurovegetative'),
         Cluster=paste('Cluster:', cluster))
         
-# quantiles corrected for number of tests        
-qn <- qnorm(0.05/4, lower.tail=F)
+# quantiles for 95% CIs  
+qn <- qnorm(0.025, lower.tail=F)
                      
 ggplot(symptom_model_coefs_present,
     aes(x=Symptom,

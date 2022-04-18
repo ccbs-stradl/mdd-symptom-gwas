@@ -13,16 +13,14 @@ library(lme4)
 library(fdrtool)
 library(doParallel)
 
-registerDoParallel(cores=1)
+registerDoParallel(cores=4)
 ```
 
 List of symptoms PRS:
 
 ``` {.r}
-gwas_symptoms <- c('clinappinc', 'clinsui', 'popneuroveg', 'popaffect')
+gwas_symptoms <- c('clinappdec', 'clinappinc', 'clinsui', 'popneuroveg', 'popaffect')
 names(gwas_symptoms) <- gwas_symptoms
-
-gwas_best_scores <- lapply(gwas_symptoms, function(gwas) read_table(here::here('prs', paste(gwas, 'best', sep='.'))) %>% mutate(PRSz=scale(PRS)[,1]))
 
 gwas_all_scores <- lapply(gwas_symptoms,
     function(gwas)
@@ -156,8 +154,6 @@ plyr::dlply(.data=unrel_scores,
 })
 ```
 
-    ## Warning in setup_parallel(): No parallel backend registered
-
 ``` {.r}
 prs_symptoms_models <-
 plyr::dlply(.data=unrel_scores,
@@ -179,8 +175,6 @@ plyr::dlply(.data=unrel_scores,
 })
 ```
 
-    ## Warning in setup_parallel(): No parallel backend registered
-
 Examine models
 
 ``` {.r}
@@ -188,7 +182,7 @@ Examine models
 model_coefs <-
 plyr::ldply(prs_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
 as_tibble() %>%
-mutate(GWAS=recode(discovery, clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
+mutate(GWAS=recode(discovery, clinappdec='ClinAppDec', clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
 
 model_coefs_prs <-
 model_coefs %>% filter(str_detect(term, 'PRS')) %>%
@@ -211,7 +205,7 @@ Calculate the main PRS effect of each symptom as main PRS effect + symptom inter
 symptom_model_coefs <-
 plyr::ldply(prs_symptoms_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
 as_tibble() %>%
-mutate(GWAS=recode(discovery, clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
+mutate(GWAS=recode(discovery, clinappdec='ClinAppDec', clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
 
 # covariance of each parameter with 'PRS'
 symptom_model_coefs_vcov <-
@@ -272,8 +266,8 @@ mutate(Symptom=factor(symptom,
                     true='Affective', false='Neurovegetative'),
         Cluster=paste('Cluster:', cluster))
         
-# quantiles corrected for number of tests        
-qn <- qnorm(0.05/4, lower.tail=F)
+# quantiles for 95% CIs  
+qn <- qnorm(0.025, lower.tail=F)
                      
 ggplot(symptom_model_coefs_present,
     aes(x=Symptom,
@@ -301,7 +295,7 @@ scale_y_continuous('OR of +1SD in PIS', breaks=c(1, 1.25, 1.5)) +
 facet_grid(Cluster~Discovery, scale='free_y', space='free_y') +
 coord_flip() +
 theme_bw() +
-theme(axis.text.y=element_text(size='16'))
+theme(axis.text.y=element_text(size='14'))
 ```
 
 ![](gs_symptoms_on_prs_files/figure-markdown_github/symptom_model_coefs_p05-1.png)
