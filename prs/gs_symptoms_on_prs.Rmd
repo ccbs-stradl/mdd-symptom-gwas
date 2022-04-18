@@ -221,6 +221,12 @@ coord_flip()
 
 ```
 
+```{r model_coefs_table}
+
+knitr::kable(transmute(model_coefs_prs, GWAS, threshold, term, OR=exp(Estimate), p=`Pr(>|z|)`))
+
+```
+
 Calculate the main PRS effect of each symptom as main PRS effect + symptom interaction, accounting for covariance of coefficients
 
 ```{r symptom_model_coefs, dpi=200}
