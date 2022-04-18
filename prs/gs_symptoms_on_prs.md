@@ -198,6 +198,53 @@ coord_flip()
 
 ![](gs_symptoms_on_prs_files/figure-markdown_github/model_coefs-1.png)
 
+``` {.r}
+knitr::kable(transmute(model_coefs_prs, GWAS, threshold, term, OR=exp(Estimate), p=`Pr(>|z|)`))
+```
+
+|GWAS|threshold|term|OR|p|
+|:---|:--------|:---|--:|--:|
+|ClinAppDec|PT0.025|PRS|1.0614845|0.1124148|
+|ClinAppDec|PT0.025|PRS:sym\_factorAvN|0.9787194|0.4616943|
+|ClinAppDec|PT0.05|PRS|1.0361054|0.3405219|
+|ClinAppDec|PT0.05|PRS:sym\_factorAvN|1.0098907|0.7355331|
+|ClinAppDec|PT0.25|PRS|1.0112465|0.7647333|
+|ClinAppDec|PT0.25|PRS:sym\_factorAvN|1.0093797|0.7487283|
+|ClinAppDec|PT1|PRS|1.0168573|0.6544264|
+|ClinAppDec|PT1|PRS:sym\_factorAvN|1.0066876|0.8188185|
+|ClinAppInc|PT0.025|PRS|1.0408023|0.2888492|
+|ClinAppInc|PT0.025|PRS:sym\_factorAvN|0.9768721|0.4298300|
+|ClinAppInc|PT0.05|PRS|1.0598607|0.1188696|
+|ClinAppInc|PT0.05|PRS:sym\_factorAvN|0.9775282|0.4379462|
+|ClinAppInc|PT0.25|PRS|1.0575183|0.1356409|
+|ClinAppInc|PT0.25|PRS:sym\_factorAvN|0.9799584|0.4940266|
+|ClinAppInc|PT1|PRS|1.0714634|0.0660642|
+|ClinAppInc|PT1|PRS:sym\_factorAvN|0.9827690|0.5558703|
+|ClinSui|PT0.025|PRS|1.0459557|0.2438166|
+|ClinSui|PT0.025|PRS:sym\_factorAvN|1.0336103|0.2732946|
+|ClinSui|PT0.05|PRS|1.0525217|0.1775579|
+|ClinSui|PT0.05|PRS:sym\_factorAvN|1.0252204|0.4014535|
+|ClinSui|PT0.25|PRS|1.0681784|0.0777211|
+|ClinSui|PT0.25|PRS:sym\_factorAvN|1.0261239|0.3778977|
+|ClinSui|PT1|PRS|1.0683434|0.0793154|
+|ClinSui|PT1|PRS:sym\_factorAvN|1.0358280|0.2341116|
+|PopAffective|PT0.025|PRS|1.1989989|0.0000013|
+|PopAffective|PT0.025|PRS:sym\_factorAvN|1.0147178|0.6202011|
+|PopAffective|PT0.05|PRS|1.1991867|0.0000013|
+|PopAffective|PT0.05|PRS:sym\_factorAvN|1.0237656|0.4270381|
+|PopAffective|PT0.25|PRS|1.1938576|0.0000024|
+|PopAffective|PT0.25|PRS:sym\_factorAvN|1.0397280|0.1870953|
+|PopAffective|PT1|PRS|1.1931402|0.0000024|
+|PopAffective|PT1|PRS:sym\_factorAvN|1.0346661|0.2478150|
+|PopNeuroveg|PT0.025|PRS|1.1747609|0.0000178|
+|PopNeuroveg|PT0.025|PRS:sym\_factorAvN|0.9391459|0.0349905|
+|PopNeuroveg|PT0.05|PRS|1.1889955|0.0000030|
+|PopNeuroveg|PT0.05|PRS:sym\_factorAvN|0.9463898|0.0594825|
+|PopNeuroveg|PT0.25|PRS|1.2082195|0.0000006|
+|PopNeuroveg|PT0.25|PRS:sym\_factorAvN|0.9792118|0.4807518|
+|PopNeuroveg|PT1|PRS|1.2030911|0.0000011|
+|PopNeuroveg|PT1|PRS:sym\_factorAvN|0.9689395|0.2908640|
+
 Calculate the main PRS effect of each symptom as main PRS effect + symptom interaction, accounting for covariance of coefficients
 
 ``` {.r}
