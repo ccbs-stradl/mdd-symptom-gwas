@@ -290,15 +290,61 @@ clin_commonfactor_sle.fit$results[c(1,2,3,6,7, 9)]
 
 clin_soma.model <- "
 A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-A2 =~ NA*ClinSui
+A2 =~ ClinSui
 A1 ~~ 1*A1
-A2 ~~ 1*A2
 ClinAppDec ~~ ClinAppInc
+ClinSui ~~ 0*ClinSui
 "
 clin_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_soma.model)
 
 clin_soma.fit$modelfit
 clin_soma.fit$results[c(1,2,3,6,7, 9)]
+
+```
+
+
+```{r clin_soma_a, cache=TRUE}
+
+clin_soma_a.model <- "
+A1 =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
+A2 =~ ClinAppDec
+A3 =~ ClinSui
+A1 ~~ 1*A1
+ClinAppDec ~~ ClinAppInc
+ClinAppDec ~~ 0*ClinAppDec
+ClinSui ~~ 0*ClinSui
+c4a > 0.001
+ClinSleDec ~~ c4a*ClinSleDec
+"
+
+clin_soma_a.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_soma_a.model)
+
+clin_soma_a.fit$modelfit
+clin_soma_a.fit$results[c(1,2,3,6,7, 9)]
+
+```
+
+```{r clin_soma_b, cache=TRUE}
+
+clin_soma_b.model <- "
+A1 =~ NA*ClinAppInc + ClinSleDec + ClinMotoInc
+A2 =~ NA*ClinAppDec + ClinSleInc
+A3 =~ ClinSui
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+ClinSui ~~ 0*ClinSui
+c3a > 0.001
+ClinAppDec ~~ c3a*ClinAppDec
+c3b > 0.001
+ClinAppInc ~~ c3b*ClinAppInc
+c4a > 0.001
+ClinSleDec ~~ c4a*ClinSleDec
+"
+
+clin_soma_b.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_soma_b.model)
+
+clin_soma_b.fit$modelfit
+clin_soma_b.fit$results[c(1,2,3,6,7, 9)]
 
 ```
 
@@ -639,14 +685,18 @@ mutate_if(is.numeric, ~signif(., 3))
 ```{r clin_pop_affect_veg, cache=TRUE}
 
 clin_pop_affect_veg.model <- "
-Soma =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-Soma ~~ 1*Soma
-Affect =~ NA*PopDep + PopGuilt + PopSui
-Veg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-Affect ~~ 1*Affect
-Veg ~~ 1*Veg
+ClinSOMA =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
+ClinAPPDEC =~ ClinAppDec
+ClinSUI =~ ClinSui
+PopAFFECT =~ NA*PopDep + PopGuilt + PopSui
+PopNEUROVEG =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
+ClinSOMA ~~ 1*ClinSOMA
+PopAFFECT ~~ 1*PopAFFECT
+PopNEUROVEG ~~ 1*PopNEUROVEG
 PopDep ~~ PopAnh
-ClinSui ~~ Soma + Affect + Veg
+ClinAppDec ~~ ClinAppInc
+ClinAppDec ~~ 0*ClinAppDec
+ClinSui ~~ 0*ClinSui
 "
 clin_pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop_affect_veg.model)
 
