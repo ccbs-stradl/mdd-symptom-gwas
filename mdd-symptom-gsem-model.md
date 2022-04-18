@@ -649,7 +649,7 @@ clin_commonfactor.fit$results[c(1,2,3,6,7, 9)]
     ## 13     ClinSui ~~     ClinSui  9.937374e-01 0.363011701600877 0.006191485
     ## 7           A1 ~~          A1  1.000000e+00                            NA
 
-dd residual covariance between appetite symptoms.
+Add residual covariance between appetite symptoms.
 
 ``` r
 clin_commonfactor_app.model <- "
@@ -763,10 +763,10 @@ clin_commonfactor_sle.fit$results[c(1,2,3,6,7, 9)]
 ``` r
 clin_soma.model <- "
 A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-A2 =~ NA*ClinSui
+A2 =~ ClinSui
 A1 ~~ 1*A1
-A2 ~~ 1*A2
 ClinAppDec ~~ ClinAppInc
+ClinSui ~~ 0*ClinSui
 "
 clin_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_soma.model)
 ```
@@ -776,7 +776,7 @@ clin_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_som
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.163 
+    ##   0.242 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.036707898049133 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.29447064580018 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -801,45 +801,44 @@ clin_soma.fit$modelfit
 ```
 
     ##       chisq df   p_chisq      AIC CFI      SRMR
-    ## df 2.604371  8 0.9566861 28.60437   1 0.1435088
+    ## df 2.604371  8 0.9566861 28.60437   1 0.1435087
 
 ``` r
 clin_soma.fit$results[c(1,2,3,6,7, 9)]
 ```
 
-    ##            lhs op         rhs STD_Genotype   STD_Genotype_SE      p_value
-    ## 1           A1 =~  ClinAppDec  0.671742763 0.433121824939175 1.209184e-01
-    ## 2           A1 =~  ClinAppInc  0.729689715 0.521524361029606 1.617694e-01
-    ## 4           A1 =~  ClinSleDec  0.746888098 0.474570094641874 1.155297e-01
-    ## 5           A1 =~  ClinSleInc  0.612272026 0.461874419098893 1.849650e-01
-    ## 3           A1 =~ ClinMotoInc  0.279997332 0.237173887357167 2.377789e-01
-    ## 8           A2 =~     ClinSui  1.000000009 0.181890173049538 3.845102e-08
-    ## 11  ClinAppDec ~~  ClinAppInc -0.861169604 0.618301414746331 1.636821e-01
-    ## 10  ClinAppDec ~~  ClinAppDec  0.548761724 0.574094056631967 3.391408e-01
-    ## 12  ClinAppInc ~~  ClinAppInc  0.467552668 0.791290540543399 5.546083e-01
-    ## 14  ClinSleDec ~~  ClinSleDec  0.442158346 0.900064939491222 6.232459e-01
-    ## 15  ClinSleInc ~~  ClinSleInc  0.625123053  1.61291805935613 6.983323e-01
-    ## 13 ClinMotoInc ~~ ClinMotoInc  0.921601453 0.470933841734341 5.035115e-02
-    ## 7           A1 ~~          A2  0.007296127 0.178527546721465 9.673992e-01
-    ## 6           A1 ~~          A1  1.000000000                             NA
-    ## 9           A2 ~~          A2  1.000000000                             NA
-    ## 16     ClinSui ~~     ClinSui  0.000000000                             NA
+    ##            lhs op         rhs STD_Genotype   STD_Genotype_SE     p_value
+    ## 1           A1 =~  ClinAppDec   0.67174334 0.433122178400893 0.120918029
+    ## 2           A1 =~  ClinAppInc   0.72968902 0.521524175730127 0.161769015
+    ## 4           A1 =~  ClinSleDec   0.74688812 0.474570218938073 0.115529263
+    ## 5           A1 =~  ClinSleInc   0.61227201 0.461874524269638 0.184964574
+    ## 3           A1 =~ ClinMotoInc   0.27999714 0.237173859105939 0.237778883
+    ## 11  ClinAppDec ~~  ClinAppInc  -0.86116937 0.618301550235908 0.163681242
+    ## 10  ClinAppDec ~~  ClinAppDec   0.54876068 0.574094993631595 0.339137270
+    ## 12  ClinAppInc ~~  ClinAppInc   0.46755450  0.79128963012317 0.554604695
+    ## 14  ClinSleDec ~~  ClinSleDec   0.44215814 0.900065084201622 0.623249270
+    ## 15  ClinSleInc ~~  ClinSleInc   0.62512300  1.61291814464682 0.698331159
+    ## 13 ClinMotoInc ~~ ClinMotoInc   0.92160161 0.470933812177892 0.050351379
+    ## 9           A2 ~~          A2   1.00000000 0.363780349523231 0.005979352
+    ## 7           A1 ~~          A2   0.00729601 0.178669796458843 0.967427131
+    ## 8           A2 =~     ClinSui   1.00000000                            NA
+    ## 6           A1 ~~          A1   1.00000000                            NA
+    ## 16     ClinSui ~~     ClinSui   0.00000000                            NA
 
 ``` r
-clin_soma_a.model <- "
+clin_soma_app.model <- "
 A1 =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-A2 =~ NA*ClinAppDec
-A3 =~ NA*ClinSui
+A2 =~ ClinAppDec
+A3 =~ ClinSui
 A1 ~~ 1*A1
-A2 ~~ 1*A2
-A3 ~~ 1*A3
+ClinAppDec ~~ ClinAppInc
 ClinAppDec ~~ 0*ClinAppDec
 ClinSui ~~ 0*ClinSui
 c4a > 0.001
 ClinSleDec ~~ c4a*ClinSleDec
 "
 
-clin_soma_a.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_soma_a.model)
+clin_soma_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_soma_app.model)
 ```
 
     ## [1] "Running primary model"
@@ -847,11 +846,11 @@ clin_soma_a.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_s
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.498 
+    ##   0.955 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.036707898049133 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.29447064580018 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## clin_soma_a.model): A difference greater than .025 was observed pre- and post-
+    ## clin_soma_app.model): A difference greater than .025 was observed pre- and post-
     ## smoothing in the genetic covariance matrix. This reflects a large difference
     ## and results should be interpreted with caution!! This can often result from
     ## including low powered traits, and you might consider removing those traits from
@@ -859,7 +858,7 @@ clin_soma_a.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_s
     ## setting the smooth_check argument to true to check smoothing for each SNP.
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## clin_soma_a.model): A difference greater than .025 was observed pre- and post-
+    ## clin_soma_app.model): A difference greater than .025 was observed pre- and post-
     ## smoothing for Z-statistics in the genetic covariance matrix. This reflects a
     ## large difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
@@ -868,35 +867,36 @@ clin_soma_a.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_s
     ## SNP.
 
 ``` r
-clin_soma_a.fit$modelfit
+clin_soma_app.fit$modelfit
 ```
 
-    ##      chisq df   p_chisq     AIC       CFI      SRMR
-    ## df 10.7342  8 0.2172193 36.7342 0.7447614 0.1945839
+    ##       chisq df   p_chisq      AIC CFI      SRMR
+    ## df 2.518935  7 0.9256645 30.51893   1 0.1483514
 
 ``` r
-clin_soma_a.fit$results[c(1,2,3,6,7, 9)]
+clin_soma_app.fit$results[c(1,2,3,6,7, 9)]
 ```
 
     ##            lhs op         rhs STD_Genotype   STD_Genotype_SE      p_value
-    ## 1           A1 =~  ClinAppInc  0.289425481 0.267557574309711 2.804402e-01
-    ## 3           A1 =~  ClinSleDec  1.060637064 0.668323103478471 1.123259e-01
-    ## 4           A1 =~  ClinSleInc  0.766644587 0.613998154206873 2.111323e-01
-    ## 2           A1 =~ ClinMotoInc  0.242242603   0.2681054319488 3.660788e-01
-    ## 8           A2 =~  ClinAppDec  1.000000022 0.107696232985808 1.611587e-20
-    ## 11          A3 =~     ClinSui  0.999999527 0.181890260756795 3.845075e-08
-    ## 16  ClinSleDec ~~  ClinSleDec  0.001000007  1.50900327908349 9.924835e-01
-    ## 14  ClinAppInc ~~  ClinAppInc  0.916232073 0.380642343832936 1.603345e-02
-    ## 17  ClinSleInc ~~  ClinSleInc  0.412255184  1.79065835412834 8.198970e-01
-    ## 15 ClinMotoInc ~~ ClinMotoInc  0.941316721 0.465944754022026 4.349106e-02
-    ## 6           A1 ~~          A2  0.366601052 0.230297082144636 1.110299e-01
-    ## 7           A1 ~~          A3 -0.032968472 0.226605208107609 8.873456e-01
-    ## 10          A2 ~~          A3 -0.060499698 0.186426673179924 7.455415e-01
-    ## 5           A1 ~~          A1  1.000000000                             NA
-    ## 9           A2 ~~          A2  1.000000000                             NA
-    ## 12          A3 ~~          A3  1.000000000                             NA
-    ## 13  ClinAppDec ~~  ClinAppDec  0.000000000                             NA
-    ## 18     ClinSui ~~     ClinSui  0.000000000                             NA
+    ## 1           A1 =~  ClinAppInc   0.88748068 0.724547960810573 2.206219e-01
+    ## 3           A1 =~  ClinSleDec   0.60997525  0.46596233454946 1.905117e-01
+    ## 4           A1 =~  ClinSleInc   0.54239863 0.463119690833432 2.415241e-01
+    ## 2           A1 =~ ClinMotoInc   0.26188780 0.245802992132268 2.866771e-01
+    ## 14  ClinAppInc ~~  ClinAppDec  -1.07817591  1.03572139129045 2.978793e-01
+    ## 17  ClinSleDec ~~  ClinSleDec   0.62792894 0.800331090042442 4.326947e-01
+    ## 15  ClinAppInc ~~  ClinAppInc   0.21237892  1.29306883630326 8.695384e-01
+    ## 18  ClinSleInc ~~  ClinSleInc   0.70580396  1.59355262980284 6.578296e-01
+    ## 16 ClinMotoInc ~~ ClinMotoInc   0.93141427 0.469753352640616 4.739293e-02
+    ## 9           A2 ~~          A2   1.00000000 0.215392470606441 3.439058e-06
+    ## 12          A3 ~~          A3   1.00000000 0.363780349523231 5.979352e-03
+    ## 6           A1 ~~          A2   0.79682861 0.608260804309076 1.901914e-01
+    ## 7           A1 ~~          A3   0.11528119 0.233132837230712 6.209627e-01
+    ## 10          A2 ~~          A3  -0.06049957 0.186655169896708 7.458415e-01
+    ## 8           A2 =~  ClinAppDec   1.00000000                             NA
+    ## 11          A3 =~     ClinSui   1.00000000                             NA
+    ## 5           A1 ~~          A1   1.00000000                             NA
+    ## 13  ClinAppDec ~~  ClinAppDec   0.00000000                             NA
+    ## 19     ClinSui ~~     ClinSui   0.00000000                             NA
 
 ## ALSPAC-UKB (Population)
 
@@ -1862,14 +1862,14 @@ ClinSUI =~ ClinSui
 PopAFFECT =~ NA*PopDep + PopGuilt + PopSui
 PopNEUROVEG =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
 ClinSOMA ~~ 1*ClinSOMA
-ClinAPPDEC ~~ 1*ClinAPPDEC
-ClinSUI ~~ 1*ClinSUI
 PopAFFECT ~~ 1*PopAFFECT
 PopNEUROVEG ~~ 1*PopNEUROVEG
 PopDep ~~ PopAnh
+ClinAppDec ~~ ClinAppInc
 ClinAppDec ~~ 0*ClinAppDec
 ClinSui ~~ 0*ClinSui
 "
+
 clin_pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop_affect_veg.model)
 ```
 
@@ -1877,14 +1877,8 @@ clin_pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mode
     ## [1] "Calculating CFI"
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## clin_pop_affect_veg.model): CFI estimates below 0 should not be trusted, and
-    ## indicate that the other model fit estimates should be interpreted with caution.
-    ## A negative CFI estimates typically appears due to negative residual variances.
-
     ## elapsed 
-    ##   0.607 
+    ##   0.886 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0371957759493138 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.36605214821313 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -1909,62 +1903,63 @@ clin_pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', mode
 clin_pop_affect_veg.fit$modelfit
 ```
 
-    ##       chisq df p_chisq      AIC        CFI     SRMR
-    ## df 9684.809 97       0 9762.809 -0.0683569 1.102487
+    ##       chisq df     p_chisq      AIC       CFI      SRMR
+    ## df 316.6288 94 6.75842e-26 400.6288 0.9751928 0.1552715
 
 ``` r
 clin_pop_affect_veg.fit$results[c(1,2,3,6,7,9)]
 ```
 
     ##            lhs op         rhs STD_Genotype    STD_Genotype_SE      p_value
-    ## 11    ClinSOMA =~  ClinAppInc   0.55690621  0.233105127906632 1.688673e-02
-    ## 13    ClinSOMA =~  ClinSleDec   0.35924835  0.264845985090146 1.749460e-01
-    ## 14    ClinSOMA =~  ClinSleInc   0.53259218  0.322172446725048 9.831519e-02
-    ## 12    ClinSOMA =~ ClinMotoInc   0.54472834  0.251929296650257 3.059820e-02
-    ## 25   PopAFFECT =~      PopDep   0.73415883 0.0704569698907518 2.010497e-25
-    ## 26   PopAFFECT =~    PopGuilt   0.77249330 0.0979158860138997 3.037295e-15
-    ## 27   PopAFFECT =~      PopSui   0.67046287  0.107150738726265 3.919514e-10
-    ## 38 PopNEUROVEG =~      PopAnh   0.80952591 0.0661214084027033 1.830103e-34
-    ## 40 PopNEUROVEG =~   PopAppInc   0.44507561 0.0829671333991421 8.118415e-08
-    ## 39 PopNEUROVEG =~   PopAppDec   0.19323544  0.087103041032499 2.652210e-02
-    ## 44 PopNEUROVEG =~   PopSleInc   0.49899258  0.103085734925784 1.294720e-06
-    ## 43 PopNEUROVEG =~   PopSleDec   0.64596293  0.101922669922836 2.330893e-10
-    ## 42 PopNEUROVEG =~    PopFatig   0.74256624 0.0927717115576844 1.202142e-15
-    ## 41 PopNEUROVEG =~     PopConc   0.78468567 0.0912180202860594 7.813104e-18
-    ## 34      PopDep ~~      PopAnh   0.41045831 0.0913628590107204 7.030988e-06
-    ## 7   ClinAppInc ~~  ClinAppInc   0.68985769  0.398389692170691 8.337898e-02
-    ## 9   ClinSleDec ~~  ClinSleDec   0.87094099  0.550181490961869 1.134341e-01
-    ## 10  ClinSleInc ~~  ClinSleInc   0.71635042  0.891145142669244 4.214742e-01
-    ## 8  ClinMotoInc ~~ ClinMotoInc   0.70327116  0.537864859004351 1.910484e-01
-    ## 35      PopDep ~~      PopDep   0.46101157  0.123061025157158 1.795400e-04
-    ## 37    PopGuilt ~~    PopGuilt   0.40325243   0.18493284214232 2.921940e-02
-    ## 48      PopSui ~~      PopSui   0.55047777  0.235917565639373 1.963003e-02
-    ## 30      PopAnh ~~      PopAnh   0.34466701  0.109983233295909 1.725794e-03
-    ## 32   PopAppInc ~~   PopAppInc   0.80190827   0.15868756015452 4.340432e-07
-    ## 31   PopAppDec ~~   PopAppDec   0.96265840  0.231234264796437 3.138963e-05
-    ## 47   PopSleInc ~~   PopSleInc   0.75100775  0.253571774647902 3.059662e-03
-    ## 46   PopSleDec ~~   PopSleDec   0.58273043  0.309921571799308 6.007385e-02
-    ## 36    PopFatig ~~    PopFatig   0.44859561  0.274949739562372 1.027767e-01
-    ## 33     PopConc ~~     PopConc   0.38426426  0.248971926666164 1.227315e-01
-    ## 15    ClinSOMA ~~  ClinAPPDEC   0.08996580  0.239049373626669 7.067129e-01
-    ## 17    ClinSOMA ~~     ClinSUI   0.14084802  0.267351590108703 5.983813e-01
-    ## 18    ClinSOMA ~~   PopAFFECT   0.08885224  0.145674778915186 5.419306e-01
-    ## 19    ClinSOMA ~~ PopNEUROVEG   0.49513922  0.197300504034566 1.208649e-02
-    ## 4   ClinAPPDEC ~~     ClinSUI  -0.05567917  0.178881729280041 7.555859e-01
-    ## 5   ClinAPPDEC ~~   PopAFFECT  -0.08421324  0.103927942765544 4.177651e-01
-    ## 6   ClinAPPDEC ~~ PopNEUROVEG  -0.07795916  0.108585539687147 4.727783e-01
-    ## 23     ClinSUI ~~   PopAFFECT   0.73159620  0.135473893627609 6.653071e-08
-    ## 24     ClinSUI ~~ PopNEUROVEG   0.65818047   0.13244638169878 6.716838e-07
-    ## 29   PopAFFECT ~~ PopNEUROVEG   0.82726963 0.0664728294956488 1.485509e-35
+    ## 12    ClinSOMA =~  ClinAppInc   0.63097267  0.249537108036325 1.145291e-02
+    ## 14    ClinSOMA =~  ClinSleDec   0.46490807  0.248888261333034 6.177194e-02
+    ## 15    ClinSOMA =~  ClinSleInc   0.50957081  0.282244681779074 7.101023e-02
+    ## 13    ClinSOMA =~ ClinMotoInc   0.48752826  0.211946913815444 2.143494e-02
+    ## 26   PopAFFECT =~      PopDep   0.73418643 0.0705006727795996 2.142522e-25
+    ## 27   PopAFFECT =~    PopGuilt   0.77245711 0.0978567652707455 2.932172e-15
+    ## 28   PopAFFECT =~      PopSui   0.67046882  0.107125684596576 3.881959e-10
+    ## 39 PopNEUROVEG =~      PopAnh   0.81025052 0.0661718967236442 1.795085e-34
+    ## 41 PopNEUROVEG =~   PopAppInc   0.44611707  0.083062201264623 7.835417e-08
+    ## 40 PopNEUROVEG =~   PopAppDec   0.19232673 0.0871100217549689 2.725386e-02
+    ## 45 PopNEUROVEG =~   PopSleInc   0.49813601  0.103089850215276 1.351321e-06
+    ## 44 PopNEUROVEG =~   PopSleDec   0.64713743  0.101890392811857 2.134866e-10
+    ## 43 PopNEUROVEG =~    PopFatig   0.74049971 0.0928444873415141 1.515231e-15
+    ## 42 PopNEUROVEG =~     PopConc   0.78428164 0.0913571039009067 9.100919e-18
+    ## 35      PopDep ~~      PopAnh   0.40992400 0.0915549252243575 7.557184e-06
+    ## 7   ClinAppInc ~~  ClinAppDec  -0.78187495  0.359769884686733 2.976135e-02
+    ## 8   ClinAppInc ~~  ClinAppInc   0.60187772  0.431129626887098 1.627070e-01
+    ## 10  ClinSleDec ~~  ClinSleDec   0.78386375  0.552632596655099 1.560727e-01
+    ## 11  ClinSleInc ~~  ClinSleInc   0.74033888  0.870737859293511 3.951889e-01
+    ## 9  ClinMotoInc ~~ ClinMotoInc   0.76231497   0.49643907658447 1.246452e-01
+    ## 36      PopDep ~~      PopDep   0.46097069  0.123114938284089 1.809605e-04
+    ## 38    PopGuilt ~~    PopGuilt   0.40331069  0.184913832052706 2.917922e-02
+    ## 49      PopSui ~~      PopSui   0.55047011  0.235914460984302 1.962940e-02
+    ## 31      PopAnh ~~      PopAnh   0.34349477  0.110278549858447 1.840697e-03
+    ## 33   PopAppInc ~~   PopAppInc   0.80098002  0.158841732791883 4.591750e-07
+    ## 32   PopAppDec ~~   PopAppDec   0.96301296  0.231172922208622 3.103143e-05
+    ## 48   PopSleInc ~~   PopSleInc   0.75186149   0.25342680274255 3.009461e-03
+    ## 47   PopSleDec ~~   PopSleDec   0.58121306  0.310011811404246 6.081978e-02
+    ## 37    PopFatig ~~    PopFatig   0.45165962  0.275337141097329 1.009229e-01
+    ## 34     PopConc ~~     PopConc   0.38490365   0.24867720020449 1.216669e-01
+    ## 3   ClinAPPDEC ~~  ClinAPPDEC   1.00000000  0.218848540831524 4.891920e-06
+    ## 23     ClinSUI ~~     ClinSUI   1.00000000  0.328834988544144 2.357633e-03
+    ## 16    ClinSOMA ~~  ClinAPPDEC   0.62555026  0.377408789250308 9.742321e-02
+    ## 18    ClinSOMA ~~     ClinSUI   0.10943088  0.251747280642462 6.637972e-01
+    ## 19    ClinSOMA ~~   PopAFFECT   0.08544085  0.136467990228432 5.312674e-01
+    ## 20    ClinSOMA ~~ PopNEUROVEG   0.45752697  0.176489103514137 9.531800e-03
+    ## 4   ClinAPPDEC ~~     ClinSUI  -0.05568972  0.178881729280041 7.555964e-01
+    ## 5   ClinAPPDEC ~~   PopAFFECT  -0.08420478  0.103924926684981 4.177987e-01
+    ## 6   ClinAPPDEC ~~ PopNEUROVEG  -0.07815331  0.108546681935836 4.715214e-01
+    ## 24     ClinSUI ~~   PopAFFECT   0.73158688  0.135471093726866 6.652077e-08
+    ## 25     ClinSUI ~~ PopNEUROVEG   0.65774817  0.132381789078598 6.744562e-07
+    ## 30   PopAFFECT ~~ PopNEUROVEG   0.82739675 0.0664547938612021 1.389526e-35
     ## 1   ClinAPPDEC =~  ClinAppDec   1.00000000                              NA
-    ## 20     ClinSUI =~     ClinSui   1.00000000                              NA
-    ## 16    ClinSOMA ~~    ClinSOMA   1.00000000                              NA
-    ## 3   ClinAPPDEC ~~  ClinAPPDEC   1.00000000                              NA
-    ## 22     ClinSUI ~~     ClinSUI   1.00000000                              NA
-    ## 28   PopAFFECT ~~   PopAFFECT   1.00000000                              NA
-    ## 45 PopNEUROVEG ~~ PopNEUROVEG   1.00000000                              NA
+    ## 21     ClinSUI =~     ClinSui   1.00000000                              NA
+    ## 17    ClinSOMA ~~    ClinSOMA   1.00000000                              NA
+    ## 29   PopAFFECT ~~   PopAFFECT   1.00000000                              NA
+    ## 46 PopNEUROVEG ~~ PopNEUROVEG   1.00000000                              NA
     ## 2   ClinAppDec ~~  ClinAppDec   0.00000000                              NA
-    ## 21     ClinSui ~~     ClinSui   0.00000000                              NA
+    ## 22     ClinSui ~~     ClinSui   0.00000000                              NA
 
 # Exploratory factor analysis
 
