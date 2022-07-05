@@ -146,35 +146,46 @@ zcat sumstats/aligned/daner_MDD5b_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="
 
 ```
 
-We find all daner files in the PGC directory and loop them through the munge step.
+We find all daner files in the meta-analysis directory and loop them through the munge step.
 
 ```{r, eval=FALSE}
 # Munge sumstats for all cohorts symptom GWASs
 
-# list sumstats distribution directories
-distributions_dirs <- dir(file.path("meta", "distribution"))
-# construct filenames of daner sumstats
-daner_files <- sapply(distributions_dirs, function(dd) file.path("meta", "distribution", dd, paste0('daner_', dd, '.gz')))
+# find daner sumstats files for format daner_[COHORTS].MDD[N]_[SYMPTOM].gz
+daner_files <- list.files("meta/distribution", pattern="^daner_[A-Z_]+\\.MDD[1-9a-b]+_[a-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
 
 # snp list reference file
-hm3_file <- "sumstats/reference/w_hm3.noMHC.snplist"
+hm3_file <- "sumstats/reference/w_hm3.snplist"
 
 trait_names <- names(daner_files)
 
 dir.create(file.path("meta", "munged"), showWarnings=FALSE)
+dir.create(file.path("meta", "txt"), showWarnings=FALSE)
 
 for(daner in daner_files) {
 
   # get traitname from daner filename
   daner_basename <- str_remove(basename(daner), '.gz')
   trait_name <- str_remove(daner_basename, 'daner_')
-
+  
   sumstats_gz <- paste(trait_name, 'sumstats.gz', sep='.')
   munge_log <- paste(trait_name, 'munge.log', sep='_')
-
+  
   if(!file.exists(file.path('meta', 'munged', sumstats_gz))) {
+    # calculate effective sample size
+    txt <- file.path('meta', 'txt', paste(trait_name, 'txt.gz', sep='.'))
+    if(!file.exists(txt)) {
+    
+      daner_sumstats <- read_tsv(daner)
+      txt_sumstats <- daner_sumstats %>%
+        select(SNP, A1, A2, FRQ=starts_with('FRQ_A'), OR, SE, P, Neff_half) %>%
+        transmute(SNP, A1, A2, FRQ, OR, SE, P, N=2*Neff_half)
+    
+      write_tsv(txt_sumstats, txt)
+    }
+
     # munge daner sumstats with hm3
-    munge(files=daner, hm3=hm3_file, trait.names=trait_name, info.filter=0.9, maf.filter=0.01)
+    munge(files=txt, hm3=hm3_file, trait.names=trait_name, info.filter=0.9, maf.filter=0.01)
     # move munged files
     file.rename(sumstats_gz, file.path('meta', 'munged', sumstats_gz))
     file.rename(munge_log, file.path('meta', 'munged', munge_log))
@@ -186,7 +197,7 @@ for(daner in daner_files) {
 
 # Symptom prevalences
 
-Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output put population prevalences have to be estimated.
+Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output but population prevalences have to be estimated.
 
 ## Population prevalences
 
