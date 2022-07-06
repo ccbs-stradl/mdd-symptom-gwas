@@ -36,8 +36,6 @@ library(devtools)
 
 if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
 
-if(!require(tidySEM)) install_github("cjvanlissa/tidySEM")
-
 ```
 
 GenomicSEM version
@@ -385,9 +383,10 @@ pop_prevs_w
 
 # Multivariable LDSC estimation
 
-We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code. We use deparsed code instead of R data object serialization (`save()` or `saveRDS()`) so that the data can be inspected with a text editor to check that it does not contain individual-level data before being committed to the version control system. A simple caching strategy is employed to check whether the covariance structure already exists and, if so, to parse it rather than re-running the LD score calculation.
+We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. Sumstats were munged using effective sample size, so we substitute `0.5` as the sample prevalences. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code. We use deparsed code instead of R data object serialization (`save()` or `saveRDS()`) so that the data can be inspected with a text editor to check that it does not contain individual-level data before being committed to the version control system. A simple caching strategy is employed to check whether the covariance structure already exists and, if so, to parse it rather than re-running the LD score calculation.
 
-```{r, results='hide'}
+AGDS+PGC and ALSPAC+UKB sumstats
+```{r covstruc, results='hide'}
 
 covstruct_prefix <- 'agds_pgc.alspac_ukb.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
@@ -396,7 +395,7 @@ covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 if(!file.exists(covstruct_r)) {
 
   # list sumstats distribution directories
-  sumstats_files <- list.files(file.path('meta', 'munged'), '.gz', full.names=TRUE)
+  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB).+sumstats\\.gz', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
@@ -412,7 +411,55 @@ if(!file.exists(covstruct_r)) {
   write_tsv(sumstats_prevs, file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 
   symptoms_covstruct <- ldsc(traits=sumstats_prevs$filename,
-                             sample.prev=sumstats_prevs$samp_prev,
+                             sample.prev=rep(0.5, times=length(sumstats_prevs$samp_prev)),
+                             population.prev=sumstats_prevs$pop_prev,
+                             ld='sumstats/reference/eur_w_ld_chr/',
+                             wld='sumstats/reference/eur_w_ld_chr/',
+                             trait.names=sumstats_prevs$trait_name)
+
+  dput(symptoms_covstruct, covstruct_r, control=c('all', 'digits17'))
+  saveRDS(symptoms_covstruct, covstruct_rds)
+  
+  # check for exact match of deparsed object
+  identical(dget(covstruct_r), symptoms_covstruct)
+
+} else {
+
+  symptoms_covstruct <- dget(covstruct_r)
+
+  sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
+
+}
+```
+
+
+AGDS+PGC+ALSPAC+UKB sumstats
+```{r covstruc_all, results='hide'}
+
+covstruct_prefix <- 'all.covstruct'
+covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
+covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
+
+if(!file.exists(covstruct_r)) {
+
+  # list sumstats distribution directories
+  sumstats_files <- list.files(file.path('meta', 'munged'), 'ALL.+sumstats\\.gz', full.names=TRUE)
+
+  # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
+  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
+
+  sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
+
+  sumstats_prevs <- 
+    symptoms_sample_prev %>%
+    left_join(sumstats_paths, by='sumstats') %>%
+    left_join(pop_prevs_w, by='symptom') %>%
+    mutate(trait_name=paste(cohorts, symptom, sep='.'))
+
+  write_tsv(sumstats_prevs, file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
+
+  symptoms_covstruct <- ldsc(traits=sumstats_prevs$filename,
+                             sample.prev=rep(0.5, times=length(sumstats_prevs$samp_prev)),
                              population.prev=sumstats_prevs$pop_prev,
                              ld='sumstats/reference/eur_w_ld_chr/',
                              wld='sumstats/reference/eur_w_ld_chr/',
