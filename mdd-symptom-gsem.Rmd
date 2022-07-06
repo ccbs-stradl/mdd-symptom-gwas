@@ -150,7 +150,7 @@ We find all daner files in the meta-analysis directory and loop them through the
 # Munge sumstats for all cohorts symptom GWASs
 
 # find daner sumstats files for format daner_[COHORTS].MDD[N]_[SYMPTOM].gz
-daner_files <- list.files("meta/distribution", pattern="^daner_[A-Z_]+\\.MDD[1-9a-b]+_[a-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
+daner_files <- list.files("meta/distribution", pattern="^daner_[A-Z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
 
 # snp list reference file
 hm3_file <- "sumstats/reference/w_hm3.snplist"
