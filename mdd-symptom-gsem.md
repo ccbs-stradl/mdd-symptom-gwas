@@ -52,21 +52,88 @@ for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.p
 library(devtools)
 
 if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
-
-if(!require(tidySEM)) install_github("cjvanlissa/tidySEM")
 ```
 
 GenomicSEM version
 
 ```r
 require(readr)
-require(tidyr)
-require(stringr)
-require(dplyr)
-require(ggplot2)
-require(corrplot)
-require(GenomicSEM)
+```
 
+```
+## Loading required package: readr
+```
+
+```r
+require(tidyr)
+```
+
+```
+## Loading required package: tidyr
+```
+
+```r
+require(stringr)
+```
+
+```
+## Loading required package: stringr
+```
+
+```r
+require(dplyr)
+```
+
+```
+## Loading required package: dplyr
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
+require(ggplot2)
+```
+
+```
+## Loading required package: ggplot2
+```
+
+```r
+require(corrplot)
+```
+
+```
+## Loading required package: corrplot
+```
+
+```
+## corrplot 0.90 loaded
+```
+
+```r
+require(GenomicSEM)
+```
+
+```
+## Loading required package: GenomicSEM
+```
+
+```r
 packageVersion("GenomicSEM")
 ```
 
@@ -120,9 +187,11 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
 ```
-## Rows: 15 Columns: 4── Column specification ──────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 4
+## ── Column specification ─────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -149,9 +218,11 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
 ```
-## Rows: 15 Columns: 2── Column specification ──────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 2
+## ── Column specification ─────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -202,42 +273,53 @@ First we need to prepare files for the MDD5 symptoms for the population samples 
 mkdir -p meta/distribution/ALSPAC_UKB.MDD5a_psychomotorFast
 mkdir -p meta/distribution/ALSPAC_UKB.MDD5b_psychomotorSlow
 
-zcat sumstats/aligned/daner_MDD5a_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print $0, "Nca", "Nco"} else {print $0, 113, 3181}}' | gzip -c > meta/distribution/ALSPAC_UKB.MDD5a_psychomotorFast/daner_ALSPAC_UKB.MDD5a_psychomotorFast.gz
+gunzip -c sumstats/aligned/daner_MDD5a_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print "CHR", "SNP", "BP", "A1", "A2", "FRQ_A_113", "FRQ_U_3181", "INFO", "OR", "SE", "P", "Nca", "Nco", "Neff_half"} else {print $0, 113, 3181, 218.247}}' | gzip -c > meta/distribution/ALSPAC_UKB.MDD5a_psychomotorFast/daner_ALSPAC_UKB.MDD5a_psychomotorFast.gz
 
-zcat sumstats/aligned/daner_MDD5b_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print $0, "Nca", "Nco"} else {print $0, 299, 2995}}' | gzip -c > meta/distribution/ALSPAC_UKB.MDD5b_psychomotorSlow/daner_ALSPAC_UKB.MDD5b_psychomotorSlow.gz
+gunzip -c sumstats/aligned/daner_MDD5b_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print "CHR", "SNP", "BP", "A1", "A2", "FRQ_A_299", "FRQ_U_2995", "INFO", "OR", "SE", "P", "Nca", "Nco", "Neff_half"} else {print $0, 299, 2995, 425.468}}' | gzip -c > meta/distribution/ALSPAC_UKB.MDD5b_psychomotorSlow/daner_ALSPAC_UKB.MDD5b_psychomotorSlow.gz
 
 ```
 
-We find all daner files in the PGC directory and loop them through the munge step.
+We find all daner files in the meta-analysis directory and loop them through the munge step.
 
 
 ```r
 # Munge sumstats for all cohorts symptom GWASs
 
-# list sumstats distribution directories
-distributions_dirs <- dir(file.path("meta", "distribution"))
-# construct filenames of daner sumstats
-daner_files <- sapply(distributions_dirs, function(dd) file.path("meta", "distribution", dd, paste0('daner_', dd, '.gz')))
+# find daner sumstats files for format daner_[COHORTS].MDD[N]_[SYMPTOM].gz
+daner_files <- list.files("meta/distribution", pattern="^daner_[A-Z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
 
 # snp list reference file
-hm3_file <- "sumstats/reference/w_hm3.noMHC.snplist"
+hm3_file <- "sumstats/reference/w_hm3.snplist"
 
 trait_names <- names(daner_files)
 
 dir.create(file.path("meta", "munged"), showWarnings=FALSE)
+dir.create(file.path("meta", "txt"), showWarnings=FALSE)
 
 for(daner in daner_files) {
 
   # get traitname from daner filename
   daner_basename <- str_remove(basename(daner), '.gz')
   trait_name <- str_remove(daner_basename, 'daner_')
-
+  
   sumstats_gz <- paste(trait_name, 'sumstats.gz', sep='.')
   munge_log <- paste(trait_name, 'munge.log', sep='_')
-
+  
   if(!file.exists(file.path('meta', 'munged', sumstats_gz))) {
+    # calculate effective sample size
+    txt <- file.path('meta', 'txt', paste(trait_name, 'txt.gz', sep='.'))
+    if(!file.exists(txt)) {
+    
+      daner_sumstats <- read_tsv(daner)
+      txt_sumstats <- daner_sumstats %>%
+        select(SNP, A1, A2, FRQ=starts_with('FRQ_A'), OR, SE, P, Neff_half) %>%
+        transmute(SNP, A1, A2, FRQ, OR, SE, P, N=2*Neff_half)
+    
+      write_tsv(txt_sumstats, txt)
+    }
+
     # munge daner sumstats with hm3
-    munge(files=daner, hm3=hm3_file, trait.names=trait_name, info.filter=0.9, maf.filter=0.01)
+    munge(files=txt, hm3=hm3_file, trait.names=trait_name, info.filter=0.9, maf.filter=0.01)
     # move munged files
     file.rename(sumstats_gz, file.path('meta', 'munged', sumstats_gz))
     file.rename(munge_log, file.path('meta', 'munged', munge_log))
@@ -248,7 +330,7 @@ for(daner in daner_files) {
 
 # Symptom prevalences
 
-Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output put population prevalences have to be estimated.
+Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output but population prevalences have to be estimated.
 
 ## Population prevalences
 
@@ -489,10 +571,12 @@ if(!file.exists(symptoms_sample_prev_file)) {
 ```
 
 ```
-## Rows: 24 Columns: 6── Column specification ──────────────────────────────────────────────────────────────────────
+## Rows: 24 Columns: 6
+## ── Column specification ─────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (3): cohorts, symptom, sumstats
 ## dbl (3): Nca, Nco, samp_prev
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -621,8 +705,9 @@ pop_prevs_w
 
 # Multivariable LDSC estimation
 
-We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code. We use deparsed code instead of R data object serialization (`save()` or `saveRDS()`) so that the data can be inspected with a text editor to check that it does not contain individual-level data before being committed to the version control system. A simple caching strategy is employed to check whether the covariance structure already exists and, if so, to parse it rather than re-running the LD score calculation.
+We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. Sumstats were munged using effective sample size, so we substitute `0.5` as the sample prevalences. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code. We use deparsed code instead of R data object serialization (`save()` or `saveRDS()`) so that the data can be inspected with a text editor to check that it does not contain individual-level data before being committed to the version control system. A simple caching strategy is employed to check whether the covariance structure already exists and, if so, to parse it rather than re-running the LD score calculation.
 
+AGDS+PGC and ALSPAC+UKB sumstats
 
 ```r
 covstruct_prefix <- 'agds_pgc.alspac_ukb.covstruct'
@@ -632,7 +717,7 @@ covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 if(!file.exists(covstruct_r)) {
 
   # list sumstats distribution directories
-  sumstats_files <- list.files(file.path('meta', 'munged'), '.gz', full.names=TRUE)
+  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB).+sumstats\\.gz', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
@@ -648,7 +733,7 @@ if(!file.exists(covstruct_r)) {
   write_tsv(sumstats_prevs, file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 
   symptoms_covstruct <- ldsc(traits=sumstats_prevs$filename,
-                             sample.prev=sumstats_prevs$samp_prev,
+                             sample.prev=rep(0.5, times=length(sumstats_prevs$samp_prev)),
                              population.prev=sumstats_prevs$pop_prev,
                              ld='sumstats/reference/eur_w_ld_chr/',
                              wld='sumstats/reference/eur_w_ld_chr/',
@@ -670,10 +755,71 @@ if(!file.exists(covstruct_r)) {
 ```
 
 ```
-## Rows: 24 Columns: 9── Column specification ──────────────────────────────────────────────────────────────────────
+## Rows: 24 Columns: 9
+## ── Column specification ─────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (5): cohorts, symptom, sumstats, filename, trait_name
 ## dbl (4): Nca, Nco, samp_prev, pop_prev
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+```
+
+
+AGDS+PGC+ALSPAC+UKB sumstats
+
+```r
+all_covstruct_prefix <- 'all.covstruct'
+all_covstruct_r <- file.path('ldsc', paste(all_covstruct_prefix, 'deparse.R', sep='.'))
+all_covstruct_rds <- file.path('ldsc', paste(all_covstruct_prefix, 'rds', sep='.'))
+
+if(!file.exists(covstruct_r)) {
+
+  # list sumstats distribution directories
+  all_sumstats_files <- list.files(file.path('meta', 'munged'), 'ALL.+sumstats\\.gz', full.names=TRUE)
+
+  # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
+  all_cohorts_symptoms <- str_match(basename(all_sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
+
+  all_sumstats_paths <- data.frame(filename=all_sumstats_files, sumstats=str_remove(basename(all_sumstats_files), '.sumstats.gz'))
+
+  all_sumstats_prevs <- 
+    all_sumstats_paths %>%
+    mutate(trait_name=all_cohorts_symptoms) %>%
+    mutate(symptom=str_match(sumstats, "ALL\\.(MDD[1-9a-b]+)_")[,2]) %>%
+    left_join(pop_prevs_w, by='symptom') 
+    
+   write_tsv(all_sumstats_prevs, file.path('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.')))
+
+  all_symptoms_covstruct <- ldsc(traits=all_sumstats_prevs$filename,
+                             sample.prev=rep(0.5, times=length(all_sumstats_prevs$samp_prev)),
+                             population.prev=all_sumstats_prevs$pop_prev,
+                             ld='sumstats/reference/eur_w_ld_chr/',
+                             wld='sumstats/reference/eur_w_ld_chr/',
+                             trait.names=all_sumstats_prevs$trait_name)
+
+  dput(all_symptoms_covstruct, all_covstruct_r, control=c('all', 'digits17'))
+  saveRDS(all_symptoms_covstruct, all_covstruct_rds)
+  
+  # check for exact match of deparsed object
+  identical(dget(all_covstruct_r), all_symptoms_covstruct)
+
+} else {
+
+  all_symptoms_covstruct <- dget(covstruct_r)
+  
+  all_sumstats_prevs <- read_tsv(file.path('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.')))
+
+}
+```
+
+```
+## Rows: 12 Columns: 5
+## ── Column specification ─────────────────────────────────────────────────────────────────────
+## Delimiter: "\t"
+## chr (4): filename, sumstats, trait_name, symptom
+## dbl (1): pop_prev
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -684,14 +830,16 @@ Run LDSC, using sumstats filenames and estimated prevalences to construct comman
 
 
 ```r
-sumstats_h2_txt <- 'ldsc/agds_pgc.alspac_ukb.h2.txt'
+sumstats_h2_txt <- 'ldsc/symptoms.h2.txt'
 
 if(!file.exists(sumstats_h2_txt)) {
+    
+  sumstats_info <- bind_rows(sumstats_prevs, all_sumstats_prevs)
 
-  sumstats_h2 <- plyr::adply(sumstats_prevs, 1, function(x) {
+  sumstats_h2 <- plyr::adply(sumstats_info, 1, function(x) {
     
     filename <- x$filename
-    samp_prev <- x$samp_prev
+    samp_prev <- 0.5
     pop_prev <- x$pop_prev
     outname <- paste(filename, 'h2', sep='.')
     logfile <- paste(outname, 'log', sep='.')
@@ -699,14 +847,14 @@ if(!file.exists(sumstats_h2_txt)) {
     print(filename)
   
   
-    if(!file.exists(logfile)) {
+    #if(!file.exists(logfile)) {
     if(!is.na(samp_prev)) {
        ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev, '--pop-prev', pop_prev)
     } else {
        ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname)
     }
     system(ldsc_command)
-    }
+    #}
   
     h2_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
   
@@ -742,10 +890,12 @@ if(!file.exists(sumstats_h2_txt)) {
 ```
 
 ```
-## Rows: 24 Columns: 15── Column specification ──────────────────────────────────────────────────────────────────────
+## Rows: 36 Columns: 15
+## ── Column specification ─────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr  (5): cohorts, symptom, sumstats, filename, trait_name
 ## dbl (10): Nca, Nco, samp_prev, pop_prev, h2, se, LambdaGC, MeanChiSq, Interc...
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -759,7 +909,7 @@ mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
 left_join(dsm_mdd_symptoms_labels, by='ref') %>%
 mutate(cohorts=case_when(study == 'AGDS+PGC' ~ "Clinical (AGDS+PGS)",
                          study == 'ALSPAC+UKB' ~ "Population (ALSPAC+UKB)",
-                         TRUE ~ NA_character_))
+                         TRUE ~ 'All'))
        
 #        %>%
 # # split negative estimates into their own facet
@@ -778,8 +928,7 @@ mutate(cohorts=case_when(study == 'AGDS+PGC' ~ "Clinical (AGDS+PGS)",
 
 # filter out traits below sample size cutoff
 mdd_symptom_gsem_h2.gg <-
-ggplot(sumstats_h2_labels %>%
-        mutate(Neff=4*Nca*Nco/(Nca+Nco)) %>% filter(Neff >= 5000),
+ggplot(sumstats_h2_labels,
         aes(x=abbv,
             y=h2,
             ymin=h2+se*qnorm(0.025),
@@ -796,7 +945,7 @@ theme(axis.text.y=element_text(size=13),
       legend.title=element_text(size=12),
       legend.text=element_text(size=14),
       legend.position='top') +
- labs(color  = "Meta-analysis:", linetype = "Meta-analysis:", shape = "Meta-analysis:")
+ labs(color  = "Meta-analysis:", shape = "Meta-analysis:")
 
 mdd_symptom_gsem_h2.gg + coord_flip(ylim=c(-0.76, 0.16)) +
 scale_y_continuous(expression(h[SNP]^2),
@@ -817,14 +966,14 @@ ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=8, height=4)
 
 ## Genetic correlation with MDD
 
-Examine how each symptom genetically correlates with MDD case/control status. Positive correlation may suggest the presence of a symptom is a more extreme form of caseness while a negative or zero correlation suggests it is a primary feature of caseness. Use sumstast from PGC cohorts so that phenotype is diagnosed depression. 
+Examine how each symptom genetically correlates with MDD case/control status. Positive correlation may suggest the presence of a symptom is a more extreme form of caseness while a negative or zero correlation suggests it is a primary feature of caseness. Use sumstats from PGC cohorts so that phenotype is diagnosed depression. 
 
 
 
 ```bash
 # Munge sumstats for other MDD sumstats
 
-for sumstats in $(ls sumstats/PGC/OtherMDD/daner_*.gz); do
+for sumstats in $(ls sumstats/PGC/MDD/daner_*.gz); do
 
         prefix=$(basename $sumstats .gz)
 
@@ -846,14 +995,14 @@ logfile <- paste(outname, 'log', sep='.')
 if(!file.exists(logfile)) {
 
   # string together rg and prevalence arguments, separated by commas
-  rg_arg <- paste(c(mdd29_sumstats_gz, sumstats_prevs$filename), collapse=',')
-  samp_prev_list <- c(16823/25632, sumstats_prevs$samp_prev)
+  rg_arg <- paste(c(mdd29_sumstats_gz, sumstats_info$filename), collapse=',')
+  samp_prev_list <- c(16823/25632, rep(0.5, length(sumstats_info$samp_prev)))
   # use 'nan' for prevalences of quantitative traits 
-  samp_prev_arg <- paste(ifelse(is.na(samp_prev_list), yes='nan', no=as.character(samp_prev_list)), collapse=',')
-  pop_prev_list <- c(0.15, sumstats_prevs$pop_prev)
+  samp_prev_arg <- paste(samp_prev_list, collapse=',')
+  pop_prev_list <- c(0.15, sumstats_info$pop_prev)
   pop_prev_arg <- paste(ifelse(is.na(pop_prev_list), yes='nan', no=as.character(pop_prev_list)), collapse=',')
 
-  ldsc_command <- paste('ldsc.py --rg', rg_arg, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev_arg, '--pop-prev', pop_prev_arg)
+  ldsc_command <- paste('/Users/mark/Work/mdd-meta/resources/ldsc/ldsc/ldsc.py --rg', rg_arg, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev_arg, '--pop-prev', pop_prev_arg)
 
   system(ldsc_command)
 
@@ -873,7 +1022,7 @@ mdd_rgs <- read_table2(paste(rg_results, collapse='\n'))
 ```r
 other_mdd_rg_refs <- 
 as_tibble(mdd_rgs) %>%
-left_join(sumstats_prevs, by=c('p2'='filename')) %>%
+left_join(sumstats_info, by=c('p2'='filename')) %>%
 mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
        study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', ' ')) %>%
 left_join(dsm_mdd_symptoms_labels, by='ref')
