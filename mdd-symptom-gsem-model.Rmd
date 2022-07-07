@@ -749,4 +749,235 @@ symptoms_pop_efa
 ```
 
 
-## All symptoms
+# All symptoms
+
+
+```{r all_covstruct}
+
+all_covstruct_prefix <- 'all.covstruct'
+all_covstruct_r <- file.path('ldsc', paste(all_covstruct_prefix, 'deparse.R', sep='.'))
+all_covstruct_rds <- file.path('ldsc', paste(all_covstruct_prefix, 'rds', sep='.'))
+
+all_symptoms_covstruct <- dget(all_covstruct_r)
+
+all_sumstats_prevs <- read_tsv(file.path('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.')))
+
+```
+
+```{r all_sem_labels}
+
+all_cohorts_sample_symptoms <-
+all_sumstats_prevs %>%
+left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
+select(symptom, trait_name, abbv)
+
+all_sample_symptoms <- all_cohorts_sample_symptoms$abbv
+names(all_sample_symptoms) <- all_cohorts_sample_symptoms$trait_name
+
+# rename traits in covstruct
+dimnames(all_symptoms_covstruct$S)[[2]] <-
+as.vector(all_sample_symptoms[dimnames(all_symptoms_covstruct$S)[[2]]])
+
+# positive variances
+dimnames(all_symptoms_covstruct$S)[[2]][which(diag(all_symptoms_covstruct$S) > 0)]
+
+```
+
+## Common factor
+
+
+```{r all_commonfactor, cache=TRUE}
+
+all_commonfactor.model <- "
+A1 =~ NA*Dep + Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Guilt + Conc + Sui
+A1 ~~ 1*A1
+"
+all_commonfactor.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_commonfactor.model)
+
+all_commonfactor.fit$modelfit
+all_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+Correlation between cardinal symptoms
+
+```{r all_commonfactor_cardinal, cache=TRUE}
+
+all_commonfactor_cardinal.model <- "
+A1 =~ NA*Dep + Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Guilt + Conc + Sui
+A1 ~~ 1*A1
+Dep ~~ Anh
+"
+all_commonfactor_cardinal.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_commonfactor_cardinal.model)
+
+all_commonfactor_cardinal.fit$modelfit
+all_commonfactor_cardinal.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+Appetite symptom correlation
+
+```{r all_commonfactor_app, cache=TRUE}
+
+all_commonfactor_app.model <- "
+A1 =~ NA*Dep + Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Guilt + Conc + Sui
+A1 ~~ 1*A1
+Dep ~~ Anh
+AppDec ~~ AppInc
+"
+all_commonfactor_app.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_commonfactor_app.model)
+
+all_commonfactor_app.fit$modelfit
+all_commonfactor_app.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+
+Appetite symptom correlation
+
+```{r all_commonfactor_sle, cache=TRUE}
+
+all_commonfactor_sle.model <- "
+A1 =~ NA*Dep + Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Guilt + Conc + Sui
+A1 ~~ 1*A1
+Dep ~~ Anh
+SleDec ~~ SleInc
+"
+all_commonfactor_sle.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_commonfactor_sle.model)
+
+all_commonfactor_sle.fit$modelfit
+all_commonfactor_sle.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+
+```{r all_commonfactor_app_sle, cache=TRUE}
+
+all_commonfactor_app_sle.model <- "
+A1 =~ NA*Dep + Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Guilt + Conc + Sui
+A1 ~~ 1*A1
+Dep ~~ Anh
+AppDec ~~ AppInc
+SleDec ~~ SleInc
+"
+all_commonfactor_app_sle.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_commonfactor_app_sle.model)
+
+all_commonfactor_app_sle.fit$modelfit
+all_commonfactor_app_sle.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+## Two-factor models
+
+```{r all_psych_soma, cache=TRUE}
+
+all_psych_soma.model <- "
+A1 =~ NA*Dep + Anh + Guilt + Conc + Sui 
+A2 =~ NA*AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+Dep ~~ Anh
+AppDec ~~ AppInc
+SleDec ~~ SleInc
+"
+all_psych_soma.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_psych_soma.model)
+
+all_psych_soma.fit$modelfit
+all_psych_soma.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+
+```{r all_psych_veg, cache=TRUE}
+
+all_psych_veg.model <- "
+A1 =~ NA*Dep + Anh + Guilt + Sui 
+A2 =~ NA*AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+Dep ~~ Anh
+AppDec ~~ AppInc
+SleDec ~~ SleInc
+"
+all_psych_veg.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_psych_veg.model)
+
+all_psych_veg.fit$modelfit
+all_psych_veg.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+```{r all_affect_veg, cache=TRUE}
+
+all_affect_veg.model <- "
+A1 =~ NA*Dep + Guilt + Sui 
+A2 =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+Dep ~~ Anh
+AppDec ~~ AppInc
+SleDec ~~ SleInc
+"
+all_affect_veg.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_affect_veg.model)
+
+all_affect_veg.fit$modelfit
+all_affect_veg.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+### Three factor model
+
+```{r all_cog_mood_neuroveg, cache=TRUE}
+
+all_cog_mood_neuroveg.model <- "
+A1 =~ NA*Guilt + Conc + Sui 
+A2 =~ NA*Dep + Anh + Guilt
+A3 =~ NA*AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig
+A1 ~~ 1*A1
+A2 ~~ 1*A2
+A3 ~~ 1*A3
+AppDec ~~ AppInc
+SleDec ~~ SleInc
+c2 > 0.001
+Anh ~~ c2*Anh
+a12 < 0.99
+A1 ~~ a12*A2
+"
+all_cog_mood_neuroveg.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_cog_mood_neuroveg.model)
+
+all_cog_mood_neuroveg.fit$modelfit
+all_cog_mood_neuroveg.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+
+### Model comparisons
+
+```{r all_model_list}
+
+all_model_list=
+list("1a"=list(name="Common", model=all_commonfactor.fit),
+     "1b"=list(name="Common (cardinal)", model=all_commonfactor_cardinal.fit),
+     "1c"=list(name="Common (App)", model=all_commonfactor_app.fit),
+     "1d"=list(name="Common (Sle)", model=all_commonfactor_sle.fit),
+     "1er"=list(name="Common (App,Sle)", model=all_commonfactor_app_sle.fit),
+     "2a(i)"=list(name="Psych-Somatic", model=all_psych_soma.fit),
+     "2b(i)"=list(name="Psych-Neuroveg", model=all_psych_veg.fit),
+     "2c(i)"=list(name="Affect-Neuroveg", model=all_affect_veg.fit),
+     "3"=list(name="Cog-Mood-Neuroveg", model=all_cog_mood_neuroveg.fit)
+     )
+
+all_model_fits <- 
+data.frame(Model=names(all_model_list),
+           Name=sapply(all_model_list, function(m) m$name)) %>%
+bind_cols(
+bind_rows(
+lapply(all_model_list, function(m) m$model$modelfit)
+))
+rownames(all_model_fits) <- NULL
+
+knitr::kable(
+all_model_fits %>%
+mutate(dAIC=AIC-min(AIC)) %>%
+mutate_if(is.numeric, ~signif(., 3))
+)
+```
