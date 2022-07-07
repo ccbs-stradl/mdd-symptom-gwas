@@ -435,7 +435,7 @@ A2 ~~ 1*A2
 A3 ~~ 1*A3
 c2 > 0.001
 PopAnh ~~ c2*PopAnh
-a13 < 1.0
+a13 < 0.99
 A1 ~~ a13*A3
 "
 pop_cog_mood_neuroveg_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg_constr.model, fix_resid=FALSE)
@@ -621,7 +621,7 @@ pop_affect_veg_bif_constr.fit$results[c(1,2,3,6,7)]
 
 ### Model comparisons
 
-```{r}
+```{r pop_model_list}
 
 pop_model_list=
 list("1a"=list(name="Common", model=pop_commonfactor.fit),
@@ -750,79 +750,3 @@ symptoms_pop_efa
 
 
 ## All symptoms
-
-Check eigen values of the correlation matrix
-```{r mdd_symptom_gsem_efa_eigen}
-
-symptoms_cov_pd.eigen <- eigen(cov2cor(symptoms_cov_pd))
-
-signif(symptoms_cov_pd.eigen$values, 3)
-
-plot(eigen(cov2cor(symptoms_cov_pd))$values, ylab='Eigenvalue')
-lines(eigen(cov2cor(symptoms_cov_pd))$values)
-abline(1, 0, col='red')
-
-```
-
-Simulate uncertainty in $\mathbf{S}$ using the $\mathbf{V}$ matrix
-
-```{r}
-
-# replicates
-m <- 100
-
-# simulate with S as the mean and V as the variance
-S_lowertri_sim = mvtnorm::rmvnorm(m,
-	mean=symptoms_covstruct$S[lower.tri(symptoms_covstruct$S, diag=TRUE)],
-	sigma=symptoms_covstruct$V)
-	
-# reshape into a 24x24xm array
-S_sim <- plyr::aaply(S_lowertri_sim, 1, function(x, k=nrow(symptoms_covstruct$S)){
-	S <- matrix(NA, ncol=k, nrow=k)
-	S[lower.tri(S, diag=T)] <- x
-	S[upper.tri(S, diag=T)] <- t(S)[upper.tri(S, diag=T)]
-	return(S)
-})
-dimnames(S_sim) <- list(1:m, colnames(symptoms_cov), colnames(symptoms_cov))
-
-# find which symptoms have positive variances across all replicates
-sim_cov_keep <- which(colSums(plyr::aaply(S_sim, 1, diag) > 0) == m)
-
-eigen(cov2cor(symptoms_covstruct$S[sim_cov_keep,sim_cov_keep]))$values
-
-S_sim_pos <- S_sim[,sim_cov_keep,sim_cov_keep]
-
-S_sim_pos_ev <- plyr::aaply(S_sim_pos, 1, function(x) eigen(cov2cor(x))$values)
-
-summary(S_sim_pos_ev)
-
-```
-
-
-```{r symptoms_efa3}
-
-symptoms_efa3 <- factanal(covmat=symptoms_cov_pd, factors=3, rotation='varimax')
-
-symptoms_efa3
-
-
-```
-
-```{r symptoms_efa4}
-
-symptoms_efa4 <- factanal(covmat=symptoms_cov_pd, factors=4, rotation='varimax')
-
-symptoms_efa4
-
-
-```
-
-
-```{r symptoms_efa6}
-
-symptoms_efa6 <- factanal(covmat=symptoms_cov_pd, factors=6, rotation='varimax')
-
-symptoms_efa6
-
-
-```
