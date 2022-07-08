@@ -417,7 +417,7 @@ if(!file.exists(covstruct_r)) {
                              wld='sumstats/reference/eur_w_ld_chr/',
                              trait.names=sumstats_prevs$trait_name)
 
-  dput(symptoms_covstruct, covstruct_r, control=c('all', 'digits17'))
+  dput(symptoms_covstruct, covstruct_r, control=c('exact'))
   saveRDS(symptoms_covstruct, covstruct_rds)
   
   # check for exact match of deparsed object
@@ -465,7 +465,7 @@ if(!file.exists(all_covstruct_r)) {
                              wld='sumstats/reference/eur_w_ld_chr/',
                              trait.names=all_sumstats_prevs$trait_name)
 
-  dput(all_symptoms_covstruct, all_covstruct_r, control=c('all', 'digits17'))
+  dput(all_symptoms_covstruct, all_covstruct_r, control=c('exact'))
   saveRDS(all_symptoms_covstruct, all_covstruct_rds)
   
   # check for exact match of deparsed object

@@ -574,7 +574,7 @@ MDD8;Concentrate;Concentrate;Conc
 MDD9;Suicidality;Suicidality;Sui
 &quot;, col_names=c(&#39;ref&#39;, &#39;h&#39;, &#39;v&#39;, &#39;abbv&#39;), delim=&#39;;&#39;)</code></pre>
 <pre><code>## Rows: 15 Columns: 4
-## ── Column specification ─────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
 ## chr (4): ref, h, v, abbv
 ## 
@@ -599,7 +599,7 @@ MDD8;Diminished ability to think or concentrate, or indecisiveness
 MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide
 &quot;, col_names=c(&#39;Reference&#39;, &#39;Description&#39;), delim=&#39;;&#39;)</code></pre>
 <pre><code>## Rows: 15 Columns: 2
-## ── Column specification ─────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
 ## chr (2): Reference, Description
 ## 
@@ -1234,7 +1234,7 @@ if(!file.exists(symptoms_sample_prev_file)) {
   symptoms_sample_prev &lt;- read_tsv(symptoms_sample_prev_file)
 }</code></pre>
 <pre><code>## Rows: 24 Columns: 6
-## ── Column specification ─────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────
 ## Delimiter: &quot;\t&quot;
 ## chr (3): cohorts, symptom, sumstats
 ## dbl (3): Nca, Nco, samp_prev
@@ -1608,7 +1608,7 @@ if(!file.exists(covstruct_r)) {
                              wld=&#39;sumstats/reference/eur_w_ld_chr/&#39;,
                              trait.names=sumstats_prevs$trait_name)
 
-  dput(symptoms_covstruct, covstruct_r, control=c(&#39;all&#39;, &#39;digits17&#39;))
+  dput(symptoms_covstruct, covstruct_r, control=c(&#39;exact&#39;))
   saveRDS(symptoms_covstruct, covstruct_rds)
   
   # check for exact match of deparsed object
@@ -1621,14 +1621,9 @@ if(!file.exists(covstruct_r)) {
   sumstats_prevs &lt;- read_tsv(file.path(&#39;ldsc&#39;, paste(covstruct_prefix, &#39;prevs&#39;, &#39;txt&#39;, sep=&#39;.&#39;)))
 
 }</code></pre>
-<pre><code>## Rows: 24 Columns: 9
-## ── Column specification ─────────────────────────────────
-## Delimiter: &quot;\t&quot;
-## chr (5): cohorts, symptom, sumstats, filename, trait_name
-## dbl (4): Nca, Nco, samp_prev, pop_prev
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre><code>## Warning in ldsc(traits = sumstats_prevs$filename, sample.prev = rep(0.5, :
+## Your genetic covariance matrix includes traits estimated to have a negative
+## heritability.</code></pre>
 <p>AGDS+PGC+ALSPAC+UKB sumstats</p>
 <pre class="r"><code>all_covstruct_prefix &lt;- &#39;all.covstruct&#39;
 all_covstruct_r &lt;- file.path(&#39;ldsc&#39;, paste(all_covstruct_prefix, &#39;deparse.R&#39;, sep=&#39;.&#39;))
@@ -1659,7 +1654,7 @@ if(!file.exists(all_covstruct_r)) {
                              wld=&#39;sumstats/reference/eur_w_ld_chr/&#39;,
                              trait.names=all_sumstats_prevs$trait_name)
 
-  dput(all_symptoms_covstruct, all_covstruct_r, control=c(&#39;all&#39;, &#39;digits17&#39;))
+  dput(all_symptoms_covstruct, all_covstruct_r, control=c(&#39;exact&#39;))
   saveRDS(all_symptoms_covstruct, all_covstruct_rds)
   
   # check for exact match of deparsed object
@@ -1672,14 +1667,9 @@ if(!file.exists(all_covstruct_r)) {
   all_sumstats_prevs &lt;- read_tsv(file.path(&#39;ldsc&#39;, paste(all_covstruct_prefix, &#39;prevs&#39;, &#39;txt&#39;, sep=&#39;.&#39;)))
 
 }</code></pre>
-<pre><code>## Rows: 12 Columns: 5
-## ── Column specification ─────────────────────────────────
-## Delimiter: &quot;\t&quot;
-## chr (4): filename, sumstats, trait_name, symptom
-## dbl (1): pop_prev
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre><code>## Warning in ldsc(traits = all_sumstats_prevs$filename, sample.prev = rep(0.5, :
+## Your genetic covariance matrix includes traits estimated to have a negative
+## heritability.</code></pre>
 <div id="heritabilities" class="section level2" number="5.1">
 <h2><span class="header-section-number">5.1</span> Heritabilities</h2>
 <p>Run LDSC, using sumstats filenames and estimated prevalences to
@@ -1743,6 +1733,14 @@ if(!file.exists(sumstats_h2_txt)) {
   sumstats_h2 &lt;- read_tsv(sumstats_h2_txt)
 
 }</code></pre>
+<pre><code>## Rows: 36 Columns: 15
+## ── Column specification ──────────────────────────────────────────────────
+## Delimiter: &quot;\t&quot;
+## chr  (5): cohorts, symptom, sumstats, filename, trait_name
+## dbl (10): Nca, Nco, samp_prev, pop_prev, h2, se, LambdaGC, MeanChiSq, Interc...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <pre class="r"><code>sumstats_h2_labels &lt;-
 as_tibble(sumstats_h2) %&gt;%
 mutate(ref=paste0(&#39;MDD&#39;, str_extract(trait_name, &#39;[:digit:](a|b)?&#39;)),
