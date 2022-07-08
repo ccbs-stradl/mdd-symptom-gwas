@@ -395,7 +395,7 @@ covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 if(!file.exists(covstruct_r)) {
 
   # list sumstats distribution directories
-  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB).+sumstats\\.gz', full.names=TRUE)
+  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB).+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
@@ -440,10 +440,10 @@ all_covstruct_prefix <- 'all.covstruct'
 all_covstruct_r <- file.path('ldsc', paste(all_covstruct_prefix, 'deparse.R', sep='.'))
 all_covstruct_rds <- file.path('ldsc', paste(all_covstruct_prefix, 'rds', sep='.'))
 
-if(!file.exists(covstruct_r)) {
+if(!file.exists(all_covstruct_r)) {
 
   # list sumstats distribution directories
-  all_sumstats_files <- list.files(file.path('meta', 'munged'), 'ALL.+sumstats\\.gz', full.names=TRUE)
+  all_sumstats_files <- list.files(file.path('meta', 'munged'), 'ALL.+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   all_cohorts_symptoms <- str_match(basename(all_sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]

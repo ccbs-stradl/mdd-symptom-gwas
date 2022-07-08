@@ -833,7 +833,7 @@ all_commonfactor_app.fit$results[c(1, 2, 3, 6, 7)]
 ```
 
 
-Appetite symptom correlation
+Sleep symptom correlation
 
 ```{r all_commonfactor_sle, cache=TRUE}
 
@@ -878,7 +878,6 @@ A1 ~~ 1*A1
 A2 ~~ 1*A2
 Dep ~~ Anh
 AppDec ~~ AppInc
-SleDec ~~ SleInc
 "
 all_psych_soma.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_psych_soma.model)
 
@@ -897,7 +896,6 @@ A1 ~~ 1*A1
 A2 ~~ 1*A2
 Dep ~~ Anh
 AppDec ~~ AppInc
-SleDec ~~ SleInc
 "
 all_psych_veg.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_psych_veg.model)
 
@@ -915,7 +913,6 @@ A1 ~~ 1*A1
 A2 ~~ 1*A2
 Dep ~~ Anh
 AppDec ~~ AppInc
-SleDec ~~ SleInc
 "
 all_affect_veg.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_affect_veg.model)
 
@@ -936,7 +933,6 @@ A1 ~~ 1*A1
 A2 ~~ 1*A2
 A3 ~~ 1*A3
 AppDec ~~ AppInc
-SleDec ~~ SleInc
 c2 > 0.001
 Anh ~~ c2*Anh
 a12 < 0.99

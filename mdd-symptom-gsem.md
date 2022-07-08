@@ -26,20 +26,20 @@ R.version
 
 ```
 ##                _                           
-## platform       aarch64-apple-darwin20      
-## arch           aarch64                     
-## os             darwin20                    
-## system         aarch64, darwin20           
+## platform       x86_64-generic-linux-gnu    
+## arch           x86_64                      
+## os             linux-gnu                   
+## system         x86_64, linux-gnu           
 ## status                                     
 ## major          4                           
-## minor          1.0                         
-## year           2021                        
-## month          05                          
-## day            18                          
-## svn rev        80317                       
+## minor          2.1                         
+## year           2022                        
+## month          06                          
+## day            23                          
+## svn rev        82513                       
 ## language       R                           
-## version.string R version 4.1.0 (2021-05-18)
-## nickname       Camp Pontanezen
+## version.string R version 4.2.1 (2022-06-23)
+## nickname       Funny-Looking Kid
 ```
 
 Package installation
@@ -122,7 +122,7 @@ require(corrplot)
 ```
 
 ```
-## corrplot 0.90 loaded
+## corrplot 0.92 loaded
 ```
 
 ```r
@@ -138,7 +138,7 @@ packageVersion("GenomicSEM")
 ```
 
 ```
-## [1] '0.0.3'
+## [1] '0.0.5'
 ```
 
 ## LD Score files
@@ -188,7 +188,7 @@ MDD9;Suicidality;Suicidality;Sui
 
 ```
 ## Rows: 15 Columns: 4
-## ── Column specification ─────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
 ## 
@@ -219,7 +219,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 
 ```
 ## Rows: 15 Columns: 2
-## ── Column specification ─────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
 ## 
@@ -572,7 +572,7 @@ if(!file.exists(symptoms_sample_prev_file)) {
 
 ```
 ## Rows: 24 Columns: 6
-## ── Column specification ─────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────
 ## Delimiter: "\t"
 ## chr (3): cohorts, symptom, sumstats
 ## dbl (3): Nca, Nco, samp_prev
@@ -717,7 +717,7 @@ covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 if(!file.exists(covstruct_r)) {
 
   # list sumstats distribution directories
-  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB).+sumstats\\.gz', full.names=TRUE)
+  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB).+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
@@ -756,7 +756,7 @@ if(!file.exists(covstruct_r)) {
 
 ```
 ## Rows: 24 Columns: 9
-## ── Column specification ─────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────
 ## Delimiter: "\t"
 ## chr (5): cohorts, symptom, sumstats, filename, trait_name
 ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -773,10 +773,10 @@ all_covstruct_prefix <- 'all.covstruct'
 all_covstruct_r <- file.path('ldsc', paste(all_covstruct_prefix, 'deparse.R', sep='.'))
 all_covstruct_rds <- file.path('ldsc', paste(all_covstruct_prefix, 'rds', sep='.'))
 
-if(!file.exists(covstruct_r)) {
+if(!file.exists(all_covstruct_r)) {
 
   # list sumstats distribution directories
-  all_sumstats_files <- list.files(file.path('meta', 'munged'), 'ALL.+sumstats\\.gz', full.names=TRUE)
+  all_sumstats_files <- list.files(file.path('meta', 'munged'), 'ALL.+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   all_cohorts_symptoms <- str_match(basename(all_sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
@@ -815,7 +815,7 @@ if(!file.exists(covstruct_r)) {
 
 ```
 ## Rows: 12 Columns: 5
-## ── Column specification ─────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────
 ## Delimiter: "\t"
 ## chr (4): filename, sumstats, trait_name, symptom
 ## dbl (1): pop_prev
@@ -887,17 +887,6 @@ if(!file.exists(sumstats_h2_txt)) {
   sumstats_h2 <- read_tsv(sumstats_h2_txt)
 
 }
-```
-
-```
-## Rows: 36 Columns: 15
-## ── Column specification ─────────────────────────────────────────────────────────────────────
-## Delimiter: "\t"
-## chr  (5): cohorts, symptom, sumstats, filename, trait_name
-## dbl (10): Nca, Nco, samp_prev, pop_prev, h2, se, LambdaGC, MeanChiSq, Interc...
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
 
 

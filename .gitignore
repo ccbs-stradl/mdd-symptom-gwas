@@ -22,6 +22,7 @@ meta/reference_info
 meta/refiex_templ
 meta/distribution/*
 meta/distribution
+meta/munged
 **/logs/*
 pheno/*
 *.RData
