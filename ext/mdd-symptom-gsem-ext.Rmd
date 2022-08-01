@@ -238,19 +238,8 @@ Load previously calculated symptom prevalences:
 
 ```{r prevs}
 
-symptoms_sample_prev <- read_tsv(here::here('meta/symptoms_prev.txt'))
-
-pop_prevs_w <-
-symptoms_sample_prev %>%
-mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
-                   symptom %in% c('MDD1', 'MDD2') ~ 1.0,
-                   TRUE ~ 0.57)) %>%
-mutate(pop_prev=samp_prev*w) %>%
-select(symptom, cohorts, pop_prev) %>%
-pivot_wider(names_from=cohorts, values_from=pop_prev) %>%
-group_by(symptom) %>%
-mutate(pop_prev=mean(c(AGDS_PGC, ALSPAC_UKB))) %>%
-select(symptom, pop_prev)
+all_covstruct_prefix <- 'all.covstruct'
+all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.'))) 
 
 ```
 
@@ -261,36 +250,18 @@ Calculate LDSC covariance structure for syptoms used in the combined structural 
 
 ```{r ldsc, results='hide'}
 
-covstruct_prefix <- 'symptoms.external.covstruct'
+covstruct_prefix <- 'all.symptoms.external.covstruct'
 covstruct_r <- here::here('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- here::here('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
 if(!file.exists(covstruct_r)) {
-
-  # list sumstats distribution directories
-  sumstats_files <- list.files(here::here('meta', 'munged'), '.gz', full.names=TRUE)
-
-  # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
-
-  sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
-
-  # symptom files, prevalences, and trait names
-  symptoms_sumstats_prevs <- 
-    symptoms_sample_prev %>%
-    left_join(sumstats_paths, by='sumstats') %>%
-    left_join(pop_prevs_w, by='symptom') %>%
-    left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
-    mutate(Sample=if_else(cohorts=="AGDS_PGC", true='Clin', false='Pop')) %>%
-    mutate(trait_name=paste0(Sample, abbv)) %>%
-    filter(trait_name %in% c('ClinAppDec', 'ClinAppInc',
-                             'ClinSleDec', 'ClinSleInc',
-                             'ClinMotoInc', 'ClinSui',
-                             'PopDep', 'PopGuilt', 'PopSui',
-                             'PopAnh', 'PopAppInc', 'PopAppDec',
-                             'PopSleInc', 'PopSleDec', 'PopFatig',
-                             'PopConc'))
     
+  symptoms_sumstats_prevs <- all_sumstats_prevs %>%
+  left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
+  mutate(samp_prev=0.5) %>%
+  filter(!symptom %in% c('MDD5b')) %>%
+  transmute(filename=here::here(filename), samp_prev, pop_prev, trait_name=abbv)
+
   # external files, prevalences and trait names
   external_sumstats_prevs <-
     tibble(filename=paste(ext_trait_names, 'sumstats', 'gz', sep='.'),
@@ -325,31 +296,24 @@ if(!file.exists(covstruct_r)) {
 
 # Models
 
-## Clinical and population factors
+## Symptom factors
 
 Base model of symptom factors
 
-```{r clin_pop_affect_veg, cache=TRUE}
+```{r affect_veg, cache=TRUE}
 
-clin_pop.model <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-ClinAPPDEC =~ ClinAppDec
-ClinSUI =~ ClinSui
-PopAffect =~ NA*PopDep + PopGuilt + PopSui
-PopNeuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-ClinSoma ~~ 1*ClinSoma
-ClinAPPDEC ~~ 1*ClinAPPDEC
-ClinSUI ~~ 1*ClinSUI
-PopAffect ~~ 1*PopAffect
-PopNeuroveg ~~ 1*PopNeuroveg
-PopDep ~~ PopAnh
-ClinAppDec ~~ 0*ClinAppDec
-ClinSui ~~ 0*ClinSui
+model <- "
+Affect =~ NA*Dep + Guilt + Sui 
+Neuroveg =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
+Affect ~~ 1*Affect
+Neuroveg ~~ 1*Neuroveg
+Dep ~~ Anh
+AppDec ~~ AppInc
 "
-clin_pop.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop.model)
+fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model)
 
-clin_pop.fit$modelfit
-clin_pop.fit$results[c(1,2,3,6,7,9)]
+fit$modelfit
+fit$results[c(1,2,3,6,7,9)]
 
 ```
 
@@ -357,16 +321,15 @@ clin_pop.fit$results[c(1,2,3,6,7,9)]
 
 Compare symptom factors against each external phenotype. Single regression of each external phenotype on each symptom or symptom cluster.
 
-```{r pop_ext, cache=TRUE}
+```{r ext_glue, cache=TRUE}
 
-pop_ext.glue <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-PopAffect =~ NA*PopDep + PopGuilt + PopSui
-PopNeuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-ClinSoma ~~ 1*ClinSoma
-PopAffect ~~ 1*PopAffect
-PopNeuroveg ~~ 1*PopNeuroveg
-PopDep ~~ PopAnh
+ext.glue <- "
+Affect =~ NA*Dep + Guilt + Sui 
+Neuroveg =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
+Affect ~~ 1*Affect
+Neuroveg ~~ 1*Neuroveg
+Dep ~~ Anh
+AppDec ~~ AppInc
 AlcDep ~ {symptom}
 Anxiety ~  {symptom}
 BIP ~ {symptom}
@@ -381,88 +344,66 @@ Sleep ~ {symptom}
 Smoking ~ {symptom}
 "
 
-ext.model_list <- lapply(c('ClinSoma', 'ClinAppDec', 'ClinSui', 'PopAffect', 'PopNeuroveg'), function(symptom) str_glue_data(list(symptom=symptom), pop_ext.glue))
+ext.model_list <- lapply(c('Affect', 'Neuroveg'), function(symptom) str_glue_data(list(symptom=symptom), ext.glue))
 
 ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
 
 ```
 
-```{r pop_ext_loadings}
+```{r ext_loadings}
 
-clin_pop_ext_full <-
+ext_full <-
 bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinAppDec', 'ClinSui', 'PopAffect', 'PopNeuroveg')) %>%
+filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
 mutate(Beta='Full', Factor=rhs, Phenotype=lhs)
 
 ```
 
-Multiple regression of each phenotype on the clinical/population symptom factors, to estimate relationship after condition on each of the other factors. 
+Multiple regression of each phenotype on symptom factors, to estimate relationship after condition on each of the other factors. 
 
-```{r clin_ext_mult, cache=TRUE}
 
-clin_ext_mult.model <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-ClinSoma ~~ 1*ClinSoma
-AlcDep ~ ClinSoma + ClinAppDec + ClinSui
-Anxiety ~ ClinSoma + ClinAppDec + ClinSui
-BIP ~ ClinSoma + ClinAppDec + ClinSui
-BMI ~ ClinSoma + ClinAppDec + ClinSui
-EA ~ ClinSoma + ClinAppDec + ClinSui
-MD ~ ClinSoma + ClinAppDec + ClinSui
-MDD ~ ClinSoma + ClinAppDec + ClinSui
-Neu ~ ClinSoma + ClinAppDec + ClinSui
-PTSD ~ ClinSoma + ClinAppDec + ClinSui
-Pain ~ ClinSoma + ClinAppDec + ClinSui
-Sleep ~ ClinSoma + ClinAppDec + ClinSui
-Smoking ~ ClinSoma + ClinAppDec + ClinSui
+```{r ext_mult, cache=TRUE}
+
+ext_mult.model <- "
+Affect =~ NA*Dep + Guilt + Sui 
+Neuroveg =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
+Affect ~~ 1*Affect
+Neuroveg ~~ 1*Neuroveg
+Dep ~~ Anh
+AppDec ~~ AppInc
+AlcDep ~ Affect + Neuroveg
+Anxiety ~ Affect + Neuroveg
+BIP ~ Affect + Neuroveg
+BMI ~ Affect + Neuroveg
+EA ~ Affect + Neuroveg
+MD ~ Affect + Neuroveg
+MDD ~ Affect + Neuroveg
+Neu ~ Affect + Neuroveg
+PTSD ~ Affect + Neuroveg
+Pain ~ Affect + Neuroveg
+Sleep ~ Affect + Neuroveg
+Smoking ~ Affect + Neuroveg
 "
-
-clin_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_ext_mult.model)
+ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult.model)
 
 ```
 
+```{r ext_mult_loadings}
 
-```{r pop_ext_mult, cache=TRUE}
-
-pop_ext_mult.model <- "
-PopAffect =~ NA*PopDep + PopGuilt + PopSui
-PopNeuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-PopAffect ~~ 1*PopAffect
-PopNeuroveg ~~ 1*PopNeuroveg
-PopDep ~~ PopAnh
-AlcDep ~ PopAffect + PopNeuroveg
-Anxiety ~ PopAffect + PopNeuroveg
-BIP ~ PopAffect + PopNeuroveg
-BMI ~ PopAffect + PopNeuroveg
-EA ~ PopAffect + PopNeuroveg
-MD ~ PopAffect + PopNeuroveg
-MDD ~ PopAffect + PopNeuroveg
-Neu ~ PopAffect + PopNeuroveg
-PTSD ~ PopAffect + PopNeuroveg
-Pain ~ PopAffect + PopNeuroveg
-Sleep ~ PopAffect + PopNeuroveg
-Smoking ~ PopAffect + PopNeuroveg
-"
-pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_ext_mult.model)
-
-```
-
-```{r pop_ext_mult_loadings}
-
-clin_pop_ext_partial <-
-bind_rows(lapply(list(clin_ext_mult.fit, pop_ext_mult.fit),
+ext_partial <-
+bind_rows(lapply(list(ext_mult.fit),
                  function(fit) fit$results)) %>%
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-  filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinAppDec', 'ClinSui', 'PopAffect', 'PopNeuroveg')) %>%
+  filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
   mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
 
 ```
 
-```{r clin_pop_ex_plot, fig.width=10, fig.height=6}
+```{r ex_plot, fig.width=10, fig.height=6}
 
-ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
-       aes(x=factor(Factor, levels=c('ClinSui', 'ClinAppDec', 'ClinSoma', 'PopNeuroveg', 'PopAffect')),
+ggplot(bind_rows(ext_full, ext_partial),
+       aes(x=factor(Factor, levels=c('Neuroveg', 'Affect')),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Partial', 'Full')),
            shape=factor(Beta, levels=c('Partial', 'Full')),
@@ -471,7 +412,7 @@ ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
 geom_hline(yintercept=0, col='gray') +
 geom_pointrange(position=position_dodge(width=0.5)) +
 facet_wrap(~Phenotype) +
-scale_x_discrete('Symptom/Factor') +
+scale_x_discrete('Factor') +
 scale_y_continuous(expression(r[g]), breaks=c(-1, 0, 1)) +
 scale_color_discrete('Model: ') +
 coord_flip(ylim=c(-1, 1)) +
@@ -487,24 +428,26 @@ labs(color  = "Model: ", shape = "Model: ")
 
 Test for attenuation of correlations
 
-```{r clin_pop_ext_attentuate}
+```{r xt_attentuate}
 
-clin_pop_ext_factor_wide <-
-bind_rows(clin_pop_ext_full, clin_pop_ext_partial) %>%
+ext_factor_wide <-
+bind_rows(ext_full, ext_partial) %>%
 as_tibble() %>%
 select(Factor, Phenotype, STD_Genotype, STD_Genotype_SE, p_value, Beta) %>%
 pivot_wider(id_cols=c(Phenotype, Factor),
             names_from=Beta, 
             values_from=c(STD_Genotype, STD_Genotype_SE, p_value))
 
-clin_pop_ext_attenuation <-     
-clin_pop_ext_factor_wide %>%
+ext_attenuation <-     
+ext_factor_wide %>%
 mutate(rg_full=STD_Genotype_Full, rg_partial=STD_Genotype_Partial,
        se_full=as.numeric(STD_Genotype_SE_Full),
        se_partial=as.numeric(STD_Genotype_SE_Partial)) %>%
 mutate(attenuation_z=(rg_full-rg_partial)/sqrt(se_full^2+se_partial^2)) %>%
 mutate(attenuation_p=2*pnorm(abs(attenuation_z), lower.tail=F)) %>%
 select(Phenotype, Factor, p_value_Full, p_value_Partial, attenuation_p)
+
+knitr::kable(ext_attenuation)
 
 ```
 

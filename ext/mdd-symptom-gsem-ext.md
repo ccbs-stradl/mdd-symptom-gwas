@@ -227,9 +227,11 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
 ```
-## Rows: 15 Columns: 4── Column specification ────────────────────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 4
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -256,9 +258,11 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
 ```
-## Rows: 15 Columns: 2── Column specification ────────────────────────────────────────────────────────────────────────────────────
+## Rows: 15 Columns: 2
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -270,30 +274,19 @@ Load previously calculated symptom prevalences:
 
 
 ```r
-symptoms_sample_prev <- read_tsv(here::here('meta/symptoms_prev.txt'))
+all_covstruct_prefix <- 'all.covstruct'
+all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.'))) 
 ```
 
 ```
-## Rows: 24 Columns: 6── Column specification ────────────────────────────────────────────────────────────────────────────────────
+## Rows: 12 Columns: 5
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
-## chr (3): cohorts, symptom, sumstats
-## dbl (3): Nca, Nco, samp_prev
+## chr (4): filename, sumstats, trait_name, symptom
+## dbl (1): pop_prev
+## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-```
-
-```r
-pop_prevs_w <-
-symptoms_sample_prev %>%
-mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
-                   symptom %in% c('MDD1', 'MDD2') ~ 1.0,
-                   TRUE ~ 0.57)) %>%
-mutate(pop_prev=samp_prev*w) %>%
-select(symptom, cohorts, pop_prev) %>%
-pivot_wider(names_from=cohorts, values_from=pop_prev) %>%
-group_by(symptom) %>%
-mutate(pop_prev=mean(c(AGDS_PGC, ALSPAC_UKB))) %>%
-select(symptom, pop_prev)
 ```
 
 
@@ -303,36 +296,18 @@ Calculate LDSC covariance structure for syptoms used in the combined structural 
 
 
 ```r
-covstruct_prefix <- 'symptoms.external.covstruct'
+covstruct_prefix <- 'all.symptoms.external.covstruct'
 covstruct_r <- here::here('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- here::here('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
 if(!file.exists(covstruct_r)) {
-
-  # list sumstats distribution directories
-  sumstats_files <- list.files(here::here('meta', 'munged'), '.gz', full.names=TRUE)
-
-  # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
-
-  sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
-
-  # symptom files, prevalences, and trait names
-  symptoms_sumstats_prevs <- 
-    symptoms_sample_prev %>%
-    left_join(sumstats_paths, by='sumstats') %>%
-    left_join(pop_prevs_w, by='symptom') %>%
-    left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
-    mutate(Sample=if_else(cohorts=="AGDS_PGC", true='Clin', false='Pop')) %>%
-    mutate(trait_name=paste0(Sample, abbv)) %>%
-    filter(trait_name %in% c('ClinAppDec', 'ClinAppInc',
-                             'ClinSleDec', 'ClinSleInc',
-                             'ClinMotoInc', 'ClinSui',
-                             'PopDep', 'PopGuilt', 'PopSui',
-                             'PopAnh', 'PopAppInc', 'PopAppDec',
-                             'PopSleInc', 'PopSleDec', 'PopFatig',
-                             'PopConc'))
     
+  symptoms_sumstats_prevs <- all_sumstats_prevs %>%
+  left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
+  mutate(samp_prev=0.5) %>%
+  filter(!symptom %in% c('MDD5b')) %>%
+  transmute(filename=here::here(filename), samp_prev, pop_prev, trait_name=abbv)
+
   # external files, prevalences and trait names
   external_sumstats_prevs <-
     tibble(filename=paste(ext_trait_names, 'sumstats', 'gz', sep='.'),
@@ -350,7 +325,7 @@ if(!file.exists(covstruct_r)) {
                              wld=here::here('sumstats/reference/eur_w_ld_chr/'),
                              trait.names=sumstats_prevs$trait_name)
 
-  dput(symptoms_covstruct, covstruct_r, control=c('all', 'digits17'))
+  dput(symptoms_covstruct, covstruct_r, control=c('exact'))
   saveRDS(symptoms_covstruct, covstruct_rds)
   
   # check for exact match of deparsed object
@@ -365,28 +340,21 @@ if(!file.exists(covstruct_r)) {
 
 # Models
 
-## Clinical and population factors
+## Symptom factors
 
 Base model of symptom factors
 
 
 ```r
-clin_pop.model <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-ClinAPPDEC =~ ClinAppDec
-ClinSUI =~ ClinSui
-PopAffect =~ NA*PopDep + PopGuilt + PopSui
-PopNeuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-ClinSoma ~~ 1*ClinSoma
-ClinAPPDEC ~~ 1*ClinAPPDEC
-ClinSUI ~~ 1*ClinSUI
-PopAffect ~~ 1*PopAffect
-PopNeuroveg ~~ 1*PopNeuroveg
-PopDep ~~ PopAnh
-ClinAppDec ~~ 0*ClinAppDec
-ClinSui ~~ 0*ClinSui
+model <- "
+Affect =~ NA*Dep + Guilt + Sui 
+Neuroveg =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
+Affect ~~ 1*Affect
+Neuroveg ~~ 1*Neuroveg
+Dep ~~ Anh
+AppDec ~~ AppInc
 "
-clin_pop.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop.model)
+fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model)
 ```
 
 ```
@@ -394,25 +362,15 @@ clin_pop.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop.
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
-```
-
-```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## clin_pop.model): CFI estimates below 0 should not be trusted, and indicate that
-## the other model fit estimates should be interpreted with caution. A negative CFI
-## estimates typically appears due to negative residual variances.
-```
-
-```
 ## elapsed 
-##   0.561 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0371957759493224 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.40833704981454 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##   0.355 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.012268991311798 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.999664813010093 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## clin_pop.model): A difference greater than .025 was observed pre- and post-
-## smoothing in the genetic covariance matrix. This reflects a large difference
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
+## A difference greater than .025 was observed pre- and post-smoothing for Z-
+## statistics in the genetic covariance matrix. This reflects a large difference
 ## and results should be interpreted with caution!! This can often result from
 ## including low powered traits, and you might consider removing those traits from
 ## the model. If you are going to run a multivariate GWAS we strongly recommend
@@ -420,84 +378,56 @@ clin_pop.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_pop.
 ```
 
 ```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## clin_pop.model): A difference greater than .025 was observed pre- and post-
-## smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-## large difference and results should be interpreted with caution!! This can often
-## result from including low powered traits, and you might consider removing those
-## traits from the model. If you are going to run a multivariate GWAS we strongly
-## recommend setting the smooth_check argument to true to check smoothing for each
-## SNP.
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  5.37435660617714e-12 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.999664813010093 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```r
-clin_pop.fit$modelfit
+fit$modelfit
 ```
 
 <div class="kable-table">
 
-|   |    chisq| df| p_chisq|      AIC|       CFI|     SRMR|
-|:--|--------:|--:|-------:|--------:|---------:|--------:|
-|df | 3448.373| 97|       0| 3526.373| -0.115681| 1.102515|
+|   |   chisq| df| p_chisq|     AIC|       CFI|    SRMR|
+|:--|-------:|--:|-------:|-------:|---------:|-------:|
+|df | 6435359| 41|       0| 6435409| 0.9903801| 0.14504|
 
 </div>
 
 ```r
-clin_pop.fit$results[c(1,2,3,6,7,9)]
+fit$results[c(1,2,3,6,7,9)]
 ```
 
 <div class="kable-table">
 
-|   |lhs         |op |rhs         | STD_Genotype|STD_Genotype_SE    |   p_value|
-|:--|:-----------|:--|:-----------|------------:|:------------------|---------:|
-|11 |ClinSoma    |=~ |ClinAppInc  |    0.6172062|0.234390128455356  | 0.0084563|
-|13 |ClinSoma    |=~ |ClinSleDec  |    0.3285757|0.242923623806449  | 0.1761654|
-|14 |ClinSoma    |=~ |ClinSleInc  |    0.5015887|0.309176037184633  | 0.1047204|
-|12 |ClinSoma    |=~ |ClinMotoInc |    0.5274582|0.226754280285284  | 0.0200104|
-|25 |PopAffect   |=~ |PopDep      |    0.7283865|0.0732018717045886 | 0.0000000|
-|26 |PopAffect   |=~ |PopGuilt    |    0.7787916|0.0971568272755929 | 0.0000000|
-|27 |PopAffect   |=~ |PopSui      |    0.6749296|0.100534114227696  | 0.0000000|
-|38 |PopNeuroveg |=~ |PopAnh      |    0.8028936|0.0670154414621765 | 0.0000000|
-|40 |PopNeuroveg |=~ |PopAppInc   |    0.4533701|0.0752779490778464 | 0.0000000|
-|39 |PopNeuroveg |=~ |PopAppDec   |    0.1924650|0.0838677628122933 | 0.0217413|
-|44 |PopNeuroveg |=~ |PopSleInc   |    0.4974910|0.0965615899155911 | 0.0000003|
-|43 |PopNeuroveg |=~ |PopSleDec   |    0.6510688|0.105169851039874  | 0.0000000|
-|42 |PopNeuroveg |=~ |PopFatig    |    0.7454795|0.0913072363565786 | 0.0000000|
-|41 |PopNeuroveg |=~ |PopConc     |    0.7882212|0.0948884391549751 | 0.0000000|
-|34 |PopDep      |~~ |PopAnh      |    0.4209173|0.0996560173775461 | 0.0000240|
-|7  |ClinAppInc  |~~ |ClinAppInc  |    0.6190542|0.401558790372386  | 0.1231666|
-|9  |ClinSleDec  |~~ |ClinSleDec  |    0.8920397|0.541607943124004  | 0.0995651|
-|10 |ClinSleInc  |~~ |ClinSleInc  |    0.7484088|0.834442725160734  | 0.3697854|
-|8  |ClinMotoInc |~~ |ClinMotoInc |    0.7217901|0.516345053208815  | 0.1621531|
-|35 |PopDep      |~~ |PopDep      |    0.4694540|0.132257516933774  | 0.0003860|
-|37 |PopGuilt    |~~ |PopGuilt    |    0.3934857|0.191936555717315  | 0.0403605|
-|48 |PopSui      |~~ |PopSui      |    0.5444704|0.260221006990255  | 0.0364101|
-|30 |PopAnh      |~~ |PopAnh      |    0.3553602|0.117065889942085  | 0.0024009|
-|32 |PopAppInc   |~~ |PopAppInc   |    0.7944563|0.155436064272031  | 0.0000003|
-|31 |PopAppDec   |~~ |PopAppDec   |    0.9629531|0.231638254044186  | 0.0000322|
-|47 |PopSleInc   |~~ |PopSleInc   |    0.7525028|0.262559880735371  | 0.0041561|
-|46 |PopSleDec   |~~ |PopSleDec   |    0.5761092|0.311828552354797  | 0.0646733|
-|36 |PopFatig    |~~ |PopFatig    |    0.4442614|0.293619849236642  | 0.1302702|
-|33 |PopConc     |~~ |PopConc     |    0.3787081|0.25274231558892   | 0.1340361|
-|15 |ClinSoma    |~~ |ClinAPPDEC  |    0.0477607|0.231902170703992  | 0.8368009|
-|17 |ClinSoma    |~~ |ClinSUI     |    0.1357271|0.272372423144733  | 0.6182715|
-|18 |ClinSoma    |~~ |PopAffect   |    0.0951326|0.154827174950651  | 0.5389527|
-|19 |ClinSoma    |~~ |PopNeuroveg |    0.5096870|0.201608268600431  | 0.0114669|
-|4  |ClinAPPDEC  |~~ |ClinSUI     |   -0.0556810|0.189730900415623  | 0.7691499|
-|5  |ClinAPPDEC  |~~ |PopAffect   |   -0.1106276|0.100359337548617  | 0.2703286|
-|6  |ClinAPPDEC  |~~ |PopNeuroveg |   -0.0939028|0.10294879486182   | 0.3617013|
-|23 |ClinSUI     |~~ |PopAffect   |    0.7341822|0.132496233531843  | 0.0000000|
-|24 |ClinSUI     |~~ |PopNeuroveg |    0.6615762|0.12073058532012   | 0.0000000|
-|29 |PopAffect   |~~ |PopNeuroveg |    0.8228287|0.0610313347858923 | 0.0000000|
-|1  |ClinAPPDEC  |=~ |ClinAppDec  |    1.0000000|                   |        NA|
-|20 |ClinSUI     |=~ |ClinSui     |    1.0000000|                   |        NA|
-|16 |ClinSoma    |~~ |ClinSoma    |    1.0000000|                   |        NA|
-|3  |ClinAPPDEC  |~~ |ClinAPPDEC  |    1.0000000|                   |        NA|
-|22 |ClinSUI     |~~ |ClinSUI     |    1.0000000|                   |        NA|
-|28 |PopAffect   |~~ |PopAffect   |    1.0000000|                   |        NA|
-|45 |PopNeuroveg |~~ |PopNeuroveg |    1.0000000|                   |        NA|
-|2  |ClinAppDec  |~~ |ClinAppDec  |    0.0000000|                   |        NA|
-|21 |ClinSui     |~~ |ClinSui     |    0.0000000|                   |        NA|
+|   |lhs      |op |rhs      | STD_Genotype|STD_Genotype_SE    |   p_value|
+|:--|:--------|:--|:--------|------------:|:------------------|---------:|
+|1  |Affect   |=~ |Dep      |    0.9346899|0.0418165780540045 | 0.0000000|
+|2  |Affect   |=~ |Guilt    |    0.5693982|0.0768551891357806 | 0.0000000|
+|3  |Affect   |=~ |Sui      |    1.0142456|0.0441027971997104 | 0.0000000|
+|16 |Neuroveg |=~ |Anh      |    1.0649120|0.0506224666230989 | 0.0000000|
+|17 |Neuroveg |=~ |AppDec   |    0.1245924|0.08492274949662   | 0.1423428|
+|18 |Neuroveg |=~ |AppInc   |    0.4052140|0.0735214910114586 | 0.0000000|
+|22 |Neuroveg |=~ |SleDec   |    0.4012336|0.100688234328776  | 0.0000675|
+|23 |Neuroveg |=~ |SleInc   |    0.4978289|0.0929525076201506 | 0.0000001|
+|21 |Neuroveg |=~ |MotoInc  |    0.2226107|0.124996236492471  | 0.0749237|
+|20 |Neuroveg |=~ |Fatig    |    0.6400736|0.1104692203408    | 0.0000000|
+|19 |Neuroveg |=~ |Conc     |    0.7265481|0.10746027127426   | 0.0000000|
+|11 |Dep      |~~ |Anh      |    0.1240322|0.0496939825465514 | 0.0125633|
+|8  |AppDec   |~~ |AppInc   |   -0.4653825|0.110008004956431  | 0.0000233|
+|12 |Dep      |~~ |Dep      |    0.1263557|0.0403247385040629 | 0.0017276|
+|14 |Guilt    |~~ |Guilt    |    0.6757879|0.154561104532794  | 0.0000123|
+|27 |Sui      |~~ |Sui      |   -0.0286939|0.0448053470363941 | 0.5219405|
+|6  |Anh      |~~ |Anh      |   -0.1340375|0.0873264140976875 | 0.1248017|
+|7  |AppDec   |~~ |AppDec   |    0.9844729|0.197581113582005  | 0.0000006|
+|9  |AppInc   |~~ |AppInc   |    0.8358021|0.136625049432531  | 0.0000000|
+|25 |SleDec   |~~ |SleDec   |    0.8390131|0.228063103140124  | 0.0002343|
+|26 |SleInc   |~~ |SleInc   |    0.7521655|0.235380696163257  | 0.0013957|
+|15 |MotoInc  |~~ |MotoInc  |    0.9504406|0.465515618018077  | 0.0411808|
+|13 |Fatig    |~~ |Fatig    |    0.5903071|0.362190674805687  | 0.1031385|
+|10 |Conc     |~~ |Conc     |    0.4721290|0.290738001968433  | 0.1043980|
+|5  |Affect   |~~ |Neuroveg |    0.7881978|0.0459416355471037 | 0.0000000|
+|4  |Affect   |~~ |Affect   |    1.0000000|                   |        NA|
+|24 |Neuroveg |~~ |Neuroveg |    1.0000000|                   |        NA|
 
 </div>
 
@@ -507,14 +437,13 @@ Compare symptom factors against each external phenotype. Single regression of ea
 
 
 ```r
-pop_ext.glue <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-PopAffect =~ NA*PopDep + PopGuilt + PopSui
-PopNeuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-ClinSoma ~~ 1*ClinSoma
-PopAffect ~~ 1*PopAffect
-PopNeuroveg ~~ 1*PopNeuroveg
-PopDep ~~ PopAnh
+ext.glue <- "
+Affect =~ NA*Dep + Guilt + Sui 
+Neuroveg =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
+Affect ~~ 1*Affect
+Neuroveg ~~ 1*Neuroveg
+Dep ~~ Anh
+AppDec ~~ AppInc
 AlcDep ~ {symptom}
 Anxiety ~  {symptom}
 BIP ~ {symptom}
@@ -529,7 +458,7 @@ Sleep ~ {symptom}
 Smoking ~ {symptom}
 "
 
-ext.model_list <- lapply(c('ClinSoma', 'ClinAppDec', 'ClinSui', 'PopAffect', 'PopNeuroveg'), function(symptom) str_glue_data(list(symptom=symptom), pop_ext.glue))
+ext.model_list <- lapply(c('Affect', 'Neuroveg'), function(symptom) str_glue_data(list(symptom=symptom), ext.glue))
 
 ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
 ```
@@ -540,18 +469,8 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  13.196 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0344079562870582 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.72652759701003 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-```
-
-```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
-## A difference greater than .025 was observed pre- and post-smoothing in the
-## genetic covariance matrix. This reflects a large difference and results should
-## be interpreted with caution!! This can often result from including low powered
-## traits, and you might consider removing those traits from the model. If you are
-## going to run a multivariate GWAS we strongly recommend setting the smooth_check
-## argument to true to check smoothing for each SNP.
+##   9.219 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0169738442961599 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.55656040065943 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -565,24 +484,17 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```
 
 ```
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  8.06659379999066e-12 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.55656040065943 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ## [1] "Running primary model"
 ## [1] "Calculating CFI"
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  14.318 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.038381882103906 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.7596833326812 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##   8.494 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0169738442961599 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.55656040065943 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
-## A difference greater than .025 was observed pre- and post-smoothing in the
-## genetic covariance matrix. This reflects a large difference and results should
-## be interpreted with caution!! This can often result from including low powered
-## traits, and you might consider removing those traits from the model. If you are
-## going to run a multivariate GWAS we strongly recommend setting the smooth_check
-## argument to true to check smoothing for each SNP.
-
 ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
 ## A difference greater than .025 was observed pre- and post-smoothing for Z-
 ## statistics in the genetic covariance matrix. This reflects a large difference
@@ -593,120 +505,44 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```
 
 ```
-## [1] "Running primary model"
-## [1] "Calculating CFI"
-## [1] "Calculating Standardized Results"
-## [1] "Calculating SRMR"
-## elapsed 
-##  14.056 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.034730283398439 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.74014666206664 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-```
-
-```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
-## A difference greater than .025 was observed pre- and post-smoothing in the
-## genetic covariance matrix. This reflects a large difference and results should
-## be interpreted with caution!! This can often result from including low powered
-## traits, and you might consider removing those traits from the model. If you are
-## going to run a multivariate GWAS we strongly recommend setting the smooth_check
-## argument to true to check smoothing for each SNP.
-
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
-## A difference greater than .025 was observed pre- and post-smoothing for Z-
-## statistics in the genetic covariance matrix. This reflects a large difference
-## and results should be interpreted with caution!! This can often result from
-## including low powered traits, and you might consider removing those traits from
-## the model. If you are going to run a multivariate GWAS we strongly recommend
-## setting the smooth_check argument to true to check smoothing for each SNP.
-```
-
-```
-## [1] "Running primary model"
-## [1] "Calculating CFI"
-## [1] "Calculating Standardized Results"
-## [1] "Calculating SRMR"
-## elapsed 
-##  12.458 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0344079562870582 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.72652759701003 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-```
-
-```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
-## A difference greater than .025 was observed pre- and post-smoothing in the
-## genetic covariance matrix. This reflects a large difference and results should
-## be interpreted with caution!! This can often result from including low powered
-## traits, and you might consider removing those traits from the model. If you are
-## going to run a multivariate GWAS we strongly recommend setting the smooth_check
-## argument to true to check smoothing for each SNP.
-
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
-## A difference greater than .025 was observed pre- and post-smoothing for Z-
-## statistics in the genetic covariance matrix. This reflects a large difference
-## and results should be interpreted with caution!! This can often result from
-## including low powered traits, and you might consider removing those traits from
-## the model. If you are going to run a multivariate GWAS we strongly recommend
-## setting the smooth_check argument to true to check smoothing for each SNP.
-```
-
-```
-## [1] "Running primary model"
-## [1] "Calculating CFI"
-## [1] "Calculating Standardized Results"
-## [1] "Calculating SRMR"
-## elapsed 
-##   12.21 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0344079562870582 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.72652759701003 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-```
-
-```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
-## A difference greater than .025 was observed pre- and post-smoothing in the
-## genetic covariance matrix. This reflects a large difference and results should
-## be interpreted with caution!! This can often result from including low powered
-## traits, and you might consider removing those traits from the model. If you are
-## going to run a multivariate GWAS we strongly recommend setting the smooth_check
-## argument to true to check smoothing for each SNP.
-
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model):
-## A difference greater than .025 was observed pre- and post-smoothing for Z-
-## statistics in the genetic covariance matrix. This reflects a large difference
-## and results should be interpreted with caution!! This can often result from
-## including low powered traits, and you might consider removing those traits from
-## the model. If you are going to run a multivariate GWAS we strongly recommend
-## setting the smooth_check argument to true to check smoothing for each SNP.
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  8.06659379999066e-12 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.55656040065943 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 
 ```r
-clin_pop_ext_full <-
+ext_full <-
 bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinAppDec', 'ClinSui', 'PopAffect', 'PopNeuroveg')) %>%
+filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
 mutate(Beta='Full', Factor=rhs, Phenotype=lhs)
 ```
 
-Multiple regression of each phenotype on the clinical/population symptom factors, to estimate relationship after condition on each of the other factors. 
+Multiple regression of each phenotype on symptom factors, to estimate relationship after condition on each of the other factors. 
+
 
 
 ```r
-clin_ext_mult.model <- "
-ClinSoma =~ NA*ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc
-ClinSoma ~~ 1*ClinSoma
-AlcDep ~ ClinSoma + ClinAppDec + ClinSui
-Anxiety ~ ClinSoma + ClinAppDec + ClinSui
-BIP ~ ClinSoma + ClinAppDec + ClinSui
-BMI ~ ClinSoma + ClinAppDec + ClinSui
-EA ~ ClinSoma + ClinAppDec + ClinSui
-MD ~ ClinSoma + ClinAppDec + ClinSui
-MDD ~ ClinSoma + ClinAppDec + ClinSui
-Neu ~ ClinSoma + ClinAppDec + ClinSui
-PTSD ~ ClinSoma + ClinAppDec + ClinSui
-Pain ~ ClinSoma + ClinAppDec + ClinSui
-Sleep ~ ClinSoma + ClinAppDec + ClinSui
-Smoking ~ ClinSoma + ClinAppDec + ClinSui
+ext_mult.model <- "
+Affect =~ NA*Dep + Guilt + Sui 
+Neuroveg =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
+Affect ~~ 1*Affect
+Neuroveg ~~ 1*Neuroveg
+Dep ~~ Anh
+AppDec ~~ AppInc
+AlcDep ~ Affect + Neuroveg
+Anxiety ~ Affect + Neuroveg
+BIP ~ Affect + Neuroveg
+BMI ~ Affect + Neuroveg
+EA ~ Affect + Neuroveg
+MD ~ Affect + Neuroveg
+MDD ~ Affect + Neuroveg
+Neu ~ Affect + Neuroveg
+PTSD ~ Affect + Neuroveg
+Pain ~ Affect + Neuroveg
+Sleep ~ Affect + Neuroveg
+Smoking ~ Affect + Neuroveg
 "
-
-clin_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_ext_mult.model)
+ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult.model)
 ```
 
 ```
@@ -715,23 +551,13 @@ clin_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   4.967 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0393892077130448 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.76209824965711 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  10.779 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0169738442961599 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.55656040065943 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
 ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## clin_ext_mult.model): A difference greater than .025 was observed pre- and post-
-## smoothing in the genetic covariance matrix. This reflects a large difference
-## and results should be interpreted with caution!! This can often result from
-## including low powered traits, and you might consider removing those traits from
-## the model. If you are going to run a multivariate GWAS we strongly recommend
-## setting the smooth_check argument to true to check smoothing for each SNP.
-```
-
-```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## clin_ext_mult.model): A difference greater than .025 was observed pre- and post-
+## ext_mult.model): A difference greater than .025 was observed pre- and post-
 ## smoothing for Z-statistics in the genetic covariance matrix. This reflects a
 ## large difference and results should be interpreted with caution!! This can often
 ## result from including low powered traits, and you might consider removing those
@@ -740,66 +566,24 @@ clin_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin
 ## SNP.
 ```
 
-
-
-```r
-pop_ext_mult.model <- "
-PopAffect =~ NA*PopDep + PopGuilt + PopSui
-PopNeuroveg =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-PopAffect ~~ 1*PopAffect
-PopNeuroveg ~~ 1*PopNeuroveg
-PopDep ~~ PopAnh
-AlcDep ~ PopAffect + PopNeuroveg
-Anxiety ~ PopAffect + PopNeuroveg
-BIP ~ PopAffect + PopNeuroveg
-BMI ~ PopAffect + PopNeuroveg
-EA ~ PopAffect + PopNeuroveg
-MD ~ PopAffect + PopNeuroveg
-MDD ~ PopAffect + PopNeuroveg
-Neu ~ PopAffect + PopNeuroveg
-PTSD ~ PopAffect + PopNeuroveg
-Pain ~ PopAffect + PopNeuroveg
-Sleep ~ PopAffect + PopNeuroveg
-Smoking ~ PopAffect + PopNeuroveg
-"
-pop_ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_ext_mult.model)
 ```
-
-```
-## [1] "Running primary model"
-## [1] "Calculating CFI"
-## [1] "Calculating Standardized Results"
-## [1] "Calculating SRMR"
-## elapsed 
-##   6.599 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.00517308597252561 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  0.516833421474208 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-```
-
-```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## pop_ext_mult.model): A difference greater than .025 was observed pre- and post-
-## smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-## large difference and results should be interpreted with caution!! This can often
-## result from including low powered traits, and you might consider removing those
-## traits from the model. If you are going to run a multivariate GWAS we strongly
-## recommend setting the smooth_check argument to true to check smoothing for each
-## SNP.
+## [1] "The V matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  8.06659379999066e-12 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.55656040065943 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 
 ```r
-clin_pop_ext_partial <-
-bind_rows(lapply(list(clin_ext_mult.fit, pop_ext_mult.fit),
+ext_partial <-
+bind_rows(lapply(list(ext_mult.fit),
                  function(fit) fit$results)) %>%
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-  filter(lhs %in% ext_trait_names, rhs %in% c('ClinSoma', 'ClinAppDec', 'ClinSui', 'PopAffect', 'PopNeuroveg')) %>%
+  filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
   mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
 ```
 
 
 ```r
-ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
-       aes(x=factor(Factor, levels=c('ClinSui', 'ClinAppDec', 'ClinSoma', 'PopNeuroveg', 'PopAffect')),
+ggplot(bind_rows(ext_full, ext_partial),
+       aes(x=factor(Factor, levels=c('Neuroveg', 'Affect')),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Partial', 'Full')),
            shape=factor(Beta, levels=c('Partial', 'Full')),
@@ -808,7 +592,7 @@ ggplot(bind_rows(clin_pop_ext_full, clin_pop_ext_partial),
 geom_hline(yintercept=0, col='gray') +
 geom_pointrange(position=position_dodge(width=0.5)) +
 facet_wrap(~Phenotype) +
-scale_x_discrete('Symptom/Factor') +
+scale_x_discrete('Factor') +
 scale_y_continuous(expression(r[g]), breaks=c(-1, 0, 1)) +
 scale_color_discrete('Model: ') +
 coord_flip(ylim=c(-1, 1)) +
@@ -821,27 +605,58 @@ theme(axis.text.y=element_text(size=16),
 labs(color  = "Model: ", shape = "Model: ")
 ```
 
-![](mdd-symptom-gsem-ext_files/figure-html/clin_pop_ex_plot-1.png)<!-- -->
+![](mdd-symptom-gsem-ext_files/figure-html/ex_plot-1.png)<!-- -->
 
 Test for attenuation of correlations
 
 
 ```r
-clin_pop_ext_factor_wide <-
-bind_rows(clin_pop_ext_full, clin_pop_ext_partial) %>%
+ext_factor_wide <-
+bind_rows(ext_full, ext_partial) %>%
 as_tibble() %>%
 select(Factor, Phenotype, STD_Genotype, STD_Genotype_SE, p_value, Beta) %>%
 pivot_wider(id_cols=c(Phenotype, Factor),
             names_from=Beta, 
             values_from=c(STD_Genotype, STD_Genotype_SE, p_value))
 
-clin_pop_ext_attenuation <-     
-clin_pop_ext_factor_wide %>%
+ext_attenuation <-     
+ext_factor_wide %>%
 mutate(rg_full=STD_Genotype_Full, rg_partial=STD_Genotype_Partial,
        se_full=as.numeric(STD_Genotype_SE_Full),
        se_partial=as.numeric(STD_Genotype_SE_Partial)) %>%
 mutate(attenuation_z=(rg_full-rg_partial)/sqrt(se_full^2+se_partial^2)) %>%
 mutate(attenuation_p=2*pnorm(abs(attenuation_z), lower.tail=F)) %>%
 select(Phenotype, Factor, p_value_Full, p_value_Partial, attenuation_p)
+
+knitr::kable(ext_attenuation)
 ```
+
+
+
+|Phenotype |Factor   | p_value_Full| p_value_Partial| attenuation_p|
+|:---------|:--------|------------:|---------------:|-------------:|
+|AlcDep    |Affect   |    0.0000000|       0.8572762|     0.0389326|
+|Anxiety   |Affect   |    0.0000000|       0.0002500|     0.3410308|
+|BIP       |Affect   |    0.0000000|       0.0003135|     0.8891126|
+|BMI       |Affect   |    0.0000000|       0.0009640|     0.0000164|
+|EA        |Affect   |    0.0282616|       0.0001838|     0.0000611|
+|MD        |Affect   |    0.0000000|       0.0000000|     0.5249785|
+|MDD       |Affect   |    0.0000000|       0.0530510|     0.1170647|
+|Neu       |Affect   |    0.0000000|       0.0000138|     0.4636198|
+|PTSD      |Affect   |    0.0000000|       0.6031148|     0.0015224|
+|Pain      |Affect   |    0.0000000|       0.4476454|     0.0000297|
+|Sleep     |Affect   |    0.0000003|       0.0301509|     0.0007504|
+|Smoking   |Affect   |    0.0000000|       0.1747041|     0.0008212|
+|AlcDep    |Neuroveg |    0.0000000|       0.0183389|     0.8032962|
+|Anxiety   |Neuroveg |    0.0000000|       0.2545301|     0.0007630|
+|BIP       |Neuroveg |    0.0000000|       0.8039234|     0.0010461|
+|BMI       |Neuroveg |    0.0000000|       0.0000052|     0.0005910|
+|EA        |Neuroveg |    0.0210440|       0.0000281|     0.0001324|
+|MD        |Neuroveg |    0.0000000|       0.4211121|     0.0000016|
+|MDD       |Neuroveg |    0.0000000|       0.0859834|     0.0968941|
+|Neu       |Neuroveg |    0.0000000|       0.3831970|     0.0000887|
+|PTSD      |Neuroveg |    0.0000000|       0.0003979|     0.7083431|
+|Pain      |Neuroveg |    0.0000000|       0.0000054|     0.3638756|
+|Sleep     |Neuroveg |    0.0000002|       0.0003561|     0.0303283|
+|Smoking   |Neuroveg |    0.0000000|       0.0001570|     0.1365478|
 
