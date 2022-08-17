@@ -6,7 +6,12 @@
 #$ -e logs
 #$ -cwd
 
-#. /etc/profile.d/modules.sh
-#module load igmm/apps/R/4.1.0
+. /etc/profile.d/modules.sh
+module load igmm/apps/R/4.1.0
 
 Rscript commonfactorgwas.R $1
+
+## submit as
+# qsub -N all_affect commonfactorgwas.sh all.affect
+# qsub -N all_common commonfactorgwas.sh all.common
+# qsub -N all_neuro commonfactorgwas.sh all.neuroveg
