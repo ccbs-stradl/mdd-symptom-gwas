@@ -40,8 +40,8 @@ group_by(symptom) %>%
 mutate(pop_prev=mean(c(AGDS_PGC, ALSPAC_UKB))) %>%
 select(symptom, pop_prev)
 
-covstruct_prefix <- 'all.common.covstruct'
-sumstats_prefix <- 'all.common.sumstats'
+covstruct_prefix <- 'all.neuroveg.covstruct'
+sumstats_prefix <- 'all.neuroveg.sumstats'
 covstruct_r <- here::here('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- here::here('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 sumstats_rds <- here::here('sumstats', paste(sumstats_prefix, 'rds', sep='.'))
@@ -62,7 +62,7 @@ left_join(dsm_mdd_symptoms_labels, by='ref') %>%
 mutate(daner=file.path('meta', 'distribution', sumstats, paste0('daner_', sumstats, '.gz')))
 
 sumstats_keep <- sumstats_prevs %>%
-filter(ref %in% c('MDD1', 'MDD2', 'MDD3a', 'MDD3b', 'MDD4a', 'MDD4b', 'MDD6', 'MDD7', 'MDD8', 'MDD9'))
+filter(ref %in% c('MDD2', 'MDD3a', 'MDD3b', 'MDD4a', 'MDD4b', 'MDD6', 'MDD8'))
 
 write_tsv(sumstats_prevs, here::here('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 	
