@@ -23,7 +23,7 @@ registerDoParallel(cores=4)
 List of symptoms PRS:
 ```{r prsice, warning=FALSE, message=FALSE}
 
-gwas_symptoms <- c('clinappdec', 'clinappinc', 'clinsui', 'popneuroveg', 'popaffect')
+gwas_symptoms <- c('common', 'affect', 'neuroveg')
 names(gwas_symptoms) <- gwas_symptoms
 
 gwas_all_scores <- lapply(gwas_symptoms,
@@ -44,7 +44,7 @@ cidi <- local({load(here::here("prs/genscot/phenotypes/GS_Recontact/STRADL.Rdata
 agesex <- read_csv(here::here("prs/genscot//phenotypes/agesex_all.csv"))
 pedigree <- read_csv(here::here("prs/genscot/phenotypes/PEDIGREES/pedigree_031116.csv"))
 pcs <- read_csv(here::here("prs/genscot/genetics/genotypes/GS20K_PLINK_files/PCA_MDS_components/HM3mds2R.mds.csv"))
-unrel <- read_table(here::here('prs/genscot/genetics/genotypes/GRMs/unrelated_t0.025_7388/QCdGS20K_unrelated_t0.025.grm.id'), col_names=c('FID', 'IID'))
+unrel <- read_table(here::here('prs/genscot/genetics/genotypes/GS20K_GCTA_basic/GRMs/unrelated_t0.025_7388/QCdGS20K_unrelated_t0.025.grm.id'), col_names=c('FID', 'IID'))
 
 ```
 
@@ -206,7 +206,7 @@ Examine models
 model_coefs <-
 plyr::ldply(prs_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
 as_tibble() %>%
-mutate(GWAS=recode(discovery, clinappdec='ClinAppDec', clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
+mutate(GWAS=recode(discovery, common='Common','affect'='Affective', 'neuroveg'='Neuroveg'))
 
 model_coefs_prs <-
 model_coefs %>% filter(str_detect(term, 'PRS')) %>%
@@ -235,7 +235,7 @@ Calculate the main PRS effect of each symptom as main PRS effect + symptom inter
 symptom_model_coefs <-
 plyr::ldply(prs_symptoms_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
 as_tibble() %>%
-mutate(GWAS=recode(discovery, clinappdec='ClinAppDec', clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
+mutate(GWAS=recode(discovery, common='Common','affect'='Affective', 'neuroveg'='Neuroveg'))
 
 # covariance of each parameter with 'PRS'
 symptom_model_coefs_vcov <-
