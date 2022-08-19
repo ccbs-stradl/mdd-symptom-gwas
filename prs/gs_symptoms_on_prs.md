@@ -1,9 +1,13 @@
 Polygenic index of depression symptoms predicting symptoms in GS
 ================
 
-Polygenic indices were calculated from GWAS of MDD symptoms and common factor GWAS of sypmtoms in MDD-enriched ("Clinical") and non-enriched ("Population") cohorts and tested in Generation Scotland (GS). PRS were calculated using clumping and thresholding in PRSice at the p-value that was the best predictor of MDD status in GS.
+Polygenic indices were calculated from GWAS of MDD symptoms and common
+factor GWAS of sypmtoms in MDD-enriched (“Clinical”) and non-enriched
+(“Population”) cohorts and tested in Generation Scotland (GS). PRS were
+calculated using clumping and thresholding in PRSice at the p-value that
+was the best predictor of MDD status in GS.
 
-``` {.r}
+``` r
 library(dplyr)
 library(readr)
 library(tidyr)
@@ -18,8 +22,8 @@ registerDoParallel(cores=4)
 
 List of symptoms PRS:
 
-``` {.r}
-gwas_symptoms <- c('clinappdec', 'clinappinc', 'clinsui', 'popneuroveg', 'popaffect')
+``` r
+gwas_symptoms <- c('common', 'affect', 'neuroveg')
 names(gwas_symptoms) <- gwas_symptoms
 
 gwas_all_scores <- lapply(gwas_symptoms,
@@ -31,18 +35,18 @@ gwas_all_scores <- lapply(gwas_symptoms,
 
 Get GenScot MDD SCID and CIDI symptoms, covariates, pedigree, and PCs
 
-``` {.r}
+``` r
 scid <- read_csv(here::here('prs/genscot/phenotypes/SCID_QC_201113_GWASids.csv'))
 cidi <- local({load(here::here("prs/genscot/phenotypes/GS_Recontact/STRADL.Rdata")); return(as_tibble(x))})
 agesex <- read_csv(here::here("prs/genscot//phenotypes/agesex_all.csv"))
 pedigree <- read_csv(here::here("prs/genscot/phenotypes/PEDIGREES/pedigree_031116.csv"))
 pcs <- read_csv(here::here("prs/genscot/genetics/genotypes/GS20K_PLINK_files/PCA_MDS_components/HM3mds2R.mds.csv"))
-unrel <- read_table(here::here('prs/genscot/genetics/genotypes/GRMs/unrelated_t0.025_7388/QCdGS20K_unrelated_t0.025.grm.id'), col_names=c('FID', 'IID'))
+unrel <- read_table(here::here('prs/genscot/genetics/genotypes/GS20K_GCTA_basic/GRMs/unrelated_t0.025_7388/QCdGS20K_unrelated_t0.025.grm.id'), col_names=c('FID', 'IID'))
 ```
 
 Harmonise the symptoms data
 
-``` {.r}
+``` r
 scid_threshold <- function(A) {
     case_when(A == 1 ~ 0L,
               A %in% 2:3 ~ 1L,
@@ -90,7 +94,7 @@ mutate(instrument='CIDI', timeframe='past')
 
 Arrange symptoms into repeated measures format
 
-``` {.r}
+``` r
 symptom_values <- 
 bind_rows(scid_symptoms_current, scid_symptoms_past, cidi_symptoms_past) %>%
 pivot_longer(cols=Dep:Sui, names_to='symptom', values_to='affected') %>%
@@ -104,7 +108,7 @@ mutate(sym_factorAvN=case_when(symptom %in% c("Dep", "Guilt", "Sui") ~ 0.5,
 
 Age at measurement occasions
 
-``` {.r}
+``` r
 covariates <- 
 bind_rows(
 agesex %>% transmute(IID=id, age, instrument='SCID'),
@@ -117,7 +121,7 @@ mutate(agez=scale(age)[,1])
 
 Transform PRS to long format
 
-``` {.r}
+``` r
 gwas_all_scores_long <-
 plyr::ldply(gwas_all_scores, I) %>%
 pivot_longer(cols=PT0.025:PT1, names_to='threshold', values_to='PRS') %>%
@@ -126,14 +130,14 @@ rename(discovery=.id)
 
 Unrelated sample
 
-``` {.r}
+``` r
 unrel_scores <- gwas_all_scores_long %>%
 filter(IID %in% unrel$IID)
 ```
 
 Compare to polygenic indices.
 
-``` {.r}
+``` r
 prs_models <-
 plyr::dlply(.data=unrel_scores,
 .variables=c("discovery", "threshold"),
@@ -154,7 +158,7 @@ plyr::dlply(.data=unrel_scores,
 })
 ```
 
-``` {.r}
+``` r
 prs_symptoms_models <-
 plyr::dlply(.data=unrel_scores,
 .variables=c("discovery", "threshold"),
@@ -177,12 +181,12 @@ plyr::dlply(.data=unrel_scores,
 
 Examine models
 
-``` {.r}
+``` r
 # constant (fixed) effects
 model_coefs <-
 plyr::ldply(prs_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
 as_tibble() %>%
-mutate(GWAS=recode(discovery, clinappdec='ClinAppDec', clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
+mutate(GWAS=recode(discovery, common='Common','affect'='Affective', 'neuroveg'='Neuroveg'))
 
 model_coefs_prs <-
 model_coefs %>% filter(str_detect(term, 'PRS')) %>%
@@ -196,63 +200,48 @@ facet_wrap(~GWAS) +
 coord_flip() 
 ```
 
-![](gs_symptoms_on_prs_files/figure-markdown_github/model_coefs-1.png)
+![](gs_symptoms_on_prs_files/figure-gfm/model_coefs-1.png)<!-- -->
 
-``` {.r}
+``` r
 knitr::kable(transmute(model_coefs_prs, GWAS, threshold, term, OR=exp(Estimate), p=`Pr(>|z|)`))
 ```
 
-|GWAS|threshold|term|OR|p|
-|:---|:--------|:---|--:|--:|
-|ClinAppDec|PT0.025|PRS|1.0614845|0.1124148|
-|ClinAppDec|PT0.025|PRS:sym\_factorAvN|0.9787194|0.4616943|
-|ClinAppDec|PT0.05|PRS|1.0361054|0.3405219|
-|ClinAppDec|PT0.05|PRS:sym\_factorAvN|1.0098907|0.7355331|
-|ClinAppDec|PT0.25|PRS|1.0112465|0.7647333|
-|ClinAppDec|PT0.25|PRS:sym\_factorAvN|1.0093797|0.7487283|
-|ClinAppDec|PT1|PRS|1.0168573|0.6544264|
-|ClinAppDec|PT1|PRS:sym\_factorAvN|1.0066876|0.8188185|
-|ClinAppInc|PT0.025|PRS|1.0408023|0.2888492|
-|ClinAppInc|PT0.025|PRS:sym\_factorAvN|0.9768721|0.4298300|
-|ClinAppInc|PT0.05|PRS|1.0598607|0.1188696|
-|ClinAppInc|PT0.05|PRS:sym\_factorAvN|0.9775282|0.4379462|
-|ClinAppInc|PT0.25|PRS|1.0575183|0.1356409|
-|ClinAppInc|PT0.25|PRS:sym\_factorAvN|0.9799584|0.4940266|
-|ClinAppInc|PT1|PRS|1.0714634|0.0660642|
-|ClinAppInc|PT1|PRS:sym\_factorAvN|0.9827690|0.5558703|
-|ClinSui|PT0.025|PRS|1.0459557|0.2438166|
-|ClinSui|PT0.025|PRS:sym\_factorAvN|1.0336103|0.2732946|
-|ClinSui|PT0.05|PRS|1.0525217|0.1775579|
-|ClinSui|PT0.05|PRS:sym\_factorAvN|1.0252204|0.4014535|
-|ClinSui|PT0.25|PRS|1.0681784|0.0777211|
-|ClinSui|PT0.25|PRS:sym\_factorAvN|1.0261239|0.3778977|
-|ClinSui|PT1|PRS|1.0683434|0.0793154|
-|ClinSui|PT1|PRS:sym\_factorAvN|1.0358280|0.2341116|
-|PopAffective|PT0.025|PRS|1.1989989|0.0000013|
-|PopAffective|PT0.025|PRS:sym\_factorAvN|1.0147178|0.6202011|
-|PopAffective|PT0.05|PRS|1.1991867|0.0000013|
-|PopAffective|PT0.05|PRS:sym\_factorAvN|1.0237656|0.4270381|
-|PopAffective|PT0.25|PRS|1.1938576|0.0000024|
-|PopAffective|PT0.25|PRS:sym\_factorAvN|1.0397280|0.1870953|
-|PopAffective|PT1|PRS|1.1931402|0.0000024|
-|PopAffective|PT1|PRS:sym\_factorAvN|1.0346661|0.2478150|
-|PopNeuroveg|PT0.025|PRS|1.1747609|0.0000178|
-|PopNeuroveg|PT0.025|PRS:sym\_factorAvN|0.9391459|0.0349905|
-|PopNeuroveg|PT0.05|PRS|1.1889955|0.0000030|
-|PopNeuroveg|PT0.05|PRS:sym\_factorAvN|0.9463898|0.0594825|
-|PopNeuroveg|PT0.25|PRS|1.2082195|0.0000006|
-|PopNeuroveg|PT0.25|PRS:sym\_factorAvN|0.9792118|0.4807518|
-|PopNeuroveg|PT1|PRS|1.2030911|0.0000011|
-|PopNeuroveg|PT1|PRS:sym\_factorAvN|0.9689395|0.2908640|
+| GWAS      | threshold | term               |        OR |         p |
+|:----------|:----------|:-------------------|----------:|----------:|
+| Affective | PT0.025   | PRS                | 1.1760511 | 0.0000143 |
+| Affective | PT0.025   | PRS:sym\_factorAvN | 1.0023834 | 0.9350329 |
+| Affective | PT0.05    | PRS                | 1.2060095 | 0.0000005 |
+| Affective | PT0.05    | PRS:sym\_factorAvN | 1.0067712 | 0.8171435 |
+| Affective | PT0.25    | PRS                | 1.2101166 | 0.0000003 |
+| Affective | PT0.25    | PRS:sym\_factorAvN | 1.0238820 | 0.4211057 |
+| Affective | PT1       | PRS                | 1.2037651 | 0.0000007 |
+| Affective | PT1       | PRS:sym\_factorAvN | 1.0249834 | 0.4032966 |
+| Common    | PT0.025   | PRS                | 1.2242598 | 0.0000001 |
+| Common    | PT0.025   | PRS:sym\_factorAvN | 0.9847304 | 0.5981993 |
+| Common    | PT0.05    | PRS                | 1.2431135 | 0.0000000 |
+| Common    | PT0.05    | PRS:sym\_factorAvN | 0.9807205 | 0.5038332 |
+| Common    | PT0.25    | PRS                | 1.2680322 | 0.0000000 |
+| Common    | PT0.25    | PRS:sym\_factorAvN | 0.9881621 | 0.6906078 |
+| Common    | PT1       | PRS                | 1.2446259 | 0.0000000 |
+| Common    | PT1       | PRS:sym\_factorAvN | 0.9924157 | 0.7981386 |
+| Neuroveg  | PT0.025   | PRS                | 1.1837722 | 0.0000061 |
+| Neuroveg  | PT0.025   | PRS:sym\_factorAvN | 0.9493376 | 0.0747268 |
+| Neuroveg  | PT0.05    | PRS                | 1.2429641 | 0.0000000 |
+| Neuroveg  | PT0.05    | PRS:sym\_factorAvN | 0.9503324 | 0.0825037 |
+| Neuroveg  | PT0.25    | PRS                | 1.2382356 | 0.0000000 |
+| Neuroveg  | PT0.25    | PRS:sym\_factorAvN | 0.9607852 | 0.1702502 |
+| Neuroveg  | PT1       | PRS                | 1.2245287 | 0.0000001 |
+| Neuroveg  | PT1       | PRS:sym\_factorAvN | 0.9716859 | 0.3305370 |
 
-Calculate the main PRS effect of each symptom as main PRS effect + symptom interaction, accounting for covariance of coefficients
+Calculate the main PRS effect of each symptom as main PRS effect +
+symptom interaction, accounting for covariance of coefficients
 
-``` {.r}
+``` r
 # constant (fixed) effects
 symptom_model_coefs <-
 plyr::ldply(prs_symptoms_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
 as_tibble() %>%
-mutate(GWAS=recode(discovery, clinappdec='ClinAppDec', clinappinc='ClinAppInc', clinsui='ClinSui', 'popaffect'='PopAffective', 'popneuroveg'='PopNeuroveg'))
+mutate(GWAS=recode(discovery, common='Common','affect'='Affective', 'neuroveg'='Neuroveg'))
 
 # covariance of each parameter with 'PRS'
 symptom_model_coefs_vcov <-
@@ -329,9 +318,9 @@ coord_flip() +
 theme_bw()
 ```
 
-![](gs_symptoms_on_prs_files/figure-markdown_github/symptom_model_coefs-1.png)
+![](gs_symptoms_on_prs_files/figure-gfm/symptom_model_coefs-1.png)<!-- -->
 
-``` {.r}
+``` r
 ggplot(symptom_model_coefs_present %>% filter(threshold=='PT0.05'),
     aes(x=Symptom,
         y=exp(beta), ymax=exp(beta+qn*se), ymin=exp(beta-qn*se))) +
@@ -345,11 +334,11 @@ theme_bw() +
 theme(axis.text.y=element_text(size='14'))
 ```
 
-![](gs_symptoms_on_prs_files/figure-markdown_github/symptom_model_coefs_p05-1.png)
+![](gs_symptoms_on_prs_files/figure-gfm/symptom_model_coefs_p05-1.png)<!-- -->
 
 Get sample counts
 
-``` {.r}
+``` r
 symptom_values %>%
 group_by(IID, symptom) %>%
 summarise(affected=max(affected)) %>%
