@@ -1,13 +1,9 @@
 Polygenic index of depression symptoms predicting symptoms in GS
 ================
 
-Polygenic indices were calculated from GWAS of MDD symptoms and common
-factor GWAS of sypmtoms in MDD-enriched (“Clinical”) and non-enriched
-(“Population”) cohorts and tested in Generation Scotland (GS). PRS were
-calculated using clumping and thresholding in PRSice at the p-value that
-was the best predictor of MDD status in GS.
+Polygenic indices were calculated from GWAS of MDD symptoms and common factor GWAS of sypmtoms in MDD-enriched ("Clinical") and non-enriched ("Population") cohorts and tested in Generation Scotland (GS). PRS were calculated using clumping and thresholding in PRSice at the p-value that was the best predictor of MDD status in GS.
 
-``` r
+``` {.r}
 library(dplyr)
 library(readr)
 library(tidyr)
@@ -22,7 +18,7 @@ registerDoParallel(cores=4)
 
 List of symptoms PRS:
 
-``` r
+``` {.r}
 gwas_symptoms <- c('common', 'affect', 'neuroveg')
 names(gwas_symptoms) <- gwas_symptoms
 
@@ -35,7 +31,7 @@ gwas_all_scores <- lapply(gwas_symptoms,
 
 Get GenScot MDD SCID and CIDI symptoms, covariates, pedigree, and PCs
 
-``` r
+``` {.r}
 scid <- read_csv(here::here('prs/genscot/phenotypes/SCID_QC_201113_GWASids.csv'))
 cidi <- local({load(here::here("prs/genscot/phenotypes/GS_Recontact/STRADL.Rdata")); return(as_tibble(x))})
 agesex <- read_csv(here::here("prs/genscot//phenotypes/agesex_all.csv"))
@@ -46,7 +42,7 @@ unrel <- read_table(here::here('prs/genscot/genetics/genotypes/GS20K_GCTA_basic/
 
 Harmonise the symptoms data
 
-``` r
+``` {.r}
 scid_threshold <- function(A) {
     case_when(A == 1 ~ 0L,
               A %in% 2:3 ~ 1L,
@@ -94,7 +90,7 @@ mutate(instrument='CIDI', timeframe='past')
 
 Arrange symptoms into repeated measures format
 
-``` r
+``` {.r}
 symptom_values <- 
 bind_rows(scid_symptoms_current, scid_symptoms_past, cidi_symptoms_past) %>%
 pivot_longer(cols=Dep:Sui, names_to='symptom', values_to='affected') %>%
@@ -108,12 +104,13 @@ mutate(sym_factorAvN=case_when(symptom %in% c("Dep", "Guilt", "Sui") ~ 0.5,
 
 Age at measurement occasions
 
-``` r
+``` {.r}
 covariates <- 
 bind_rows(
 agesex %>% transmute(IID=id, age, instrument='SCID'),
 cidi %>% transmute(IID=id, age=Age, instrument='CIDI')) %>%
 inner_join(agesex %>% select(IID=id, sex)) %>%
+inner_join(pcs, by=('id'='IID')) %>%
 mutate(agez=scale(age)[,1])
 ```
 
@@ -121,7 +118,7 @@ mutate(agez=scale(age)[,1])
 
 Transform PRS to long format
 
-``` r
+``` {.r}
 gwas_all_scores_long <-
 plyr::ldply(gwas_all_scores, I) %>%
 pivot_longer(cols=PT0.025:PT1, names_to='threshold', values_to='PRS') %>%
@@ -130,14 +127,14 @@ rename(discovery=.id)
 
 Unrelated sample
 
-``` r
+``` {.r}
 unrel_scores <- gwas_all_scores_long %>%
 filter(IID %in% unrel$IID)
 ```
 
 Compare to polygenic indices.
 
-``` r
+``` {.r}
 prs_models <-
 plyr::dlply(.data=unrel_scores,
 .variables=c("discovery", "threshold"),
@@ -150,6 +147,7 @@ plyr::dlply(.data=unrel_scores,
     
     # fit repeated measures family model
     sym_thresh_model <- glmer(affected ~ 1 + agez + sex +
+        C1 + C2 + C3 + C4 +
         timeframe + symptom +
         PRS + PRS:sym_factorAvN +
         (1|IID), data=sym_prs, family='binomial', nAGQ=0)
@@ -158,7 +156,7 @@ plyr::dlply(.data=unrel_scores,
 })
 ```
 
-``` r
+``` {.r}
 prs_symptoms_models <-
 plyr::dlply(.data=unrel_scores,
 .variables=c("discovery", "threshold"),
@@ -171,6 +169,7 @@ plyr::dlply(.data=unrel_scores,
     
     # fit repeated measures family model
     sym_thresh_model <- glmer(affected ~ 1 + agez + sex +
+        C1 + C2 + C3 + C4 +
         timeframe + symptom +
         PRS + PRS:symptom +
         (1|IID), data=sym_prs, family='binomial', nAGQ=0)
@@ -181,7 +180,7 @@ plyr::dlply(.data=unrel_scores,
 
 Examine models
 
-``` r
+``` {.r}
 # constant (fixed) effects
 model_coefs <-
 plyr::ldply(prs_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
@@ -200,43 +199,42 @@ facet_wrap(~GWAS) +
 coord_flip() 
 ```
 
-![](gs_symptoms_on_prs_files/figure-gfm/model_coefs-1.png)<!-- -->
+![](gs_symptoms_on_prs_files/figure-markdown_github/model_coefs-1.png)
 
-``` r
+``` {.r}
 knitr::kable(transmute(model_coefs_prs, GWAS, threshold, term, OR=exp(Estimate), p=`Pr(>|z|)`))
 ```
 
-| GWAS      | threshold | term               |        OR |         p |
-|:----------|:----------|:-------------------|----------:|----------:|
-| Affective | PT0.025   | PRS                | 1.1760511 | 0.0000143 |
-| Affective | PT0.025   | PRS:sym\_factorAvN | 1.0023834 | 0.9350329 |
-| Affective | PT0.05    | PRS                | 1.2060095 | 0.0000005 |
-| Affective | PT0.05    | PRS:sym\_factorAvN | 1.0067712 | 0.8171435 |
-| Affective | PT0.25    | PRS                | 1.2101166 | 0.0000003 |
-| Affective | PT0.25    | PRS:sym\_factorAvN | 1.0238820 | 0.4211057 |
-| Affective | PT1       | PRS                | 1.2037651 | 0.0000007 |
-| Affective | PT1       | PRS:sym\_factorAvN | 1.0249834 | 0.4032966 |
-| Common    | PT0.025   | PRS                | 1.2242598 | 0.0000001 |
-| Common    | PT0.025   | PRS:sym\_factorAvN | 0.9847304 | 0.5981993 |
-| Common    | PT0.05    | PRS                | 1.2431135 | 0.0000000 |
-| Common    | PT0.05    | PRS:sym\_factorAvN | 0.9807205 | 0.5038332 |
-| Common    | PT0.25    | PRS                | 1.2680322 | 0.0000000 |
-| Common    | PT0.25    | PRS:sym\_factorAvN | 0.9881621 | 0.6906078 |
-| Common    | PT1       | PRS                | 1.2446259 | 0.0000000 |
-| Common    | PT1       | PRS:sym\_factorAvN | 0.9924157 | 0.7981386 |
-| Neuroveg  | PT0.025   | PRS                | 1.1837722 | 0.0000061 |
-| Neuroveg  | PT0.025   | PRS:sym\_factorAvN | 0.9493376 | 0.0747268 |
-| Neuroveg  | PT0.05    | PRS                | 1.2429641 | 0.0000000 |
-| Neuroveg  | PT0.05    | PRS:sym\_factorAvN | 0.9503324 | 0.0825037 |
-| Neuroveg  | PT0.25    | PRS                | 1.2382356 | 0.0000000 |
-| Neuroveg  | PT0.25    | PRS:sym\_factorAvN | 0.9607852 | 0.1702502 |
-| Neuroveg  | PT1       | PRS                | 1.2245287 | 0.0000001 |
-| Neuroveg  | PT1       | PRS:sym\_factorAvN | 0.9716859 | 0.3305370 |
+|GWAS|threshold|term|OR|p|
+|:---|:--------|:---|--:|--:|
+|Affective|PT0.025|PRS|1.1807455|0.0000103|
+|Affective|PT0.025|PRS:sym\_factorAvN|1.0009552|0.9739443|
+|Affective|PT0.05|PRS|1.2111563|0.0000003|
+|Affective|PT0.05|PRS:sym\_factorAvN|1.0032325|0.9120191|
+|Affective|PT0.25|PRS|1.2149004|0.0000002|
+|Affective|PT0.25|PRS:sym\_factorAvN|1.0203745|0.4919715|
+|Affective|PT1|PRS|1.2078716|0.0000005|
+|Affective|PT1|PRS:sym\_factorAvN|1.0253866|0.3964038|
+|Common|PT0.025|PRS|1.2301321|0.0000000|
+|Common|PT0.025|PRS:sym\_factorAvN|0.9899789|0.7304696|
+|Common|PT0.05|PRS|1.2485850|0.0000000|
+|Common|PT0.05|PRS:sym\_factorAvN|0.9866260|0.6439492|
+|Common|PT0.25|PRS|1.2728336|0.0000000|
+|Common|PT0.25|PRS:sym\_factorAvN|0.9892555|0.7184299|
+|Common|PT1|PRS|1.2493043|0.0000000|
+|Common|PT1|PRS:sym\_factorAvN|0.9959750|0.8923869|
+|Neuroveg|PT0.025|PRS|1.1865440|0.0000053|
+|Neuroveg|PT0.025|PRS:sym\_factorAvN|0.9459191|0.0568833|
+|Neuroveg|PT0.05|PRS|1.2466731|0.0000000|
+|Neuroveg|PT0.05|PRS:sym\_factorAvN|0.9460055|0.0586212|
+|Neuroveg|PT0.25|PRS|1.2413916|0.0000000|
+|Neuroveg|PT0.25|PRS:sym\_factorAvN|0.9589762|0.1516581|
+|Neuroveg|PT1|PRS|1.2279930|0.0000001|
+|Neuroveg|PT1|PRS:sym\_factorAvN|0.9730771|0.3561293|
 
-Calculate the main PRS effect of each symptom as main PRS effect +
-symptom interaction, accounting for covariance of coefficients
+Calculate the main PRS effect of each symptom as main PRS effect + symptom interaction, accounting for covariance of coefficients
 
-``` r
+``` {.r}
 # constant (fixed) effects
 symptom_model_coefs <-
 plyr::ldply(prs_symptoms_models, function(model) as_tibble(summary(model)$coefficients, rownames='term')) %>%
@@ -318,9 +316,9 @@ coord_flip() +
 theme_bw()
 ```
 
-![](gs_symptoms_on_prs_files/figure-gfm/symptom_model_coefs-1.png)<!-- -->
+![](gs_symptoms_on_prs_files/figure-markdown_github/symptom_model_coefs-1.png)
 
-``` r
+``` {.r}
 ggplot(symptom_model_coefs_present %>% filter(threshold=='PT0.05'),
     aes(x=Symptom,
         y=exp(beta), ymax=exp(beta+qn*se), ymin=exp(beta-qn*se))) +
@@ -334,11 +332,11 @@ theme_bw() +
 theme(axis.text.y=element_text(size='14'))
 ```
 
-![](gs_symptoms_on_prs_files/figure-gfm/symptom_model_coefs_p05-1.png)<!-- -->
+![](gs_symptoms_on_prs_files/figure-markdown_github/symptom_model_coefs_p05-1.png)
 
 Get sample counts
 
-``` r
+``` {.r}
 symptom_values %>%
 group_by(IID, symptom) %>%
 summarise(affected=max(affected)) %>%
