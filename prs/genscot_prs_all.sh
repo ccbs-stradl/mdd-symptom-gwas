@@ -16,6 +16,8 @@ OUT=$2
 
 # load PRSice
 module load igmm/apps/PRSice/2.1.11 
+module unload igmm/apps/R/3.5.1
+module load  igmm/apps/R/4.1.0
 
 Rscript $(which PRSice.R) \
 --prsice $(which PRSice_linux) \
