@@ -123,6 +123,7 @@ bind_rows(
 agesex %>% transmute(IID=id, age, instrument='SCID'),
 cidi %>% transmute(IID=id, age=Age, instrument='CIDI')) %>%
 inner_join(agesex %>% select(IID=id, sex)) %>%
+inner_join(pcs, by=('id'='IID')) %>%
 mutate(agez=scale(age)[,1])
 
 
@@ -164,6 +165,7 @@ plyr::dlply(.data=unrel_scores,
     
     # fit repeated measures family model
     sym_thresh_model <- glmer(affected ~ 1 + agez + sex +
+        C1 + C2 + C3 + C4 +
         timeframe + symptom +
         PRS + PRS:sym_factorAvN +
         (1|IID), data=sym_prs, family='binomial', nAGQ=0)
@@ -188,6 +190,7 @@ plyr::dlply(.data=unrel_scores,
     
     # fit repeated measures family model
     sym_thresh_model <- glmer(affected ~ 1 + agez + sex +
+        C1 + C2 + C3 + C4 +
         timeframe + symptom +
         PRS + PRS:symptom +
         (1|IID), data=sym_prs, family='binomial', nAGQ=0)
