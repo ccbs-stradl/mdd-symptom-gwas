@@ -604,6 +604,31 @@ ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=8, height=4)
 
 ```
 
+Full meta analysis only
+
+```{r mdd_symptom_gsem_h2}
+
+ggplot(filter(sumstats_h2_labels, cohorts=='All'),
+        aes(x=abbv,
+            y=h2,
+            ymin=h2+se*qnorm(0.025),
+            ymax=h2+se*qnorm(0.975))) +
+geom_hline(yintercept=0, col='grey') +
+geom_pointrange(position=position_dodge(width=0.5)) + 
+scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$abbv))) +
+scale_y_continuous(expression(h[SNP]^2)) +
+coord_flip(ylim=c(-.05, .1)) +
+theme_bw() + 
+theme(axis.text.y=element_text(size=13),
+  axis.text.x=element_text(size=10),
+  axis.title=element_text(size=12),
+  legend.title=element_text(size=12),
+  legend.text=element_text(size=14))
+  
+ggsave('mdd-symptom-gsem_files/symptoms_h2_snp_all.png', width=8, height=4)
+
+```
+
 
 ## Genetic correlation with MDD
 
