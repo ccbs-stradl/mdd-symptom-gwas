@@ -228,7 +228,7 @@ MDD9;Suicidality;Suicidality;Sui
 
 ```
 ## Rows: 15 Columns: 4
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
 ## 
@@ -259,7 +259,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 
 ```
 ## Rows: 15 Columns: 2
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
 ## 
@@ -280,7 +280,7 @@ all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'p
 
 ```
 ## Rows: 12 Columns: 5
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (4): filename, sumstats, trait_name, symptom
 ## dbl (1): pop_prev
@@ -514,7 +514,7 @@ ext_full <-
 bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
 filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
-mutate(Beta='Full', Factor=rhs, Phenotype=lhs)
+mutate(Beta='Total', Factor=rhs, Phenotype=lhs)
 ```
 
 Multiple regression of each phenotype on symptom factors, to estimate relationship after condition on each of the other factors. 
@@ -577,7 +577,7 @@ bind_rows(lapply(list(ext_mult.fit),
                  function(fit) fit$results)) %>%
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
   filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
-  mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
+  mutate(Beta='Specific', Factor=rhs, Phenotype=lhs)
 ```
 
 
@@ -585,8 +585,8 @@ bind_rows(lapply(list(ext_mult.fit),
 ggplot(bind_rows(ext_full, ext_partial),
        aes(x=factor(Factor, levels=c('Neuroveg', 'Affect')),
            y=STD_Genotype,
-           color=factor(Beta, levels=c('Partial', 'Full')),
-           shape=factor(Beta, levels=c('Partial', 'Full')),
+           color=factor(Beta, levels=c('Specific', 'Total')),
+           shape=factor(Beta, levels=c('Specific', 'Total')),
           ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
           ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
 geom_hline(yintercept=0, col='gray') +
@@ -594,7 +594,7 @@ geom_pointrange(position=position_dodge(width=0.5)) +
 facet_wrap(~Phenotype) +
 scale_x_discrete('Factor') +
 scale_y_continuous(expression(r[g]), breaks=c(-1, 0, 1)) +
-scale_color_discrete('Model: ') +
+scale_color_discrete('Correlation: ') +
 coord_flip(ylim=c(-1, 1)) +
 theme_bw() +
 theme(axis.text.y=element_text(size=16),
@@ -602,7 +602,7 @@ theme(axis.text.y=element_text(size=16),
       legend.title=element_text(size=12),
       legend.text=element_text(size=14),
       legend.position='top') +
-labs(color  = "Model: ", shape = "Model: ")
+labs(color  = "Correlation: ", shape = "Correlation: ")
 ```
 
 ![](mdd-symptom-gsem-ext_files/figure-html/ex_plot-1.png)<!-- -->
@@ -621,42 +621,42 @@ pivot_wider(id_cols=c(Phenotype, Factor),
 
 ext_attenuation <-     
 ext_factor_wide %>%
-mutate(rg_full=STD_Genotype_Full, rg_partial=STD_Genotype_Partial,
-       se_full=as.numeric(STD_Genotype_SE_Full),
-       se_partial=as.numeric(STD_Genotype_SE_Partial)) %>%
-mutate(attenuation_z=(rg_full-rg_partial)/sqrt(se_full^2+se_partial^2)) %>%
+mutate(rg_Total=STD_Genotype_Total, rg_Specific=STD_Genotype_Specific,
+       se_Total=as.numeric(STD_Genotype_SE_Total),
+       se_Specific=as.numeric(STD_Genotype_SE_Specific)) %>%
+mutate(attenuation_z=(rg_Total-rg_Specific)/sqrt(se_Total^2+se_Specific^2)) %>%
 mutate(attenuation_p=2*pnorm(abs(attenuation_z), lower.tail=F)) %>%
-select(Phenotype, Factor, p_value_Full, p_value_Partial, attenuation_p)
+select(Phenotype, Factor, p_value_Total, p_value_Specific, attenuation_p)
 
 knitr::kable(ext_attenuation)
 ```
 
 
 
-|Phenotype |Factor   | p_value_Full| p_value_Partial| attenuation_p|
-|:---------|:--------|------------:|---------------:|-------------:|
-|AlcDep    |Affect   |    0.0000000|       0.8572762|     0.0389326|
-|Anxiety   |Affect   |    0.0000000|       0.0002500|     0.3410308|
-|BIP       |Affect   |    0.0000000|       0.0003135|     0.8891126|
-|BMI       |Affect   |    0.0000000|       0.0009640|     0.0000164|
-|EA        |Affect   |    0.0282616|       0.0001838|     0.0000611|
-|MD        |Affect   |    0.0000000|       0.0000000|     0.5249785|
-|MDD       |Affect   |    0.0000000|       0.0530510|     0.1170647|
-|Neu       |Affect   |    0.0000000|       0.0000138|     0.4636198|
-|PTSD      |Affect   |    0.0000000|       0.6031148|     0.0015224|
-|Pain      |Affect   |    0.0000000|       0.4476454|     0.0000297|
-|Sleep     |Affect   |    0.0000003|       0.0301509|     0.0007504|
-|Smoking   |Affect   |    0.0000000|       0.1747041|     0.0008212|
-|AlcDep    |Neuroveg |    0.0000000|       0.0183389|     0.8032962|
-|Anxiety   |Neuroveg |    0.0000000|       0.2545301|     0.0007630|
-|BIP       |Neuroveg |    0.0000000|       0.8039234|     0.0010461|
-|BMI       |Neuroveg |    0.0000000|       0.0000052|     0.0005910|
-|EA        |Neuroveg |    0.0210440|       0.0000281|     0.0001324|
-|MD        |Neuroveg |    0.0000000|       0.4211121|     0.0000016|
-|MDD       |Neuroveg |    0.0000000|       0.0859834|     0.0968941|
-|Neu       |Neuroveg |    0.0000000|       0.3831970|     0.0000887|
-|PTSD      |Neuroveg |    0.0000000|       0.0003979|     0.7083431|
-|Pain      |Neuroveg |    0.0000000|       0.0000054|     0.3638756|
-|Sleep     |Neuroveg |    0.0000002|       0.0003561|     0.0303283|
-|Smoking   |Neuroveg |    0.0000000|       0.0001570|     0.1365478|
+|Phenotype |Factor   | p_value_Total| p_value_Specific| attenuation_p|
+|:---------|:--------|-------------:|----------------:|-------------:|
+|AlcDep    |Affect   |     0.0000000|        0.8572762|     0.0389326|
+|Anxiety   |Affect   |     0.0000000|        0.0002500|     0.3410308|
+|BIP       |Affect   |     0.0000000|        0.0003135|     0.8891126|
+|BMI       |Affect   |     0.0000000|        0.0009640|     0.0000164|
+|EA        |Affect   |     0.0282616|        0.0001838|     0.0000611|
+|MD        |Affect   |     0.0000000|        0.0000000|     0.5249785|
+|MDD       |Affect   |     0.0000000|        0.0530510|     0.1170647|
+|Neu       |Affect   |     0.0000000|        0.0000138|     0.4636198|
+|PTSD      |Affect   |     0.0000000|        0.6031148|     0.0015224|
+|Pain      |Affect   |     0.0000000|        0.4476454|     0.0000297|
+|Sleep     |Affect   |     0.0000003|        0.0301509|     0.0007504|
+|Smoking   |Affect   |     0.0000000|        0.1747041|     0.0008212|
+|AlcDep    |Neuroveg |     0.0000000|        0.0183389|     0.8032962|
+|Anxiety   |Neuroveg |     0.0000000|        0.2545301|     0.0007630|
+|BIP       |Neuroveg |     0.0000000|        0.8039234|     0.0010461|
+|BMI       |Neuroveg |     0.0000000|        0.0000052|     0.0005910|
+|EA        |Neuroveg |     0.0210440|        0.0000281|     0.0001324|
+|MD        |Neuroveg |     0.0000000|        0.4211121|     0.0000016|
+|MDD       |Neuroveg |     0.0000000|        0.0859834|     0.0968941|
+|Neu       |Neuroveg |     0.0000000|        0.3831970|     0.0000887|
+|PTSD      |Neuroveg |     0.0000000|        0.0003979|     0.7083431|
+|Pain      |Neuroveg |     0.0000000|        0.0000054|     0.3638756|
+|Sleep     |Neuroveg |     0.0000002|        0.0003561|     0.0303283|
+|Smoking   |Neuroveg |     0.0000000|        0.0001570|     0.1365478|
 

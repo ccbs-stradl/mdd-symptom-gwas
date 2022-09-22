@@ -356,7 +356,7 @@ ext_full <-
 bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
 filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
-mutate(Beta='Full', Factor=rhs, Phenotype=lhs)
+mutate(Beta='Total', Factor=rhs, Phenotype=lhs)
 
 ```
 
@@ -396,7 +396,7 @@ bind_rows(lapply(list(ext_mult.fit),
                  function(fit) fit$results)) %>%
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
   filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
-  mutate(Beta='Partial', Factor=rhs, Phenotype=lhs)
+  mutate(Beta='Specific', Factor=rhs, Phenotype=lhs)
 
 ```
 
@@ -405,8 +405,8 @@ bind_rows(lapply(list(ext_mult.fit),
 ggplot(bind_rows(ext_full, ext_partial),
        aes(x=factor(Factor, levels=c('Neuroveg', 'Affect')),
            y=STD_Genotype,
-           color=factor(Beta, levels=c('Partial', 'Full')),
-           shape=factor(Beta, levels=c('Partial', 'Full')),
+           color=factor(Beta, levels=c('Specific', 'Total')),
+           shape=factor(Beta, levels=c('Specific', 'Total')),
           ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
           ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
 geom_hline(yintercept=0, col='gray') +
@@ -414,7 +414,7 @@ geom_pointrange(position=position_dodge(width=0.5)) +
 facet_wrap(~Phenotype) +
 scale_x_discrete('Factor') +
 scale_y_continuous(expression(r[g]), breaks=c(-1, 0, 1)) +
-scale_color_discrete('Model: ') +
+scale_color_discrete('Correlation: ') +
 coord_flip(ylim=c(-1, 1)) +
 theme_bw() +
 theme(axis.text.y=element_text(size=16),
@@ -422,7 +422,7 @@ theme(axis.text.y=element_text(size=16),
       legend.title=element_text(size=12),
       legend.text=element_text(size=14),
       legend.position='top') +
-labs(color  = "Model: ", shape = "Model: ")
+labs(color  = "Correlation: ", shape = "Correlation: ")
 
 ```
 
@@ -440,12 +440,12 @@ pivot_wider(id_cols=c(Phenotype, Factor),
 
 ext_attenuation <-     
 ext_factor_wide %>%
-mutate(rg_full=STD_Genotype_Full, rg_partial=STD_Genotype_Partial,
-       se_full=as.numeric(STD_Genotype_SE_Full),
-       se_partial=as.numeric(STD_Genotype_SE_Partial)) %>%
-mutate(attenuation_z=(rg_full-rg_partial)/sqrt(se_full^2+se_partial^2)) %>%
+mutate(rg_Total=STD_Genotype_Total, rg_Specific=STD_Genotype_Specific,
+       se_Total=as.numeric(STD_Genotype_SE_Total),
+       se_Specific=as.numeric(STD_Genotype_SE_Specific)) %>%
+mutate(attenuation_z=(rg_Total-rg_Specific)/sqrt(se_Total^2+se_Specific^2)) %>%
 mutate(attenuation_p=2*pnorm(abs(attenuation_z), lower.tail=F)) %>%
-select(Phenotype, Factor, p_value_Full, p_value_Partial, attenuation_p)
+select(Phenotype, Factor, p_value_Total, p_value_Specific, attenuation_p)
 
 knitr::kable(ext_attenuation)
 
