@@ -163,7 +163,7 @@ plyr::dlply(.data=unrel_scores,
     inner_join(symptom_values, by='IID') %>%
     left_join(covariates, by=c('IID', 'instrument'))
     
-    # fit repeated measures family model
+    # fit repeated measures model
     sym_thresh_model <- glmer(affected ~ 1 + agez + sex +
         C1 + C2 + C3 + C4 +
         timeframe + symptom +
@@ -172,7 +172,6 @@ plyr::dlply(.data=unrel_scores,
 
     return(sym_thresh_model)
 })
-
 
 ```
 
@@ -188,7 +187,7 @@ plyr::dlply(.data=unrel_scores,
     inner_join(symptom_values, by='IID') %>%
     left_join(covariates, by=c('IID', 'instrument'))
     
-    # fit repeated measures family model
+    # fit repeated measures model
     sym_thresh_model <- glmer(affected ~ 1 + agez + sex +
         C1 + C2 + C3 + C4 +
         timeframe + symptom +
@@ -294,10 +293,10 @@ mutate(Symptom=factor(symptom,
                       levels=c('Conc', 'Fatig', 'Moto',
                                'Sle', 'App', 'Anh',
                                'Sui', 'Guilt', 'Dep')),
-        Discovery=paste('Discovery:', GWAS),
+        Discovery=factor(paste('Discovery:', GWAS), levels=c('Discovery: Common', 'Discovery: Affective', 'Discovery: Neuroveg')),
         cluster=if_else(symptom %in% c('Dep', 'Guilt', 'Sui'),
                     true='Affective', false='Neurovegetative'),
-        Cluster=paste('Cluster:', cluster))
+        Cluster=paste('Target:', cluster))
         
 # quantiles for 95% CIs  
 qn <- qnorm(0.025, lower.tail=F)
