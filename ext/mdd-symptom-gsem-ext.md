@@ -228,7 +228,7 @@ MDD9;Suicidality;Suicidality;Sui
 
 ```
 ## Rows: 15 Columns: 4
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
 ## 
@@ -259,7 +259,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 
 ```
 ## Rows: 15 Columns: 2
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
 ## 
@@ -280,7 +280,7 @@ all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'p
 
 ```
 ## Rows: 12 Columns: 5
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (4): filename, sumstats, trait_name, symptom
 ## dbl (1): pop_prev
@@ -579,6 +579,68 @@ bind_rows(lapply(list(ext_mult.fit),
   filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
   mutate(Beta='Specific', Factor=rhs, Phenotype=lhs)
 ```
+
+
+```r
+bind_rows(ext_full, ext_partial) %>%
+select(Factor, Phenotype, Model=Beta, STD_Genotype, STD_Genotype_SE, p_value) %>%
+arrange(Factor, Phenotype, Model)
+```
+
+<div class="kable-table">
+
+|Factor   |Phenotype |Model    | STD_Genotype|STD_Genotype_SE    |   p_value|
+|:--------|:---------|:--------|------------:|:------------------|---------:|
+|Affect   |AlcDep    |Specific |   -0.0456183|0.253636372857857  | 0.8572762|
+|Affect   |AlcDep    |Total    |    0.4999482|0.0739961337392351 | 0.0000000|
+|Affect   |Anxiety   |Specific |    0.5438069|0.148491833074245  | 0.0002500|
+|Affect   |Anxiety   |Total    |    0.6935843|0.0519216876586154 | 0.0000000|
+|Affect   |BIP       |Specific |    0.4911706|0.136291186458522  | 0.0003135|
+|Affect   |BIP       |Total    |    0.5109457|0.0392503461305172 | 0.0000000|
+|Affect   |BMI       |Specific |   -0.6483490|0.196420963293597  | 0.0009640|
+|Affect   |BMI       |Total    |    0.2065047|0.0279544069184537 | 0.0000000|
+|Affect   |EA        |Specific |    0.8352126|0.223306711580872  | 0.0001838|
+|Affect   |EA        |Total    |   -0.0686905|0.0313133927111822 | 0.0282616|
+|Affect   |MD        |Specific |    0.7965045|0.145938282827662  | 0.0000000|
+|Affect   |MD        |Total    |    0.8925609|0.0391784391459985 | 0.0000000|
+|Affect   |MDD       |Specific |    0.4249761|0.219682578757415  | 0.0530510|
+|Affect   |MDD       |Total    |    0.7917357|0.0806534155214744 | 0.0000000|
+|Affect   |Neu       |Specific |    0.5502529|0.126590951948537  | 0.0000138|
+|Affect   |Neu       |Total    |    0.6467729|0.0363126401471525 | 0.0000000|
+|Affect   |Pain      |Specific |   -0.1202824|0.158400627149776  | 0.4476454|
+|Affect   |Pain      |Total    |    0.5599653|0.038044023546841  | 0.0000000|
+|Affect   |PTSD      |Specific |    0.1172003|0.2254267144384    | 0.6031148|
+|Affect   |PTSD      |Total    |    0.8639243|0.0682506130016438 | 0.0000000|
+|Affect   |Sleep     |Specific |   -0.4070494|0.18774468879252   | 0.0301509|
+|Affect   |Sleep     |Total    |    0.2458985|0.047771212251295  | 0.0000003|
+|Affect   |Smoking   |Specific |   -0.1856754|0.136803053135553  | 0.1747041|
+|Affect   |Smoking   |Total    |    0.2880992|0.0365980819598274 | 0.0000000|
+|Neuroveg |AlcDep    |Specific |    0.5678938|0.240766028529571  | 0.0183389|
+|Neuroveg |AlcDep    |Total    |    0.5051587|0.0739397942196628 | 0.0000000|
+|Neuroveg |Anxiety   |Specific |    0.1691357|0.148443242001337  | 0.2545301|
+|Neuroveg |Anxiety   |Total    |    0.6990884|0.052486401850733  | 0.0000000|
+|Neuroveg |BIP       |Specific |    0.0349428|0.140756512054108  | 0.8039234|
+|Neuroveg |BIP       |Total    |    0.5145321|0.0399401532156914 | 0.0000000|
+|Neuroveg |BMI       |Specific |    0.8881299|0.194956990744916  | 0.0000052|
+|Neuroveg |BMI       |Total    |    0.2115176|0.0278477118795848 | 0.0000000|
+|Neuroveg |EA        |Specific |   -0.9301924|0.22210213130999   | 0.0000281|
+|Neuroveg |EA        |Total    |   -0.0727999|0.0315535470344258 | 0.0210440|
+|Neuroveg |MD        |Specific |    0.1252329|0.155671800805534  | 0.4211121|
+|Neuroveg |MD        |Total    |    0.8980737|0.041715775023724  | 0.0000000|
+|Neuroveg |MDD       |Specific |    0.3940511|0.229506737208225  | 0.0859834|
+|Neuroveg |MDD       |Total    |    0.7991198|0.08284827905566   | 0.0000000|
+|Neuroveg |Neu       |Specific |    0.1146922|0.131528593862162  | 0.3831970|
+|Neuroveg |Neu       |Total    |    0.6513988|0.0380748972227258 | 0.0000000|
+|Neuroveg |Pain      |Specific |    0.7136433|0.156928281484106  | 0.0000054|
+|Neuroveg |Pain      |Total    |    0.5668429|0.0388826811089672 | 0.0000000|
+|Neuroveg |PTSD      |Specific |    0.7852363|0.221728879157147  | 0.0003979|
+|Neuroveg |PTSD      |Total    |    0.8722568|0.0703577722729154 | 0.0000000|
+|Neuroveg |Sleep     |Specific |    0.6698153|0.187591152678354  | 0.0003561|
+|Neuroveg |Sleep     |Total    |    0.2502248|0.0484097491119888 | 0.0000002|
+|Neuroveg |Smoking   |Specific |    0.4941649|0.130740233460178  | 0.0001570|
+|Neuroveg |Smoking   |Total    |    0.2921347|0.0363624604031794 | 0.0000000|
+
+</div>
 
 
 ```r

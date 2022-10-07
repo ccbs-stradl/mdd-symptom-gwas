@@ -400,6 +400,14 @@ bind_rows(lapply(list(ext_mult.fit),
 
 ```
 
+```{r ext_table}
+
+bind_rows(ext_full, ext_partial) %>%
+select(Factor, Phenotype, Model=Beta, STD_Genotype, STD_Genotype_SE, p_value) %>%
+arrange(Factor, Phenotype, Model)
+
+```
+
 ```{r ex_plot, fig.width=10, fig.height=6}
 
 ggplot(bind_rows(ext_full, ext_partial),

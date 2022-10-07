@@ -389,7 +389,7 @@ MDD8;Concentrate;Concentrate;Conc
 MDD9;Suicidality;Suicidality;Sui
 &quot;, col_names=c(&#39;ref&#39;, &#39;h&#39;, &#39;v&#39;, &#39;abbv&#39;), delim=&#39;;&#39;)</code></pre>
 <pre><code>## Rows: 15 Columns: 4
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
 ## chr (4): ref, h, v, abbv
 ## 
@@ -414,7 +414,7 @@ MDD8;Diminished ability to think or concentrate, or indecisiveness
 MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide
 &quot;, col_names=c(&#39;Reference&#39;, &#39;Description&#39;), delim=&#39;;&#39;)</code></pre>
 <pre><code>## Rows: 15 Columns: 2
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
 ## chr (2): Reference, Description
 ## 
@@ -427,7 +427,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 <pre class="r"><code>all_covstruct_prefix &lt;- &#39;all.covstruct&#39;
 all_sumstats_prevs &lt;- read_tsv(here::here(&#39;ldsc&#39;, paste(all_covstruct_prefix, &#39;prevs&#39;, &#39;txt&#39;, sep=&#39;.&#39;))) </code></pre>
 <pre><code>## Rows: 12 Columns: 5
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;\t&quot;
 ## chr (4): filename, sumstats, trait_name, symptom
 ## dbl (1): pop_prev
@@ -903,6 +903,409 @@ bind_rows(lapply(list(ext_mult.fit),
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %&gt;%
   filter(lhs %in% ext_trait_names, rhs %in% c(&#39;Affect&#39;, &#39;Neuroveg&#39;)) %&gt;%
   mutate(Beta=&#39;Specific&#39;, Factor=rhs, Phenotype=lhs)</code></pre>
+<pre class="r"><code>bind_rows(ext_full, ext_partial) %&gt;%
+select(Factor, Phenotype, Model=Beta, STD_Genotype, STD_Genotype_SE, p_value) %&gt;%
+arrange(Factor, Phenotype, Model)</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">Factor</th>
+<th align="left">Phenotype</th>
+<th align="left">Model</th>
+<th align="right">STD_Genotype</th>
+<th align="left">STD_Genotype_SE</th>
+<th align="right">p_value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">AlcDep</td>
+<td align="left">Specific</td>
+<td align="right">-0.0456183</td>
+<td align="left">0.253636372857857</td>
+<td align="right">0.8572762</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">AlcDep</td>
+<td align="left">Total</td>
+<td align="right">0.4999482</td>
+<td align="left">0.0739961337392351</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">Anxiety</td>
+<td align="left">Specific</td>
+<td align="right">0.5438069</td>
+<td align="left">0.148491833074245</td>
+<td align="right">0.0002500</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">Anxiety</td>
+<td align="left">Total</td>
+<td align="right">0.6935843</td>
+<td align="left">0.0519216876586154</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">BIP</td>
+<td align="left">Specific</td>
+<td align="right">0.4911706</td>
+<td align="left">0.136291186458522</td>
+<td align="right">0.0003135</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">BIP</td>
+<td align="left">Total</td>
+<td align="right">0.5109457</td>
+<td align="left">0.0392503461305172</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">BMI</td>
+<td align="left">Specific</td>
+<td align="right">-0.6483490</td>
+<td align="left">0.196420963293597</td>
+<td align="right">0.0009640</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">BMI</td>
+<td align="left">Total</td>
+<td align="right">0.2065047</td>
+<td align="left">0.0279544069184537</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">EA</td>
+<td align="left">Specific</td>
+<td align="right">0.8352126</td>
+<td align="left">0.223306711580872</td>
+<td align="right">0.0001838</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">EA</td>
+<td align="left">Total</td>
+<td align="right">-0.0686905</td>
+<td align="left">0.0313133927111822</td>
+<td align="right">0.0282616</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">MD</td>
+<td align="left">Specific</td>
+<td align="right">0.7965045</td>
+<td align="left">0.145938282827662</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">MD</td>
+<td align="left">Total</td>
+<td align="right">0.8925609</td>
+<td align="left">0.0391784391459985</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">MDD</td>
+<td align="left">Specific</td>
+<td align="right">0.4249761</td>
+<td align="left">0.219682578757415</td>
+<td align="right">0.0530510</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">MDD</td>
+<td align="left">Total</td>
+<td align="right">0.7917357</td>
+<td align="left">0.0806534155214744</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">Neu</td>
+<td align="left">Specific</td>
+<td align="right">0.5502529</td>
+<td align="left">0.126590951948537</td>
+<td align="right">0.0000138</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">Neu</td>
+<td align="left">Total</td>
+<td align="right">0.6467729</td>
+<td align="left">0.0363126401471525</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">Pain</td>
+<td align="left">Specific</td>
+<td align="right">-0.1202824</td>
+<td align="left">0.158400627149776</td>
+<td align="right">0.4476454</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">Pain</td>
+<td align="left">Total</td>
+<td align="right">0.5599653</td>
+<td align="left">0.038044023546841</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">PTSD</td>
+<td align="left">Specific</td>
+<td align="right">0.1172003</td>
+<td align="left">0.2254267144384</td>
+<td align="right">0.6031148</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">PTSD</td>
+<td align="left">Total</td>
+<td align="right">0.8639243</td>
+<td align="left">0.0682506130016438</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">Sleep</td>
+<td align="left">Specific</td>
+<td align="right">-0.4070494</td>
+<td align="left">0.18774468879252</td>
+<td align="right">0.0301509</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">Sleep</td>
+<td align="left">Total</td>
+<td align="right">0.2458985</td>
+<td align="left">0.047771212251295</td>
+<td align="right">0.0000003</td>
+</tr>
+<tr class="odd">
+<td align="left">Affect</td>
+<td align="left">Smoking</td>
+<td align="left">Specific</td>
+<td align="right">-0.1856754</td>
+<td align="left">0.136803053135553</td>
+<td align="right">0.1747041</td>
+</tr>
+<tr class="even">
+<td align="left">Affect</td>
+<td align="left">Smoking</td>
+<td align="left">Total</td>
+<td align="right">0.2880992</td>
+<td align="left">0.0365980819598274</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">AlcDep</td>
+<td align="left">Specific</td>
+<td align="right">0.5678938</td>
+<td align="left">0.240766028529571</td>
+<td align="right">0.0183389</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">AlcDep</td>
+<td align="left">Total</td>
+<td align="right">0.5051587</td>
+<td align="left">0.0739397942196628</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">Anxiety</td>
+<td align="left">Specific</td>
+<td align="right">0.1691357</td>
+<td align="left">0.148443242001337</td>
+<td align="right">0.2545301</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">Anxiety</td>
+<td align="left">Total</td>
+<td align="right">0.6990884</td>
+<td align="left">0.052486401850733</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">BIP</td>
+<td align="left">Specific</td>
+<td align="right">0.0349428</td>
+<td align="left">0.140756512054108</td>
+<td align="right">0.8039234</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">BIP</td>
+<td align="left">Total</td>
+<td align="right">0.5145321</td>
+<td align="left">0.0399401532156914</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">BMI</td>
+<td align="left">Specific</td>
+<td align="right">0.8881299</td>
+<td align="left">0.194956990744916</td>
+<td align="right">0.0000052</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">BMI</td>
+<td align="left">Total</td>
+<td align="right">0.2115176</td>
+<td align="left">0.0278477118795848</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">EA</td>
+<td align="left">Specific</td>
+<td align="right">-0.9301924</td>
+<td align="left">0.22210213130999</td>
+<td align="right">0.0000281</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">EA</td>
+<td align="left">Total</td>
+<td align="right">-0.0727999</td>
+<td align="left">0.0315535470344258</td>
+<td align="right">0.0210440</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">MD</td>
+<td align="left">Specific</td>
+<td align="right">0.1252329</td>
+<td align="left">0.155671800805534</td>
+<td align="right">0.4211121</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">MD</td>
+<td align="left">Total</td>
+<td align="right">0.8980737</td>
+<td align="left">0.041715775023724</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">MDD</td>
+<td align="left">Specific</td>
+<td align="right">0.3940511</td>
+<td align="left">0.229506737208225</td>
+<td align="right">0.0859834</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">MDD</td>
+<td align="left">Total</td>
+<td align="right">0.7991198</td>
+<td align="left">0.08284827905566</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">Neu</td>
+<td align="left">Specific</td>
+<td align="right">0.1146922</td>
+<td align="left">0.131528593862162</td>
+<td align="right">0.3831970</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">Neu</td>
+<td align="left">Total</td>
+<td align="right">0.6513988</td>
+<td align="left">0.0380748972227258</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">Pain</td>
+<td align="left">Specific</td>
+<td align="right">0.7136433</td>
+<td align="left">0.156928281484106</td>
+<td align="right">0.0000054</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">Pain</td>
+<td align="left">Total</td>
+<td align="right">0.5668429</td>
+<td align="left">0.0388826811089672</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">PTSD</td>
+<td align="left">Specific</td>
+<td align="right">0.7852363</td>
+<td align="left">0.221728879157147</td>
+<td align="right">0.0003979</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">PTSD</td>
+<td align="left">Total</td>
+<td align="right">0.8722568</td>
+<td align="left">0.0703577722729154</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">Sleep</td>
+<td align="left">Specific</td>
+<td align="right">0.6698153</td>
+<td align="left">0.187591152678354</td>
+<td align="right">0.0003561</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">Sleep</td>
+<td align="left">Total</td>
+<td align="right">0.2502248</td>
+<td align="left">0.0484097491119888</td>
+<td align="right">0.0000002</td>
+</tr>
+<tr class="odd">
+<td align="left">Neuroveg</td>
+<td align="left">Smoking</td>
+<td align="left">Specific</td>
+<td align="right">0.4941649</td>
+<td align="left">0.130740233460178</td>
+<td align="right">0.0001570</td>
+</tr>
+<tr class="even">
+<td align="left">Neuroveg</td>
+<td align="left">Smoking</td>
+<td align="left">Total</td>
+<td align="right">0.2921347</td>
+<td align="left">0.0363624604031794</td>
+<td align="right">0.0000000</td>
+</tr>
+</tbody>
+</table>
+</div>
 <pre class="r"><code>ggplot(bind_rows(ext_full, ext_partial),
        aes(x=factor(Factor, levels=c(&#39;Neuroveg&#39;, &#39;Affect&#39;)),
            y=STD_Genotype,
