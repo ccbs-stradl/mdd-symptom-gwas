@@ -149,8 +149,13 @@ We find all daner files in the meta-analysis directory and loop them through the
 ```{r munge, eval=FALSE}
 # Munge sumstats for all cohorts symptom GWASs
 
-# find daner sumstats files for format daner_[COHORTS].MDD[N]_[SYMPTOM].gz
-daner_files <- list.files("meta/distribution", pattern="^daner_[A-Z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
+# find meta-analysed daner sumstats files for format daner_[COHORTS].MDD[N]_[SYMPTOM].gz
+meta_daner_files <- list.files("meta/distribution", pattern="^daner_[A-Z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
+
+# non-meta-analysed files
+other_daner_files <- list.files("sumstats/UKB/Touchscreen", pattern="^daner_[A-Za-z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
+
+daner_files <- c(meta_daner_files, other_daner_files)
 
 # snp list reference file
 hm3_file <- "sumstats/reference/w_hm3.snplist"
@@ -288,14 +293,9 @@ Read in headers from the daner files. The daner format contains headers for the 
 symptoms_sample_prev_file <- 'meta/symptoms_prev.txt'
 
 if(!file.exists(symptoms_sample_prev_file)) {
-
-  # list sumstats distribution directories
-  distributions_dirs <- dir(file.path("meta", "distribution"))
-  # construct filenames of daner sumstats
-  daner_files <- sapply(distributions_dirs, function(dd) file.path("meta", "distribution", dd, paste0('daner_', dd, '.gz')))
   
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-  cohorts_symptoms <- str_match(names(daner_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,2:3]
+  cohorts_symptoms <- str_match(basename(daner_files), 'daner_([A-Za-z_]+).(MDD[:digit:](a|b)?)')[,2:3]
   colnames(cohorts_symptoms) <- c('cohorts', 'symptom')
   
   # read in header and pull out 6th and 7th columns
@@ -433,7 +433,7 @@ if(!file.exists(covstruct_r)) {
 ```
 
 
-AGDS+PGC+ALSPAC+UKB sumstats
+AGDS+PGC+ALSPAC+UKB sumstats, plus UKB Touchscreen cardinal symptoms
 ```{r covstruc_all, results='hide'}
 
 all_covstruct_prefix <- 'all.covstruct'
@@ -443,17 +443,17 @@ all_covstruct_rds <- file.path('ldsc', paste(all_covstruct_prefix, 'rds', sep='.
 if(!file.exists(all_covstruct_r)) {
 
   # list sumstats distribution directories
-  all_sumstats_files <- list.files(file.path('meta', 'munged'), 'ALL.+sumstats\\.gz$', full.names=TRUE)
+  all_sumstats_files <- list.files(file.path('meta', 'munged'), '(ALL|UKBt).+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-  all_cohorts_symptoms <- str_match(basename(all_sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
+  all_cohorts_symptoms <- str_match(basename(all_sumstats_files), '([A-Za-z_]+).(MDD[:digit:](a|b)?)')[,1]
 
   all_sumstats_paths <- data.frame(filename=all_sumstats_files, sumstats=str_remove(basename(all_sumstats_files), '.sumstats.gz'))
 
   all_sumstats_prevs <- 
     all_sumstats_paths %>%
     mutate(trait_name=all_cohorts_symptoms) %>%
-    mutate(symptom=str_match(sumstats, "ALL\\.(MDD[1-9a-b]+)_")[,2]) %>%
+    mutate(symptom=str_match(sumstats, "[A-Za-z]\\.(MDD[1-9a-b]+)_")[,2]) %>%
     left_join(pop_prevs_w, by='symptom') 
     
    write_tsv(all_sumstats_prevs, file.path('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.')))

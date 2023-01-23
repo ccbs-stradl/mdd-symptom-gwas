@@ -5,6 +5,7 @@ config.yaml
 *.info
 *.csv
 *.txt
+*.gz
 !*.prevs.txt
 *.enc
 *.enc_ukb
@@ -16,6 +17,7 @@ sumstats/UKB/*.r
 sumstats/**/*.png
 sumstats/reference
 sumstats/aligned
+sumstats/UKB/Touchscreen
 *_cache/
 meta/pcaer_sub
 meta/pi_sub
