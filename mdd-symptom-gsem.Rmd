@@ -302,6 +302,7 @@ if(!file.exists(symptoms_sample_prev_file)) {
   daner_nca_nco <- 
   bind_rows(lapply(daner_files, function(daner) {
       # # get sample size columns from file header
+      print(daner)
       daner_header <- read.table(daner, nrows=1)
       frq_a_col <- daner_header$V6
       frq_u_col <- daner_header$V7
@@ -366,6 +367,7 @@ Combine the sample prevalences weighted by assuming 15% population prevalence of
 
 pop_prevs_w <-
 symptoms_sample_prev %>%
+filter(cohorts %in% c('AGDS_PGC', 'ALSPAC_UKB')) |>
 mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
                    symptom %in% c('MDD1', 'MDD2') ~ 1.0,
                    TRUE ~ 0.57)) %>%

@@ -11,3 +11,5 @@ meta/munged/ALL.MDD6_fatigue.sumstats.gz	ALL.MDD6_fatigue	ALL.MDD6	MDD6	0.294921
 meta/munged/ALL.MDD7_worthless.sumstats.gz	ALL.MDD7_worthless	ALL.MDD7	MDD7	0.20385349307673398
 meta/munged/ALL.MDD8_concentration.sumstats.gz	ALL.MDD8_concentration	ALL.MDD8	MDD8	0.28289629948207273
 meta/munged/ALL.MDD9_death.sumstats.gz	ALL.MDD9_death	ALL.MDD9	MDD9	0.1928835432413938
+meta/munged/UKBt.MDD1_depressed.sumstats.gz	UKBt.MDD1_depressed	UKBt.MDD1	MDD1	0.3391850741539902
+meta/munged/UKBt.MDD2_anhedonia.sumstats.gz	UKBt.MDD2_anhedonia	UKBt.MDD2	MDD2	0.26261412043600163

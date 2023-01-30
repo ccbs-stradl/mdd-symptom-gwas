@@ -772,7 +772,9 @@ left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
 select(symptom, trait_name, abbv)
 
 all_sample_symptoms <- all_cohorts_sample_symptoms$abbv
+all_sample_symptoms
 names(all_sample_symptoms) <- all_cohorts_sample_symptoms$trait_name
+all_sample_symptoms[c('UKBt.MDD1', 'UKBt.MDD2')] <- c('Dep1', 'Anh1')
 
 # rename traits in covstruct
 dimnames(all_symptoms_covstruct$S)[[2]] <-
@@ -799,14 +801,44 @@ all_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
 
 ```
 
-Correlation between cardinal symptoms
+Cardinal symptom factor among meta-analysed and community-only symptoms
+
+```{r all_commonfactor_cardinal, cache=TRUE}
+
+all_commonfactor_cardinal.model <- "
+C1 =~ NA*Dep + Anh + Dep1 + Anh1
+C1 ~~ 1*C1
+"
+
+all_commonfactor_cardinal.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_commonfactor_cardinal.model)
+
+all_commonfactor_cardinal.fit$modelfit
+all_commonfactor_cardinal.fit$results[c(1, 2, 3, 6, 7)]
+
+```
+
+```{r all_commonfactor_cardinal, cache=TRUE}
+
+all_commonfactor_cardinal.model <- "
+A1 =~ NA*Dep + Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Guilt + Conc + Sui + Dep1 + Anh1
+C1 =~ c*Dep + c*Anh + c*Dep1 + c*Anh1
+A1 ~~ 1*A1
+A1 ~~ 0*C1
+"
+all_commonfactor_cardinal.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_commonfactor_cardinal.model)
+
+all_commonfactor_cardinal.fit$modelfit
+all_commonfactor_cardinal.fit$results[c(1, 2, 3, 6, 7)]
+
+```
 
 ```{r all_commonfactor_cardinal, cache=TRUE}
 
 all_commonfactor_cardinal.model <- "
 A1 =~ NA*Dep + Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Guilt + Conc + Sui
+C1 =~ NA*Dep + Anh + Dep1 + Anh1
 A1 ~~ 1*A1
-Dep ~~ Anh
+C1 ~~ 1*C1
 "
 all_commonfactor_cardinal.fit <- usermodel(all_symptoms_covstruct, estimation='DWLS', model=all_commonfactor_cardinal.model)
 
