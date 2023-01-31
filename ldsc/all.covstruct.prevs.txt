@@ -6,10 +6,9 @@ meta/munged/ALL.MDD3b_weightGain.sumstats.gz	ALL.MDD3b_weightGain	ALL.MDD3b	MDD3
 meta/munged/ALL.MDD4a_sleepProb.sumstats.gz	ALL.MDD4a_sleepProb	ALL.MDD4a	MDD4a	0.2617328873112341
 meta/munged/ALL.MDD4b_sleepMore.sumstats.gz	ALL.MDD4b_sleepMore	ALL.MDD4b	MDD4b	0.08052608558255452
 meta/munged/ALL.MDD5a_psychomotorFast.sumstats.gz	ALL.MDD5a_psychomotorFast	ALL.MDD5a	MDD5a	0.04423894133437096
-meta/munged/ALL.MDD5b_psychomotorSlow.sumstats.gz	ALL.MDD5b_psychomotorSlow	ALL.MDD5b	MDD5b	0.06440625341076532
 meta/munged/ALL.MDD6_fatigue.sumstats.gz	ALL.MDD6_fatigue	ALL.MDD6	MDD6	0.29492176315737967
 meta/munged/ALL.MDD7_worthless.sumstats.gz	ALL.MDD7_worthless	ALL.MDD7	MDD7	0.20385349307673398
 meta/munged/ALL.MDD8_concentration.sumstats.gz	ALL.MDD8_concentration	ALL.MDD8	MDD8	0.28289629948207273
 meta/munged/ALL.MDD9_death.sumstats.gz	ALL.MDD9_death	ALL.MDD9	MDD9	0.1928835432413938
-meta/munged/UKBt.MDD1_depressed.sumstats.gz	UKBt.MDD1_depressed	UKBt.MDD1	MDD1	0.3391850741539902
-meta/munged/UKBt.MDD2_anhedonia.sumstats.gz	UKBt.MDD2_anhedonia	UKBt.MDD2	MDD2	0.26261412043600163
+meta/munged/UKBt.MDD1_depressed.sumstats.gz	UKBt.MDD1_depressed	UKBt.MDD1	MDD1	0.557
+meta/munged/UKBt.MDD2_anhedonia.sumstats.gz	UKBt.MDD2_anhedonia	UKBt.MDD2	MDD2	0.368

@@ -298,6 +298,8 @@ if(!file.exists(symptoms_sample_prev_file)) {
   cohorts_symptoms <- str_match(basename(daner_files), 'daner_([A-Za-z_]+).(MDD[:digit:](a|b)?)')[,2:3]
   colnames(cohorts_symptoms) <- c('cohorts', 'symptom')
   
+  names(daner_files) <- str_remove_all(basename(daner_files), '(daner_|.gz)')
+  
   # read in header and pull out 6th and 7th columns
   daner_nca_nco <- 
   bind_rows(lapply(daner_files, function(daner) {
@@ -397,7 +399,7 @@ covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 if(!file.exists(covstruct_r)) {
 
   # list sumstats distribution directories
-  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB).+sumstats\\.gz$', full.names=TRUE)
+  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB|UKBt).+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
@@ -406,9 +408,12 @@ if(!file.exists(covstruct_r)) {
 
   sumstats_prevs <- 
     symptoms_sample_prev %>%
-    left_join(sumstats_paths, by='sumstats') %>%
+    inner_join(sumstats_paths, by='sumstats') %>%
     left_join(pop_prevs_w, by='symptom') %>%
-    mutate(trait_name=paste(cohorts, symptom, sep='.'))
+    mutate(trait_name=paste(cohorts, symptom, sep='.')) |>
+    mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev)) |>
+    filter(!sumstats %in% c("AGDS_PGC.MDD1_depressed", "AGDS_PGC.MDD2_anhedonia", "AGDS_PGC.MDD6_fatigue", 
+    "AGDS_PGC.MDD7_worthless", "AGDS_PGC.MDD8_concentration", "ALSPAC_UKB.MDD5a_psychomotorFast", "ALSPAC_UKB.MDD5b_psychomotorSlow"))
 
   write_tsv(sumstats_prevs, file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 
@@ -456,7 +461,11 @@ if(!file.exists(all_covstruct_r)) {
     all_sumstats_paths %>%
     mutate(trait_name=all_cohorts_symptoms) %>%
     mutate(symptom=str_match(sumstats, "[A-Za-z]\\.(MDD[1-9a-b]+)_")[,2]) %>%
-    left_join(pop_prevs_w, by='symptom') 
+    left_join(pop_prevs_w, by='symptom') %>%
+    filter(!symptom == 'MDD5b') |>
+    mutate(pop_prev=case_when(trait_name == 'UKBt.MDD1' ~ 0.557,
+                              trait_name == 'UKBt.MDD2' ~ 0.368,
+                              TRUE ~ pop_prev))
     
    write_tsv(all_sumstats_prevs, file.path('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.')))
 
