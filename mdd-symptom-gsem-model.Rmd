@@ -149,7 +149,7 @@ symptoms_S_var[which(symptoms_S_var > 0)]
 
 ## Common factor
 
-Common factor across symptoms from both cohorts
+Common factor across symptoms from both cohorts, as a general MDD factor
 
 ```{r commonfactor, cache=TRUE}
 
@@ -162,11 +162,16 @@ MDD ~~ 1*MDD
 commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor.model)
 
 commonfactor.fit$modelfit
-commonfactor.fit$results[c(1,2,3,6,7)]
+commonfactor.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs == 'MDD') %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
 ## Correlation among directional symptoms
+
+Directional symptoms that can increase or decrease (appetite/weight changes, sleep, psychomotor) will likely be negatively correlated, so add an indepdendent factor to capture this.
 
 ```{r commonfactor_app, cache=TRUE}
 
@@ -182,7 +187,10 @@ MDD ~~ 0*APP
 commonfactor_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor_app.model)
 
 commonfactor_app.fit$modelfit
-commonfactor_app.fit$results[c(1,2,3,6,7,9)]
+commonfactor_app.fit$results[c(1,2,3,6,7,9)] %>%
+     filter(lhs %in% c('MDD', 'APP')) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
@@ -203,13 +211,18 @@ CommSleDec ~~ c4a*CommSleDec
 commonfactor_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor_sle.model)
 
 commonfactor_sle.fit$modelfit
-commonfactor_sle.fit$results[c(1,2,3,6,7,9)]
+commonfactor_sle.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('MDD', 'SLE')) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
 ## Ascertainment-specific factors
 
-```{r clin_pop, cache=TRUE}
+Symptoms were assessed in Clinical and Community samples. Make factors representing sample type.
+
+```{r clin_comm, cache=TRUE}
 
 clin_comm.model <- "
 CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
@@ -217,16 +230,46 @@ COMM =~ NA*CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc
 
 CLIN ~~ 1*CLIN
 COMM ~~ 1*COMM
+
 "
 
 clin_comm.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_comm.model)
 
 clin_comm.fit$modelfit
-clin_comm.fit$results[c(1,2,3,6,7,9)]
+clin_comm.fit$results[c(1,2,3,6,7,9)] %>%
+     filter(lhs %in% c('CLIN', 'COMM'), rhs %in% c('CLIN', 'COMM'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
-Community gating symptom factors (Depression and Anhedonia)
+Add the sample factors as a bifactor model to the general MDD factor
+
+```{r clin_comm_bif, cache=TRUE}
+
+clin_comm_bif.model <- "
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+COMM =~ NA*CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+
+MDD ~~ 1*MDD
+CLIN ~~ 1*CLIN
+COMM ~~ 1*COMM
+
+MDD ~~ 0*CLIN + 0*COMM
+"
+
+clin_comm_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_comm_bif.model)
+
+clin_comm_bif.fit$modelfit
+clin_comm_bif.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('CLIN', 'COMM'), rhs %in% c('CLIN', 'COMM'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
+
+```
+
+Then consider the community cardinal symptoms (Depression and Anhedonia), which are gating items to the rest of the community-sample symptoms.
 
 ```{r gate, cache=TRUE}
 
@@ -242,11 +285,14 @@ MDD ~~ 0*GATE
 gate.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gate.model)
 
 gate.fit$modelfit
-gate.fit$results[c(1,2,3,6,7)]
+gate.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('GATE')) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
-Gating symptoms, case and control symptoms, and case-only symptoms
+Comparison of ascertainment and measurement. Gating symptoms from community sample (distinguish controls from subthreshold), other symptoms from community sample symptoms (subthreshold from cases), and clinical cohort symptoms (distinguish cases from each other)
 
 ```{r measure, cache=TRUE}
 
@@ -265,11 +311,14 @@ CLIN ~~ cl_co*COMM
 measure.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure.model)
 
 measure.fit$modelfit
-measure.fit$results[c(1,2,3,6,7,9)]
+measure.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('CLIN', 'COMM', 'GATE'), rhs %in% c('CLIN', 'COMM', 'GATE'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
-Symptoms with positive genetic variance between cases vs others
+Group symptoms from the clinical cohorts (that had positive genetic variance) together with the same symptoms from the community cohorts, then a separate factor for all other community cohort symptoms
 
 ```{r divergence, cache=TRUE}
 
@@ -284,7 +333,10 @@ CASECON ~~ 1*CASECON
 divergence.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=divergence.model)
 
 divergence.fit$modelfit
-divergence.fit$results[c(1,2,3,6,7,9)]
+divergence.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('CASE', 'CASECON'), rhs %in% c('CASE', 'CASECON'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
@@ -316,7 +368,6 @@ UkbDep ~~ u1*UkbDep
 base.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=base.model)
 
 base.fit$modelfit
-base.fit$results[c(1,2,3,6,7)]
 
 ```
 
@@ -355,7 +406,10 @@ APP ~~ 0*SLE
 psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_soma.model)
 
 psych_soma.fit$modelfit
-psych_soma.fit$results[c(1,2,3,6,7)]
+psych_soma.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('PSYCH', 'SOMA'), rhs %in% c('PSYCH', 'SOMA'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
@@ -385,7 +439,10 @@ APP ~~ 0*SLE
 psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_veg.model)
 
 psych_veg.fit$modelfit
-psych_veg.fit$results[c(1,2,3,6,7)]
+psych_veg.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('PSYCH', 'VEG'), rhs %in% c('PSYCH', 'VEG'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
@@ -395,19 +452,19 @@ psych_veg.fit$results[c(1,2,3,6,7)]
 ```{r affect_neuroveg, cache=TRUE}
 
 affect_neuroveg.model <- "
-PSYCH =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
+AFFECT =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
 NEUROVEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec +  + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommConc
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
 SLE =~ NA*ClinSleDec + ClinSleInc + CommSleDec + CommSleInc
 
-PSYCH ~~ 1*PSYCH
+AFFECT ~~ 1*AFFECT
 NEUROVEG ~~ 1*NEUROVEG
 GATE ~~ 1*GATE
 APP ~~ 1*APP
 SLE ~~ 1*SLE
-PSYCH ~~ 0*GATE + 0*APP + 0*SLE
+AFFECT ~~ 0*GATE + 0*APP + 0*SLE
 NEUROVEG ~~ 0*GATE + 0*APP + 0*SLE
 GATE ~~ 0*APP + 0*SLE
 APP ~~ 0*SLE
@@ -415,7 +472,10 @@ APP ~~ 0*SLE
 affect_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=affect_neuroveg.model)
 
 affect_neuroveg.fit$modelfit
-affect_neuroveg.fit$results[c(1,2,3,6,7)]
+affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('AFFECT', 'NEUROVEG'), rhs %in% c('AFFECT', 'NEUROVEG'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
@@ -446,7 +506,10 @@ APP ~~ 0*SLE
 cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_neuroveg.model)
 
 cog_mood_neuroveg.fit$modelfit
-cog_mood_neuroveg.fit$results[c(1,2,3,6,7)]
+cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('COG', 'MOOD', 'VEG'), rhs %in% c('COG', 'MOOD', 'VEG'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
@@ -460,6 +523,7 @@ list("1a"=list(name="Common", model=commonfactor.fit),
      "1c"=list(name="Common (Sle)", model=commonfactor_sle.fit),
      "1d"=list(name="Common (gating)", model=gate.fit),
      "1e"=list(name="Ascertainment", model=clin_comm.fit),
+     "1f"=list(name="Measurement", model=measure.fit),
      "1f"=list(name="Divergence", model=divergence.fit),
      "1g"=list(name="Baseline", model=base.fit),
      "2a"=list(name="Psych-Somatic", model=psych_soma.fit),
