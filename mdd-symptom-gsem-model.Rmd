@@ -173,6 +173,7 @@ commonfactor.fit$results[c(1,2,3,6,7)] %>%
 
 Directional symptoms that can increase or decrease (appetite/weight changes, sleep, psychomotor) will likely be negatively correlated, so add an indepdendent factor to capture this.
 
+First formulation is an independent factor for the directional symptom.
 ```{r commonfactor_app, cache=TRUE}
 
 commonfactor_app.model <- "
@@ -188,6 +189,27 @@ commonfactor_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=c
 
 commonfactor_app.fit$modelfit
 commonfactor_app.fit$results[c(1,2,3,6,7,9)] %>%
+     filter(lhs %in% c('MDD', 'APP')) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
+
+```
+
+Second formulation is where the appetite symptom is a subfactor that then loads on the general MDD factor.
+```{r commonfactor_app_sub, cache=TRUE}
+
+commonfactor_app_sub.model <- "
+MDD =~ NA*ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh + APP
+APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
+
+MDD ~~ 1*MDD
+APP ~~ 1*APP
+"
+
+commonfactor_app_sub.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor_app_sub.model)
+
+commonfactor_app_sub.fit$modelfit
+commonfactor_app_sub.fit$results[c(1,2,3,6,7,9)] %>%
      filter(lhs %in% c('MDD', 'APP')) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
@@ -217,6 +239,7 @@ commonfactor_sle.fit$results[c(1,2,3,6,7)] %>%
      print(digits=2)
 
 ```
+
 
 ## Ascertainment-specific factors
 
@@ -340,38 +363,6 @@ divergence.fit$results[c(1,2,3,6,7)] %>%
 
 ```
 
-## Baseline gating and directional symptoms factors
-
-```{r base, cache=TRUE}
-
-base.model <- "
-MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
-
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
-SLE =~ NA*ClinSleDec + ClinSleInc + CommSleDec + CommSleInc
-
-MDD ~~ 1*MDD
-GATE ~~ 1*GATE
-APP ~~ 1*APP
-SLE ~~ 1*SLE
-MDD ~~ 0*GATE + 0*APP + 0*SLE
-GATE ~~ 0*APP + 0*SLE
-APP ~~ 0*SLE
-
-c4a > 0
-CommSleDec ~~ c4a*CommSleDec
-u1 > 0
-UkbDep ~~ u1*UkbDep
-"
-
-base.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=base.model)
-
-base.fit$modelfit
-
-```
-
-
 ## Two-factor models
 
 [Elhai Psychiat Res 2012](https://www.sciencedirect.com/science/article/pii/S0165178112002685) compared 3 two-factor models
@@ -382,6 +373,7 @@ base.fit$modelfit
 
 > the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor slowing as a fourth somatic item
 
+
 ```{r psych_soma, cache=TRUE}
 
 psych_soma.model <- "
@@ -389,18 +381,11 @@ PSYCH =~ NA*ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommGuilt 
 SOMA =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
-SLE =~ NA*ClinSleDec + ClinSleInc + CommSleDec + CommSleInc
 
 PSYCH ~~ 1*PSYCH
 SOMA ~~ 1*SOMA
 GATE ~~ 1*GATE
-APP ~~ 1*APP
-SLE ~~ 1*SLE
-PSYCH ~~ 0*GATE + 0*APP + 0*SLE
-SOMA ~~ 0*GATE + 0*APP + 0*SLE
-GATE ~~ 0*APP + 0*SLE
-APP ~~ 0*SLE
+GATE ~~ 0*PSYCH + 0*SOMA
 "
 
 psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_soma.model)
@@ -413,28 +398,20 @@ psych_soma.fit$results[c(1,2,3,6,7)] %>%
 
 ```
 
-
 ### Psychological-Neurovegetative (Elhai Model 2b)
 
 ```{r psych_veg, cache=TRUE}
 
 psych_veg.model <- "
 PSYCH =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
-VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec +  + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
+VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
-SLE =~ NA*ClinSleDec + ClinSleInc + CommSleDec + CommSleInc
 
 PSYCH ~~ 1*PSYCH
 VEG ~~ 1*VEG
 GATE ~~ 1*GATE
-APP ~~ 1*APP
-SLE ~~ 1*SLE
-PSYCH ~~ 0*GATE + 0*APP + 0*SLE
-VEG ~~ 0*GATE + 0*APP + 0*SLE
-GATE ~~ 0*APP + 0*SLE
-APP ~~ 0*SLE
+GATE ~~ 0*PSYCH + 0*VEG
 "
 psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_veg.model)
 
@@ -453,21 +430,14 @@ psych_veg.fit$results[c(1,2,3,6,7)] %>%
 
 affect_neuroveg.model <- "
 AFFECT =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
-NEUROVEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec +  + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommConc
+NEUROVEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommConc
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
-SLE =~ NA*ClinSleDec + ClinSleInc + CommSleDec + CommSleInc
 
 AFFECT ~~ 1*AFFECT
 NEUROVEG ~~ 1*NEUROVEG
 GATE ~~ 1*GATE
-APP ~~ 1*APP
-SLE ~~ 1*SLE
-AFFECT ~~ 0*GATE + 0*APP + 0*SLE
-NEUROVEG ~~ 0*GATE + 0*APP + 0*SLE
-GATE ~~ 0*APP + 0*SLE
-APP ~~ 0*SLE
+GATE ~~ 0*AFFECT + 0*NEUROVEG
 "
 affect_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=affect_neuroveg.model)
 
@@ -479,6 +449,95 @@ affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 
 ```
 
+## Melancholic and atypical
+
+Account for directionality of symptoms using melancholic and atypical classifications
+
+```{r mel_aty, cache=TRUE}
+
+mel_aty.model <- "
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+MDD =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+MEL ~~ 1*MEL
+ATY ~~ 1*ATY
+MDD ~~ 1*MDD
+GATE ~~ 1*GATE
+GATE ~~ 0*MDD + 0*MEL + 0*ATY
+"
+
+mel_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty.model)
+
+mel_aty.fit$modelfit
+mel_aty.fit$results[c(1,2,3,6,7)]# %>%
+     #filter(lhs == 'MDD') %>%
+     #mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     #print(digits=2)
+
+```
+
+```{r mel_aty_psych_soma, cache=TRUE}
+
+mel_aty_psych_soma.model <- "
+AFFECT =~ NA*CommAnh + UkbAnh + CommGuilt + CommDep + UkbDep + ClinSui + CommSui
+SOMA =~ NA*ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommConc
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+AFFECT ~~ 1*AFFECT
+SOMA ~~ 1*SOMA
+ATY ~~ 1*ATY
+GATE ~~ 1*GATE
+GATE ~~ 0*AFFECT + 0*SOMA + 0*ATY
+
+u1 > 0
+UkbDep ~~ u1*UkbDep
+"
+
+mel_aty_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty_psych_soma.model)
+
+mel_aty_psych_soma.fit$modelfit
+mel_aty_psych_soma.fit$results[c(1,2,3,6,7)]# %>%
+     #filter(lhs == 'MDD') %>%
+     #mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     #print(digits=2)
+
+```
+
+```{r psych_soma_aty, cache=TRUE}
+
+psych_soma_aty.model <- "
+PSYCH =~ NA*CommAnh + UkbAnh + CommGuilt + CommDep + UkbDep + ClinSui + CommSui + CommConc + CommFatig
+SOMA =~ NA*ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec 
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+PSYCH ~~ 1*PSYCH
+SOMA ~~ 1*SOMA
+ATY ~~ 1*ATY
+GATE ~~ 1*GATE
+GATE ~~ 0*PSYCH + 0*SOMA + 0*ATY
+
+u1 > 0
+UkbDep ~~ u1*UkbDep
+
+co4a > 0
+CommSleDec ~~ co4a*CommSleDec
+"
+
+psych_soma_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_soma_aty.model)
+
+psych_soma_aty.fit$modelfit
+psych_soma_aty.fit$results[c(1,2,3,6,7)]# %>%
+     #filter(lhs == 'MDD') %>%
+     #mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     #print(digits=2)
+
+```
+
+
 ## Three factor models
 
 ### Cognitive-Mood-Neuroveg (Kendler Neale) model
@@ -488,26 +547,52 @@ affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 cog_mood_neuroveg.model <- "
 COG =~ NA*ClinSui + CommGuilt + CommConc + CommSui
 MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
-VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec +  + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
+VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
-SLE =~ NA*ClinSleDec + ClinSleInc + CommSleDec + CommSleInc
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
 COG ~~ 1*COG
 MOOD ~~ 1*MOOD
 VEG ~~ 1*VEG
-APP ~~ 1*APP
-SLE ~~ 1*SLE
-COG ~~ 0*APP + 0*SLE
-MOOD ~~ 0*APP + 0*SLE
-VEG ~~ 0*APP + 0*SLE
-APP ~~ 0*SLE
+GATE ~~ 1*GATE
+GATE ~~ 0*COG + 0*MOOD + 0*VEG
 "
 cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_neuroveg.model)
 
 cog_mood_neuroveg.fit$modelfit
 cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
      filter(lhs %in% c('COG', 'MOOD', 'VEG'), rhs %in% c('COG', 'MOOD', 'VEG'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
+
+```
+
+## Four factor models
+
+### Cognitive-Mood-Neuroveg (Kendler Neale) model, plus Melancholic/Atypical split
+
+```{r cog_mood_mel_aty, cache=TRUE}
+
+cog_mood_mel_aty.model <- "
+COG =~ NA*ClinSui + CommGuilt + CommConc + CommSui
+MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
+ATY =~ NA*ClinMotoDec + ClinAppInc +  + ClinSleInc + CommAppInc + CommSleInc + CommFatig
+MEL =~ NA*ClinMotoInc + ClinAppDec + CommAppDec + ClinSleDec + CommSleDec
+
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+COG ~~ 1*COG
+MOOD ~~ 1*MOOD
+MEL ~~ 1*MEL
+ATY ~~ 1*ATY
+GATE ~~ 1*GATE
+GATE ~~ 0*COG + 0*MOOD + 0*MEL + 0*ATY
+"
+cog_mood_mel_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_mel_aty.model)
+
+cog_mood_mel_aty.fit$modelfit
+cog_mood_mel_aty.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('COG', 'MOOD', 'MEL', 'ATY'), rhs %in% c('COG', 'MOOD', 'MEL', 'ATY'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
 
@@ -520,16 +605,20 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 model_list=
 list("1a"=list(name="Common", model=commonfactor.fit),
      "1b"=list(name="Common (App)", model=commonfactor_app.fit),
-     "1c"=list(name="Common (Sle)", model=commonfactor_sle.fit),
-     "1d"=list(name="Common (gating)", model=gate.fit),
-     "1e"=list(name="Ascertainment", model=clin_comm.fit),
-     "1f"=list(name="Measurement", model=measure.fit),
-     "1f"=list(name="Divergence", model=divergence.fit),
-     "1g"=list(name="Baseline", model=base.fit),
+     "1c"=list(name="Common (App, sub)", model=commonfactor_app_sub.fit),
+     "1d"=list(name="Common (Sle)", model=commonfactor_sle.fit),
+     "1e"=list(name="Common (gating)", model=gate.fit),
+     "1f"=list(name="Ascertainment", model=clin_comm.fit),
+     "1g"=list(name="Measurement", model=measure.fit),
+     "1h"=list(name="Divergence", model=divergence.fit),
      "2a"=list(name="Psych-Somatic", model=psych_soma.fit),
      "2b"=list(name="Psych-Neuroveg", model=psych_veg.fit),
      "2c"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
-     "3"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit)
+     "2d"=list(name="Melancholic/Atypical", model=mel_aty.fit),
+     "2e"=list(names="Affect-Somatic-Atypical", model=mel_aty_psych_soma.fit),
+     "2f"=list(names="Psych-Somatic-Atypical", model=psych_soma_aty.fit),
+     "3"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
+     "4"=list(names="Cog-Mood-Mel-Aty", model=cog_mood_mel_aty.fit)
      )
 
 model_fits <- 
