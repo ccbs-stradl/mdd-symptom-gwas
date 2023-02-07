@@ -146,7 +146,7 @@ gunzip -c sumstats/aligned/daner_MDD5b_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {
 
 We find all daner files in the meta-analysis directory and loop them through the munge step.
 
-```{r munge, eval=FALSE}
+```{r munge, eval=TRUE}
 # Munge sumstats for all cohorts symptom GWASs
 
 # find meta-analysed daner sumstats files for format daner_[COHORTS].MDD[N]_[SYMPTOM].gz
@@ -399,7 +399,7 @@ covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 if(!file.exists(covstruct_r)) {
 
   # list sumstats distribution directories
-  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB|UKBt).+sumstats\\.gz$', full.names=TRUE)
+  sumstats_files <- list.files(file.path('meta', 'munged'), '.+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
@@ -414,6 +414,7 @@ if(!file.exists(covstruct_r)) {
     mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev))
     
   sumstats_prevs_keep <- sumstats_prevs |>
+    filter(cohorts %in% c('AGDS_PGC', 'ALSPAC_UKB', 'UKBt')) |>
     filter(!sumstats %in% c("AGDS_PGC.MDD1_depressed", "AGDS_PGC.MDD2_anhedonia", "AGDS_PGC.MDD6_fatigue", 
     "AGDS_PGC.MDD7_worthless", "AGDS_PGC.MDD8_concentration", "ALSPAC_UKB.MDD5a_psychomotorFast", "ALSPAC_UKB.MDD5b_psychomotorSlow"))
 
@@ -499,27 +500,30 @@ if(!file.exists(sumstats_h2_txt)) {
   sumstats_h2 %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
   mutate(sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clin',
-                          cohorts == 'ALSPAC_UKB' ~ 'Comm',
-                          cohorts == 'UKBt' ~ 'Ukb',
-                          TRUE ~ NA_character_),
-        Sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clinical',
-                         cohorts == 'ALSPAC_UKB' ~ 'Community',
-                         cohorts == 'UKBt' ~ 'UK Biobank',
-                         TRUE ~ NA_character_)) %>%
+                        cohorts == 'ALSPAC_UKB' ~ 'Comm',
+                        cohorts == 'UKBt' ~ 'Ukb',
+                        cohorts == 'ALL' ~ 'All',
+                        TRUE ~ NA_character_),
+      Sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clinical',
+                       cohorts == 'ALSPAC_UKB' ~ 'Community',
+                       cohorts == 'UKBt' ~ 'UK Biobank',
+                       cohorts == 'ALL' ~ 'All',
+                       TRUE ~ NA_character_)) %>%
   mutate(sample_symptom=paste0(sample, abbv)) %>%
   select(Sample, sample_symptom, ref=symptom,
-         h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE,
-         Nca, Nco, samp_prev, pop_prev,
-         cohorts, abbv, sumstats, filename)
-
+       h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE,
+       Nca, Nco, samp_prev, pop_prev,
+       cohorts, abbv, sumstats, filename)
 
   write_tsv(sumstats_h2_table, sumstats_h2_txt)
 
 } else {
 
-  sumstats_h2 <- read_tsv(sumstats_h2_txt)
+  sumstats_h2_table <- read_tsv(sumstats_h2_txt)
 
 }
+
+
 
 
 ```
@@ -532,10 +536,10 @@ ggplot(sumstats_h2_table,
             y=h2,
             ymin=h2+se*qnorm(0.025),
             ymax=h2+se*qnorm(0.975),
-            colour=cohorts, shape=cohorts)) +
+            colour=Sample, shape=Sample)) +
 geom_hline(yintercept=0, col='grey') +
 geom_pointrange(position=position_dodge(width=0.5)) + 
-scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$abbv))) +
+scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_table$abbv))) +
 scale_y_continuous(expression(h[SNP]^2)) +
 theme_bw() + 
 theme(axis.text.y=element_text(size=13),

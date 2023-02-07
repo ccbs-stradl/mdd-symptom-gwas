@@ -1,20 +1,23 @@
 # Prepare LDSC and sumstats of well-powered symptoms across both samples
 
-library(GenomicSEM)
+
 library(stringr)
 library(readr)
 library(dplyr)
 library(tidyr)
+library(GenomicSEM)
 
 symptoms_h2 <- read_tsv(here::here('ldsc', 'symptoms.h2.txt'))
 
 # symptoms with positive heritabilities, sufficient chisq
 symptoms_analyse <-
 symptoms_h2 %>%
-    filter(h2 > 0, MeanChiSq >= 1.02)
+    filter(cohorts %in% c('ALL', 'UKBt')) %>%
+    filter(h2 > 0) %>%
+    filter(sample_symptom %in% c("AllAnh", "AllDep", "AllSui", "AllAppInc", "AllGuilt", "AllSleInc", "AllConc", "AllAppDec", "AllMotoInc"))
 
-covstruct_prefix <- 'agds_pgc.alspac_ukb.common.covstruct'
-sumstats_prefix <- 'agds_pgc.alspac_ukb.common.sumstats'
+covstruct_prefix <- 'all.common.covstruct'
+sumstats_prefix <- 'all.common.sumstats'
 covstruct_r <- here::here('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- here::here('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 sumstats_rds <- here::here('sumstats', paste(sumstats_prefix, 'rds', sep='.'))
@@ -71,7 +74,29 @@ if(!file.exists(sumstats_rds)){
 								  maf.filter=0.01,
 								  keep.indel=FALSE,
 								  parallel=TRUE,
-								  cores=parallel::detectCores()/2)
+								  cores=8)
 						
 	saveRDS(symptoms_sumstats, sumstats_rds)
 }
+
+# test for traits that don't require large modifications to the matrix
+# cc.model <- "
+# MDD =~ NA*AllAnh + AllDep + AllSui + AllAppInc + AllGuilt + AllSleInc + AllConc + AllAppDec + AllMotoInc
+# MDD ~~ 1*MDD
+# "
+# 
+# x <- usermodel(symptoms_covstruct, estimation='DWLS', model=cc.model)
+
+#  1 AllAnh        
+#  2 AllDep        
+#  3 AllSui        
+#  4 AllAppInc     
+#  5 UkbDep        
+#  6 AllGuilt      
+#  7 UkbAnh        
+#  8 AllFatig      
+#  9 AllSleInc     
+# 10 AllConc       
+# 11 AllAppDec     
+# 12 AllSleDec     
+# 13 AllMotoInc   

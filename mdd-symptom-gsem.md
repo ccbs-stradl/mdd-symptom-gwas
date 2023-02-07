@@ -58,13 +58,82 @@ GenomicSEM version
 
 ```r
 require(readr)
-require(tidyr)
-require(stringr)
-require(dplyr)
-require(ggplot2)
-require(corrplot)
-require(GenomicSEM)
+```
 
+```
+## Loading required package: readr
+```
+
+```r
+require(tidyr)
+```
+
+```
+## Loading required package: tidyr
+```
+
+```r
+require(stringr)
+```
+
+```
+## Loading required package: stringr
+```
+
+```r
+require(dplyr)
+```
+
+```
+## Loading required package: dplyr
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
+require(ggplot2)
+```
+
+```
+## Loading required package: ggplot2
+```
+
+```r
+require(corrplot)
+```
+
+```
+## Loading required package: corrplot
+```
+
+```
+## corrplot 0.92 loaded
+```
+
+```r
+require(GenomicSEM)
+```
+
+```
+## Loading required package: GenomicSEM
+```
+
+```r
 packageVersion("GenomicSEM")
 ```
 
@@ -264,6 +333,88 @@ for(daner in daner_files) {
 }
 ```
 
+```
+## Rows: 8051380 Columns: 19
+## ── Column specification ─────────────────────────────────────────────────────────────────
+## Delimiter: "\t"
+## chr  (5): SNP, A1, A2, ngt, Direction
+## dbl (14): CHR, BP, FRQ_A_92706, FRQ_U_59236, INFO, OR, SE, P, HetISqt, HetDf...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+```
+
+```
+## The munging of 1 summary statistics started at 2023-02-07 17:07:21
+## Reading in reference file
+## Reading summary statistics for meta/txt/ALL.MDD1_depressed.txt.gz. Please note that this step usually takes a few minutes due to the size of summary statistic files.
+## All files loaded into R!
+## Munging file: meta/txt/ALL.MDD1_depressed.txt.gz
+## Interpreting the SNP column as the SNP column.
+## Interpreting the A1 column as the A1 column.
+## Interpreting the A2 column as the A2 column.
+## Interpreting the OR column as the effect column.
+## Interpreting the P column as the P column.
+## Interpreting the N column as the N column.
+## Interpreting the SE column as the SE column.
+## Merging file:meta/txt/ALL.MDD1_depressed.txt.gz with the reference file:sumstats/reference/w_hm3.snplist
+## 8051380 rows present in the full meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file.
+## 6886277 rows were removed from the meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file as the rs-ids for these rows were not present in the reference file.
+## The effect column was determined to be coded as an odds ratio (OR) for the meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file. Please ensure this is correct.
+## 4 row(s) were removed from the meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file due to the effect allele (A1) column not matching A1 or A2 in the reference file.
+## 1 row(s) were removed from the meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file due to the other allele (A2) column not matching A1 or A2 in the reference file.
+## No INFO column, cannot filter on INFO, which may influence results
+## No MAF column, cannot filter on MAF, which may influence results
+## 1165098SNPs are left in the summary statistics file meta/txt/ALL.MDD1_depressed.txt.gz after QC.
+## I am done munging file: meta/txt/ALL.MDD1_depressed.txt.gz
+## The file is saved as ALL.MDD1_depressed.sumstats.gz in the current working directory.
+##      
+## Munging was completed at 2023-02-07 17:09:04
+## The munging of all files took 1 minutes and 43.3077869415283 seconds
+## Please check the .log file(s) to ensure that all columns were interpreted correctly and no warnings were issued for any of the summary statistics files
+```
+
+```
+## Rows: 8051380 Columns: 19
+## ── Column specification ─────────────────────────────────────────────────────────────────
+## Delimiter: "\t"
+## chr  (5): SNP, A1, A2, ngt, Direction
+## dbl (14): CHR, BP, FRQ_A_51144, FRQ_U_42365, INFO, OR, SE, P, HetISqt, HetDf...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+```
+
+```
+## The munging of 1 summary statistics started at 2023-02-07 17:09:40
+## Reading in reference file
+## Reading summary statistics for meta/txt/ALL.MDD9_death.txt.gz. Please note that this step usually takes a few minutes due to the size of summary statistic files.
+## All files loaded into R!
+## Munging file: meta/txt/ALL.MDD9_death.txt.gz
+## Interpreting the SNP column as the SNP column.
+## Interpreting the A1 column as the A1 column.
+## Interpreting the A2 column as the A2 column.
+## Interpreting the OR column as the effect column.
+## Interpreting the P column as the P column.
+## Interpreting the N column as the N column.
+## Interpreting the SE column as the SE column.
+## Merging file:meta/txt/ALL.MDD9_death.txt.gz with the reference file:sumstats/reference/w_hm3.snplist
+## 8051380 rows present in the full meta/txt/ALL.MDD9_death.txt.gz summary statistics file.
+## 6886277 rows were removed from the meta/txt/ALL.MDD9_death.txt.gz summary statistics file as the rs-ids for these rows were not present in the reference file.
+## The effect column was determined to be coded as an odds ratio (OR) for the meta/txt/ALL.MDD9_death.txt.gz summary statistics file. Please ensure this is correct.
+## 4 row(s) were removed from the meta/txt/ALL.MDD9_death.txt.gz summary statistics file due to the effect allele (A1) column not matching A1 or A2 in the reference file.
+## 1 row(s) were removed from the meta/txt/ALL.MDD9_death.txt.gz summary statistics file due to the other allele (A2) column not matching A1 or A2 in the reference file.
+## No INFO column, cannot filter on INFO, which may influence results
+## No MAF column, cannot filter on MAF, which may influence results
+## 1165098SNPs are left in the summary statistics file meta/txt/ALL.MDD9_death.txt.gz after QC.
+## I am done munging file: meta/txt/ALL.MDD9_death.txt.gz
+## The file is saved as ALL.MDD9_death.sumstats.gz in the current working directory.
+##      
+## Munging was completed at 2023-02-07 17:11:16
+## The munging of all files took 1 minutes and 35.8277871608734 seconds
+## Please check the .log file(s) to ensure that all columns were interpreted correctly and no warnings were issued for any of the summary statistics files
+```
+
 # Symptom prevalences
 
 Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output but population prevalences have to be estimated.
@@ -275,7 +426,14 @@ We include a table of counts of symptom presence and absence for PGC cohorts
 
 ```r
 pgc_symptom_counts <- read_table2('sumstats/PGC/CasesAllCohorts/pgc_dsm_symptom_counts.txt')
+```
 
+```
+## Warning: `read_table2()` was deprecated in readr 2.0.0.
+## ℹ Please use `read_table()` instead.
+```
+
+```r
 pgc_symptom_counts %>%
   spread(Status, N) %>%
   unite(AbsentPresent, Absent, Present, sep=':') %>%
@@ -666,7 +824,7 @@ covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 if(!file.exists(covstruct_r)) {
 
   # list sumstats distribution directories
-  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB|UKBt).+sumstats\\.gz$', full.names=TRUE)
+  sumstats_files <- list.files(file.path('meta', 'munged'), '.+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
@@ -681,6 +839,7 @@ if(!file.exists(covstruct_r)) {
     mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev))
     
   sumstats_prevs_keep <- sumstats_prevs |>
+    filter(cohorts %in% c('AGDS_PGC', 'ALSPAC_UKB', 'UKBt')) |>
     filter(!sumstats %in% c("AGDS_PGC.MDD1_depressed", "AGDS_PGC.MDD2_anhedonia", "AGDS_PGC.MDD6_fatigue", 
     "AGDS_PGC.MDD7_worthless", "AGDS_PGC.MDD8_concentration", "ALSPAC_UKB.MDD5a_psychomotorFast", "ALSPAC_UKB.MDD5b_psychomotorSlow"))
 
@@ -709,7 +868,7 @@ if(!file.exists(covstruct_r)) {
 ```
 
 ```
-## Rows: 26 Columns: 9
+## Rows: 38 Columns: 9
 ## ── Column specification ─────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (5): cohorts, symptom, sumstats, filename, trait_name
@@ -777,31 +936,32 @@ if(!file.exists(sumstats_h2_txt)) {
   sumstats_h2 %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
   mutate(sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clin',
-                          cohorts == 'ALSPAC_UKB' ~ 'Comm',
-                          cohorts == 'UKBt' ~ 'Ukb',
-                          TRUE ~ NA_character_),
-        Sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clinical',
-                         cohorts == 'ALSPAC_UKB' ~ 'Community',
-                         cohorts == 'UKBt' ~ 'UK Biobank',
-                         TRUE ~ NA_character_)) %>%
+                        cohorts == 'ALSPAC_UKB' ~ 'Comm',
+                        cohorts == 'UKBt' ~ 'Ukb',
+                        cohorts == 'ALL' ~ 'All',
+                        TRUE ~ NA_character_),
+      Sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clinical',
+                       cohorts == 'ALSPAC_UKB' ~ 'Community',
+                       cohorts == 'UKBt' ~ 'UK Biobank',
+                       cohorts == 'ALL' ~ 'All',
+                       TRUE ~ NA_character_)) %>%
   mutate(sample_symptom=paste0(sample, abbv)) %>%
   select(Sample, sample_symptom, ref=symptom,
-         h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE,
-         Nca, Nco, samp_prev, pop_prev,
-         cohorts, abbv, sumstats, filename)
-
+       h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE,
+       Nca, Nco, samp_prev, pop_prev,
+       cohorts, abbv, sumstats, filename)
 
   write_tsv(sumstats_h2_table, sumstats_h2_txt)
 
 } else {
 
-  sumstats_h2 <- read_tsv(sumstats_h2_txt)
+  sumstats_h2_table <- read_tsv(sumstats_h2_txt)
 
 }
 ```
 
 ```
-## Rows: 26 Columns: 17
+## Rows: 38 Columns: 17
 ## ── Column specification ─────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr  (7): Sample, sample_symptom, ref, cohorts, abbv, sumstats, filename
@@ -819,10 +979,10 @@ ggplot(sumstats_h2_table,
             y=h2,
             ymin=h2+se*qnorm(0.025),
             ymax=h2+se*qnorm(0.975),
-            colour=cohorts, shape=cohorts)) +
+            colour=Sample, shape=Sample)) +
 geom_hline(yintercept=0, col='grey') +
 geom_pointrange(position=position_dodge(width=0.5)) + 
-scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$abbv))) +
+scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_table$abbv))) +
 scale_y_continuous(expression(h[SNP]^2)) +
 theme_bw() + 
 theme(axis.text.y=element_text(size=13),
