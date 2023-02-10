@@ -30,7 +30,9 @@ List of `basic.xls` files from Ricopili with sample counts
 
 basic_xls_list <- list.files('meta/distribution', pattern='basic.*.xls', full.names=TRUE, recursive=TRUE)
 
-basics <- bind_rows(lapply(basic_xls_list, read_excel)) %>%
+names(basic_xls_list) <- str_match(basename(basic_xls_list), "basic\\.([A-Z_]+)\\.(MDD[A-Za-z0-9_]+)\\.num\\.xls")[,2]
+
+basics <- bind_rows(lapply(basic_xls_list, read_excel), .id='meta') %>%
 filter(Dataset != 'SUM')
 
 ```
@@ -43,9 +45,9 @@ basics_aligned <-
 cohort_alignment %>%
 filter(!reference %in% c('MDD3', 'MDD4')) %>%
 mutate(Dataset=str_replace(str_remove(filename, pattern='daner_'), 'gz', 'aligned.gz')) %>%
-left_join(basics, by='Dataset') 
+inner_join(filter(basics, meta %in% c('AGDS_PGC', 'ALSPAC_UKB')), by='Dataset') 
 
-presence_absence <- basics_aligned %>% str_glue_data("{N_cases}:{N_controls}")
+presence_absence <- basics_aligned %>% str_glue_data("{N_cases}:{N_controls} {round(100*N_cases/(N_cases + N_controls))}")
 
 basics_aligned %>%
 mutate(PresenceAbsence=as.character(presence_absence)) %>%
