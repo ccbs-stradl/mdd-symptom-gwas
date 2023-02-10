@@ -238,7 +238,7 @@ Load previously calculated symptom prevalences:
 
 ```{r prevs}
 
-all_covstruct_prefix <- 'all.covstruct'
+all_covstruct_prefix <- 'agds_pgc.alspac_ukb.covstruct'
 all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.'))) 
 
 ```
@@ -250,7 +250,7 @@ Calculate LDSC covariance structure for syptoms used in the combined structural 
 
 ```{r ldsc, results='hide'}
 
-covstruct_prefix <- 'all.symptoms.external.covstruct'
+covstruct_prefix <- 'symptoms.external.covstruct'
 covstruct_r <- here::here('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- here::here('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
@@ -258,9 +258,11 @@ if(!file.exists(covstruct_r)) {
     
   symptoms_sumstats_prevs <- all_sumstats_prevs %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
-  mutate(samp_prev=0.5) %>%
-  filter(!symptom %in% c('MDD5b')) %>%
-  transmute(filename=here::here(filename), samp_prev, pop_prev, trait_name=abbv)
+  mutate(samp_prev=0.5,
+         cohort=case_when(str_detect(filename, 'AGDS_PGC') ~ 'Clin',
+                          str_detect(filename, 'ALSPAC_UKB') ~ 'Comm',
+                          str_detect(filename, 'UKBt') ~ 'Ukb')) %>%
+  transmute(filename=here::here(filename), samp_prev, pop_prev, trait_name=paste0(cohort, abbv))
 
   # external files, prevalences and trait names
   external_sumstats_prevs <-
@@ -298,22 +300,21 @@ if(!file.exists(covstruct_r)) {
 
 ## Symptom factors
 
-Base model of symptom factors
+Base model of symptom factors, with Melancholic and Atypical. The mood symptoms factor was highly correlated with the Melancholic factor, so those symptoms have been combined. 
 
 ```{r affect_veg, cache=TRUE}
 
 model <- "
-Affect =~ NA*Dep + Guilt + Sui 
-Neuroveg =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
-Affect ~~ 1*Affect
-Neuroveg ~~ 1*Neuroveg
-Dep ~~ Anh
-AppDec ~~ AppInc
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt + CommDep + UkbDep + ClinSui + CommConc + CommSui 
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+MEL ~~ 1*MEL
+ATY ~~ 1*ATY
+GATE ~~ 1*GATE
+GATE ~~ 0*MEL + 0*ATY
 "
 fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model)
-
-fit$modelfit
-fit$results[c(1,2,3,6,7,9)]
 
 ```
 
@@ -324,12 +325,15 @@ Compare symptom factors against each external phenotype. Single regression of ea
 ```{r ext_glue, cache=TRUE}
 
 ext.glue <- "
-Affect =~ NA*Dep + Guilt + Sui 
-Neuroveg =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
-Affect ~~ 1*Affect
-Neuroveg ~~ 1*Neuroveg
-Dep ~~ Anh
-AppDec ~~ AppInc
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt + CommDep + UkbDep + ClinSui + CommConc + CommSui 
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+MEL ~~ 1*MEL
+ATY ~~ 1*ATY
+GATE ~~ 1*GATE
+GATE ~~ 0*MEL + 0*ATY
+
 AlcDep ~ {symptom}
 Anxiety ~  {symptom}
 BIP ~ {symptom}
@@ -344,7 +348,7 @@ Sleep ~ {symptom}
 Smoking ~ {symptom}
 "
 
-ext.model_list <- lapply(c('Affect', 'Neuroveg'), function(symptom) str_glue_data(list(symptom=symptom), ext.glue))
+ext.model_list <- lapply(c('MEL', 'ATY', 'GATE'), function(symptom) str_glue_data(list(symptom=symptom), ext.glue))
 
 ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
 
@@ -353,10 +357,10 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ```{r ext_loadings}
 
 ext_full <-
-bind_rows(lapply(ext.fit_list, function(fit) fit$results)) %>%
+bind_rows(lapply(ext.fit_list, function(fit) mutate(fit$results, p_value=as.character(p_value)))) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
-mutate(Beta='Total', Factor=rhs, Phenotype=lhs)
+filter(lhs %in% ext_trait_names, rhs %in% c('MEL', 'ATY', 'GATE')) %>%
+mutate(Beta='Total', Factor=rhs, Phenotype=lhs, p_value=as.numeric(p_value))
 
 ```
 
@@ -366,24 +370,27 @@ Multiple regression of each phenotype on symptom factors, to estimate relationsh
 ```{r ext_mult, cache=TRUE}
 
 ext_mult.model <- "
-Affect =~ NA*Dep + Guilt + Sui 
-Neuroveg =~ NA*Anh + AppDec + AppInc + SleDec + SleInc + MotoInc + Fatig + Conc
-Affect ~~ 1*Affect
-Neuroveg ~~ 1*Neuroveg
-Dep ~~ Anh
-AppDec ~~ AppInc
-AlcDep ~ Affect + Neuroveg
-Anxiety ~ Affect + Neuroveg
-BIP ~ Affect + Neuroveg
-BMI ~ Affect + Neuroveg
-EA ~ Affect + Neuroveg
-MD ~ Affect + Neuroveg
-MDD ~ Affect + Neuroveg
-Neu ~ Affect + Neuroveg
-PTSD ~ Affect + Neuroveg
-Pain ~ Affect + Neuroveg
-Sleep ~ Affect + Neuroveg
-Smoking ~ Affect + Neuroveg
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt + CommDep + UkbDep + ClinSui + CommConc + CommSui 
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+MEL ~~ 1*MEL
+ATY ~~ 1*ATY
+GATE ~~ 1*GATE
+GATE ~~ 0*MEL + 0*ATY
+
+AlcDep ~ MEL + ATY + GATE
+Anxiety ~  MEL + ATY + GATE
+BIP ~ MEL + ATY + GATE
+BMI ~ MEL + ATY + GATE
+EA ~ MEL + ATY + GATE
+MD ~ MEL + ATY + GATE
+MDD ~ MEL + ATY + GATE
+Neu ~ MEL + ATY + GATE
+PTSD ~ MEL + ATY + GATE
+Pain ~ MEL + ATY + GATE
+Sleep ~ MEL + ATY + GATE
+Smoking ~ MEL + ATY + GATE
 "
 ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult.model)
 
@@ -395,7 +402,7 @@ ext_partial <-
 bind_rows(lapply(list(ext_mult.fit),
                  function(fit) fit$results)) %>%
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-  filter(lhs %in% ext_trait_names, rhs %in% c('Affect', 'Neuroveg')) %>%
+  filter(lhs %in% ext_trait_names, rhs %in% c('MEL', 'ATY', 'GATE')) %>%
   mutate(Beta='Specific', Factor=rhs, Phenotype=lhs)
 
 ```
@@ -411,7 +418,7 @@ arrange(Factor, Phenotype, Model)
 ```{r ex_plot, fig.width=10, fig.height=6}
 
 ggplot(bind_rows(ext_full, ext_partial),
-       aes(x=factor(Factor, levels=c('Neuroveg', 'Affect')),
+       aes(x=factor(Factor, levels=c('MEL', 'ATY', 'GATE')),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Specific', 'Total')),
            shape=factor(Beta, levels=c('Specific', 'Total')),

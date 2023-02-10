@@ -146,7 +146,7 @@ gunzip -c sumstats/aligned/daner_MDD5b_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {
 
 We find all daner files in the meta-analysis directory and loop them through the munge step.
 
-```{r munge, eval=FALSE}
+```{r munge, eval=TRUE}
 # Munge sumstats for all cohorts symptom GWASs
 
 # find meta-analysed daner sumstats files for format daner_[COHORTS].MDD[N]_[SYMPTOM].gz
@@ -399,7 +399,7 @@ covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 if(!file.exists(covstruct_r)) {
 
   # list sumstats distribution directories
-  sumstats_files <- list.files(file.path('meta', 'munged'), '(AGDS_PGC|ALSPAC_UKB|UKBt).+sumstats\\.gz$', full.names=TRUE)
+  sumstats_files <- list.files(file.path('meta', 'munged'), '.+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
   cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
@@ -411,18 +411,21 @@ if(!file.exists(covstruct_r)) {
     inner_join(sumstats_paths, by='sumstats') %>%
     left_join(pop_prevs_w, by='symptom') %>%
     mutate(trait_name=paste(cohorts, symptom, sep='.')) |>
-    mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev)) |>
+    mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev))
+    
+  sumstats_prevs_keep <- sumstats_prevs |>
+    filter(cohorts %in% c('AGDS_PGC', 'ALSPAC_UKB', 'UKBt')) |>
     filter(!sumstats %in% c("AGDS_PGC.MDD1_depressed", "AGDS_PGC.MDD2_anhedonia", "AGDS_PGC.MDD6_fatigue", 
     "AGDS_PGC.MDD7_worthless", "AGDS_PGC.MDD8_concentration", "ALSPAC_UKB.MDD5a_psychomotorFast", "ALSPAC_UKB.MDD5b_psychomotorSlow"))
 
   write_tsv(sumstats_prevs, file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 
-  symptoms_covstruct <- ldsc(traits=sumstats_prevs$filename,
-                             sample.prev=rep(0.5, times=length(sumstats_prevs$samp_prev)),
-                             population.prev=sumstats_prevs$pop_prev,
+  symptoms_covstruct <- ldsc(traits=sumstats_prevs_keep$filename,
+                             sample.prev=rep(0.5, times=length(sumstats_prevs_keep$samp_prev)),
+                             population.prev=sumstats_prevs_keep$pop_prev,
                              ld='sumstats/reference/eur_w_ld_chr/',
                              wld='sumstats/reference/eur_w_ld_chr/',
-                             trait.names=sumstats_prevs$trait_name)
+                             trait.names=sumstats_prevs_keep$trait_name)
 
   dput(symptoms_covstruct, covstruct_r, control=c('exact'))
   saveRDS(symptoms_covstruct, covstruct_rds)
@@ -439,60 +442,6 @@ if(!file.exists(covstruct_r)) {
 }
 ```
 
-
-AGDS+PGC+ALSPAC+UKB sumstats, plus UKB Touchscreen cardinal symptoms
-```{r covstruc_all, results='hide'}
-
-all_covstruct_prefix <- 'all.covstruct'
-all_covstruct_r <- file.path('ldsc', paste(all_covstruct_prefix, 'deparse.R', sep='.'))
-all_covstruct_rds <- file.path('ldsc', paste(all_covstruct_prefix, 'rds', sep='.'))
-
-if(!file.exists(all_covstruct_r)) {
-
-  # list sumstats distribution directories
-  all_sumstats_files <- list.files(file.path('meta', 'munged'), '(ALL|UKBt).+sumstats\\.gz$', full.names=TRUE)
-
-  # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-  all_cohorts_symptoms <- str_match(basename(all_sumstats_files), '([A-Za-z_]+).(MDD[:digit:](a|b)?)')[,1]
-
-  all_sumstats_paths <- data.frame(filename=all_sumstats_files, sumstats=str_remove(basename(all_sumstats_files), '.sumstats.gz'))
-
-  all_sumstats_prevs <- 
-    all_sumstats_paths %>%
-    mutate(trait_name=all_cohorts_symptoms) %>%
-    mutate(symptom=str_match(sumstats, "[A-Za-z]\\.(MDD[1-9a-b]+)_")[,2]) %>%
-    left_join(pop_prevs_w, by='symptom') %>%
-    filter(!symptom == 'MDD5b') |>
-    mutate(pop_prev=case_when(trait_name == 'UKBt.MDD1' ~ 0.557,
-                              trait_name == 'UKBt.MDD2' ~ 0.368,
-                              TRUE ~ pop_prev))
-    
-   write_tsv(all_sumstats_prevs, file.path('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.')))
-
-  all_symptoms_covstruct <- ldsc(traits=all_sumstats_prevs$filename,
-                             sample.prev=rep(0.5, times=length(all_sumstats_prevs$samp_prev)),
-                             population.prev=all_sumstats_prevs$pop_prev,
-                             ld='sumstats/reference/eur_w_ld_chr/',
-                             wld='sumstats/reference/eur_w_ld_chr/',
-                             trait.names=all_sumstats_prevs$trait_name)
-
-  dput(all_symptoms_covstruct, all_covstruct_r, control=c('exact'))
-  saveRDS(all_symptoms_covstruct, all_covstruct_rds)
-  
-  # check for exact match of deparsed object
-  identical(dget(all_covstruct_r), all_symptoms_covstruct)
-
-} else {
-
-  all_symptoms_covstruct <- dget(covstruct_r)
-  
-  all_sumstats_prevs <- read_tsv(file.path('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.')))
-
-}
-
-
-```
-
 ## Heritabilities
 
 Run LDSC, using sumstats filenames and estimated prevalences to construct command line arguments for `ldsc.py`. Symptoms with negative heritabilities in PGC cohorts are plotted in a separate facet with its own scale.
@@ -502,10 +451,8 @@ Run LDSC, using sumstats filenames and estimated prevalences to construct comman
 sumstats_h2_txt <- 'ldsc/symptoms.h2.txt'
 
 if(!file.exists(sumstats_h2_txt)) {
-    
-  sumstats_info <- bind_rows(sumstats_prevs, all_sumstats_prevs)
 
-  sumstats_h2 <- plyr::adply(sumstats_info, 1, function(x) {
+  sumstats_h2 <- plyr::adply(sumstats_prevs, 1, function(x) {
     
     filename <- x$filename
     samp_prev <- 0.5
@@ -516,14 +463,14 @@ if(!file.exists(sumstats_h2_txt)) {
     print(filename)
   
   
-    #if(!file.exists(logfile)) {
-    if(!is.na(samp_prev)) {
-       ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev, '--pop-prev', pop_prev)
-    } else {
-       ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname)
+    if(!file.exists(logfile)) {
+        if(!is.na(samp_prev)) {
+           ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev, '--pop-prev', pop_prev)
+        } else {
+           ldsc_command <- paste('ldsc.py --h2', filename, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname)
+        }
+        system(ldsc_command)
     }
-    system(ldsc_command)
-    #}
   
     h2_log <- read.table(logfile, sep='\t', stringsAsFactors=F)
   
@@ -548,55 +495,51 @@ if(!file.exists(sumstats_h2_txt)) {
     return(data.frame(h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE))
   
   })
+  
+  sumstats_h2_table <-
+  sumstats_h2 %>%
+  left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
+  mutate(sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clin',
+                        cohorts == 'ALSPAC_UKB' ~ 'Comm',
+                        cohorts == 'UKBt' ~ 'Ukb',
+                        cohorts == 'ALL' ~ 'All',
+                        TRUE ~ NA_character_),
+      Sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clinical',
+                       cohorts == 'ALSPAC_UKB' ~ 'Community',
+                       cohorts == 'UKBt' ~ 'UK Biobank',
+                       cohorts == 'ALL' ~ 'All',
+                       TRUE ~ NA_character_)) %>%
+  mutate(sample_symptom=paste0(sample, abbv)) %>%
+  select(Sample, sample_symptom, ref=symptom,
+       h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE,
+       Nca, Nco, samp_prev, pop_prev,
+       cohorts, abbv, sumstats, filename)
 
-  write_tsv(sumstats_h2, sumstats_h2_txt)
+  write_tsv(sumstats_h2_table, sumstats_h2_txt)
 
 } else {
 
-  sumstats_h2 <- read_tsv(sumstats_h2_txt)
+  sumstats_h2_table <- read_tsv(sumstats_h2_txt)
 
 }
+
+
 
 
 ```
 
 ```{r mdd_symptom_gsem_h2}
 
-sumstats_h2_labels <-
-as_tibble(sumstats_h2) %>%
-mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
-       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', '+')) %>%
-left_join(dsm_mdd_symptoms_labels, by='ref') %>%
-mutate(cohorts=case_when(study == 'AGDS+PGC' ~ "Clinical (AGDS+PGS)",
-                         study == 'ALSPAC+UKB' ~ "Population (ALSPAC+UKB)",
-                         TRUE ~ 'All'))
-       
-#        %>%
-# # split negative estimates into their own facet
-# mutate(study_est=case_when(study == 'PGC' & h2 > 0 ~ 'PGC (+)',
-#                            study == 'PGC' & h2 <= 0 ~ 'PGC (-)',
-#                            TRUE ~ study)) %>%
-# filter(is.na(sub_study) | sub_study == '_M') %>%
-# mutate(a=1) %>%
-# # insert invisible placeholder estimates so that the positive estimates are
-# # all plotted on common scale even though the facet has `scale='free'`
-# bind_rows(tibble(study_est=rep(c('PGC (-)', 'PGC (+)', 'UKB CIDI', 'UKB PHQ'), times=2),
-#                  h='Mood',
-#                  a=0,
-#                  h2=rep(c(0, 0.26), each=4),
-#                  se=0.0))
-
-# filter out traits below sample size cutoff
 mdd_symptom_gsem_h2.gg <-
-ggplot(sumstats_h2_labels,
+ggplot(sumstats_h2_table,
         aes(x=abbv,
             y=h2,
             ymin=h2+se*qnorm(0.025),
             ymax=h2+se*qnorm(0.975),
-            colour=cohorts, shape=cohorts)) +
+            colour=Sample, shape=Sample)) +
 geom_hline(yintercept=0, col='grey') +
 geom_pointrange(position=position_dodge(width=0.5)) + 
-scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$abbv))) +
+scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_table$abbv))) +
 scale_y_continuous(expression(h[SNP]^2)) +
 theme_bw() + 
 theme(axis.text.y=element_text(size=13),
@@ -612,179 +555,5 @@ scale_y_continuous(expression(h[SNP]^2),
     breaks=c(-0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2))
 
 ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=8, height=4)
-
-```
-
-Full meta analysis only
-
-```{r mdd_symptom_gsem_h2}
-
-ggplot(filter(sumstats_h2_labels, cohorts=='All'),
-        aes(x=abbv,
-            y=h2,
-            ymin=h2+se*qnorm(0.025),
-            ymax=h2+se*qnorm(0.975))) +
-geom_hline(yintercept=0, col='grey') +
-geom_pointrange(position=position_dodge(width=0.5)) + 
-scale_x_discrete('Symptom', limits=rev(unique(sumstats_h2_labels$abbv))) +
-scale_y_continuous(expression(h[SNP]^2)) +
-coord_flip(ylim=c(-.05, .1)) +
-theme_bw() + 
-theme(axis.text.y=element_text(size=13),
-  axis.text.x=element_text(size=10),
-  axis.title=element_text(size=12),
-  legend.title=element_text(size=12),
-  legend.text=element_text(size=14))
-  
-ggsave('mdd-symptom-gsem_files/symptoms_h2_snp_all.png', width=8, height=4)
-
-```
-
-
-## Genetic correlation with MDD
-
-Examine how each symptom genetically correlates with MDD case/control status. Positive correlation may suggest the presence of a symptom is a more extreme form of caseness while a negative or zero correlation suggests it is a primary feature of caseness. Use sumstats from PGC cohorts so that phenotype is diagnosed depression. 
-
-
-```{bash, eval=FALSE}
-# Munge sumstats for other MDD sumstats
-
-for sumstats in $(ls sumstats/PGC/MDD/daner_*.gz); do
-
-        prefix=$(basename $sumstats .gz)
-
-        munge_sumstats.py --daner-n \
-        --sumstats $sumstats \
-        --merge-alleles sumstats/reference/w_hm3.snplist \
-        --out sumstats/PGC/OtherMDD/${prefix}.ldsc
-
-done
-
-
-```
-
-```{r mdd_rg, eval=FALSE}
-
-mdd29_sumstats_gz <- 'sumstats/PGC/MDD/daner_MDD29.0515a_mds6.0316.ldsc.sumstats.gz'
-outname <- paste(mdd29_sumstats_gz, 'rg', sep='.')
-logfile <- paste(outname, 'log', sep='.')
-
-if(!file.exists(logfile)) {
-
-  # string together rg and prevalence arguments, separated by commas
-  rg_arg <- paste(c(mdd29_sumstats_gz, sumstats_info$filename), collapse=',')
-  samp_prev_list <- c(16823/25632, rep(0.5, length(sumstats_info$samp_prev)))
-  # use 'nan' for prevalences of quantitative traits 
-  samp_prev_arg <- paste(samp_prev_list, collapse=',')
-  pop_prev_list <- c(0.15, sumstats_info$pop_prev)
-  pop_prev_arg <- paste(ifelse(is.na(pop_prev_list), yes='nan', no=as.character(pop_prev_list)), collapse=',')
-
-  ldsc_command <- paste('/Users/mark/Work/mdd-meta/resources/ldsc/ldsc/ldsc.py --rg', rg_arg, '--ref-ld-chr sumstats/reference/eur_w_ld_chr/ --w-ld-chr sumstats/reference/eur_w_ld_chr/ --out', outname, '--samp-prev', samp_prev_arg, '--pop-prev', pop_prev_arg)
-
-  system(ldsc_command)
-
-}
-
-rg_log <- readLines(logfile)
-
-start_of_results <- which(str_detect(rg_log, 'Summary of Genetic Correlation Results')) + 1
-end_of_results <- which(str_detect(rg_log, 'Analysis finished at'))-1
-
-rg_results <- rg_log[start_of_results:end_of_results]
-
-mdd_rgs <- read_table2(paste(rg_results, collapse='\n'))
-
-
-
-```
-
-```{r mdd_symptom_gsem_rg, eval=FALSE}
-
-
-other_mdd_rg_refs <- 
-as_tibble(mdd_rgs) %>%
-left_join(sumstats_info, by=c('p2'='filename')) %>%
-mutate(ref=paste0('MDD', str_extract(trait_name, '[:digit:](a|b)?')),
-       study=str_replace(str_extract(trait_name, '[A-Z_]+'), '_', ' ')) %>%
-left_join(dsm_mdd_symptoms_labels, by='ref')
-
-ggplot(other_mdd_rg_refs,
-      aes(x=h, y=rg, ymin=rg+se*qnorm(0.025), ymax=rg+se*qnorm(0.975))) +
-geom_hline(yintercept=0, col='grey') +
-geom_hline(yintercept=1, col='grey') +
-geom_pointrange() +
-facet_grid(cols=vars(study)) +
-scale_x_discrete('Symptoms', limits=rev(unique(other_mdd_rg_refs$h))) +
-scale_y_continuous('r[g](PGC MDD)') +
-coord_flip(ylim=c(-1, 1)) +
-theme_bw() + 
-theme(axis.text.y=element_text(size=12, family='Apple Symbols'))
-
-
-ggsave('mdd-symptom-gsem_files/symptoms_mdd_rg_snp.png', width=10, height=4)
-
-```
-
-## Correlation matrix
-
-Load phenotypic correlations 
-
-```{r, eval=FALSE}
-
-ukb_cidi_phq_cor <- dget('sumstats/UKB/ukb_cidi_phq_mixed_cor.deparse.R')
-
-pgc_dsm_cor <- dget('sumstats/PGC/CasesAllCohorts/pgc_cases_tetra_cor.deprase.R')
-
-
-symptoms_pgc_cidi_phqm <- 
-c("PGC1", "PGC2", "PGC3a", "PGC3b", "PGC4a", "PGC4b", "PGC5a", 
-"PGC5b", "PGC6", "PGC7", "PGC8", "PGC9", "UKB_CIDI1", "UKB_CIDI2", 
-"UKB_CIDI3a", "UKB_CIDI3b", "UKB_CIDI4a", "UKB_CIDI4b", "UKB_CIDI6", 
-"UKB_CIDI7", "UKB_CIDI8", "UKB_CIDI9",  "UKB_PHQ1_M", "UKB_PHQ2_M", "UKB_PHQ3_M", 
-"UKB_PHQ4_M", "UKB_PHQ5_M",  "UKB_PHQ6_M", "UKB_PHQ7_M", "UKB_PHQ8_M", "UKB_PHQ9_M")
-
-pheno_cor <- matrix(NA, nrow=length(symptoms_pgc_cidi_phqm), ncol=length(symptoms_pgc_cidi_phqm), dimnames=list(symptoms_pgc_cidi_phqm, symptoms_pgc_cidi_phqm))
-
-
-pheno_cor[13:31,13:31] <- ukb_cidi_phq_cor$rho[c(-3,-6), c(-3, -6)]
-
-pheno_cor[1:12,1:12] <- pgc_dsm_cor$rho
-
-```
-
-```{r pgc_ukb_corrplot, fig.width=9, fig.height=9, eval=FALSE}
-
-cov_pos <- which(diag(symptoms_covstruct$S) > 0)
-
-symptoms_cor <- cov2cor(symptoms_covstruct$S[cov_pos,cov_pos])
-symptoms_cor[which(symptoms_cor > 1)] <- 1
-symptoms_cor[which(symptoms_cor < -1)] <- -1
-rownames(symptoms_cor) <- colnames(symptoms_cor)
-
-corrplot(symptoms_cor, 'square')
-
-symptoms_pgc_cidi_phqm_cor <- symptoms_cor[symptoms_pgc_cidi_phqm,symptoms_pgc_cidi_phqm]
-
-# phenotypic correlations in upper diagonal
-
-symptoms_pgc_cidi_phqm_cor[upper.tri(symptoms_pgc_cidi_phqm_cor)] <- pheno_cor[upper.tri(pheno_cor)]
-
-corrplot(symptoms_pgc_cidi_phqm_cor, 'square', na.label='.')
-
-# # output for presentation
-# dsm_horizontal_labels <- dsm_mdd_symptoms_labels$h
-# dsm_vertical_labels <- dsm_mdd_symptoms_labels$v
-# names(dsm_horizontal_labels) <- names(dsm_vertical_labels) <- dsm_mdd_symptoms_labels$ref
-
-# symptoms_pgc_cidi_phqm_cor_refs <- paste0('MDD', str_extract(colnames(symptoms_pgc_cidi_phqm_cor), '[:digit:](a|b)?'))
-
-# symptoms_pgc_cidi_phqm_cor_present <- symptoms_pgc_cidi_phqm_cor
-
-# rownames(symptoms_pgc_cidi_phqm_cor_present) <- dsm_horizontal_labels[symptoms_pgc_cidi_phqm_cor_refs]
-# colnames(symptoms_pgc_cidi_phqm_cor_present) <- dsm_vertical_labels[symptoms_pgc_cidi_phqm_cor_refs]
-
-# png('mdd-symptom-gsem_files/symptoms_pgc_cidi_phqm_cor.png', width=3000, height=3000, pointsize=60)
-# corrplot(symptoms_pgc_cidi_phqm_cor_present, 'square', na.label='.')
-# dev.off()
 
 ```

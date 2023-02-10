@@ -1,0 +1,10 @@
+Sample	sample_symptom	ref	samp_prev	pop_prev	filename	daner
+All	AllDep	MDD1	0.6101407115873162	0.3391850741539902	meta/munged/ALL.MDD1_depressed.sumstats.gz	meta/distribution/ALL.MDD1_depressed/daner_ALL.MDD1_depressed.gz
+All	AllAnh	MDD2	0.4813992666732732	0.26261412043600163	meta/munged/ALL.MDD2_anhedonia.sumstats.gz	meta/distribution/ALL.MDD2_anhedonia/daner_ALL.MDD2_anhedonia.gz
+All	AllAppDec	MDD3a	0.3976318927150598	0.14331684078533274	meta/munged/ALL.MDD3a_weightLoss.sumstats.gz	meta/distribution/ALL.MDD3a_weightLoss/daner_ALL.MDD3a_weightLoss.gz
+All	AllAppInc	MDD3b	0.2554129624318899	0.0896658685652876	meta/munged/ALL.MDD3b_weightGain.sumstats.gz	meta/distribution/ALL.MDD3b_weightGain/daner_ALL.MDD3b_weightGain.gz
+All	AllSleInc	MDD4b	0.24266956379523844	0.08052608558255452	meta/munged/ALL.MDD4b_sleepMore.sumstats.gz	meta/distribution/ALL.MDD4b_sleepMore/daner_ALL.MDD4b_sleepMore.gz
+All	AllMotoInc	MDD5a	0.4067419962335216	0.04423894133437096	meta/munged/ALL.MDD5a_psychomotorFast.sumstats.gz	meta/distribution/ALL.MDD5a_psychomotorFast/daner_ALL.MDD5a_psychomotorFast.gz
+All	AllGuilt	MDD7	0.5897239841907449	0.203853493076734	meta/munged/ALL.MDD7_worthless.sumstats.gz	meta/distribution/ALL.MDD7_worthless/daner_ALL.MDD7_worthless.gz
+All	AllConc	MDD8	0.7977663443027144	0.28289629948207273	meta/munged/ALL.MDD8_concentration.sumstats.gz	meta/distribution/ALL.MDD8_concentration/daner_ALL.MDD8_concentration.gz
+All	AllSui	MDD9	0.5469420055823504	0.1928835432413938	meta/munged/ALL.MDD9_death.sumstats.gz	meta/distribution/ALL.MDD9_death/daner_ALL.MDD9_death.gz

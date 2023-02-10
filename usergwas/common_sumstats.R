@@ -1,89 +1,54 @@
 # Prepare LDSC and sumstats of well-powered symptoms across both samples
 
-library(GenomicSEM)
+
 library(stringr)
 library(readr)
 library(dplyr)
 library(tidyr)
+library(GenomicSEM)
 
-dsm_mdd_symptoms_labels <-
-read_delim("
-MDD1;Mood;Mood;Dep
-MDD2;Interest;Interest;Anh
-MDD3;Weight⇅;Weight⇆;App
-MDD3a;Weight⇊;Weight⇇;AppDec
-MDD3b;Weight⇈;Weight⇉;AppInc
-MDD4;Sleep⇅;Sleep⇆;Sle
-MDD4a;Sleep⇊;Sleep⇇;SleDec
-MDD4b;Sleep⇈;Sleep⇉;SleInc
-MDD5;Motor⇅;Motor⇆;Moto
-MDD5a;Motor⇈;Motor⇉;MotoInc
-MDD5b;Motor⇊;Motor⇇;MotoDec
-MDD6;Fatigue;Fatigue;Fatig
-MDD7;Guilt;Guilt;Guilt
-MDD8;Concentrate;Concentrate;Conc
-MDD9;Suicidality;Suicidality;Sui
-", col_names=c('ref', 'h', 'v', 'abbv'), delim=';')
+symptoms_h2 <- read_tsv(here::here('ldsc', 'symptoms.h2.txt'))
 
-symptoms_sample_prev_file <- here::here('meta', 'symptoms_prev.txt')
-symptoms_sample_prev <- read_tsv(symptoms_sample_prev_file)
+# symptoms with positive heritabilities, sufficient chisq
+symptoms_analyse <-
+symptoms_h2 %>%
+    filter(cohorts %in% c('ALL', 'UKBt')) %>%
+    filter(h2 > 0) %>%
+    filter(sample_symptom %in% c("AllAnh", "AllDep", "AllSui", "AllAppInc", "AllGuilt", "AllSleInc", "AllConc", "AllAppDec", "AllMotoInc"))
 
-pop_prevs_w <-
-symptoms_sample_prev %>%
-mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
-				   symptom %in% c('MDD1', 'MDD2') ~ 1.0,
-				   TRUE ~ 0.57)) %>%
-mutate(pop_prev=samp_prev*w) %>%
-select(symptom, cohorts, pop_prev) %>%
-pivot_wider(names_from=cohorts, values_from=pop_prev) %>%
-group_by(symptom) %>%
-mutate(pop_prev=mean(c(AGDS_PGC, ALSPAC_UKB))) %>%
-select(symptom, pop_prev)
-
-covstruct_prefix <- 'agds_pgc.alspac_ukb.common.covstruct'
-sumstats_prefix <- 'agds_pgc.alspac_ukb.common.sumstats'
+covstruct_prefix <- 'all.common.covstruct'
+sumstats_prefix <- 'all.common.sumstats'
 covstruct_r <- here::here('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- here::here('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 sumstats_rds <- here::here('sumstats', paste(sumstats_prefix, 'rds', sep='.'))
 
-# list sumstats distribution directories
-sumstats_files <- list.files(here::here('meta', 'munged'), '.gz', full.names=TRUE)
+# find the daner files
+meta_daner_files <- list.files("meta/distribution", pattern="^daner_[A-Z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
 
-# pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
+# non-meta-analysed files
+other_daner_files <- list.files("sumstats/UKB/Touchscreen", pattern="^daner_[A-Za-z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
 
-sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
+daner_files <- c(meta_daner_files, other_daner_files)
+# parse out info from filenames
+daner_info <- str_match(basename(daner_files), "daner_([A-Za-z_]+)\\.(MDD[0-9a-b]+)")
 
-sumstats_prevs <- 
-symptoms_sample_prev %>%
-left_join(sumstats_paths, by='sumstats') %>%
-left_join(pop_prevs_w, by='symptom') %>%
-left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
-mutate(Sample=case_when(cohorts %in% 'AGDS_PGC' ~ 'Clin',
-						cohorts %in% 'ALSPAC_UKB' ~ 'Pop',
-						TRUE ~ NA_character_)) %>%
-mutate(trait_name=paste0(Sample, abbv)) %>%
-mutate(daner=paste(here::here('meta', 'distribution', sumstats, paste0('daner_', sumstats, '.gz'))))
+symptoms_daner_analyse <- symptoms_analyse %>%
+left_join(tibble(daner=daner_files, cohorts=daner_info[,2], ref=daner_info[,3]),
+          by=c('cohorts', 'ref')) %>%
+select(Sample, sample_symptom, ref, samp_prev, pop_prev, filename, daner)
 
-sumstats_prevs_keep <- sumstats_prevs %>%
-filter(trait_name %in% c("ClinAppDec", "ClinAppInc", "ClinSleDec",
-					   "ClinSleInc", "ClinMotoInc", "ClinSui",
-					   "PopDep", "PopAnh", "PopAppDec", "PopAppInc",
-					   "PopSleDec", "PopSleInc", "PopFatig", 
-					   "PopGuilt", "PopConc", "PopSui"))
-
-  write_tsv(sumstats_prevs, here::here('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
+ write_tsv(symptoms_daner_analyse, here::here('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 	
 if(!file.exists(covstruct_r)) {
 
-  symptoms_covstruct <- ldsc(traits=sumstats_prevs_keep$filename,
-							 sample.prev=sumstats_prevs_keep$samp_prev,
-							 population.prev=sumstats_prevs_keep$pop_prev,
+  symptoms_covstruct <- ldsc(traits=symptoms_daner_analyse$filename,
+							 sample.prev=rep(0.5, times=length(symptoms_daner_analyse$samp_prev)),
+							 population.prev=symptoms_daner_analyse$pop_prev,
 							 ld=here::here('sumstats/reference/eur_w_ld_chr/'),
 							 wld=here::here('sumstats/reference/eur_w_ld_chr/'),
-							 trait.names=sumstats_prevs_keep$trait_name)
+							 trait.names=symptoms_daner_analyse$sample_symptom)
 
-  dput(symptoms_covstruct, covstruct_r, control=c('all', 'digits17'))
+  dput(symptoms_covstruct, covstruct_r, control=c('exact'))
   saveRDS(symptoms_covstruct, covstruct_rds)
   
   # check for exact match of deparsed object
@@ -99,12 +64,12 @@ if(!file.exists(covstruct_r)) {
 
 if(!file.exists(sumstats_rds)){
 	
-	symptoms_sumstats <- sumstats(files=sumstats_prevs_keep$daner,
+	symptoms_sumstats <- sumstats(files=symptoms_daner_analyse$daner,
 	                              ref=here::here('sumstats', 'reference', 'reference.1000G.maf.0.005.txt'),
-								  trait.names=sumstats_prevs_keep$trait_name,
-								  se.logit=rep(TRUE, nrow(sumstats_prevs_keep)),
+								  trait.names=symptoms_daner_analyse$sample_symptom,
+								  se.logit=rep(TRUE, nrow(symptoms_daner_analyse)),
 								  OLS=NULL,
-								  linprob=rep(FALSE, nrow(sumstats_prevs_keep)),
+								  linprob=rep(FALSE, nrow(symptoms_daner_analyse)),
 								  info.filter=0.6,
 								  maf.filter=0.01,
 								  keep.indel=FALSE,
@@ -113,3 +78,25 @@ if(!file.exists(sumstats_rds)){
 						
 	saveRDS(symptoms_sumstats, sumstats_rds)
 }
+
+# test for traits that don't require large modifications to the matrix
+# cc.model <- "
+# MDD =~ NA*AllAnh + AllDep + AllSui + AllAppInc + AllGuilt + AllSleInc + AllConc + AllAppDec + AllMotoInc
+# MDD ~~ 1*MDD
+# "
+# 
+# x <- usermodel(symptoms_covstruct, estimation='DWLS', model=cc.model)
+
+#  1 AllAnh        
+#  2 AllDep        
+#  3 AllSui        
+#  4 AllAppInc     
+#  5 UkbDep        
+#  6 AllGuilt      
+#  7 UkbAnh        
+#  8 AllFatig      
+#  9 AllSleInc     
+# 10 AllConc       
+# 11 AllAppDec     
+# 12 AllSleDec     
+# 13 AllMotoInc   
