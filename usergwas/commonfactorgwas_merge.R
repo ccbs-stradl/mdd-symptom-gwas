@@ -14,8 +14,6 @@ sumstats_txt <- here::here('meta', 'usergwas', paste0(gwas_prefix, '.txt.gz'))
 symptoms_gwas <-
 bind_rows(lapply(list.files(gwas_rds_dir, pattern=gwas_prefix, full.names=TRUE), readRDS)) %>%
 as_tibble() %>%
-arrange(CHR, BP) %>%
-filter(fail == 0) %>%
-select(-i, -lhs, -op, -rhs, -fail, -warning)
+arrange(CHR, BP)
 
 write_tsv(symptoms_gwas, sumstats_txt)

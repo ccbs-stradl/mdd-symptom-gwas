@@ -73,8 +73,8 @@ if(!file.exists(sumstats_rds)){
 								  info.filter=0.6,
 								  maf.filter=0.01,
 								  keep.indel=FALSE,
-								  parallel=TRUE,
-								  cores=8)
+								  parallel=FALSE)#TRUE,
+								  #cores=8)
 						
 	saveRDS(symptoms_sumstats, sumstats_rds)
 }
