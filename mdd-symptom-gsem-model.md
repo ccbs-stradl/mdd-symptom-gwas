@@ -14,20 +14,20 @@ R.version
 ```
 
     ##                _                           
-    ## platform       x86_64-pc-linux-gnu         
-    ## arch           x86_64                      
-    ## os             linux-gnu                   
-    ## system         x86_64, linux-gnu           
+    ## platform       aarch64-apple-darwin20      
+    ## arch           aarch64                     
+    ## os             darwin20                    
+    ## system         aarch64, darwin20           
     ## status                                     
     ## major          4                           
-    ## minor          1.2                         
-    ## year           2021                        
-    ## month          11                          
-    ## day            01                          
-    ## svn rev        81115                       
+    ## minor          2.2                         
+    ## year           2022                        
+    ## month          10                          
+    ## day            31                          
+    ## svn rev        83211                       
     ## language       R                           
-    ## version.string R version 4.1.2 (2021-11-01)
-    ## nickname       Bird Hippie
+    ## version.string R version 4.2.2 (2022-10-31)
+    ## nickname       Innocent and Trusting
 
 Package installation
 
@@ -82,7 +82,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ──────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -111,7 +111,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ──────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -125,23 +125,23 @@ select(Reference, Abbreviation=abbv, Label=h, Description)
 ```
 
     ## # A tibble: 15 × 4
-    ##    Reference Abbreviation Label       Description                                         
-    ##    <chr>     <chr>        <chr>       <chr>                                               
-    ##  1 MDD1      Dep          Mood        Depressed mood most of the day, nearly every day    
-    ##  2 MDD2      Anh          Interest    Markedly diminished interest or pleasure in all, or…
-    ##  3 MDD3      App          Weight⇅     Significant change in weight or appetite            
-    ##  4 MDD3a     AppDec       Weight⇊     Significant weight loss or decrease in appetite     
-    ##  5 MDD3b     AppInc       Weight⇈     Significant weight gain or increase in appetite     
-    ##  6 MDD4      Sle          Sleep⇅      Sleeping too much or not sleeping enough            
-    ##  7 MDD4a     SleDec       Sleep⇊      Insomnia nearly every day                           
-    ##  8 MDD4b     SleInc       Sleep⇈      Hypersomnia nearly every day                        
-    ##  9 MDD5      Moto         Motor⇅      Changes in speed/amount of moving or speaking       
-    ## 10 MDD5a     MotoInc      Motor⇈      Psychomotor agitation nearly every day              
-    ## 11 MDD5b     MotoDec      Motor⇊      Psychomotor slowing nearly every day                
-    ## 12 MDD6      Fatig        Fatigue     Fatigue or loss of energy nearly every day          
-    ## 13 MDD7      Guilt        Guilt       Feelings of worthlessness or excessive or inappropr…
-    ## 14 MDD8      Conc         Concentrate Diminished ability to think or concentrate, or inde…
-    ## 15 MDD9      Sui          Suicidality Recurrent thoughts of death or suicide or a suicide…
+    ##    Reference Abbreviation Label       Description                               
+    ##    <chr>     <chr>        <chr>       <chr>                                     
+    ##  1 MDD1      Dep          Mood        Depressed mood most of the day, nearly ev…
+    ##  2 MDD2      Anh          Interest    Markedly diminished interest or pleasure …
+    ##  3 MDD3      App          Weight⇅     Significant change in weight or appetite  
+    ##  4 MDD3a     AppDec       Weight⇊     Significant weight loss or decrease in ap…
+    ##  5 MDD3b     AppInc       Weight⇈     Significant weight gain or increase in ap…
+    ##  6 MDD4      Sle          Sleep⇅      Sleeping too much or not sleeping enough  
+    ##  7 MDD4a     SleDec       Sleep⇊      Insomnia nearly every day                 
+    ##  8 MDD4b     SleInc       Sleep⇈      Hypersomnia nearly every day              
+    ##  9 MDD5      Moto         Motor⇅      Changes in speed/amount of moving or spea…
+    ## 10 MDD5a     MotoInc      Motor⇈      Psychomotor agitation nearly every day    
+    ## 11 MDD5b     MotoDec      Motor⇊      Psychomotor slowing nearly every day      
+    ## 12 MDD6      Fatig        Fatigue     Fatigue or loss of energy nearly every day
+    ## 13 MDD7      Guilt        Guilt       Feelings of worthlessness or excessive or…
+    ## 14 MDD8      Conc         Concentrate Diminished ability to think or concentrat…
+    ## 15 MDD9      Sui          Suicidality Recurrent thoughts of death or suicide or…
 
 # GenomicSEM covariance structure
 
@@ -155,8 +155,8 @@ symptoms_covstruct <- dget(covstruct_r)
 sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 ```
 
-    ## Rows: 19 Columns: 9
-    ## ── Column specification ──────────────────────────────────────────────────────────────────
+    ## Rows: 38 Columns: 9
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -200,12 +200,14 @@ names(symptoms_S_var) <- dimnames(symptoms_covstruct$S)[[2]]
 symptoms_S_var[which(symptoms_S_var > 0)]
 ```
 
-    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc ClinMotoDec     ClinSui 
-    ## 0.128871019 0.051543416 0.013663704 0.013924961 0.039896861 0.002375007 0.103892914 
-    ##     CommDep     CommAnh  CommAppDec  CommAppInc  CommSleDec  CommSleInc   CommFatig 
-    ## 0.082198484 0.087343514 0.035741853 0.079200630 0.043111949 0.047553540 0.057539570 
-    ##   CommGuilt    CommConc     CommSui      UkbDep      UkbAnh 
-    ## 0.060012455 0.056887041 0.033166683 0.042463388 0.047031487
+    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc ClinMotoDec 
+    ## 0.128871019 0.051543416 0.013663704 0.013924961 0.039896861 0.002375007 
+    ##     ClinSui     CommDep     CommAnh  CommAppDec  CommAppInc  CommSleDec 
+    ## 0.103892914 0.082198484 0.087343514 0.035741853 0.079200630 0.043111949 
+    ##  CommSleInc   CommFatig   CommGuilt    CommConc     CommSui      UkbDep 
+    ## 0.047553540 0.057539570 0.060012455 0.056887041 0.033166683 0.042463388 
+    ##      UkbAnh 
+    ## 0.047031487
 
 ## Common factor
 
@@ -226,25 +228,26 @@ commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commo
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.331 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##    0.66 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## commonfactor.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing in the genetic covariance matrix. This reflects a large difference
-    ## and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from
-    ## the model. If you are going to run a multivariate GWAS we strongly recommend
-    ## setting the smooth_check argument to true to check smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## commonfactor.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-    ## large difference and results should be interpreted with caution!! This can often
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
     ## traits from the model. If you are going to run a multivariate GWAS we strongly
     ## recommend setting the smooth_check argument to true to check smoothing for each
     ## SNP.
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## commonfactor.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
 
 ``` r
 commonfactor.fit$modelfit
@@ -308,24 +311,26 @@ common_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=common_
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.388 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##    0.73 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = common_dir.model):
-    ## A difference greater than .025 was observed pre- and post-smoothing in the genetic
-    ## covariance matrix. This reflects a large difference and results should be interpreted with
-    ## caution!! This can often result from including low powered traits, and you might consider
-    ## removing those traits from the model. If you are going to run a multivariate GWAS we
-    ## strongly recommend setting the smooth_check argument to true to check smoothing for each
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## common_dir.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
     ## SNP.
 
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = common_dir.model):
-    ## A difference greater than .025 was observed pre- and post-smoothing for Z-statistics
-    ## in the genetic covariance matrix. This reflects a large difference and results should
-    ## be interpreted with caution!! This can often result from including low powered traits,
-    ## and you might consider removing those traits from the model. If you are going to run a
-    ## multivariate GWAS we strongly recommend setting the smooth_check argument to true to check
-    ## smoothing for each SNP.
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## common_dir.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
 
 ``` r
 common_dir.fit$modelfit
@@ -393,32 +398,33 @@ clin_comm.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_com
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.531 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##    0.83 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## clin_comm.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing in the genetic covariance matrix. This reflects a large difference
-    ## and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from
-    ## the model. If you are going to run a multivariate GWAS we strongly recommend
-    ## setting the smooth_check argument to true to check smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## clin_comm.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-    ## large difference and results should be interpreted with caution!! This can often
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
     ## traits from the model. If you are going to run a multivariate GWAS we strongly
     ## recommend setting the smooth_check argument to true to check smoothing for each
     ## SNP.
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## clin_comm.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
 
 ``` r
 clin_comm.fit$modelfit
 ```
 
     ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1327.448 151 3.816421e-187 1405.448 0.9509947 0.1749241
+    ## df 1327.451 151 3.811313e-187 1405.451 0.9509946 0.1749241
 
 ``` r
 clin_comm.fit$results[c(1,2,3,6,7,9)] %>%
@@ -454,24 +460,26 @@ gate.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gate.model)
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.384 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   0.663 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = gate.model):
-    ## A difference greater than .025 was observed pre- and post-smoothing in the
-    ## genetic covariance matrix. This reflects a large difference and results should
-    ## be interpreted with caution!! This can often result from including low powered
-    ## traits, and you might consider removing those traits from the model. If you are
-    ## going to run a multivariate GWAS we strongly recommend setting the smooth_check
-    ## argument to true to check smoothing for each SNP.
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## gate.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
+    ## SNP.
 
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = gate.model):
-    ## A difference greater than .025 was observed pre- and post-smoothing for
-    ## Z-statistics in the genetic covariance matrix. This reflects a large difference
-    ## and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from
-    ## the model. If you are going to run a multivariate GWAS we strongly recommend
-    ## setting the smooth_check argument to true to check smoothing for each SNP.
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## gate.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
 
 ``` r
 gate.fit$modelfit
@@ -494,7 +502,7 @@ gate.fit$results[c(1,2,3,6,7)] %>%
     ## 4 GATE =~  UkbAnh         0.59           0.110
     ## 5 GATE ~~    GATE         1.00              NA
 
-### Gate-Community-Clinical
+### Gate-Community-Clinical (Spectrum)
 
 Comparison of ascertainment and measurement. Gating symptoms from
 community sample (distinguish controls from subthreshold), other
@@ -510,7 +518,7 @@ COMM =~ NA*CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommG
 CLIN ~~ 1*CLIN
 GATE ~~ 1*GATE
 COMM ~~ 1*COMM
-cl_co < 1
+cl_co < 0.999
 CLIN ~~ cl_co*COMM
 "
 
@@ -522,32 +530,33 @@ measure.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure.mo
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   9.436 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   4.043 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## measure.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing in the genetic covariance matrix. This reflects a large difference
-    ## and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from
-    ## the model. If you are going to run a multivariate GWAS we strongly recommend
-    ## setting the smooth_check argument to true to check smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## measure.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-    ## large difference and results should be interpreted with caution!! This can often
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
     ## traits from the model. If you are going to run a multivariate GWAS we strongly
     ## recommend setting the smooth_check argument to true to check smoothing for each
     ## SNP.
 
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## measure.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
+
 ``` r
 measure.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1480.445 149 7.669439e-218 1562.445 0.9445383 0.1595514
+    ##      chisq  df       p_chisq     AIC       CFI      SRMR
+    ## df 1480.24 149 8.411267e-218 1562.24 0.9445468 0.1595566
 
 ``` r
 measure.fit$results[c(1,2,3,6,7)] %>%
@@ -557,7 +566,7 @@ measure.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##    lhs op  rhs STD_Genotype STD_Genotype_SE
-    ## 1 CLIN ~~ COMM         1.00           0.348
+    ## 1 CLIN ~~ COMM         1.00           0.347
     ## 2 CLIN ~~ GATE         0.44           0.177
     ## 3 GATE ~~ COMM         0.79           0.073
 
@@ -585,31 +594,33 @@ subtype.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=subtype.mo
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.739 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   0.776 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = subtype.model):
-    ## A difference greater than .025 was observed pre- and post-smoothing in the genetic
-    ## covariance matrix. This reflects a large difference and results should be interpreted with
-    ## caution!! This can often result from including low powered traits, and you might consider
-    ## removing those traits from the model. If you are going to run a multivariate GWAS we
-    ## strongly recommend setting the smooth_check argument to true to check smoothing for each
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## subtype.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
     ## SNP.
 
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = subtype.model):
-    ## A difference greater than .025 was observed pre- and post-smoothing for Z-statistics
-    ## in the genetic covariance matrix. This reflects a large difference and results should
-    ## be interpreted with caution!! This can often result from including low powered traits,
-    ## and you might consider removing those traits from the model. If you are going to run a
-    ## multivariate GWAS we strongly recommend setting the smooth_check argument to true to check
-    ## smoothing for each SNP.
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## subtype.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
 
 ``` r
 subtype.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1324.772 151 1.252082e-186 1402.772 0.9511062 0.1739938
+    ##      chisq  df      p_chisq     AIC       CFI      SRMR
+    ## df 1324.77 151 1.25306e-186 1402.77 0.9511063 0.1739938
 
 ``` r
 subtype.fit$results[c(1,2,3,6,7)] %>%
@@ -623,16 +634,16 @@ subtype.fit$results[c(1,2,3,6,7)] %>%
 
 ## Two-factor models
 
-[Elhai Psychiat
-Res 2012](https://www.sciencedirect.com/science/article/pii/S0165178112002685)
+[Elhai Psychiat Res
+2012](https://www.sciencedirect.com/science/article/pii/S0165178112002685)
 compared 3 two-factor models
 
 ### Psychological-Somatic (Elhai Model 2a)
 
-[Krause Rehab
-Psychol 2008](https://psycnet.apa.org/record/2008-17022-011), [Krause
-Arch Psys Med
-Rehab 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
+[Krause Rehab Psychol
+2008](https://psycnet.apa.org/record/2008-17022-011), [Krause Arch Psys
+Med Rehab
+2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
 
 > the 2-factor solution with 3 somatic items (sleep disturbance, poor
 > energy, appetite change) was a better solution than either a
@@ -660,32 +671,33 @@ psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_s
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##    1.65 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   0.912 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## psych_soma.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing in the genetic covariance matrix. This reflects a large difference
-    ## and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from
-    ## the model. If you are going to run a multivariate GWAS we strongly recommend
-    ## setting the smooth_check argument to true to check smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## psych_soma.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-    ## large difference and results should be interpreted with caution!! This can often
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
     ## traits from the model. If you are going to run a multivariate GWAS we strongly
     ## recommend setting the smooth_check argument to true to check smoothing for each
     ## SNP.
 
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## psych_soma.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
+
 ``` r
 psych_soma.fit$modelfit
 ```
 
-    ##     chisq  df       p_chisq    AIC       CFI      SRMR
-    ## df 1136.5 147 1.809352e-152 1222.5 0.9587821 0.1625164
+    ##       chisq  df       p_chisq      AIC       CFI      SRMR
+    ## df 1136.492 147 1.815648e-152 1222.492 0.9587824 0.1625163
 
 ``` r
 psych_soma.fit$results[c(1,2,3,6,7)] %>%
@@ -719,32 +731,33 @@ psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_ve
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.807 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##    0.84 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## psych_veg.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing in the genetic covariance matrix. This reflects a large difference
-    ## and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from
-    ## the model. If you are going to run a multivariate GWAS we strongly recommend
-    ## setting the smooth_check argument to true to check smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## psych_veg.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-    ## large difference and results should be interpreted with caution!! This can often
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
     ## traits from the model. If you are going to run a multivariate GWAS we strongly
     ## recommend setting the smooth_check argument to true to check smoothing for each
     ## SNP.
 
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## psych_veg.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
+
 ``` r
 psych_veg.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC      CFI      SRMR
-    ## df 1081.984 147 3.556402e-142 1167.984 0.961053 0.1614363
+    ##       chisq  df      p_chisq      AIC       CFI      SRMR
+    ## df 1081.985 147 3.55372e-142 1167.985 0.9610529 0.1614363
 
 ``` r
 psych_veg.fit$results[c(1,2,3,6,7)] %>%
@@ -778,32 +791,33 @@ affect_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=af
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.607 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   0.845 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## affect_neuroveg.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing in the genetic covariance matrix. This reflects a large difference
-    ## and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from
-    ## the model. If you are going to run a multivariate GWAS we strongly recommend
-    ## setting the smooth_check argument to true to check smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## affect_neuroveg.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-    ## large difference and results should be interpreted with caution!! This can often
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
     ## traits from the model. If you are going to run a multivariate GWAS we strongly
     ## recommend setting the smooth_check argument to true to check smoothing for each
     ## SNP.
 
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## affect_neuroveg.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
+
 ``` r
 affect_neuroveg.fit$modelfit
 ```
 
-    ##       chisq  df      p_chisq      AIC       CFI      SRMR
-    ## df 1148.942 147 7.90408e-155 1234.942 0.9582638 0.1608248
+    ##       chisq  df       p_chisq      AIC       CFI      SRMR
+    ## df 1148.944 147 7.896611e-155 1234.944 0.9582637 0.1608248
 
 ``` r
 affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
@@ -814,6 +828,72 @@ affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 
     ##      lhs op      rhs STD_Genotype STD_Genotype_SE
     ## 1 AFFECT ~~ NEUROVEG        -0.89             0.1
+
+## Three factor models
+
+### Cognitive-Mood-Neuroveg (Kendler Neale) model
+
+``` r
+cog_mood_neuroveg.model <- "
+COG =~ NA*ClinSui + CommGuilt + CommConc + CommSui
+MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
+VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
+
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+COG ~~ 1*COG
+MOOD ~~ 1*MOOD
+VEG ~~ 1*VEG
+GATE ~~ 1*GATE
+GATE ~~ 0*COG + 0*MOOD + 0*VEG
+"
+cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_neuroveg.model)
+```
+
+    ## [1] "Running primary model"
+    ## [1] "Calculating CFI"
+    ## [1] "Calculating Standardized Results"
+    ## [1] "Calculating SRMR"
+    ## elapsed 
+    ##   1.053 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## cog_mood_neuroveg.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
+    ## SNP.
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## cog_mood_neuroveg.model): A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
+
+``` r
+cog_mood_neuroveg.fit$modelfit
+```
+
+    ##       chisq  df       p_chisq      AIC       CFI      SRMR
+    ## df 1088.313 144 1.104593e-144 1180.313 0.9606644 0.1615334
+
+``` r
+cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('COG', 'MOOD', 'VEG'), rhs %in% c('COG', 'MOOD', 'VEG'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
+```
+
+    ##    lhs op  rhs STD_Genotype STD_Genotype_SE
+    ## 1  COG ~~ MOOD         0.86            0.12
+    ## 2  COG ~~  VEG        -0.87            0.12
+    ## 3 MOOD ~~  VEG        -0.79            0.13
 
 ## Melancholic and atypical
 
@@ -842,31 +922,33 @@ mel_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty.mo
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.898 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   0.856 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = mel_aty.model, :
-    ## A difference greater than .025 was observed pre- and post-smoothing in the genetic
-    ## covariance matrix. This reflects a large difference and results should be interpreted with
-    ## caution!! This can often result from including low powered traits, and you might consider
-    ## removing those traits from the model. If you are going to run a multivariate GWAS we
-    ## strongly recommend setting the smooth_check argument to true to check smoothing for each
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## mel_aty.model, : A difference greater than .025 was observed pre- and
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
     ## SNP.
 
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = mel_aty.model, :
-    ## A difference greater than .025 was observed pre- and post-smoothing for Z-statistics
-    ## in the genetic covariance matrix. This reflects a large difference and results should
-    ## be interpreted with caution!! This can often result from including low powered traits,
-    ## and you might consider removing those traits from the model. If you are going to run a
-    ## multivariate GWAS we strongly recommend setting the smooth_check argument to true to check
-    ## smoothing for each SNP.
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## mel_aty.model, : A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
 
 ``` r
 mel_aty.fit$modelfit
 ```
 
     ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1044.031 145 6.488099e-136 1134.031 0.9625506 0.1588098
+    ## df 1044.033 145 6.482037e-136 1134.033 0.9625505 0.1588098
 
 ``` r
 mel_aty.fit$results[c(1,2,3,6,7)] %>%
@@ -880,352 +962,19 @@ mel_aty.fit$results[c(1,2,3,6,7)] %>%
     ## 2 MEL ~~ MDD         0.99           0.039
     ## 3 ATY ~~ MDD         0.69           0.129
 
-## Three factor models
-
-### Cognitive-Mood-Neuroveg (Kendler Neale) model
-
-``` r
-cog_mood_neuroveg.model <- "
-COG =~ NA*ClinSui + CommGuilt + CommConc + CommSui
-MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
-VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
-
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-COG ~~ 1*COG
-MOOD ~~ 1*MOOD
-VEG ~~ 1*VEG
-GATE ~~ 1*GATE
-GATE ~~ 0*COG + 0*MOOD + 0*VEG
-"
-cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_neuroveg.model)
-```
-
-    ## [1] "Running primary model"
-    ## [1] "Calculating CFI"
-    ## [1] "Calculating Standardized Results"
-    ## [1] "Calculating SRMR"
-    ## elapsed 
-    ##   1.866 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## cog_mood_neuroveg.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing in the genetic covariance matrix. This reflects a large difference
-    ## and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from
-    ## the model. If you are going to run a multivariate GWAS we strongly recommend
-    ## setting the smooth_check argument to true to check smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## cog_mood_neuroveg.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-    ## large difference and results should be interpreted with caution!! This can often
-    ## result from including low powered traits, and you might consider removing those
-    ## traits from the model. If you are going to run a multivariate GWAS we strongly
-    ## recommend setting the smooth_check argument to true to check smoothing for each
-    ## SNP.
-
-``` r
-cog_mood_neuroveg.fit$modelfit
-```
-
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1088.314 144 1.104125e-144 1180.314 0.9606643 0.1615335
-
-``` r
-cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('COG', 'MOOD', 'VEG'), rhs %in% c('COG', 'MOOD', 'VEG'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
-```
-
-    ##    lhs op  rhs STD_Genotype STD_Genotype_SE
-    ## 1  COG ~~ MOOD         0.86            0.12
-    ## 2  COG ~~  VEG        -0.87            0.12
-    ## 3 MOOD ~~  VEG        -0.79            0.13
-
-### Psych/Somatic + Atypical
-
-Expand on the Psych/Somatic two-factor models by separating out
-directional symptoms.
-
-#### Psychological-Somatic-Atypical
-
-``` r
-psych_soma_aty.model <- "
-PSYCH =~ NA*ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
-SOMA =~ NA*ClinAppDec + ClinSleDec + CommAppDec + CommSleDec
-ATY =~ NA*ClinAppInc + ClinSleInc + CommAppInc + CommSleInc + CommFatig
-
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-PSYCH ~~ 1*PSYCH
-SOMA ~~ 1*SOMA
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*PSYCH + 0*SOMA + 0*ATY
-"
-
-psych_soma_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_soma_aty.model)
-```
-
-    ## [1] "Running primary model"
-    ## [1] "Calculating CFI"
-    ## [1] "Calculating Standardized Results"
-    ## [1] "Calculating SRMR"
-    ## elapsed 
-    ##   1.836 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## psych_soma_aty.model): A difference greater than .025 was observed pre- and post-smoothing
-    ## in the genetic covariance matrix. This reflects a large difference and results should
-    ## be interpreted with caution!! This can often result from including low powered traits,
-    ## and you might consider removing those traits from the model. If you are going to run a
-    ## multivariate GWAS we strongly recommend setting the smooth_check argument to true to check
-    ## smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## psych_soma_aty.model): A difference greater than .025 was observed pre- and post-smoothing
-    ## for Z-statistics in the genetic covariance matrix. This reflects a large difference and
-    ## results should be interpreted with caution!! This can often result from including low
-    ## powered traits, and you might consider removing those traits from the model. If you are
-    ## going to run a multivariate GWAS we strongly recommend setting the smooth_check argument
-    ## to true to check smoothing for each SNP.
-
-``` r
-psych_soma_aty.fit$modelfit
-```
-
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1235.313 145 3.086172e-172 1325.313 0.9545827 0.1548222
-
-``` r
-psych_soma_aty.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('PSYCH', 'SOMA', 'ATY'), rhs %in% c('PSYCH', 'SOMA', 'ATY'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
-```
-
-    ##     lhs op  rhs STD_Genotype STD_Genotype_SE
-    ## 1 PSYCH ~~ SOMA         0.46            0.16
-    ## 2 PSYCH ~~  ATY         0.82            0.13
-    ## 3  SOMA ~~  ATY         0.20            0.15
-
-#### Psychological-Neurovegetative-Atypical
-
-``` r
-psych_veg_aty.model <- "
-PSYCH =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
-VEG =~ NA*ClinAppDec + ClinSleDec + ClinMotoInc +  + CommAppDec + CommSleDec
-ATY =~ NA*ClinAppInc + ClinSleInc + ClinMotoDec + CommAppInc + CommSleInc + CommFatig
-
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-PSYCH ~~ 1*PSYCH
-VEG ~~ 1*VEG
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*PSYCH + 0*VEG + ATY
-"
-psych_veg_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_veg_aty.model)
-```
-
-    ## [1] "Running primary model"
-    ## [1] "Calculating CFI"
-    ## [1] "Calculating Standardized Results"
-    ## [1] "Calculating SRMR"
-    ## elapsed 
-    ##   1.692 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## psych_veg_aty.model): A difference greater than .025 was observed pre- and post-smoothing
-    ## in the genetic covariance matrix. This reflects a large difference and results should
-    ## be interpreted with caution!! This can often result from including low powered traits,
-    ## and you might consider removing those traits from the model. If you are going to run a
-    ## multivariate GWAS we strongly recommend setting the smooth_check argument to true to check
-    ## smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## psych_veg_aty.model): A difference greater than .025 was observed pre- and post-smoothing
-    ## for Z-statistics in the genetic covariance matrix. This reflects a large difference and
-    ## results should be interpreted with caution!! This can often result from including low
-    ## powered traits, and you might consider removing those traits from the model. If you are
-    ## going to run a multivariate GWAS we strongly recommend setting the smooth_check argument
-    ## to true to check smoothing for each SNP.
-
-``` r
-psych_veg_aty.fit$modelfit
-```
-
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1192.665 144 1.588989e-164 1284.665 0.9563176 0.1511433
-
-``` r
-psych_veg_aty.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('PSYCH', 'VEG', 'ATY'), rhs %in% c('PSYCH', 'VEG', 'ATY'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
-```
-
-    ##     lhs op rhs STD_Genotype STD_Genotype_SE
-    ## 1 PSYCH ~~ VEG         0.47            0.13
-    ## 2 PSYCH ~~ ATY         0.84            0.13
-    ## 3   VEG ~~ ATY         0.26            0.16
-
-#### Affective-Neurovegetative-Atypical
-
-``` r
-affect_neuroveg_aty.model <- "
-AFFECT =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
-NEUROVEG =~ NA*ClinAppDec + ClinSleDec + ClinMotoInc + CommAppDec + CommSleDec + CommConc
-ATY =~ NA*ClinAppInc + ClinSleInc + ClinMotoDec + CommAppInc + CommSleInc + CommFatig
-
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-AFFECT ~~ 1*AFFECT
-NEUROVEG ~~ 1*NEUROVEG
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*AFFECT + 0*NEUROVEG + 0*ATY
-"
-affect_neuroveg_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=affect_neuroveg_aty.model)
-```
-
-    ## [1] "Running primary model"
-    ## [1] "Calculating CFI"
-    ## [1] "Calculating Standardized Results"
-    ## [1] "Calculating SRMR"
-    ## elapsed 
-    ##   1.905 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## affect_neuroveg_aty.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing in the genetic covariance matrix. This reflects a large difference and
-    ## results should be interpreted with caution!! This can often result from including low
-    ## powered traits, and you might consider removing those traits from the model. If you are
-    ## going to run a multivariate GWAS we strongly recommend setting the smooth_check argument
-    ## to true to check smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## affect_neuroveg_aty.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects a large
-    ## difference and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from the model.
-    ## If you are going to run a multivariate GWAS we strongly recommend setting the smooth_check
-    ## argument to true to check smoothing for each SNP.
-
-``` r
-affect_neuroveg_aty.fit$modelfit
-```
-
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1179.509 145 1.494031e-161 1269.509 0.9569072 0.1570791
-
-``` r
-affect_neuroveg_aty.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('AFFECT', 'NEUROVEG', 'ATY'), rhs %in% c('AFFECT', 'NEUROVEG', 'ATY'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
-```
-
-    ##        lhs op      rhs STD_Genotype STD_Genotype_SE
-    ## 1   AFFECT ~~ NEUROVEG         0.82            0.13
-    ## 2   AFFECT ~~      ATY         0.76            0.13
-    ## 3 NEUROVEG ~~      ATY         0.66            0.16
-
-## Four factor models
-
-### Cognitive-Mood-Neuroveg (Kendler Neale) model, plus Melancholic/Atypical split
-
-``` r
-cog_mood_mel_aty.model <- "
-COG =~ NA*ClinSui + CommGuilt + CommConc + CommSui
-MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
-ATY =~ NA*ClinMotoDec + ClinAppInc +  + ClinSleInc + CommAppInc + CommSleInc + CommFatig
-MEL =~ NA*ClinMotoInc + ClinAppDec + CommAppDec + ClinSleDec + CommSleDec
-
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-COG ~~ 1*COG
-MOOD ~~ 1*MOOD
-MEL ~~ 1*MEL
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*COG + 0*MOOD + 0*MEL + 0*ATY
-"
-cog_mood_mel_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_mel_aty.model)
-```
-
-    ## [1] "Running primary model"
-    ## [1] "Calculating CFI"
-    ## [1] "Calculating Standardized Results"
-    ## [1] "Calculating SRMR"
-    ## elapsed 
-    ##   1.812 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355015 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782736 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## cog_mood_mel_aty.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing in the genetic covariance matrix. This reflects a large difference
-    ## and results should be interpreted with caution!! This can often result from
-    ## including low powered traits, and you might consider removing those traits from the
-    ## model. If you are going to run a multivariate GWAS we strongly recommend setting
-    ## the smooth_check argument to true to check smoothing for each SNP.
-
-    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## cog_mood_mel_aty.model): A difference greater than .025 was observed pre- and
-    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects a
-    ## large difference and results should be interpreted with caution!! This can often
-    ## result from including low powered traits, and you might consider removing those
-    ## traits from the model. If you are going to run a multivariate GWAS we strongly
-    ## recommend setting the smooth_check argument to true to check smoothing for each
-    ## SNP.
-
-``` r
-cog_mood_mel_aty.fit$modelfit
-```
-
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1271.655 141 3.898009e-181 1369.655 0.9529022 0.1518656
-
-``` r
-cog_mood_mel_aty.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('COG', 'MOOD', 'MEL', 'ATY'), rhs %in% c('COG', 'MOOD', 'MEL', 'ATY'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
-```
-
-    ##    lhs op  rhs STD_Genotype STD_Genotype_SE
-    ## 1  COG ~~ MOOD         0.86            0.12
-    ## 2  COG ~~  ATY         0.74            0.14
-    ## 3  COG ~~  MEL         0.47            0.14
-    ## 4 MOOD ~~  ATY         0.69            0.13
-    ## 5 MOOD ~~  MEL         0.43            0.13
-    ## 6  ATY ~~  MEL         0.26            0.16
-
 ### Model comparisons
 
 ``` r
 model_list=
-list("1a"=list(name="Common", model=commonfactor.fit),
-     "1b"=list(name="Directional", model=common_dir.fit),
-     "1c"=list(name="Ascertainment", model=clin_comm.fit),
-     "1d"=list(name="Gating", model=gate.fit),
-     "1e"=list(name="Measurement", model=measure.fit),
-     "1f"=list(name="Subtype", model=subtype.fit),
-     "2a"=list(name="Psych-Somatic", model=psych_soma.fit),
-     "2b"=list(name="Psych-Neuroveg", model=psych_veg.fit),
-     "2c"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
-     "2d"=list(name="Melancholic/Atypical", model=mel_aty.fit),
-     "3"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-     "3a"=list(name="Psych-Somatic-Atypical", model=psych_soma_aty.fit),
-     "3b"=list(name="Psych-Neuroveg-Atypical", model=psych_veg_aty.fit),
-     "3c"=list(name="Affect-Neuroveg-Atypical", model=affect_neuroveg_aty.fit),
-     "4"=list(names="Cog-Mood-Mel-Aty", model=cog_mood_mel_aty.fit)
+list("A"=list(name="Common", model=commonfactor.fit),
+     "B"=list(name="Sample", model=clin_comm.fit),
+     "C"=list(name="Gating", model=gate.fit),
+     "D"=list(name="Spectrum", model=measure.fit),
+     "E"=list(name="Psych-Somatic", model=psych_soma.fit),
+     "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
+     "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
+     "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
+     "L"=list(name="Melancholic/Atypical", model=mel_aty.fit)
      )
 
 model_fits <- 
@@ -1244,23 +993,17 @@ mutate_if(is.numeric, ~signif(., 3))
 )
 ```
 
-| Model | Name                     | chisq |  df | p\_chisq |  AIC |   CFI |  SRMR |  dAIC |
-| :---- | :----------------------- | ----: | --: | -------: | ---: | ----: | ----: | ----: |
-| 1a    | Common                   |  1340 | 152 |        0 | 1410 | 0.951 | 0.175 | 279.0 |
-| 1b    | Directional              |  1220 | 147 |        0 | 1310 | 0.955 | 0.166 | 175.0 |
-| 1c    | Ascertainment            |  1330 | 151 |        0 | 1410 | 0.951 | 0.175 | 271.0 |
-| 1d    | Gating                   |  1150 | 148 |        0 | 1230 | 0.958 | 0.163 | 101.0 |
-| 1e    | Measurement              |  1480 | 149 |        0 | 1560 | 0.945 | 0.160 | 428.0 |
-| 1f    | Subtype                  |  1320 | 151 |        0 | 1400 | 0.951 | 0.174 | 269.0 |
-| 2a    | Psych-Somatic            |  1140 | 147 |        0 | 1220 | 0.959 | 0.163 |  88.5 |
-| 2b    | Psych-Neuroveg           |  1080 | 147 |        0 | 1170 | 0.961 | 0.161 |  34.0 |
-| 2c    | Affect-Neuroveg          |  1150 | 147 |        0 | 1230 | 0.958 | 0.161 | 101.0 |
-| 2d    | Melancholic/Atypical     |  1040 | 145 |        0 | 1130 | 0.963 | 0.159 |   0.0 |
-| 3     | Cog-Mood-Neuroveg        |  1090 | 144 |        0 | 1180 | 0.961 | 0.162 |  46.3 |
-| 3a    | Psych-Somatic-Atypical   |  1240 | 145 |        0 | 1330 | 0.955 | 0.155 | 191.0 |
-| 3b    | Psych-Neuroveg-Atypical  |  1190 | 144 |        0 | 1280 | 0.956 | 0.151 | 151.0 |
-| 3c    | Affect-Neuroveg-Atypical |  1180 | 145 |        0 | 1270 | 0.957 | 0.157 | 135.0 |
-| 4     | Cog-Mood-Mel-Aty         |  1270 | 141 |        0 | 1370 | 0.953 | 0.152 | 236.0 |
+| Model | Name                 | chisq |  df | p_chisq |  AIC |   CFI |  SRMR |  dAIC |
+|:------|:---------------------|------:|----:|--------:|-----:|------:|------:|------:|
+| A     | Common               |  1340 | 152 |       0 | 1410 | 0.951 | 0.175 | 279.0 |
+| B     | Sample               |  1330 | 151 |       0 | 1410 | 0.951 | 0.175 | 271.0 |
+| C     | Gating               |  1150 | 148 |       0 | 1230 | 0.958 | 0.163 | 101.0 |
+| D     | Spectrum             |  1480 | 149 |       0 | 1560 | 0.945 | 0.160 | 428.0 |
+| E     | Psych-Somatic        |  1140 | 147 |       0 | 1220 | 0.959 | 0.163 |  88.5 |
+| F     | Psych-Neuroveg       |  1080 | 147 |       0 | 1170 | 0.961 | 0.161 |  34.0 |
+| G     | Affect-Neuroveg      |  1150 | 147 |       0 | 1230 | 0.958 | 0.161 | 101.0 |
+| H     | Cog-Mood-Neuroveg    |  1090 | 144 |       0 | 1180 | 0.961 | 0.162 |  46.3 |
+| L     | Melancholic/Atypical |  1040 | 145 |       0 | 1130 | 0.963 | 0.159 |   0.0 |
 
 Check that all symptoms have been included in each model
 
@@ -1268,8 +1011,8 @@ Check that all symptoms have been included in each model
 sapply(model_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
 ```
 
-    ##   1a   1b   1c   1d   1e   1f   2a   2b   2c   2d    3   3a   3b   3c    4 
-    ## TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+    ##    A    B    C    D    E    F    G    H    L 
+    ## TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 
 # Exploratory factor analysis
 
@@ -1322,12 +1065,14 @@ print(symptoms_efa, cut=0.4)
     ## factanal(factors = 3, covmat = symptoms_cov_pd, rotation = "varimax")
     ## 
     ## Uniquenesses:
-    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc ClinMotoDec     ClinSui 
-    ##       0.082       0.069       0.005       0.831       0.895       0.968       0.798 
-    ##     CommDep     CommAnh  CommAppDec  CommAppInc  CommSleDec  CommSleInc   CommFatig 
-    ##       0.112       0.050       0.869       0.290       0.440       0.757       0.646 
-    ##   CommGuilt    CommConc     CommSui      UkbDep      UkbAnh 
-    ##       0.585       0.583       0.712       0.122       0.168 
+    ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc ClinMotoDec 
+    ##       0.082       0.069       0.005       0.831       0.895       0.968 
+    ##     ClinSui     CommDep     CommAnh  CommAppDec  CommAppInc  CommSleDec 
+    ##       0.798       0.112       0.050       0.869       0.290       0.440 
+    ##  CommSleInc   CommFatig   CommGuilt    CommConc     CommSui      UkbDep 
+    ##       0.757       0.646       0.585       0.583       0.712       0.122 
+    ##      UkbAnh 
+    ##       0.168 
     ## 
     ## Loadings:
     ##             Factor1 Factor2 Factor3
