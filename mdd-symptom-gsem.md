@@ -58,82 +58,13 @@ GenomicSEM version
 
 ```r
 require(readr)
-```
-
-```
-## Loading required package: readr
-```
-
-```r
 require(tidyr)
-```
-
-```
-## Loading required package: tidyr
-```
-
-```r
 require(stringr)
-```
-
-```
-## Loading required package: stringr
-```
-
-```r
 require(dplyr)
-```
-
-```
-## Loading required package: dplyr
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 require(ggplot2)
-```
-
-```
-## Loading required package: ggplot2
-```
-
-```r
 require(corrplot)
-```
-
-```
-## Loading required package: corrplot
-```
-
-```
-## corrplot 0.92 loaded
-```
-
-```r
 require(GenomicSEM)
-```
 
-```
-## Loading required package: GenomicSEM
-```
-
-```r
 packageVersion("GenomicSEM")
 ```
 
@@ -188,7 +119,7 @@ MDD9;Suicidality;Suicidality;Sui
 
 ```
 ## Rows: 15 Columns: 4
-## ── Column specification ─────────────────────────────────────────────────────────────────
+## ── Column specification ────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
 ## 
@@ -219,7 +150,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 
 ```
 ## Rows: 15 Columns: 2
-## ── Column specification ─────────────────────────────────────────────────────────────────
+## ── Column specification ────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
 ## 
@@ -333,88 +264,6 @@ for(daner in daner_files) {
 }
 ```
 
-```
-## Rows: 8051380 Columns: 19
-## ── Column specification ─────────────────────────────────────────────────────────────────
-## Delimiter: "\t"
-## chr  (5): SNP, A1, A2, ngt, Direction
-## dbl (14): CHR, BP, FRQ_A_92706, FRQ_U_59236, INFO, OR, SE, P, HetISqt, HetDf...
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-```
-
-```
-## The munging of 1 summary statistics started at 2023-02-07 17:07:21
-## Reading in reference file
-## Reading summary statistics for meta/txt/ALL.MDD1_depressed.txt.gz. Please note that this step usually takes a few minutes due to the size of summary statistic files.
-## All files loaded into R!
-## Munging file: meta/txt/ALL.MDD1_depressed.txt.gz
-## Interpreting the SNP column as the SNP column.
-## Interpreting the A1 column as the A1 column.
-## Interpreting the A2 column as the A2 column.
-## Interpreting the OR column as the effect column.
-## Interpreting the P column as the P column.
-## Interpreting the N column as the N column.
-## Interpreting the SE column as the SE column.
-## Merging file:meta/txt/ALL.MDD1_depressed.txt.gz with the reference file:sumstats/reference/w_hm3.snplist
-## 8051380 rows present in the full meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file.
-## 6886277 rows were removed from the meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file as the rs-ids for these rows were not present in the reference file.
-## The effect column was determined to be coded as an odds ratio (OR) for the meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file. Please ensure this is correct.
-## 4 row(s) were removed from the meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file due to the effect allele (A1) column not matching A1 or A2 in the reference file.
-## 1 row(s) were removed from the meta/txt/ALL.MDD1_depressed.txt.gz summary statistics file due to the other allele (A2) column not matching A1 or A2 in the reference file.
-## No INFO column, cannot filter on INFO, which may influence results
-## No MAF column, cannot filter on MAF, which may influence results
-## 1165098SNPs are left in the summary statistics file meta/txt/ALL.MDD1_depressed.txt.gz after QC.
-## I am done munging file: meta/txt/ALL.MDD1_depressed.txt.gz
-## The file is saved as ALL.MDD1_depressed.sumstats.gz in the current working directory.
-##      
-## Munging was completed at 2023-02-07 17:09:04
-## The munging of all files took 1 minutes and 43.3077869415283 seconds
-## Please check the .log file(s) to ensure that all columns were interpreted correctly and no warnings were issued for any of the summary statistics files
-```
-
-```
-## Rows: 8051380 Columns: 19
-## ── Column specification ─────────────────────────────────────────────────────────────────
-## Delimiter: "\t"
-## chr  (5): SNP, A1, A2, ngt, Direction
-## dbl (14): CHR, BP, FRQ_A_51144, FRQ_U_42365, INFO, OR, SE, P, HetISqt, HetDf...
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-```
-
-```
-## The munging of 1 summary statistics started at 2023-02-07 17:09:40
-## Reading in reference file
-## Reading summary statistics for meta/txt/ALL.MDD9_death.txt.gz. Please note that this step usually takes a few minutes due to the size of summary statistic files.
-## All files loaded into R!
-## Munging file: meta/txt/ALL.MDD9_death.txt.gz
-## Interpreting the SNP column as the SNP column.
-## Interpreting the A1 column as the A1 column.
-## Interpreting the A2 column as the A2 column.
-## Interpreting the OR column as the effect column.
-## Interpreting the P column as the P column.
-## Interpreting the N column as the N column.
-## Interpreting the SE column as the SE column.
-## Merging file:meta/txt/ALL.MDD9_death.txt.gz with the reference file:sumstats/reference/w_hm3.snplist
-## 8051380 rows present in the full meta/txt/ALL.MDD9_death.txt.gz summary statistics file.
-## 6886277 rows were removed from the meta/txt/ALL.MDD9_death.txt.gz summary statistics file as the rs-ids for these rows were not present in the reference file.
-## The effect column was determined to be coded as an odds ratio (OR) for the meta/txt/ALL.MDD9_death.txt.gz summary statistics file. Please ensure this is correct.
-## 4 row(s) were removed from the meta/txt/ALL.MDD9_death.txt.gz summary statistics file due to the effect allele (A1) column not matching A1 or A2 in the reference file.
-## 1 row(s) were removed from the meta/txt/ALL.MDD9_death.txt.gz summary statistics file due to the other allele (A2) column not matching A1 or A2 in the reference file.
-## No INFO column, cannot filter on INFO, which may influence results
-## No MAF column, cannot filter on MAF, which may influence results
-## 1165098SNPs are left in the summary statistics file meta/txt/ALL.MDD9_death.txt.gz after QC.
-## I am done munging file: meta/txt/ALL.MDD9_death.txt.gz
-## The file is saved as ALL.MDD9_death.sumstats.gz in the current working directory.
-##      
-## Munging was completed at 2023-02-07 17:11:16
-## The munging of all files took 1 minutes and 35.8277871608734 seconds
-## Please check the .log file(s) to ensure that all columns were interpreted correctly and no warnings were issued for any of the summary statistics files
-```
-
 # Symptom prevalences
 
 Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output but population prevalences have to be estimated.
@@ -426,14 +275,7 @@ We include a table of counts of symptom presence and absence for PGC cohorts
 
 ```r
 pgc_symptom_counts <- read_table2('sumstats/PGC/CasesAllCohorts/pgc_dsm_symptom_counts.txt')
-```
 
-```
-## Warning: `read_table2()` was deprecated in readr 2.0.0.
-## ℹ Please use `read_table()` instead.
-```
-
-```r
 pgc_symptom_counts %>%
   spread(Status, N) %>%
   unite(AbsentPresent, Absent, Present, sep=':') %>%
@@ -580,7 +422,8 @@ ggplot(pgc_symptom_prev_size %>% left_join(dsm_mdd_symptoms_labels, by=c('Sympto
 
 ```
 ## Warning: The following aesthetics were dropped during statistical transformation: weight
-## ℹ This can happen when ggplot fails to infer the correct grouping structure in the data.
+## ℹ This can happen when ggplot fails to infer the correct grouping structure in the
+##   data.
 ## ℹ Did you forget to specify a `group` aesthetic or to convert a numerical variable into
 ##   a factor?
 ```
@@ -664,7 +507,7 @@ if(!file.exists(symptoms_sample_prev_file)) {
 
 ```
 ## Rows: 38 Columns: 6
-## ── Column specification ─────────────────────────────────────────────────────────────────
+## ── Column specification ────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (3): cohorts, symptom, sumstats
 ## dbl (3): Nca, Nco, samp_prev
@@ -869,7 +712,7 @@ if(!file.exists(covstruct_r)) {
 
 ```
 ## Rows: 38 Columns: 9
-## ── Column specification ─────────────────────────────────────────────────────────────────
+## ── Column specification ────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (5): cohorts, symptom, sumstats, filename, trait_name
 ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -962,7 +805,7 @@ if(!file.exists(sumstats_h2_txt)) {
 
 ```
 ## Rows: 38 Columns: 17
-## ── Column specification ─────────────────────────────────────────────────────────────────
+## ── Column specification ────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr  (7): Sample, sample_symptom, ref, cohorts, abbv, sumstats, filename
 ## dbl (10): h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE, Nca, Nco, sam...
@@ -991,9 +834,9 @@ theme(axis.text.y=element_text(size=13),
       legend.title=element_text(size=12),
       legend.text=element_text(size=14),
       legend.position='top') +
- labs(color  = "Meta-analysis:", shape = "Meta-analysis:")
+ labs(color  = "Cohorts:", shape = "Cohorts:")
 
-mdd_symptom_gsem_h2.gg + coord_flip(ylim=c(-0.76, 0.16)) +
+mdd_symptom_gsem_h2.gg + coord_flip(ylim=c(-0.20, 0.20)) +
 scale_y_continuous(expression(h[SNP]^2),
     breaks=c(-0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2))
 ```

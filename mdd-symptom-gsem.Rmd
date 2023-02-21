@@ -548,12 +548,12 @@ theme(axis.text.y=element_text(size=13),
       legend.title=element_text(size=12),
       legend.text=element_text(size=14),
       legend.position='top') +
- labs(color  = "Meta-analysis:", shape = "Meta-analysis:")
+ labs(color  = "Cohorts:", shape = "Cohorts:")
 
-mdd_symptom_gsem_h2.gg + coord_flip(ylim=c(-0.76, 0.16)) +
+mdd_symptom_gsem_h2.gg + coord_flip(ylim=c(-0.20, 0.20)) +
 scale_y_continuous(expression(h[SNP]^2),
     breaks=c(-0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2))
 
-ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=8, height=4)
+ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=7, height=5)
 
 ```
