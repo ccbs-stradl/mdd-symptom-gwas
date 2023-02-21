@@ -30,7 +30,6 @@ List of `basic.xls` files from Ricopili with sample counts
 
 basic_xls_list <- list.files('meta/distribution', pattern='basic.*.xls', full.names=TRUE, recursive=TRUE)
 
-# extract meta-analysis name from filename
 names(basic_xls_list) <- str_match(basename(basic_xls_list), "basic\\.([A-Z_]+\\.MDD[0-9A-Za-z_]+)")[,2]
 
 basics <- bind_rows(lapply(basic_xls_list, read_excel), .id='meta')
@@ -58,7 +57,8 @@ filter(!reference %in% c('MDD3', 'MDD4')) %>%
 mutate(Dataset=str_replace(str_remove(filename, pattern='daner_'), 'gz', 'aligned.gz')) %>%
 left_join(basics_datasets, by='Dataset') 
 
-presence_absence <- basics_aligned %>% str_glue_data("{N_cases}:{N_controls}")
+
+presence_absence <- basics_aligned %>% str_glue_data("{N_cases}:{N_controls} {round(100*N_cases/(N_cases + N_controls))}")
 
 basics_aligned %>%
 mutate(PresenceAbsence=as.character(presence_absence)) %>%
