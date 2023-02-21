@@ -251,26 +251,25 @@ gate.fit$results[c(1,2,3,6,7)] %>%
 
 ### Gate-Community-Clinical (Spectrum)
 
-Comparison of ascertainment and measurement. Gating symptoms from community sample (distinguish controls from subthreshold), other symptoms from community sample symptoms (subthreshold from cases), and clinical cohort symptoms (distinguish cases from each other)
+Comparison of ascertainment and measurement. Gating symptoms from community sample (distinguish controls from subthreshold), symptoms from community sample symptoms (subthreshold from cases), and clinical cohort symptoms (distinguish cases from each other)
 
 ```{r measure, cache=TRUE}
 
 measure.model <- "
 CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-COMM =~ NA*CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui 
 
 CLIN ~~ 1*CLIN
 GATE ~~ 1*GATE
 COMM ~~ 1*COMM
-cl_co < 0.999
-CLIN ~~ cl_co*COMM
+GATE ~~ 0*COMM + 0*CLIN
 "
 
 measure.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure.model)
 
 measure.fit$modelfit
-measure.fit$results[c(1,2,3,6,7)] %>%
+measure.fit$results[c(1,2,3,6,7, 9)] %>%
      filter(lhs %in% c('CLIN', 'COMM', 'GATE'), rhs %in% c('CLIN', 'COMM', 'GATE'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
