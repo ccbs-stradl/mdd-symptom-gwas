@@ -249,28 +249,27 @@ gate.fit$results[c(1,2,3,6,7)] %>%
 
 ```
 
-### Gate-Community-Clinical
+### Gate-Community-Clinical (Spectrum)
 
-Comparison of ascertainment and measurement. Gating symptoms from community sample (distinguish controls from subthreshold), other symptoms from community sample symptoms (subthreshold from cases), and clinical cohort symptoms (distinguish cases from each other)
+Comparison of ascertainment and measurement. Gating symptoms from community sample (distinguish controls from subthreshold), symptoms from community sample symptoms (subthreshold from cases), and clinical cohort symptoms (distinguish cases from each other)
 
 ```{r measure, cache=TRUE}
 
 measure.model <- "
 CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-COMM =~ NA*CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui 
 
 CLIN ~~ 1*CLIN
 GATE ~~ 1*GATE
 COMM ~~ 1*COMM
-cl_co < 1
-CLIN ~~ cl_co*COMM
+GATE ~~ 0*COMM + 0*CLIN
 "
 
 measure.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure.model)
 
 measure.fit$modelfit
-measure.fit$results[c(1,2,3,6,7)] %>%
+measure.fit$results[c(1,2,3,6,7, 9)] %>%
      filter(lhs %in% c('CLIN', 'COMM', 'GATE'), rhs %in% c('CLIN', 'COMM', 'GATE'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
@@ -387,34 +386,6 @@ affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 
 ```
 
-## Melancholic and atypical
-
-Account for directionality of symptoms using melancholic and atypical classifications
-
-```{r mel_aty, cache=TRUE}
-
-mel_aty.model <- "
-MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
-MDD =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-MEL ~~ 1*MEL
-ATY ~~ 1*ATY
-MDD ~~ 1*MDD
-GATE ~~ 1*GATE
-GATE ~~ 0*MDD + 0*MEL + 0*ATY
-"
-
-mel_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty.model, imp_cov=TRUE)
-
-mel_aty.fit$modelfit
-mel_aty.fit$results[c(1,2,3,6,7)] %>%
-     filter(rhs %in% c('MEL', 'ATY', 'MDD'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
-
-```
 
 ## Three factor models
 
@@ -445,145 +416,50 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 
 ```
 
-### Psych/Somatic + Atypical
+## Melancholic and atypical
 
-Expand on the Psych/Somatic two-factor models by separating out directional symptoms.
+Account for directionality of symptoms using melancholic and atypical classifications
 
-#### Psychological-Somatic-Atypical
+```{r mel_aty, cache=TRUE}
 
-```{r psych_soma_aty, cache=TRUE}
-
-psych_soma_aty.model <- "
-PSYCH =~ NA*ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
-SOMA =~ NA*ClinAppDec + ClinSleDec + CommAppDec + CommSleDec
-ATY =~ NA*ClinAppInc + ClinSleInc + CommAppInc + CommSleInc + CommFatig
-
+mel_aty.model <- "
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+MDD =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
-PSYCH ~~ 1*PSYCH
-SOMA ~~ 1*SOMA
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*PSYCH + 0*SOMA + 0*ATY
-"
-
-psych_soma_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_soma_aty.model)
-
-psych_soma_aty.fit$modelfit
-psych_soma_aty.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('PSYCH', 'SOMA', 'ATY'), rhs %in% c('PSYCH', 'SOMA', 'ATY'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
-
-```
-
-#### Psychological-Neurovegetative-Atypical
-
-```{r psych_veg_aty, cache=TRUE}
-
-psych_veg_aty.model <- "
-PSYCH =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
-VEG =~ NA*ClinAppDec + ClinSleDec + ClinMotoInc +  + CommAppDec + CommSleDec
-ATY =~ NA*ClinAppInc + ClinSleInc + ClinMotoDec + CommAppInc + CommSleInc + CommFatig
-
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-PSYCH ~~ 1*PSYCH
-VEG ~~ 1*VEG
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*PSYCH + 0*VEG + ATY
-"
-psych_veg_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_veg_aty.model)
-
-psych_veg_aty.fit$modelfit
-psych_veg_aty.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('PSYCH', 'VEG', 'ATY'), rhs %in% c('PSYCH', 'VEG', 'ATY'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
-
-```
-
-
-#### Affective-Neurovegetative-Atypical
-
-```{r affect_neuroveg_aty, cache=TRUE}
-
-affect_neuroveg_aty.model <- "
-AFFECT =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
-NEUROVEG =~ NA*ClinAppDec + ClinSleDec + ClinMotoInc + CommAppDec + CommSleDec + CommConc
-ATY =~ NA*ClinAppInc + ClinSleInc + ClinMotoDec + CommAppInc + CommSleInc + CommFatig
-
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-AFFECT ~~ 1*AFFECT
-NEUROVEG ~~ 1*NEUROVEG
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*AFFECT + 0*NEUROVEG + 0*ATY
-"
-affect_neuroveg_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=affect_neuroveg_aty.model)
-
-affect_neuroveg_aty.fit$modelfit
-affect_neuroveg_aty.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('AFFECT', 'NEUROVEG', 'ATY'), rhs %in% c('AFFECT', 'NEUROVEG', 'ATY'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
-
-```
-
-
-## Four factor models
-
-### Cognitive-Mood-Neuroveg (Kendler Neale) model, plus Melancholic/Atypical split
-
-```{r cog_mood_mel_aty, cache=TRUE}
-
-cog_mood_mel_aty.model <- "
-COG =~ NA*ClinSui + CommGuilt + CommConc + CommSui
-MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
-ATY =~ NA*ClinMotoDec + ClinAppInc +  + ClinSleInc + CommAppInc + CommSleInc + CommFatig
-MEL =~ NA*ClinMotoInc + ClinAppDec + CommAppDec + ClinSleDec + CommSleDec
-
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-COG ~~ 1*COG
-MOOD ~~ 1*MOOD
 MEL ~~ 1*MEL
 ATY ~~ 1*ATY
+MDD ~~ 1*MDD
 GATE ~~ 1*GATE
-GATE ~~ 0*COG + 0*MOOD + 0*MEL + 0*ATY
+GATE ~~ 0*MDD + 0*MEL + 0*ATY
 "
-cog_mood_mel_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_mel_aty.model)
 
-cog_mood_mel_aty.fit$modelfit
-cog_mood_mel_aty.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('COG', 'MOOD', 'MEL', 'ATY'), rhs %in% c('COG', 'MOOD', 'MEL', 'ATY'), lhs != rhs) %>%
-     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-     print(digits=2)
+mel_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty.model, imp_cov=TRUE)
+
+mel_aty.fit$modelfit
+mel_aty.fit$results[c(1,2,3,6,7,9)] %>%
+	 filter(rhs %in% c('MEL', 'ATY', 'MDD'), lhs != rhs) %>%
+	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+	 print(digits=2)
 
 ```
+
 
 ### Model comparisons
 
 ```{r model_list}
 
 model_list=
-list("1a"=list(name="Common", model=commonfactor.fit),
-     "1b"=list(name="Directional", model=common_dir.fit),
-     "1c"=list(name="Ascertainment", model=clin_comm.fit),
-     "1d"=list(name="Gating", model=gate.fit),
-     "1e"=list(name="Measurement", model=measure.fit),
-     "1f"=list(name="Subtype", model=subtype.fit),
-     "2a"=list(name="Psych-Somatic", model=psych_soma.fit),
-     "2b"=list(name="Psych-Neuroveg", model=psych_veg.fit),
-     "2c"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
-     "2d"=list(name="Melancholic/Atypical", model=mel_aty.fit),
-     "3"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-     "3a"=list(name="Psych-Somatic-Atypical", model=psych_soma_aty.fit),
-     "3b"=list(name="Psych-Neuroveg-Atypical", model=psych_veg_aty.fit),
-     "3c"=list(name="Affect-Neuroveg-Atypical", model=affect_neuroveg_aty.fit),
-     "4"=list(names="Cog-Mood-Mel-Aty", model=cog_mood_mel_aty.fit)
+list("A"=list(name="Common", model=commonfactor.fit),
+     "B"=list(name="Clinical-Community", model=clin_comm.fit),
+     "C"=list(name="Common-Gating", model=gate.fit),
+     "D"=list(name="Clinical-Community-Gating", model=measure.fit),
+     "E"=list(name="Psych-Somatic", model=psych_soma.fit),
+     "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
+     "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
+     "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
+	 "L"=list(name="Depression-Melancholic-Atypical", model=mel_aty.fit)
      )
 
 model_fits <- 
@@ -609,6 +485,8 @@ Check that all symptoms have been included in each model
 ```{r model_check}
 sapply(model_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
 ```
+
+
       
 # Exploratory factor analysis
 
