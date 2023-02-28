@@ -438,12 +438,13 @@ GATE ~~ 0*MDD + 0*MEL + 0*ATY
 mel_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty.model, imp_cov=TRUE)
 
 mel_aty.fit$modelfit
-mel_aty.fit$results[c(1,2,3,6,7)] %>%
+mel_aty.fit$results[c(1,2,3,6,7,9)] %>%
 	 filter(rhs %in% c('MEL', 'ATY', 'MDD'), lhs != rhs) %>%
 	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
 	 print(digits=2)
 
 ```
+
 
 ### Model comparisons
 
@@ -451,14 +452,14 @@ mel_aty.fit$results[c(1,2,3,6,7)] %>%
 
 model_list=
 list("A"=list(name="Common", model=commonfactor.fit),
-     "B"=list(name="Sample", model=clin_comm.fit),
-     "C"=list(name="Gating", model=gate.fit),
-     "D"=list(name="Spectrum", model=measure.fit),
+     "B"=list(name="Clinical-Community", model=clin_comm.fit),
+     "C"=list(name="Common-Gating", model=gate.fit),
+     "D"=list(name="Clinical-Community-Gating", model=measure.fit),
      "E"=list(name="Psych-Somatic", model=psych_soma.fit),
      "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
      "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
      "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-	 "L"=list(name="Melancholic/Atypical", model=mel_aty.fit)
+	 "L"=list(name="Depression-Melancholic-Atypical", model=mel_aty.fit)
      )
 
 model_fits <- 
@@ -484,6 +485,8 @@ Check that all symptoms have been included in each model
 ```{r model_check}
 sapply(model_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
 ```
+
+
       
 # Exploratory factor analysis
 
