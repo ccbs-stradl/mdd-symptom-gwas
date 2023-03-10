@@ -305,26 +305,6 @@ Base model of symptom factors, with Melancholic and Atypical. The mood symptoms 
 ```{r dep_aty, cache=TRUE}
 
 model <- "
-DEP =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt + CommDep + UkbDep + ClinSui + CommConc + CommSui 
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-DEP ~~ 1*DEP
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*DEP + 0*ATY
-"
-fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRUE)
-
-```
-
-## Sample factors
-
-Base model of Clinical and Community sample factors. 
-
-```{r clin_comm, cache=TRUE}
-
-model <- "
 CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -334,53 +314,17 @@ GATE ~~ 1*GATE
 COMM ~~ 1*COMM
 GATE ~~ 0*COMM + 0*CLIN
 "
-fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRUE)
+fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model)
 
 ```
 
 ## External phenotypes
 
-### Symptom factors
-
 Compare symptom factors against each external phenotype. Single regression of each external phenotype on each symptom or symptom cluster.
 
 ```{r ext_glue, cache=TRUE}
 
-ext_symp.glue <- "
-DEP =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt + CommDep + UkbDep + ClinSui + CommConc + CommSui 
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-DEP ~~ 1*DEP
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*DEP + 0*ATY
-
-AlcDep ~ {symptom}
-Anxiety ~  {symptom}
-BIP ~ {symptom}
-BMI ~ {symptom}
-EA ~ {symptom}
-MD ~ {symptom}
-MDD ~ {symptom}
-Neu ~ {symptom}
-PTSD ~ {symptom}
-Pain ~ {symptom}
-Sleep ~ {symptom}
-Smoking ~ {symptom}
-"
-
-ext_symp.model_list <- lapply(c('DEP', 'ATY', 'GATE'), function(symptom) str_glue_data(list(symptom=symptom), ext_symp.glue))
-
-ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
-
-```
-
-### Sample factors
-
-```{r ext_samp_glue, cache=TRUE}
-
-ext_samp.glue <- "
+ext.glue <- "
 CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -407,62 +351,28 @@ Sleep ~ {symptom}
 Smoking ~ {symptom}
 "
 
-ext_samp.model_list <- lapply(c('CLIN', 'COMM'), function(symptom) str_glue_data(list(symptom=symptom), ext_samp.glue))
+ext.model_list <- lapply(c('CLIN', 'COMM', 'GATE'), function(symptom) str_glue_data(list(symptom=symptom), ext.glue))
 
-ext_samp.fit_list <- lapply(ext_samp.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
+ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
 
 ```
 
 ```{r ext_loadings}
 
-ext_single <-
-bind_rows(lapply(c(ext_symp.fit_list, ext_samp.fit_list), function(fit) mutate(fit$results, p_value=as.character(p_value)))) %>%
-select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('DEP', 'ATY', 'GATE', 'CLIN', 'COMM')) %>%
+ext_full <-
+bind_rows(lapply(ext.fit_list, function(fit) mutate(fit$results, p_value=as.character(p_value)))) %>%
+select(lhs, op, rhs, Unstand_Est, Unstand_SE, p_value) %>%
+filter(lhs %in% ext_trait_names, rhs %in% c('CLIN', 'COMM', 'GATE')) %>%
 mutate(Beta='Single', Factor=rhs, Phenotype=lhs, p_value=as.numeric(p_value))
 
 ```
-
-### Symptom factors
 
 Multiple regression of each phenotype on symptom factors, to estimate relationship after condition on each of the other factors. 
 
 
 ```{r ext_mult, cache=TRUE}
 
-ext_mult_symp.model <- "
-DEP =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt + CommDep + UkbDep + ClinSui + CommConc + CommSui 
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-DEP ~~ 1*DEP
-ATY ~~ 1*ATY
-GATE ~~ 1*GATE
-GATE ~~ 0*DEP + 0*ATY
-
-AlcDep ~ DEP + ATY + GATE
-Anxiety ~  DEP + ATY + GATE
-BIP ~ DEP + ATY + GATE
-BMI ~ DEP + ATY + GATE
-EA ~ DEP + ATY + GATE
-MD ~ DEP + ATY + GATE
-MDD ~ DEP + ATY + GATE
-Neu ~ DEP + ATY + GATE
-PTSD ~ DEP + ATY + GATE
-Pain ~ DEP + ATY + GATE
-Sleep ~ DEP + ATY + GATE
-Smoking ~ DEP + ATY + GATE
-"
-ext_mult_symp.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult_symp.model)
-
-```
-
-### Sample factors
-
-
-```{r ext_samp_mult, cache=TRUE}
-
-ext_samp_mult.model <- "
+ext_mult.model <- "
 CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -472,66 +382,56 @@ GATE ~~ 1*GATE
 COMM ~~ 1*COMM
 GATE ~~ 0*COMM + 0*CLIN
 
-AlcDep ~ CLIN + COMM 
-Anxiety ~  CLIN + COMM
-BIP ~ CLIN + COMM 
-BMI ~ CLIN + COMM 
-EA ~ CLIN + COMM 
-MD ~ CLIN + COMM
-MDD ~ CLIN + COMM
-Neu ~ CLIN + COMM
-PTSD ~ CLIN + COMM
-Pain ~ CLIN + COMM
-Sleep ~ CLIN + COMM
-Smoking ~ CLIN + COMM
+AlcDep ~ CLIN + COMM + GATE
+Anxiety ~  CLIN + COMM + GATE
+BIP ~ CLIN + COMM + GATE
+BMI ~ CLIN + COMM + GATE
+EA ~ CLIN + COMM + GATE
+MD ~ CLIN + COMM + GATE
+MDD ~ CLIN + COMM + GATE
+Neu ~ CLIN + COMM + GATE
+PTSD ~ CLIN + COMM + GATE
+Pain ~ CLIN + COMM + GATE
+Sleep ~ CLIN + COMM + GATE
+Smoking ~ CLIN + COMM + GATE
 "
-ext_samp_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_samp_mult.model)
+ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult.model)
 
 ```
 
 ```{r ext_mult_loadings}
 
-ext_multiple <-
-bind_rows(lapply(list(ext_mult_symp.fit, ext_samp_mult.fit),
+ext_partial <-
+bind_rows(lapply(list(ext_mult.fit),
                  function(fit) fit$results)) %>%
-  select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-  filter(lhs %in% ext_trait_names, rhs %in% c('DEP', 'ATY', 'GATE', 'CLIN', 'COMM')) %>%
+  select(lhs, op, rhs, Unstand_Est, Unstand_SE, p_value) %>%
+  filter(lhs %in% ext_trait_names, rhs %in% c('CLIN', 'COMM', 'GATE')) %>%
   mutate(Beta='Multiple', Factor=rhs, Phenotype=lhs)
 
 ```
 
 ```{r ext_table}
 
-ext_table <-
-bind_rows(ext_single, ext_multiple) %>%
-transmute(Phenotype,
-          Factor=factor(Factor,
-	    				levels=c('DEP', 'ATY', 'GATE', 'COMM', 'CLIN'),
-						labels=c("Depression", "Atypical", "Gating", "Community", "Clinical")),
-		  Model=Beta, STD_Genotype, STD_Genotype_SE, p_value) %>%
-mutate(fdr=p.adjust(p_value, 'BY')) |>
-arrange(Phenotype, desc(Factor), Model)
-
-ext_table
+bind_rows(ext_full, ext_partial) %>%
+select(Factor, Phenotype, Model=Beta, Unstand_Est, Unstand_SE, p_value) %>%
+arrange(Factor, Phenotype, Model)
 
 ```
 
 ```{r ex_plot, fig.width=10, fig.height=6, dpi=300}
 
-ggplot(bind_rows(ext_multiple, ext_single),
-       aes(x=factor(Factor,
-	   				levels=c('DEP', 'ATY', 'GATE', 'COMM', 'CLIN'),
-					   labels=c("Depression", "Atypical", "Gating", "Community", "Clinical")),
-           y=STD_Genotype,
-           color=factor(Beta, levels=c('Single', 'Multiple')),
-           shape=factor(Beta, levels=c('Single', 'Multiple')),
-          ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
-          ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
+ggplot(bind_rows(ext_full, ext_partial),
+       aes(x=factor(Factor, levels=c('CLIN', 'COMM', 'GATE')),
+           y=Unstand_Est,
+           color=factor(Beta, levels=c('Multiple', 'Single')),
+           shape=factor(Beta, levels=c('Multiple', 'Single')),
+          ymin=qnorm(0.025, mean=Unstand_Est, sd=as.numeric(Unstand_SE)),
+          ymax=qnorm(0.975, mean=Unstand_Est, sd=as.numeric(Unstand_SE)))) +
 geom_hline(yintercept=0, col='gray') +
-geom_pointrange(position=position_dodge(width=-0.5)) +
+geom_pointrange(position=position_dodge(width=0.5)) +
 facet_wrap(~Phenotype) +
 scale_x_discrete('Factor') +
-scale_y_continuous('Beta') +
+scale_y_continuous('Beta', breaks=c(-1, 0, 1)) +
 scale_color_discrete('Regression: ') +
 coord_flip() +
 theme_bw() +
@@ -549,18 +449,18 @@ Test for attenuation of correlations
 ```{r xt_attentuate}
 
 ext_factor_wide <-
-bind_rows(ext_single, ext_multiple) %>%
+bind_rows(ext_full, ext_partial) %>%
 as_tibble() %>%
-select(Factor, Phenotype, STD_Genotype, STD_Genotype_SE, p_value, Beta) %>%
+select(Factor, Phenotype, Unstand_Est, Unstand_SE, p_value, Beta) %>%
 pivot_wider(id_cols=c(Phenotype, Factor),
             names_from=Beta, 
-            values_from=c(STD_Genotype, STD_Genotype_SE, p_value))
+            values_from=c(Unstand_Est, Unstand_SE, p_value))
 
 ext_attenuation <-     
 ext_factor_wide %>%
-mutate(rg_Single=STD_Genotype_Single, rg_Multiple=STD_Genotype_Multiple,
-       se_Single=as.numeric(STD_Genotype_SE_Single),
-       se_Multiple=as.numeric(STD_Genotype_SE_Multiple)) %>%
+mutate(rg_Single=Unstand_Est_Single, rg_Multiple=Unstand_Est_Multiple,
+       se_Single=as.numeric(Unstand_SE_Single),
+       se_Multiple=as.numeric(Unstand_SE_Multiple)) %>%
 mutate(attenuation_z=(rg_Single-rg_Multiple)/sqrt(se_Single^2+se_Multiple^2)) %>%
 mutate(attenuation_p=2*pnorm(abs(attenuation_z), lower.tail=F)) %>%
 select(Phenotype, Factor, p_value_Single, p_value_Multiple, attenuation_p)

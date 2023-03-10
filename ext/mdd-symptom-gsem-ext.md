@@ -39,20 +39,20 @@ R.version
 
 ```
 ##                _                           
-## platform       x86_64-apple-darwin17.0     
-## arch           x86_64                      
-## os             darwin17.0                  
-## system         x86_64, darwin17.0          
+## platform       aarch64-apple-darwin20      
+## arch           aarch64                     
+## os             darwin20                    
+## system         aarch64, darwin20           
 ## status                                     
 ## major          4                           
-## minor          2.1                         
+## minor          2.2                         
 ## year           2022                        
-## month          06                          
-## day            23                          
-## svn rev        82513                       
+## month          10                          
+## day            31                          
+## svn rev        83211                       
 ## language       R                           
-## version.string R version 4.2.1 (2022-06-23)
-## nickname       Funny-Looking Kid
+## version.string R version 4.2.2 (2022-10-31)
+## nickname       Innocent and Trusting
 ```
 
 Package installation
@@ -228,7 +228,7 @@ MDD9;Suicidality;Suicidality;Sui
 
 ```
 ## Rows: 15 Columns: 4
-## ── Column specification ────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
 ## 
@@ -253,13 +253,13 @@ MDD5b;Psychomotor slowing nearly every day
 MDD6;Fatigue or loss of energy nearly every day
 MDD7;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;Diminished ability to think or concentrate, or indecisiveness
-MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide
+MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a Multiple plan for attempting suicide
 ", col_names=c('Reference', 'Description'), delim=';')
 ```
 
 ```
 ## Rows: 15 Columns: 2
-## ── Column specification ────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
 ## 
@@ -280,7 +280,7 @@ all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'p
 
 ```
 ## Rows: 38 Columns: 9
-## ── Column specification ────────────────────────────────────────────────────────────────────
+## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (5): cohorts, symptom, sumstats, filename, trait_name
 ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -358,7 +358,7 @@ ATY ~~ 1*ATY
 GATE ~~ 1*GATE
 GATE ~~ 0*DEP + 0*ATY
 "
-fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model)
+fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRUE)
 ```
 
 ```
@@ -367,13 +367,13 @@ fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model)
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##   1.441 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355035 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.63713097734563 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##   1.201 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355036 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.63713097734562 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
-## difference greater than .025 was observed pre- and post-smoothing in the
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model, :
+## A difference greater than .025 was observed pre- and post-smoothing in the
 ## genetic covariance matrix. This reflects a large difference and results should
 ## be interpreted with caution!! This can often result from including low powered
 ## traits, and you might consider removing those traits from the model. If you are
@@ -382,8 +382,57 @@ fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model)
 ```
 
 ```
-## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
-## difference greater than .025 was observed pre- and post-smoothing for
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model, :
+## A difference greater than .025 was observed pre- and post-smoothing for
+## Z-statistics in the genetic covariance matrix. This reflects a large difference
+## and results should be interpreted with caution!! This can often result from
+## including low powered traits, and you might consider removing those traits from
+## the model. If you are going to run a multivariate GWAS we strongly recommend
+## setting the smooth_check argument to true to check smoothing for each SNP.
+```
+
+## Sample factors
+
+Base model of Clinical and Community sample factors. 
+
+
+```r
+model <- "
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+CLIN ~~ 1*CLIN
+GATE ~~ 1*GATE
+COMM ~~ 1*COMM
+GATE ~~ 0*COMM + 0*CLIN
+"
+fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRUE)
+```
+
+```
+## [1] "Running primary model"
+## [1] "Calculating CFI"
+## [1] "Calculating Standardized Results"
+## [1] "Calculating SRMR"
+## elapsed 
+##   1.425 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355036 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.63713097734562 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+```
+
+```
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model, :
+## A difference greater than .025 was observed pre- and post-smoothing in the
+## genetic covariance matrix. This reflects a large difference and results should
+## be interpreted with caution!! This can often result from including low powered
+## traits, and you might consider removing those traits from the model. If you are
+## going to run a multivariate GWAS we strongly recommend setting the smooth_check
+## argument to true to check smoothing for each SNP.
+```
+
+```
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model, :
+## A difference greater than .025 was observed pre- and post-smoothing for
 ## Z-statistics in the genetic covariance matrix. This reflects a large difference
 ## and results should be interpreted with caution!! This can often result from
 ## including low powered traits, and you might consider removing those traits from
@@ -393,11 +442,13 @@ fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model)
 
 ## External phenotypes
 
+### Symptom factors
+
 Compare symptom factors against each external phenotype. Single regression of each external phenotype on each symptom or symptom cluster.
 
 
 ```r
-ext.glue <- "
+ext_symp.glue <- "
 DEP =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt + CommDep + UkbDep + ClinSui + CommConc + CommSui 
 ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -421,9 +472,9 @@ Sleep ~ {symptom}
 Smoking ~ {symptom}
 "
 
-ext.model_list <- lapply(c('DEP', 'ATY', 'GATE'), function(symptom) str_glue_data(list(symptom=symptom), ext.glue))
+ext_symp.model_list <- lapply(c('DEP', 'ATY', 'GATE'), function(symptom) str_glue_data(list(symptom=symptom), ext_symp.glue))
 
-ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
+ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
 ```
 
 ```
@@ -432,8 +483,8 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  23.706 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058033 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  22.319 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -462,8 +513,8 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  18.418 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058033 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  17.236 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -490,8 +541,102 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  20.863 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058033 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  19.836 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+```
+
+```
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
+## difference greater than .025 was observed pre- and post-smoothing in the
+## genetic covariance matrix. This reflects a large difference and results should
+## be interpreted with caution!! This can often result from including low powered
+## traits, and you might consider removing those traits from the model. If you are
+## going to run a multivariate GWAS we strongly recommend setting the smooth_check
+## argument to true to check smoothing for each SNP.
+
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
+## difference greater than .025 was observed pre- and post-smoothing for
+## Z-statistics in the genetic covariance matrix. This reflects a large difference
+## and results should be interpreted with caution!! This can often result from
+## including low powered traits, and you might consider removing those traits from
+## the model. If you are going to run a multivariate GWAS we strongly recommend
+## setting the smooth_check argument to true to check smoothing for each SNP.
+```
+
+### Sample factors
+
+
+```r
+ext_samp.glue <- "
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+CLIN ~~ 1*CLIN
+GATE ~~ 1*GATE
+COMM ~~ 1*COMM
+GATE ~~ 0*COMM + 0*CLIN
+
+cc < 0.99
+CLIN ~~ cc*COMM
+
+AlcDep ~ {symptom}
+Anxiety ~  {symptom}
+BIP ~ {symptom}
+BMI ~ {symptom}
+EA ~ {symptom}
+MD ~ {symptom}
+MDD ~ {symptom}
+Neu ~ {symptom}
+PTSD ~ {symptom}
+Pain ~ {symptom}
+Sleep ~ {symptom}
+Smoking ~ {symptom}
+"
+
+ext_samp.model_list <- lapply(c('CLIN', 'COMM'), function(symptom) str_glue_data(list(symptom=symptom), ext_samp.glue))
+
+ext_samp.fit_list <- lapply(ext_samp.model_list, function(model) usermodel(symptoms_covstruct, estimation='DWLS', model=model))
+```
+
+```
+## [1] "Running primary model"
+## [1] "Calculating CFI"
+## [1] "Calculating Standardized Results"
+## [1] "Calculating SRMR"
+## elapsed 
+##  91.023 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+```
+
+```
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
+## difference greater than .025 was observed pre- and post-smoothing in the
+## genetic covariance matrix. This reflects a large difference and results should
+## be interpreted with caution!! This can often result from including low powered
+## traits, and you might consider removing those traits from the model. If you are
+## going to run a multivariate GWAS we strongly recommend setting the smooth_check
+## argument to true to check smoothing for each SNP.
+```
+
+```
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
+## difference greater than .025 was observed pre- and post-smoothing for
+## Z-statistics in the genetic covariance matrix. This reflects a large difference
+## and results should be interpreted with caution!! This can often result from
+## including low powered traits, and you might consider removing those traits from
+## the model. If you are going to run a multivariate GWAS we strongly recommend
+## setting the smooth_check argument to true to check smoothing for each SNP.
+```
+
+```
+## [1] "Running primary model"
+## [1] "Calculating CFI"
+## [1] "Calculating Standardized Results"
+## [1] "Calculating SRMR"
+## elapsed 
+##  76.325 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
@@ -514,19 +659,21 @@ ext.fit_list <- lapply(ext.model_list, function(model) usermodel(symptoms_covstr
 
 
 ```r
-ext_full <-
-bind_rows(lapply(ext.fit_list, function(fit) mutate(fit$results, p_value=as.character(p_value)))) %>%
+ext_single <-
+bind_rows(lapply(c(ext_symp.fit_list, ext_samp.fit_list), function(fit) mutate(fit$results, p_value=as.character(p_value)))) %>%
 select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-filter(lhs %in% ext_trait_names, rhs %in% c('DEP', 'ATY', 'GATE')) %>%
-mutate(Beta='Total', Factor=rhs, Phenotype=lhs, p_value=as.numeric(p_value))
+filter(lhs %in% ext_trait_names, rhs %in% c('DEP', 'ATY', 'GATE', 'CLIN', 'COMM')) %>%
+mutate(Beta='Single', Factor=rhs, Phenotype=lhs, p_value=as.numeric(p_value))
 ```
+
+### Symptom factors
 
 Multiple regression of each phenotype on symptom factors, to estimate relationship after condition on each of the other factors. 
 
 
 
 ```r
-ext_mult.model <- "
+ext_mult_symp.model <- "
 DEP =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt + CommDep + UkbDep + ClinSui + CommConc + CommSui 
 ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -549,7 +696,7 @@ Pain ~ DEP + ATY + GATE
 Sleep ~ DEP + ATY + GATE
 Smoking ~ DEP + ATY + GATE
 "
-ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult.model)
+ext_mult_symp.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult_symp.model)
 ```
 
 ```
@@ -558,13 +705,13 @@ ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult.
 ## [1] "Calculating Standardized Results"
 ## [1] "Calculating SRMR"
 ## elapsed 
-##  23.814 
-## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058033 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+##  22.932 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 ```
 
 ```
 ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## ext_mult.model): A difference greater than .025 was observed pre- and
+## ext_mult_symp.model): A difference greater than .025 was observed pre- and
 ## post-smoothing in the genetic covariance matrix. This reflects a large
 ## difference and results should be interpreted with caution!! This can often
 ## result from including low powered traits, and you might consider removing those
@@ -575,7 +722,70 @@ ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult.
 
 ```
 ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-## ext_mult.model): A difference greater than .025 was observed pre- and
+## ext_mult_symp.model): A difference greater than .025 was observed pre- and
+## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+## a large difference and results should be interpreted with caution!! This can
+## often result from including low powered traits, and you might consider removing
+## those traits from the model. If you are going to run a multivariate GWAS we
+## strongly recommend setting the smooth_check argument to true to check smoothing
+## for each SNP.
+```
+
+### Sample factors
+
+
+
+```r
+ext_samp_mult.model <- "
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+CLIN ~~ 1*CLIN
+GATE ~~ 1*GATE
+COMM ~~ 1*COMM
+GATE ~~ 0*COMM + 0*CLIN
+
+AlcDep ~ CLIN + COMM 
+Anxiety ~  CLIN + COMM
+BIP ~ CLIN + COMM 
+BMI ~ CLIN + COMM 
+EA ~ CLIN + COMM 
+MD ~ CLIN + COMM
+MDD ~ CLIN + COMM
+Neu ~ CLIN + COMM
+PTSD ~ CLIN + COMM
+Pain ~ CLIN + COMM
+Sleep ~ CLIN + COMM
+Smoking ~ CLIN + COMM
+"
+ext_samp_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_samp_mult.model)
+```
+
+```
+## [1] "Running primary model"
+## [1] "Calculating CFI"
+## [1] "Calculating Standardized Results"
+## [1] "Calculating SRMR"
+## elapsed 
+##  41.639 
+## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+```
+
+```
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+## ext_samp_mult.model): A difference greater than .025 was observed pre- and
+## post-smoothing in the genetic covariance matrix. This reflects a large
+## difference and results should be interpreted with caution!! This can often
+## result from including low powered traits, and you might consider removing those
+## traits from the model. If you are going to run a multivariate GWAS we strongly
+## recommend setting the smooth_check argument to true to check smoothing for each
+## SNP.
+```
+
+```
+## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+## ext_samp_mult.model): A difference greater than .025 was observed pre- and
 ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
 ## a large difference and results should be interpreted with caution!! This can
 ## often result from including low powered traits, and you might consider removing
@@ -586,17 +796,17 @@ ext_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_mult.
 
 
 ```r
-ext_partial <-
-bind_rows(lapply(list(ext_mult.fit),
+ext_multiple <-
+bind_rows(lapply(list(ext_mult_symp.fit, ext_samp_mult.fit),
                  function(fit) fit$results)) %>%
   select(lhs, op, rhs, STD_Genotype, STD_Genotype_SE, p_value) %>%
-  filter(lhs %in% ext_trait_names, rhs %in% c('DEP', 'ATY', 'GATE')) %>%
-  mutate(Beta='Specific', Factor=rhs, Phenotype=lhs)
+  filter(lhs %in% ext_trait_names, rhs %in% c('DEP', 'ATY', 'GATE', 'CLIN', 'COMM')) %>%
+  mutate(Beta='Multiple', Factor=rhs, Phenotype=lhs)
 ```
 
 
 ```r
-bind_rows(ext_full, ext_partial) %>%
+bind_rows(ext_single, ext_multiple) %>%
 select(Factor, Phenotype, Model=Beta, STD_Genotype, STD_Genotype_SE, p_value) %>%
 arrange(Factor, Phenotype, Model)
 ```
@@ -605,104 +815,169 @@ arrange(Factor, Phenotype, Model)
 
 |Factor |Phenotype |Model    | STD_Genotype|STD_Genotype_SE    |   p_value|
 |:------|:---------|:--------|------------:|:------------------|---------:|
-|ATY    |AlcDep    |Specific |    0.3640767|0.254228487814086  | 0.1521144|
-|ATY    |AlcDep    |Total    |    0.5005632|0.0801365998233833 | 0.0000000|
-|ATY    |Anxiety   |Specific |   -0.1002595|0.15789788053738   | 0.5254618|
-|ATY    |Anxiety   |Total    |    0.7461638|0.0610498972634396 | 0.0000000|
-|ATY    |BIP       |Specific |   -0.1925331|0.151262513376248  | 0.2030751|
-|ATY    |BIP       |Total    |    0.5253496|0.0433068909754881 | 0.0000000|
-|ATY    |BMI       |Specific |    1.1769822|0.36900876973096   | 0.0014241|
-|ATY    |BMI       |Total    |    0.2236476|0.0293760349283482 | 0.0000000|
-|ATY    |EA        |Specific |   -0.4022932|0.13930888661245   | 0.0038787|
-|ATY    |EA        |Total    |   -0.1059923|0.0303955945887964 | 0.0004883|
-|ATY    |MD        |Specific |    0.1362367|0.118657902329921  | 0.2508930|
-|ATY    |MD        |Total    |    0.9337764|0.0553271353460975 | 0.0000000|
-|ATY    |MDD       |Specific |    0.1932694|0.224332429760117  | 0.3889392|
-|ATY    |MDD       |Total    |    0.8343727|0.0844201722693633 | 0.0000000|
-|ATY    |Neu       |Specific |   -0.1438345|0.157369633342377  | 0.3607263|
-|ATY    |Neu       |Total    |    0.6951237|0.0475181114949475 | 0.0000000|
-|ATY    |PTSD      |Specific |    0.1306751|0.204823292306298  | 0.5234703|
-|ATY    |PTSD      |Total    |    0.7948335|0.0761178908892611 | 0.0000000|
-|ATY    |Pain      |Specific |    0.6255118|0.193529566742197  | 0.0012282|
-|ATY    |Pain      |Total    |    0.6028382|0.0446756382218185 | 0.0000000|
-|ATY    |Sleep     |Specific |    0.6465696|0.243383591610749  | 0.0078918|
-|ATY    |Sleep     |Total    |    0.3062883|0.0495371839928435 | 0.0000000|
-|ATY    |Smoking   |Specific |    0.6431627|0.23347309145044   | 0.0058719|
-|ATY    |Smoking   |Total    |    0.2991301|0.039228791444688  | 0.0000000|
-|DEP    |AlcDep    |Specific |    0.1885050|0.231210188105455  | 0.4148641|
-|DEP    |AlcDep    |Total    |    0.4737221|0.0729119638494336 | 0.0000000|
-|DEP    |Anxiety   |Specific |    0.6166142|0.144183584948087  | 0.0000190|
-|DEP    |Anxiety   |Total    |    0.7085221|0.0504659271394381 | 0.0000000|
-|DEP    |BIP       |Specific |    0.5534770|0.140238803314301  | 0.0000792|
-|DEP    |BIP       |Total    |    0.4993681|0.0364951812168613 | 0.0000000|
-|DEP    |BMI       |Specific |   -0.5753820|0.359698684262476  | 0.1096769|
-|DEP    |BMI       |Total    |    0.2096220|0.027165906311088  | 0.0000000|
-|DEP    |EA        |Specific |    0.0031493|0.133246052921943  | 0.9812037|
-|DEP    |EA        |Total    |   -0.0994529|0.0286656998615448 | 0.0005216|
-|DEP    |MD        |Specific |    0.5660656|0.109409228135781  | 0.0000002|
-|DEP    |MD        |Total    |    0.8861225|0.0390501161886385 | 0.0000000|
-|DEP    |MDD       |Specific |    0.4055509|0.209299460427074  | 0.0526553|
-|DEP    |MDD       |Total    |    0.7912590|0.072414808169817  | 0.0000000|
-|DEP    |Neu       |Specific |    0.7589834|0.142804349095257  | 0.0000001|
-|DEP    |Neu       |Total    |    0.6604487|0.0370095039478862 | 0.0000000|
-|DEP    |PTSD      |Specific |    0.5261640|0.179137179821488  | 0.0033107|
-|DEP    |PTSD      |Total    |    0.7537116|0.064209039992394  | 0.0000000|
-|DEP    |Pain      |Specific |    0.0876166|0.193299649274597  | 0.6502778|
-|DEP    |Pain      |Total    |    0.5702388|0.0366128094171443 | 0.0000000|
-|DEP    |Sleep     |Specific |   -0.2822782|0.236718610214829  | 0.2330832|
-|DEP    |Sleep     |Total    |    0.2880514|0.0472773039715776 | 0.0000000|
-|DEP    |Smoking   |Specific |   -0.2684021|0.224016527027553  | 0.2308656|
-|DEP    |Smoking   |Total    |    0.2820754|0.0363413353422488 | 0.0000000|
-|GATE   |AlcDep    |Specific |    0.0719889|0.134107865360387  | 0.5914075|
-|GATE   |AlcDep    |Total    |    0.5775986|0.137025033250661  | 0.0000249|
-|GATE   |Anxiety   |Specific |    0.3895213|0.0865468839695091 | 0.0000068|
-|GATE   |Anxiety   |Total    |    1.0186390|0.141087258397134  | 0.0000000|
-|GATE   |BIP       |Specific |    0.2203518|0.0760515302325504 | 0.0037629|
-|GATE   |BIP       |Total    |    0.6907365|0.104545146671682  | 0.0000000|
-|GATE   |BMI       |Specific |   -0.1092501|0.0579927773313639 | 0.0595845|
-|GATE   |BMI       |Total    |    0.1629996|0.0465424467425572 | 0.0004615|
-|GATE   |EA        |Specific |    0.3189161|0.074797933480592  | 0.0000201|
-|GATE   |EA        |Total    |    0.0076982|0.0423127806802913 | 0.8556408|
-|GATE   |MD        |Specific |    0.5070460|0.0743490245529634 | 0.0000000|
-|GATE   |MD        |Total    |    1.2682565|0.167656586562129  | 0.0000000|
-|GATE   |MDD       |Specific |    0.5092440|0.134643957082049  | 0.0001555|
-|GATE   |MDD       |Total    |    1.1340963|0.177589744720942  | 0.0000000|
-|GATE   |Neu       |Specific |    0.0924421|0.0899956413225501 | 0.3043413|
-|GATE   |Neu       |Total    |    0.8423175|0.120011235300734  | 0.0000000|
-|GATE   |PTSD      |Specific |    0.3205619|0.117818043669866  | 0.0065124|
-|GATE   |PTSD      |Total    |    1.0304451|0.160874779070875  | 0.0000000|
-|GATE   |Pain      |Specific |    0.0900431|0.0758069477957605 | 0.2349187|
-|GATE   |Pain      |Total    |    0.6810387|0.0993562767980237 | 0.0000000|
-|GATE   |Sleep     |Specific |    0.1469529|0.088841538295064  | 0.0981105|
-|GATE   |Sleep     |Total    |    0.3400320|0.0826835343196338 | 0.0000391|
-|GATE   |Smoking   |Specific |    0.1616602|0.0635913333922893 | 0.0110170|
-|GATE   |Smoking   |Total    |    0.3702149|0.0694564471208399 | 0.0000001|
+|ATY    |AlcDep    |Multiple |    0.3640712|0.254223785791238  | 0.1521133|
+|ATY    |AlcDep    |Single   |    0.5005631|0.0801366140442318 | 0.0000000|
+|ATY    |Anxiety   |Multiple |   -0.1002574|0.157895205544124  | 0.5254606|
+|ATY    |Anxiety   |Single   |    0.7461647|0.061049930775689  | 0.0000000|
+|ATY    |BIP       |Multiple |   -0.1925292|0.151259371408457  | 0.2030753|
+|ATY    |BIP       |Single   |    0.5253500|0.0433069091428086 | 0.0000000|
+|ATY    |BMI       |Multiple |    1.1769646|0.368995219662611  | 0.0014241|
+|ATY    |BMI       |Single   |    0.2236477|0.0293760425533776 | 0.0000000|
+|ATY    |EA        |Multiple |   -0.4022878|0.139304956948227  | 0.0038787|
+|ATY    |EA        |Single   |   -0.1059925|0.0303956020755315 | 0.0004883|
+|ATY    |MD        |Multiple |    0.1362361|0.118656132658375  | 0.2508968|
+|ATY    |MD        |Single   |    0.9337767|0.0553271604614671 | 0.0000000|
+|ATY    |MDD       |Multiple |    0.1932670|0.224328961589488  | 0.3889393|
+|ATY    |MDD       |Single   |    0.8343739|0.084420219045379  | 0.0000000|
+|ATY    |Neu       |Multiple |   -0.1438306|0.157366347646865  | 0.3607231|
+|ATY    |Neu       |Single   |    0.6951241|0.04751813414257   | 0.0000000|
+|ATY    |PTSD      |Multiple |    0.1306745|0.204820296419978  | 0.5234706|
+|ATY    |PTSD      |Single   |    0.7948341|0.0761179204369635 | 0.0000000|
+|ATY    |Pain      |Multiple |    0.6255035|0.193523306355692  | 0.0012282|
+|ATY    |Pain      |Single   |    0.6028379|0.044675637984252  | 0.0000000|
+|ATY    |Sleep     |Multiple |    0.6465586|0.243375939792957  | 0.0078918|
+|ATY    |Sleep     |Single   |    0.3062879|0.0495371868573943 | 0.0000000|
+|ATY    |Smoking   |Multiple |    0.6431527|0.233465617055737  | 0.0058718|
+|ATY    |Smoking   |Single   |    0.2991304|0.039228804765846  | 0.0000000|
+|CLIN   |AlcDep    |Multiple |    0.5539985|0.451475966420007  | 0.2197182|
+|CLIN   |AlcDep    |Single   |    0.4770973|0.0822308805109108 | 0.0000000|
+|CLIN   |Anxiety   |Multiple |   -0.4473043|0.395788775975659  | 0.2583376|
+|CLIN   |Anxiety   |Single   |    0.7129587|0.0791675441466363 | 0.0000000|
+|CLIN   |BIP       |Multiple |   -0.4511859|0.377105431259951  | 0.2314438|
+|CLIN   |BIP       |Single   |    0.5024973|0.0558807401700145 | 0.0000000|
+|CLIN   |BMI       |Multiple |    1.1754744|0.7937046512339    | 0.1385062|
+|CLIN   |BMI       |Single   |    0.2113343|0.0327028634246196 | 0.0000000|
+|CLIN   |EA        |Multiple |   -0.8634334|0.585694284005175  | 0.1403267|
+|CLIN   |EA        |Single   |   -0.1003859|0.0291786839273907 | 0.0005809|
+|CLIN   |MD        |Multiple |   -0.3147681|0.320838492341552  | 0.3265085|
+|CLIN   |MD        |Single   |    0.8916358|0.0842683837826528 | 0.0000000|
+|CLIN   |MDD       |Multiple |   -0.5264491|0.511747314532823  | 0.3035501|
+|CLIN   |MDD       |Single   |    0.7963982|0.0961948348056698 | 0.0000000|
+|CLIN   |Neu       |Multiple |   -0.0881142|0.195992511987339  | 0.6530585|
+|CLIN   |Neu       |Single   |    0.6645534|0.0671021281930817 | 0.0000000|
+|CLIN   |PTSD      |Multiple |   -0.2234120|0.34801383869207   | 0.5209005|
+|CLIN   |PTSD      |Single   |    0.7587889|0.0971739423320513 | 0.0000000|
+|CLIN   |Pain      |Multiple |    0.3942759|0.294699439656623  | 0.1808442|
+|CLIN   |Pain      |Single   |    0.5742093|0.0608871788983916 | 0.0000000|
+|CLIN   |Sleep     |Multiple |    0.1801937|0.233665669666763  | 0.4405708|
+|CLIN   |Sleep     |Single   |    0.2903798|0.0547082088136701 | 0.0000001|
+|CLIN   |Smoking   |Multiple |    0.6438998|0.447983662807281  | 0.1505291|
+|CLIN   |Smoking   |Single   |    0.2841731|0.0440562581722677 | 0.0000000|
+|COMM   |AlcDep    |Multiple |    0.1208426|0.370476961320492  | 0.7440459|
+|COMM   |AlcDep    |Single   |    0.4727444|0.072715189272104  | 0.0000000|
+|COMM   |Anxiety   |Multiple |    0.9872020|0.334212763993674  | 0.0031289|
+|COMM   |Anxiety   |Single   |    0.7067274|0.0502600320551331 | 0.0000000|
+|COMM   |BIP       |Multiple |    0.7762264|0.324816025541961  | 0.0168257|
+|COMM   |BIP       |Single   |    0.4980530|0.0363035201204751 | 0.0000000|
+|COMM   |BMI       |Multiple |   -0.5128830|0.722403664125655  | 0.4776757|
+|COMM   |BMI       |Single   |    0.2094419|0.027101582747042  | 0.0000000|
+|COMM   |EA        |Multiple |    0.4417557|0.534646529525153  | 0.4085868|
+|COMM   |EA        |Single   |   -0.0993831|0.028591720855334  | 0.0005091|
+|COMM   |MD        |Multiple |    1.0876584|0.263989857042839  | 0.0000376|
+|COMM   |MD        |Single   |    0.8838678|0.0387631464950772 | 0.0000000|
+|COMM   |MDD       |Multiple |    1.1230484|0.425872159719764  | 0.0083437|
+|COMM   |MDD       |Single   |    0.7894503|0.0721919040779266 | 0.0000000|
+|COMM   |Neu       |Multiple |    0.7164269|0.141036769670343  | 0.0000004|
+|COMM   |Neu       |Single   |    0.6587390|0.036818313492786  | 0.0000000|
+|COMM   |PTSD      |Multiple |    0.8913235|0.252573458582583  | 0.0004157|
+|COMM   |PTSD      |Single   |    0.7520557|0.0640070272834876 | 0.0000000|
+|COMM   |Pain      |Multiple |    0.3269622|0.250509815204117  | 0.1915965|
+|COMM   |Pain      |Single   |    0.5691436|0.0364114685612383 | 0.0000000|
+|COMM   |Sleep     |Multiple |    0.1733625|0.171980850568423  | 0.3132514|
+|COMM   |Sleep     |Single   |    0.2877816|0.0470993019805111 | 0.0000000|
+|COMM   |Smoking   |Multiple |   -0.1162823|0.401478185650852  | 0.7721715|
+|COMM   |Smoking   |Single   |    0.2816045|0.0362003139181727 | 0.0000000|
+|DEP    |AlcDep    |Multiple |    0.1885105|0.231205774371916  | 0.4148665|
+|DEP    |AlcDep    |Single   |    0.4737222|0.0729119786423913 | 0.0000000|
+|DEP    |Anxiety   |Multiple |    0.6166120|0.144181255958035  | 0.0000190|
+|DEP    |Anxiety   |Single   |    0.7085225|0.0504659378980927 | 0.0000000|
+|DEP    |BIP       |Multiple |    0.5534740|0.140235803335444  | 0.0000792|
+|DEP    |BIP       |Single   |    0.4993684|0.0364951938484106 | 0.0000000|
+|DEP    |BMI       |Multiple |   -0.5753649|0.359685270470339  | 0.1096768|
+|DEP    |BMI       |Single   |    0.2096219|0.027165910520389  | 0.0000000|
+|DEP    |EA        |Multiple |    0.0031440|0.13324209758816   | 0.9812037|
+|DEP    |EA        |Single   |   -0.0994526|0.0286657057514955 | 0.0005216|
+|DEP    |MD        |Multiple |    0.5660664|0.109407664287715  | 0.0000002|
+|DEP    |MD        |Single   |    0.8861226|0.0390501287043192 | 0.0000000|
+|DEP    |MDD       |Multiple |    0.4055531|0.209296351426157  | 0.0526557|
+|DEP    |MDD       |Single   |    0.7912586|0.0724148184158745 | 0.0000000|
+|DEP    |Neu       |Multiple |    0.7589806|0.1428013375112    | 0.0000001|
+|DEP    |Neu       |Single   |    0.6604488|0.0370095138762591 | 0.0000000|
+|DEP    |PTSD      |Multiple |    0.5261650|0.179134534455853  | 0.0033107|
+|DEP    |PTSD      |Single   |    0.7537116|0.0642090506830633 | 0.0000000|
+|DEP    |Pain      |Multiple |    0.0876251|0.193293420557446  | 0.6502747|
+|DEP    |Pain      |Single   |    0.5702388|0.0366128165925743 | 0.0000000|
+|DEP    |Sleep     |Multiple |   -0.2822677|0.236711060933285  | 0.2330837|
+|DEP    |Sleep     |Single   |    0.2880514|0.047277313201574  | 0.0000000|
+|DEP    |Smoking   |Multiple |   -0.2683926|0.224009138006028  | 0.2308655|
+|DEP    |Smoking   |Single   |    0.2820754|0.0363413425996212 | 0.0000000|
+|GATE   |AlcDep    |Multiple |    0.0719891|0.134107967929391  | 0.5914044|
+|GATE   |AlcDep    |Single   |    0.5776047|0.13702762426172   | 0.0000249|
+|GATE   |Anxiety   |Multiple |    0.3895213|0.086546921738715  | 0.0000068|
+|GATE   |Anxiety   |Single   |    1.0186501|0.141091949002172  | 0.0000000|
+|GATE   |BIP       |Multiple |    0.2203511|0.0760516143009265 | 0.0037628|
+|GATE   |BIP       |Single   |    0.6907434|0.104548297042388  | 0.0000000|
+|GATE   |BMI       |Multiple |   -0.1092503|0.0579928842170064 | 0.0595848|
+|GATE   |BMI       |Single   |    0.1630011|0.046543171653155  | 0.0004615|
+|GATE   |EA        |Multiple |    0.3189160|0.0747980148618434 | 0.0000201|
+|GATE   |EA        |Single   |    0.0076979|0.0423132101001359 | 0.8556397|
+|GATE   |MD        |Multiple |    0.5070457|0.0743490668763843 | 0.0000000|
+|GATE   |MD        |Single   |    1.2682699|0.167662730177194  | 0.0000000|
+|GATE   |MDD       |Multiple |    0.5092444|0.134644047312628  | 0.0001555|
+|GATE   |MDD       |Single   |    1.1341098|0.177595017100915  | 0.0000000|
+|GATE   |Neu       |Multiple |    0.0924412|0.0899958325231919 | 0.3043390|
+|GATE   |Neu       |Single   |    0.8423266|0.120015254657171  | 0.0000000|
+|GATE   |PTSD      |Multiple |    0.3205616|0.117818130546624  | 0.0065124|
+|GATE   |PTSD      |Single   |    1.0304568|0.160879568321433  | 0.0000000|
+|GATE   |Pain      |Multiple |    0.0900426|0.0758070755318798 | 0.2349191|
+|GATE   |Pain      |Single   |    0.6810453|0.0993593432370933 | 0.0000000|
+|GATE   |Sleep     |Multiple |    0.1469520|0.0888416030424469 | 0.0981094|
+|GATE   |Sleep     |Single   |    0.3400354|0.0826849166197801 | 0.0000392|
+|GATE   |Smoking   |Multiple |    0.1616598|0.0635913767023067 | 0.0110170|
+|GATE   |Smoking   |Single   |    0.3702171|0.0694578418999869 | 0.0000001|
 
 </div>
 
 
 ```r
-ggplot(bind_rows(ext_full, ext_partial),
-       aes(x=factor(Factor, levels=c('DEP', 'ATY', 'GATE')),
+ggplot(bind_rows(ext_multiple, ext_single),
+       aes(x=factor(Factor,
+	   				levels=c('DEP', 'ATY', 'GATE', 'COMM', 'CLIN'),
+					   labels=c("Depression", "Atypical", "Gating", "Community", "Clinical")),
            y=STD_Genotype,
-           color=factor(Beta, levels=c('Specific', 'Total')),
-           shape=factor(Beta, levels=c('Specific', 'Total')),
+           color=factor(Beta, levels=c('Single', 'Multiple')),
+           shape=factor(Beta, levels=c('Single', 'Multiple')),
           ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
           ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
 geom_hline(yintercept=0, col='gray') +
-geom_pointrange(position=position_dodge(width=0.5)) +
+geom_pointrange(position=position_dodge(width=-0.5)) +
 facet_wrap(~Phenotype) +
 scale_x_discrete('Factor') +
-scale_y_continuous(expression(r[g]), breaks=c(-1, 0, 1)) +
-scale_color_discrete('Correlation: ') +
-coord_flip(ylim=c(-1, 1)) +
+scale_y_continuous('Beta') +
+scale_color_discrete('Regression: ') +
+coord_flip() +
 theme_bw() +
 theme(axis.text.y=element_text(size=16),
       strip.text=element_text(size=16),
       legend.title=element_text(size=12),
       legend.text=element_text(size=14),
       legend.position='top') +
-labs(color  = "Correlation: ", shape = "Correlation: ")
+labs(color  = "Regression: ", shape = "Regression: ")
+```
+
+```
+## Warning: `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
+## `position_dodge()` requires non-overlapping x intervals
 ```
 
 ![](mdd-symptom-gsem-ext_files/figure-html/ex_plot-1.png)<!-- -->
@@ -712,7 +987,7 @@ Test for attenuation of correlations
 
 ```r
 ext_factor_wide <-
-bind_rows(ext_full, ext_partial) %>%
+bind_rows(ext_single, ext_multiple) %>%
 as_tibble() %>%
 select(Factor, Phenotype, STD_Genotype, STD_Genotype_SE, p_value, Beta) %>%
 pivot_wider(id_cols=c(Phenotype, Factor),
@@ -721,54 +996,78 @@ pivot_wider(id_cols=c(Phenotype, Factor),
 
 ext_attenuation <-     
 ext_factor_wide %>%
-mutate(rg_Total=STD_Genotype_Total, rg_Specific=STD_Genotype_Specific,
-       se_Total=as.numeric(STD_Genotype_SE_Total),
-       se_Specific=as.numeric(STD_Genotype_SE_Specific)) %>%
-mutate(attenuation_z=(rg_Total-rg_Specific)/sqrt(se_Total^2+se_Specific^2)) %>%
+mutate(rg_Single=STD_Genotype_Single, rg_Multiple=STD_Genotype_Multiple,
+       se_Single=as.numeric(STD_Genotype_SE_Single),
+       se_Multiple=as.numeric(STD_Genotype_SE_Multiple)) %>%
+mutate(attenuation_z=(rg_Single-rg_Multiple)/sqrt(se_Single^2+se_Multiple^2)) %>%
 mutate(attenuation_p=2*pnorm(abs(attenuation_z), lower.tail=F)) %>%
-select(Phenotype, Factor, p_value_Total, p_value_Specific, attenuation_p)
+select(Phenotype, Factor, p_value_Single, p_value_Multiple, attenuation_p)
 
 knitr::kable(ext_attenuation)
 ```
 
 
 
-|Phenotype |Factor | p_value_Total| p_value_Specific| attenuation_p|
-|:---------|:------|-------------:|----------------:|-------------:|
-|AlcDep    |DEP    |     0.0000000|        0.4148641|     0.2394062|
-|Anxiety   |DEP    |     0.0000000|        0.0000190|     0.5474086|
-|BIP       |DEP    |     0.0000000|        0.0000792|     0.7088530|
-|BMI       |DEP    |     0.0000000|        0.1096769|     0.0295406|
-|EA        |DEP    |     0.0005216|        0.9812037|     0.4515719|
-|MD        |DEP    |     0.0000000|        0.0000002|     0.0058676|
-|MDD       |DEP    |     0.0000000|        0.0526553|     0.0815854|
-|Neu       |DEP    |     0.0000000|        0.0000001|     0.5041776|
-|PTSD      |DEP    |     0.0000000|        0.0033107|     0.2317940|
-|Pain      |DEP    |     0.0000000|        0.6502778|     0.0141615|
-|Sleep     |DEP    |     0.0000000|        0.2330832|     0.0181446|
-|Smoking   |DEP    |     0.0000000|        0.2308656|     0.0152832|
-|AlcDep    |ATY    |     0.0000000|        0.1521144|     0.6086301|
-|Anxiety   |ATY    |     0.0000000|        0.5254618|     0.0000006|
-|BIP       |ATY    |     0.0000000|        0.2030751|     0.0000051|
-|BMI       |ATY    |     0.0000000|        0.0014241|     0.0100138|
-|EA        |ATY    |     0.0004883|        0.0038787|     0.0377052|
-|MD        |ATY    |     0.0000000|        0.2508930|     0.0000000|
-|MDD       |ATY    |     0.0000000|        0.3889392|     0.0074795|
-|Neu       |ATY    |     0.0000000|        0.3607263|     0.0000003|
-|PTSD      |ATY    |     0.0000000|        0.5234703|     0.0023698|
-|Pain      |ATY    |     0.0000000|        0.0012282|     0.9091142|
-|Sleep     |ATY    |     0.0000000|        0.0078918|     0.1706751|
-|Smoking   |ATY    |     0.0000000|        0.0058719|     0.1461757|
-|AlcDep    |GATE   |     0.0000249|        0.5914075|     0.0083624|
-|Anxiety   |GATE   |     0.0000000|        0.0000068|     0.0001442|
-|BIP       |GATE   |     0.0000000|        0.0037629|     0.0002743|
-|BMI       |GATE   |     0.0004615|        0.0595845|     0.0002510|
-|EA        |GATE   |     0.8556408|        0.0000201|     0.0002929|
-|MD        |GATE   |     0.0000000|        0.0000000|     0.0000332|
-|MDD       |GATE   |     0.0000000|        0.0001555|     0.0050508|
-|Neu       |GATE   |     0.0000000|        0.3043413|     0.0000006|
-|PTSD      |GATE   |     0.0000000|        0.0065124|     0.0003708|
-|Pain      |GATE   |     0.0000000|        0.2349187|     0.0000023|
-|Sleep     |GATE   |     0.0000391|        0.0981105|     0.1116319|
-|Smoking   |GATE   |     0.0000001|        0.0110170|     0.0267838|
+|Phenotype |Factor | p_value_Single| p_value_Multiple| attenuation_p|
+|:---------|:------|--------------:|----------------:|-------------:|
+|AlcDep    |DEP    |      0.0000000|        0.4148665|     0.2394069|
+|Anxiety   |DEP    |      0.0000000|        0.0000190|     0.5473917|
+|BIP       |DEP    |      0.0000000|        0.0000792|     0.7088645|
+|BMI       |DEP    |      0.0000000|        0.1096768|     0.0295381|
+|EA        |DEP    |      0.0005216|        0.9812037|     0.4515836|
+|MD        |DEP    |      0.0000000|        0.0000002|     0.0058671|
+|MDD       |DEP    |      0.0000000|        0.0526557|     0.0815835|
+|Neu       |DEP    |      0.0000000|        0.0000001|     0.5041817|
+|PTSD      |DEP    |      0.0000000|        0.0033107|     0.2317900|
+|Pain      |DEP    |      0.0000000|        0.6502747|     0.0141602|
+|Sleep     |DEP    |      0.0000000|        0.2330837|     0.0181432|
+|Smoking   |DEP    |      0.0000000|        0.2308655|     0.0152817|
+|AlcDep    |ATY    |      0.0000000|        0.1521133|     0.6086098|
+|Anxiety   |ATY    |      0.0000000|        0.5254606|     0.0000006|
+|BIP       |ATY    |      0.0000000|        0.2030753|     0.0000051|
+|BMI       |ATY    |      0.0000000|        0.0014241|     0.0100124|
+|EA        |ATY    |      0.0004883|        0.0038787|     0.0377036|
+|MD        |ATY    |      0.0000000|        0.2508968|     0.0000000|
+|MDD       |ATY    |      0.0000000|        0.3889393|     0.0074783|
+|Neu       |ATY    |      0.0000000|        0.3607231|     0.0000003|
+|PTSD      |ATY    |      0.0000000|        0.5234706|     0.0023694|
+|Pain      |ATY    |      0.0000000|        0.0012282|     0.9091432|
+|Sleep     |ATY    |      0.0000000|        0.0078918|     0.1706756|
+|Smoking   |ATY    |      0.0000000|        0.0058718|     0.1461753|
+|AlcDep    |GATE   |      0.0000249|        0.5914044|     0.0083622|
+|Anxiety   |GATE   |      0.0000000|        0.0000068|     0.0001442|
+|BIP       |GATE   |      0.0000000|        0.0037628|     0.0002743|
+|BMI       |GATE   |      0.0004615|        0.0595848|     0.0002510|
+|EA        |GATE   |      0.8556397|        0.0000201|     0.0002929|
+|MD        |GATE   |      0.0000000|        0.0000000|     0.0000332|
+|MDD       |GATE   |      0.0000000|        0.0001555|     0.0050508|
+|Neu       |GATE   |      0.0000000|        0.3043390|     0.0000006|
+|PTSD      |GATE   |      0.0000000|        0.0065124|     0.0003708|
+|Pain      |GATE   |      0.0000000|        0.2349191|     0.0000023|
+|Sleep     |GATE   |      0.0000392|        0.0981094|     0.1116271|
+|Smoking   |GATE   |      0.0000001|        0.0110170|     0.0267837|
+|AlcDep    |CLIN   |      0.0000000|        0.2197182|     0.8669169|
+|Anxiety   |CLIN   |      0.0000000|        0.2583376|     0.0040457|
+|BIP       |CLIN   |      0.0000000|        0.2314438|     0.0123620|
+|BMI       |CLIN   |      0.0000000|        0.1385062|     0.2248607|
+|EA        |CLIN   |      0.0005809|        0.1403267|     0.1931918|
+|MD        |CLIN   |      0.0000000|        0.3265085|     0.0002760|
+|MDD       |CLIN   |      0.0000000|        0.3035501|     0.0110704|
+|Neu       |CLIN   |      0.0000000|        0.6530585|     0.0002799|
+|PTSD      |CLIN   |      0.0000000|        0.5209005|     0.0065614|
+|Pain      |CLIN   |      0.0000000|        0.1808442|     0.5498820|
+|Sleep     |CLIN   |      0.0000001|        0.4405708|     0.6461351|
+|Smoking   |CLIN   |      0.0000000|        0.1505291|     0.4242118|
+|AlcDep    |COMM   |      0.0000000|        0.7440459|     0.3512964|
+|Anxiety   |COMM   |      0.0000000|        0.0031289|     0.4066075|
+|BIP       |COMM   |      0.0000000|        0.0168257|     0.3947117|
+|BMI       |COMM   |      0.0000000|        0.4776757|     0.3177036|
+|EA        |COMM   |      0.0005091|        0.4085868|     0.3121606|
+|MD        |COMM   |      0.0000000|        0.0000376|     0.4450019|
+|MDD       |COMM   |      0.0000000|        0.0083437|     0.4399300|
+|Neu       |COMM   |      0.0000000|        0.0000004|     0.6922790|
+|PTSD      |COMM   |      0.0000000|        0.0004157|     0.5929963|
+|Pain      |COMM   |      0.0000000|        0.1915965|     0.3387181|
+|Sleep     |COMM   |      0.0000000|        0.3132514|     0.5210853|
+|Smoking   |COMM   |      0.0000000|        0.7721715|     0.3236180|
 
