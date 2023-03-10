@@ -159,7 +159,7 @@ MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + Clin
 MDD ~~ 1*MDD
 "
 
-commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor.model)
+commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor.model, imp_cov=TRUE)
 
 commonfactor.fit$modelfit
 commonfactor.fit$results[c(1,2,3,6,7)] %>%
@@ -187,7 +187,7 @@ CommSleDec ~~ CommSleInc
 MDD ~~ 1*MDD
 "
 
-common_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=common_dir.model)
+common_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=common_dir.model, imp_cov=TRUE)
 
 common_dir.fit$modelfit
 common_dir.fit$results[c(1,2,3,6,7)] %>%
@@ -214,7 +214,7 @@ COMM ~~ 1*COMM
 
 "
 
-clin_comm.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_comm.model)
+clin_comm.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_comm.model, imp_cov=TRUE)
 
 clin_comm.fit$modelfit
 clin_comm.fit$results[c(1,2,3,6,7,9)] %>%
@@ -239,7 +239,7 @@ GATE ~~ 1*GATE
 MDD ~~ 0*GATE
 "
 
-gate.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gate.model)
+gate.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gate.model, imp_cov=TRUE)
 
 gate.fit$modelfit
 gate.fit$results[c(1,2,3,6,7)] %>%
@@ -266,7 +266,7 @@ COMM ~~ 1*COMM
 GATE ~~ 0*COMM + 0*CLIN
 "
 
-measure.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure.model)
+measure.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure.model, imp_cov=TRUE)
 
 measure.fit$modelfit
 measure.fit$results[c(1,2,3,6,7, 9)] %>%
@@ -290,7 +290,7 @@ SUBTYPE ~~ 1*SUBTYPE
 MDD ~~ 1*MDD
 "
 
-subtype.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=subtype.model)
+subtype.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=subtype.model, imp_cov=TRUE)
 
 subtype.fit$modelfit
 subtype.fit$results[c(1,2,3,6,7)] %>%
@@ -325,7 +325,7 @@ GATE ~~ 1*GATE
 GATE ~~ 0*PSYCH + 0*SOMA
 "
 
-psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_soma.model)
+psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_soma.model, imp_cov=TRUE)
 
 psych_soma.fit$modelfit
 psych_soma.fit$results[c(1,2,3,6,7)] %>%
@@ -350,7 +350,7 @@ VEG ~~ 1*VEG
 GATE ~~ 1*GATE
 GATE ~~ 0*PSYCH + 0*VEG
 "
-psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_veg.model)
+psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_veg.model, imp_cov=TRUE)
 
 psych_veg.fit$modelfit
 psych_veg.fit$results[c(1,2,3,6,7)] %>%
@@ -376,7 +376,7 @@ NEUROVEG ~~ 1*NEUROVEG
 GATE ~~ 1*GATE
 GATE ~~ 0*AFFECT + 0*NEUROVEG
 "
-affect_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=affect_neuroveg.model)
+affect_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=affect_neuroveg.model, imp_cov=TRUE)
 
 affect_neuroveg.fit$modelfit
 affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
@@ -406,7 +406,7 @@ VEG ~~ 1*VEG
 GATE ~~ 1*GATE
 GATE ~~ 0*COG + 0*MOOD + 0*VEG
 "
-cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_neuroveg.model)
+cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_neuroveg.model, imp_cov=TRUE)
 
 cog_mood_neuroveg.fit$modelfit
 cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
@@ -486,7 +486,72 @@ Check that all symptoms have been included in each model
 sapply(model_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
 ```
 
+#### Model Implied and residual genetic correlations
 
+Plot the implied genetic and residual correlations, but scaled by the total genetic correlation.
+
+```{r}
+
+fit_cor <- function(fit) {
+	# get the implied and residual covariances
+	cov_imp <-fit$resid_cov$`Model Implied Covariance Matrix`
+	cov_res <- fit$resid_cov$`Residual Covariance Matrix: Calculated as Observed Cov - Model Implied Cov`
+	
+	# get the residual variances from the model
+	symp <- fit$results %>% filter(lhs == rhs) %>% pull(lhs)
+	res <- fit$results %>% filter(lhs == rhs) %>% pull(Unstand_Est)
+	names(res) <- symp
+	
+	# convert the implied covariance matrix to a correlation matrix
+	cor_imp_var <- cov2cor(cov_imp)
+	
+	# subtract proportion of residual variance from the
+	# correlation matrix
+	highpass1 <- function(x) if_else(x > 1, true=1, false=x)
+	cov_var <- diag(cov_imp)
+	diag(cor_imp_var) <- highpass1((cov_var - res[names(cov_var)]) / cov_var)
+	
+	# do same for residual matrix
+	cov_res_var <- cov_res
+	diag(cov_res_var) <- diag(cov_imp)
+	
+	# convert to correlation matrix
+	cor_res_var <- cov2cor(cov_res_var)
+	
+	# replace diagonals
+	diag(cor_res_var) <- res[names(cov_var)] / cov_var
+	
+	return(list(imp_cor=cor_imp_var, res_cor=cor_res_var))
+}
+
+```{r mdd_symptoms_d_imp, dpi=300}
+
+d_fit_cor <- fit_cor(measure.fit)
+
+corrplot(d_fit_cor$imp_cor, is.corr=FALSE, col.lim=c(-1, 1))
+
+```
+
+```{r mdd_symptoms_d_resid, dpi=300}
+
+corrplot(d_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
+
+```
+
+
+```{r mdd_symptoms_l_imp, dpi=300}
+
+l_fit_cor <- fit_cor(mel_aty.fit)
+
+corrplot(l_fit_cor$imp_cor, is.corr=FALSE, col.lim=c(-1, 1))
+
+```
+
+```{r mdd_symptoms_l_resid, dpi=300}
+
+corrplot(l_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
+
+```
       
 # Exploratory factor analysis
 
@@ -508,7 +573,7 @@ symptoms_cov_pos <- symptoms_cov[symptoms_cov_keep,symptoms_cov_keep]
 ```
 
 Smooth the genetic covariance matrix so that it is positive definite
-```{r mdd_symptom_gsem_efa_pd}
+```{r mdd_symptom_gsem_efa_pd, dpi=300}
 
 # smooth the covariance matrix
 symptoms_cov_pd <- as.matrix(Matrix::nearPD(symptoms_covstruct$S, corr=FALSE)$mat)
