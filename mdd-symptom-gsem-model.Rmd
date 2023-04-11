@@ -418,33 +418,32 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 
 ## Melancholic and atypical
 
-Account for directionality of symptoms using melancholic and atypical classifications
+Account for directionality of symptoms using melancholic and atypical classifications, plus remaining affective/cognitive symptoms
 
-```{r mel_aty, cache=TRUE}
+```{r mel_aty_afc, cache=TRUE}
 
-mel_aty.model <- "
+mel_aty_afc.model <- "
 MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
 ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
-MDD =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
+AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
 MEL ~~ 1*MEL
 ATY ~~ 1*ATY
-MDD ~~ 1*MDD
+AFC ~~ 1*AFC
 GATE ~~ 1*GATE
-GATE ~~ 0*MDD + 0*MEL + 0*ATY
+GATE ~~ 0*AFC + 0*MEL + 0*ATY
 "
 
-mel_aty.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty.model, imp_cov=TRUE)
+mel_aty_afc.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty_afc.model, imp_cov=TRUE)
 
-mel_aty.fit$modelfit
-mel_aty.fit$results[c(1,2,3,6,7,9)] %>%
-	 filter(rhs %in% c('MEL', 'ATY', 'MDD'), lhs != rhs) %>%
+mel_aty_afc.fit$modelfit
+mel_aty_afc.fit$results[c(1,2,3,6,7,9)] %>%
+	 filter(rhs %in% c('MEL', 'ATY', 'AFC'), lhs != rhs) %>%
 	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
 	 print(digits=2)
 
 ```
-
 
 ### Model comparisons
 
@@ -459,7 +458,7 @@ list("A"=list(name="Common", model=commonfactor.fit),
      "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
      "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
      "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-	 "L"=list(name="Depression-Melancholic-Atypical", model=mel_aty.fit)
+	 "L"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit)
      )
 
 model_fits <- 
@@ -476,15 +475,91 @@ model_fits %>%
 mutate(dAIC=AIC-min(AIC)) %>%
 mutate_if(is.numeric, ~signif(., 3))
 )
+```
 
+The Atypical/Melancholic model is the best, SRMR is high across all the models, indicating that there are high residual correlations. 
 
+## Modifications
+
+Add residual correlations betwee same-item symptoms across cohorts.
+
+```{r mel_aty_afc_mod, cache=TRUE}
+
+mel_aty_afc_mod.model <- "
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+MEL ~~ 1*MEL
+ATY ~~ 1*ATY
+AFC ~~ 1*AFC
+GATE ~~ 1*GATE
+GATE ~~ 0*AFC + 0*MEL + 0*ATY
+
+ClinAppDec ~~ ClinAppInc
+ClinSleDec ~~ ClinSleInc
+CommAppDec ~~ CommAppInc
+ClinMotoDec ~~ ClinMotoInc
+CommAppDec ~~ CommAppInc
+CommSleDec ~~ CommSleInc
+
+ClinAppDec ~~ CommAppDec
+ClinAppInc ~~ CommAppInc
+ClinSleDec ~~ CommSleDec
+ClinSleInc ~~ CommSleInc
+ClinSui ~~ CommSui
+"
+
+mel_aty_afc_mod.model <- "
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+MEL ~~ 1*MEL
+ATY ~~ 1*ATY
+AFC ~~ 1*AFC
+GATE ~~ 1*GATE
+GATE ~~ 0*AFC + 0*MEL + 0*ATY
+
+ClinAppDec ~~ ClinAppInc
+ClinSleDec ~~ ClinSleInc
+ClinMotoDec ~~ ClinMotoInc
+
+CommAppDec ~~ CommAppInc
+CommSleDec ~~ CommSleInc
+"
+
+mel_aty_afc_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty_afc_mod.model, imp_cov=TRUE)
+
+mel_aty_afc_mod.fit$modelfit
+mel_aty_afc_mod.fit$results[c(1,2,3,6,7,9)] %>%
+	 filter(rhs %in% c('MEL', 'ATY', 'AFC'), lhs != rhs) %>%
+	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+	 print(digits=2)
+```
+
+#### Model coefficients
+
+Add modified model to list
+```{r mod_list}
+mod_list <- model_list
+mod_list[["M"]] <- list(name="Modified", model=mel_aty_afc_mod.fit)
 ```
 
 Check that all symptoms have been included in each model
 
 ```{r model_check}
-sapply(model_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
+sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
 ```
+
+```{r model_coefs}
+
+model_coefs <- bind_rows(lapply(mod_list, function(m) m$model$results), .id='model')
+
+```
+
 
 #### Model Implied and residual genetic correlations
 
@@ -541,7 +616,7 @@ corrplot(d_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
 
 ```{r mdd_symptoms_l_imp, dpi=300}
 
-l_fit_cor <- fit_cor(mel_aty.fit)
+l_fit_cor <- fit_cor(mel_aty_afc.fit)
 
 corrplot(l_fit_cor$imp_cor, is.corr=FALSE, col.lim=c(-1, 1))
 
