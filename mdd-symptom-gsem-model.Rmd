@@ -416,6 +416,40 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 
 ```
 
+### Cognitive-Appetite-Vegetative (van Loo)
+
+
+```{r cog_app_veg, cache=TRUE}
+
+cog_app_veg.model <- "
+COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
+APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + app_co3b*CommAppInc
+VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+app_co3b > -1.0
+
+COG ~~ 1*COG
+APP ~~ 1*APP
+VEG ~~ 1*VEG
+GATE ~~ 1*GATE
+GATE ~~ 0*COG + 0*APP + 0*VEG
+
+u1 > 0.001
+UkbDep ~~ u1*UkbDep
+co3b > 0.001
+CommAppInc ~~ co3b*CommAppInc
+"
+cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg.model, imp_cov=TRUE)
+
+cog_app_veg.fit$modelfit
+cog_app_veg.fit$results[c(1,2,3,6,7)] %>%
+	 filter(lhs %in% c('COG', 'APP', 'VEG'), rhs %in% c('COG', 'APP', 'VEG'), lhs != rhs) %>%
+	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+	 print(digits=2)
+
+```
+
 ## Melancholic and atypical
 
 Account for directionality of symptoms using melancholic and atypical classifications, plus remaining affective/cognitive symptoms
@@ -458,7 +492,8 @@ list("A"=list(name="Common", model=commonfactor.fit),
      "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
      "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
      "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-	 "L"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit)
+	 "I"=list(name="Mood-Appetite-Vegetative", model=cog_app_veg.fit),
+	 "J"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit)
      )
 
 model_fits <- 
@@ -477,7 +512,7 @@ mutate_if(is.numeric, ~signif(., 3))
 )
 ```
 
-The Atypical/Melancholic model is the best, SRMR is high across all the models, indicating that there are high residual correlations. 
+The Mood-Appetite-Vegetative model is the best, SRMR is high across all the models, indicating that there are high residual correlations. 
 
 ## Modifications
 
@@ -613,20 +648,20 @@ corrplot(d_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
 
 ```
 
+```{r mdd_symptoms_i_imp, dpi=300}
 
-```{r mdd_symptoms_l_imp, dpi=300}
+i_fit_cor <- fit_cor(cog_app_veg.fit)
 
-l_fit_cor <- fit_cor(mel_aty_afc.fit)
+corrplot(i_fit_cor$imp_cor, is.corr=FALSE, col.lim=c(-1, 1))
 
-corrplot(l_fit_cor$imp_cor, is.corr=FALSE, col.lim=c(-1, 1))
+```
+
+```{r mdd_symptoms_i_resid, dpi=300}
+
+corrplot(i_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
 
 ```
 
-```{r mdd_symptoms_l_resid, dpi=300}
-
-corrplot(l_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
-
-```
       
 # Exploratory factor analysis
 
