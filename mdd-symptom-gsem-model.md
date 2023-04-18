@@ -899,9 +899,11 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 ``` r
 cog_app_veg.model <- "
 COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
+APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + app_co3b*CommAppInc
 VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+app_co3b > -1.0
 
 COG ~~ 1*COG
 APP ~~ 1*APP
@@ -922,7 +924,7 @@ cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_ap
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##    8.64 
+    ##   7.468 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -948,7 +950,7 @@ cog_app_veg.fit$modelfit
 ```
 
     ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 862.0427 145 2.497016e-102 952.0427 0.9701314 0.1525697
+    ## df 862.0417 145 2.498099e-102 952.0417 0.9701314 0.1525697
 
 ``` r
 cog_app_veg.fit$results[c(1,2,3,6,7)] %>%
@@ -958,9 +960,9 @@ cog_app_veg.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##   lhs op rhs STD_Genotype STD_Genotype_SE
-    ## 1 COG ~~ APP        -0.28           0.095
+    ## 1 COG ~~ APP        -0.29           0.097
     ## 2 COG ~~ VEG         0.88           0.110
-    ## 3 APP ~~ VEG        -0.33           0.139
+    ## 3 APP ~~ VEG        -0.35           0.143
 
 ## Melancholic and atypical
 
@@ -1041,8 +1043,8 @@ list("A"=list(name="Common", model=commonfactor.fit),
      "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
      "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
      "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-     "L"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit),
-     "N"=list(name="Mood-Appetite-Vegetative", model=cog_app_veg.fit)
+     "I"=list(name="Mood-Appetite-Vegetative", model=cog_app_veg.fit),
+     "J"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit)
      )
 
 model_fits <- 
@@ -1071,11 +1073,11 @@ mutate_if(is.numeric, ~signif(., 3))
 | F     | Psych-Neuroveg                  |  1080 | 147 |       0 | 1170 | 0.961 | 0.161 |  216 |
 | G     | Affect-Neuroveg                 |  1150 | 147 |       0 | 1230 | 0.958 | 0.161 |  283 |
 | H     | Cog-Mood-Neuroveg               |  1090 | 144 |       0 | 1180 | 0.961 | 0.162 |  228 |
-| L     | Depression-Melancholic-Atypical |  1040 | 145 |       0 | 1130 | 0.963 | 0.159 |  182 |
-| N     | Mood-Appetite-Vegetative        |   862 | 145 |       0 |  952 | 0.970 | 0.153 |    0 |
+| I     | Mood-Appetite-Vegetative        |   862 | 145 |       0 |  952 | 0.970 | 0.153 |    0 |
+| J     | Depression-Melancholic-Atypical |  1040 | 145 |       0 | 1130 | 0.963 | 0.159 |  182 |
 
-The Atypical/Melancholic model is the best, SRMR is high across all the
-models, indicating that there are high residual correlations.
+The Mood-Appetite-Vegetative model is the best, SRMR is high across all
+the models, indicating that there are high residual correlations.
 
 ## Modifications
 
@@ -1191,7 +1193,7 @@ Check that all symptoms have been included in each model
 sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
 ```
 
-    ##    A    B    C    D    E    F    G    H    L    N    M 
+    ##    A    B    C    D    E    F    G    H    I    J    M 
     ## TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 
 ``` r
@@ -1252,18 +1254,18 @@ corrplot(d_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
 ![](mdd-symptom-gsem-model_files/figure-gfm/mdd_symptoms_d_resid-1.png)<!-- -->
 
 ``` r
-l_fit_cor <- fit_cor(mel_aty_afc.fit)
+i_fit_cor <- fit_cor(cog_app_veg.fit)
 
-corrplot(l_fit_cor$imp_cor, is.corr=FALSE, col.lim=c(-1, 1))
+corrplot(i_fit_cor$imp_cor, is.corr=FALSE, col.lim=c(-1, 1))
 ```
 
-![](mdd-symptom-gsem-model_files/figure-gfm/mdd_symptoms_l_imp-1.png)<!-- -->
+![](mdd-symptom-gsem-model_files/figure-gfm/mdd_symptoms_i_imp-1.png)<!-- -->
 
 ``` r
-corrplot(l_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
+corrplot(i_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
 ```
 
-![](mdd-symptom-gsem-model_files/figure-gfm/mdd_symptoms_l_resid-1.png)<!-- -->
+![](mdd-symptom-gsem-model_files/figure-gfm/mdd_symptoms_i_resid-1.png)<!-- -->
 
 # Exploratory factor analysis
 

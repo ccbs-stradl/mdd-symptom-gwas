@@ -423,11 +423,11 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 
 cog_app_veg.model <- "
 COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + app_co3b*CommAppInc
+APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
 VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
-app_co3b > -1.0
+app_co3b < 1.0
 
 COG ~~ 1*COG
 APP ~~ 1*APP
@@ -520,24 +520,24 @@ Add residual correlations betwee same-item symptoms across cohorts.
 
 ```{r mel_aty_afc_mod, cache=TRUE}
 
-mel_aty_afc_mod.model <- "
-MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
-AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
+cog_app_veg_mod.model <- "
+COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
+APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + app_co3b*CommAppInc
+VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
-MEL ~~ 1*MEL
-ATY ~~ 1*ATY
-AFC ~~ 1*AFC
-GATE ~~ 1*GATE
-GATE ~~ 0*AFC + 0*MEL + 0*ATY
+app_co3b > -1.0
 
-ClinAppDec ~~ ClinAppInc
-ClinSleDec ~~ ClinSleInc
-CommAppDec ~~ CommAppInc
-ClinMotoDec ~~ ClinMotoInc
-CommAppDec ~~ CommAppInc
-CommSleDec ~~ CommSleInc
+COG ~~ 1*COG
+APP ~~ 1*APP
+VEG ~~ 1*VEG
+GATE ~~ 1*GATE
+GATE ~~ 0*COG + 0*APP + 0*VEG
+
+u1 > 0.001
+UkbDep ~~ u1*UkbDep
+co3b > 0.001
+CommAppInc ~~ co3b*CommAppInc
 
 ClinAppDec ~~ CommAppDec
 ClinAppInc ~~ CommAppInc
@@ -546,31 +546,11 @@ ClinSleInc ~~ CommSleInc
 ClinSui ~~ CommSui
 "
 
-mel_aty_afc_mod.model <- "
-MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
-AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+cog_app_veg_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg_mod.model, imp_cov=TRUE)
 
-MEL ~~ 1*MEL
-ATY ~~ 1*ATY
-AFC ~~ 1*AFC
-GATE ~~ 1*GATE
-GATE ~~ 0*AFC + 0*MEL + 0*ATY
-
-ClinAppDec ~~ ClinAppInc
-ClinSleDec ~~ ClinSleInc
-ClinMotoDec ~~ ClinMotoInc
-
-CommAppDec ~~ CommAppInc
-CommSleDec ~~ CommSleInc
-"
-
-mel_aty_afc_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty_afc_mod.model, imp_cov=TRUE)
-
-mel_aty_afc_mod.fit$modelfit
-mel_aty_afc_mod.fit$results[c(1,2,3,6,7,9)] %>%
-	 filter(rhs %in% c('MEL', 'ATY', 'AFC'), lhs != rhs) %>%
+cog_app_veg_mod.fit$modelfit
+cog_app_veg_mod.fit$results[c(1,2,3,6,7,9)] %>%
+	 filter(rhs %in% c('COG', 'APP', 'VEG'), lhs != rhs) %>%
 	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
 	 print(digits=2)
 ```
@@ -580,7 +560,7 @@ mel_aty_afc_mod.fit$results[c(1,2,3,6,7,9)] %>%
 Add modified model to list
 ```{r mod_list}
 mod_list <- model_list
-mod_list[["M"]] <- list(name="Modified", model=mel_aty_afc_mod.fit)
+mod_list[["M"]] <- list(name="Modified", model=cog_app_veg_mod.fit)
 ```
 
 Check that all symptoms have been included in each model
