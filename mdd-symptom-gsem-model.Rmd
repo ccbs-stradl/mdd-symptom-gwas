@@ -443,7 +443,7 @@ CommAppInc ~~ co3b*CommAppInc
 cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg.model, imp_cov=TRUE)
 
 cog_app_veg.fit$modelfit
-cog_app_veg.fit$results[c(1,2,3,6,7)] %>%
+cog_app_veg.fit$results[c(1,2,3,6,7, 9)] %>%
 	 filter(lhs %in% c('COG', 'APP', 'VEG'), rhs %in% c('COG', 'APP', 'VEG'), lhs != rhs) %>%
 	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
 	 print(digits=2)
@@ -492,7 +492,7 @@ list("A"=list(name="Common", model=commonfactor.fit),
      "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
      "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
      "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-	 "I"=list(name="Mood-Appetite-Vegetative", model=cog_app_veg.fit),
+	 "I"=list(name="Appetite-Vegetative-Cog/Mood", model=cog_app_veg.fit),
 	 "J"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit)
      )
 
@@ -516,9 +516,9 @@ The Mood-Appetite-Vegetative model is the best, SRMR is high across all the mode
 
 ## Modifications
 
-Add residual correlations betwee same-item symptoms across cohorts.
+Add residual correlations between same-item symptoms across cohorts.
 
-```{r mel_aty_afc_mod, cache=TRUE}
+```{r cog_app_mod, cache=TRUE}
 
 cog_app_veg_mod.model <- "
 COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui

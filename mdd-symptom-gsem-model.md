@@ -42,13 +42,60 @@ GenomicSEM version
 
 ``` r
 require(readr)
-require(tidyr)
-require(stringr)
-require(dplyr)
-require(ggplot2)
-require(corrplot)
-require(GenomicSEM)
+```
 
+    ## Loading required package: readr
+
+``` r
+require(tidyr)
+```
+
+    ## Loading required package: tidyr
+
+``` r
+require(stringr)
+```
+
+    ## Loading required package: stringr
+
+``` r
+require(dplyr)
+```
+
+    ## Loading required package: dplyr
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
+require(ggplot2)
+```
+
+    ## Loading required package: ggplot2
+
+``` r
+require(corrplot)
+```
+
+    ## Loading required package: corrplot
+
+    ## corrplot 0.92 loaded
+
+``` r
+require(GenomicSEM)
+```
+
+    ## Loading required package: GenomicSEM
+
+``` r
 packageVersion("GenomicSEM")
 ```
 
@@ -82,7 +129,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -111,7 +158,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -156,7 +203,7 @@ sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 't
 ```
 
     ## Rows: 38 Columns: 9
-    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -899,11 +946,11 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 ``` r
 cog_app_veg.model <- "
 COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + app_co3b*CommAppInc
+APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
 VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
-app_co3b > -1.0
+app_co3b < 1.0
 
 COG ~~ 1*COG
 APP ~~ 1*APP
@@ -924,7 +971,7 @@ cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_ap
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   7.468 
+    ##   8.003 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -950,19 +997,19 @@ cog_app_veg.fit$modelfit
 ```
 
     ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 862.0417 145 2.498099e-102 952.0417 0.9701314 0.1525697
+    ## df 862.0416 145 2.498191e-102 952.0416 0.9701314 0.1525697
 
 ``` r
-cog_app_veg.fit$results[c(1,2,3,6,7)] %>%
+cog_app_veg.fit$results[c(1,2,3,6,7, 9)] %>%
      filter(lhs %in% c('COG', 'APP', 'VEG'), rhs %in% c('COG', 'APP', 'VEG'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
 ```
 
-    ##   lhs op rhs STD_Genotype STD_Genotype_SE
-    ## 1 COG ~~ APP        -0.29           0.097
-    ## 2 COG ~~ VEG         0.88           0.110
-    ## 3 APP ~~ VEG        -0.35           0.143
+    ##   lhs op rhs STD_Genotype STD_Genotype_SE p_value
+    ## 1 COG ~~ APP         0.29           0.097 2.9e-03
+    ## 2 COG ~~ VEG         0.88           0.110 1.5e-15
+    ## 3 APP ~~ VEG         0.35           0.143 1.6e-02
 
 ## Melancholic and atypical
 
@@ -1084,24 +1131,24 @@ the models, indicating that there are high residual correlations.
 Add residual correlations betwee same-item symptoms across cohorts.
 
 ``` r
-mel_aty_afc_mod.model <- "
-MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
-AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
+cog_app_veg_mod.model <- "
+COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
+APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + app_co3b*CommAppInc
+VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
-MEL ~~ 1*MEL
-ATY ~~ 1*ATY
-AFC ~~ 1*AFC
-GATE ~~ 1*GATE
-GATE ~~ 0*AFC + 0*MEL + 0*ATY
+app_co3b > -1.0
 
-ClinAppDec ~~ ClinAppInc
-ClinSleDec ~~ ClinSleInc
-CommAppDec ~~ CommAppInc
-ClinMotoDec ~~ ClinMotoInc
-CommAppDec ~~ CommAppInc
-CommSleDec ~~ CommSleInc
+COG ~~ 1*COG
+APP ~~ 1*APP
+VEG ~~ 1*VEG
+GATE ~~ 1*GATE
+GATE ~~ 0*COG + 0*APP + 0*VEG
+
+u1 > 0.001
+UkbDep ~~ u1*UkbDep
+co3b > 0.001
+CommAppInc ~~ co3b*CommAppInc
 
 ClinAppDec ~~ CommAppDec
 ClinAppInc ~~ CommAppInc
@@ -1110,27 +1157,7 @@ ClinSleInc ~~ CommSleInc
 ClinSui ~~ CommSui
 "
 
-mel_aty_afc_mod.model <- "
-MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
-AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-MEL ~~ 1*MEL
-ATY ~~ 1*ATY
-AFC ~~ 1*AFC
-GATE ~~ 1*GATE
-GATE ~~ 0*AFC + 0*MEL + 0*ATY
-
-ClinAppDec ~~ ClinAppInc
-ClinSleDec ~~ ClinSleInc
-ClinMotoDec ~~ ClinMotoInc
-
-CommAppDec ~~ CommAppInc
-CommSleDec ~~ CommSleInc
-"
-
-mel_aty_afc_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty_afc_mod.model, imp_cov=TRUE)
+cog_app_veg_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg_mod.model, imp_cov=TRUE)
 ```
 
     ## [1] "Running primary model"
@@ -1138,11 +1165,11 @@ mel_aty_afc_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=me
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.446 
+    ##   8.687 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## mel_aty_afc_mod.model, : A difference greater than .025 was observed pre- and
+    ## cog_app_veg_mod.model, : A difference greater than .025 was observed pre- and
     ## post-smoothing in the genetic covariance matrix. This reflects a large
     ## difference and results should be interpreted with caution!! This can often
     ## result from including low powered traits, and you might consider removing those
@@ -1151,7 +1178,7 @@ mel_aty_afc_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=me
     ## SNP.
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
-    ## mel_aty_afc_mod.model, : A difference greater than .025 was observed pre- and
+    ## cog_app_veg_mod.model, : A difference greater than .025 was observed pre- and
     ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
     ## a large difference and results should be interpreted with caution!! This can
     ## often result from including low powered traits, and you might consider removing
@@ -1160,23 +1187,23 @@ mel_aty_afc_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=me
     ## for each SNP.
 
 ``` r
-mel_aty_afc_mod.fit$modelfit
+cog_app_veg_mod.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 863.1144 140 1.725273e-104 963.1144 0.9698785 0.1484995
+    ##       chisq  df       p_chisq      AIC      CFI      SRMR
+    ## df 1143.425 140 5.971991e-157 1243.425 0.958202 0.1429939
 
 ``` r
-mel_aty_afc_mod.fit$results[c(1,2,3,6,7,9)] %>%
-     filter(rhs %in% c('MEL', 'ATY', 'AFC'), lhs != rhs) %>%
+cog_app_veg_mod.fit$results[c(1,2,3,6,7,9)] %>%
+     filter(rhs %in% c('COG', 'APP', 'VEG'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
 ```
 
-    ##   lhs op rhs STD_Genotype STD_Genotype_SE  p_value
-    ## 1 MEL ~~ ATY         0.87            0.13  1.4e-11
-    ## 2 MEL ~~ AFC         0.99            0.04 2.1e-137
-    ## 3 ATY ~~ AFC         0.69            0.13  8.5e-08
+    ##   lhs op rhs STD_Genotype STD_Genotype_SE p_value
+    ## 1 COG ~~ APP        -0.34            0.12 6.9e-03
+    ## 2 COG ~~ VEG         0.89            0.11 1.8e-15
+    ## 3 APP ~~ VEG        -0.39            0.17 2.7e-02
 
 #### Model coefficients
 
@@ -1184,7 +1211,7 @@ Add modified model to list
 
 ``` r
 mod_list <- model_list
-mod_list[["M"]] <- list(name="Modified", model=mel_aty_afc_mod.fit)
+mod_list[["M"]] <- list(name="Modified", model=cog_app_veg_mod.fit)
 ```
 
 Check that all symptoms have been included in each model

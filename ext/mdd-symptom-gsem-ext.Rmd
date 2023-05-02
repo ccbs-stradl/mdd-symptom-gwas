@@ -559,9 +559,55 @@ labs(color  = "Regression: ", shape = "Regression: ")
 
 ```
 
+Consistancy of effect direction in single regression
+
+```{r ext_direction}
+ext_table |>
+filter(Model == 'Single') |>
+group_by(Phenotype) |>
+filter(any(sign(STD_Genotype) == 1) & any(sign(STD_Genotype) == -1))
+```
+
+Specific relationship
+```{r specific_sample}
+specific_sample <-
+ext_table |>
+filter(Factor %in% c('Clinical', 'Community'), Model == 'Multiple') |>
+group_by(Phenotype) |>
+filter(any(fdr <= 0.05), any(fdr > 0.05))  |>
+filter(fdr <= 0.05)
+specific_sample
+```
+
+```{r specific_symptoms}
+ext_table |>
+filter(Factor %in% c('Appetite/Weight', 'Depression', 'Gating'), Model == 'Multiple') |>
+group_by(Phenotype) |>
+filter(any(fdr <= 0.05), any(fdr > 0.05)) |>
+ungroup() |>
+filter(fdr <= 0.05) |>
+arrange(Factor)
+```
+
+Shared relationships
+```{r shared_sample}
+ext_table |>
+filter(Factor %in% c('Clinical', 'Community')) |>
+group_by(Phenotype) |>
+filter(any(fdr < 0.05)) |>
+filter(Model == 'Multiple') |>
+filter(all(fdr >= 0.05))
+```
+```{r shared_symptoms}
+ext_table |>
+filter(Factor %in% c('Appetite/Weight', 'Depression', 'Gating'), Model == 'Multiple') |>
+group_by(Phenotype) |>
+filter(all(fdr <= 0.05))
+```
+
 Test for attenuation of correlations
 
-```{r xt_attentuate}
+```{r ext_attentuate}
 
 ext_factor_wide <-
 bind_rows(ext_single, ext_multiple) %>%
