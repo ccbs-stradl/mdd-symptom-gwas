@@ -39,3 +39,5 @@ prs/lib
 *.summary
 *.score
 Rplots.pdf
+.nextflow/
+.nextflow.log*
