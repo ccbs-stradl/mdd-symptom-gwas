@@ -5,7 +5,7 @@
 ##sumstatsURL=<ID=SUMSTATS,REF="{sumstats_url}">
 ##codeURL=<ID=CODE,REF="{code_url}">
 ##genomeReference="GRCh37"
-##imputationReference="Haplotype Reference Consortium v1.1"
+##imputationReference="1000 Genomes Project Phase 3"
 ##analysisProgram="Ricopili 2019_Jun_18.001"
 ##metaAnalysisProgram="Ricopili 2019_Jun_18.001"
 ##shortName="{id}"

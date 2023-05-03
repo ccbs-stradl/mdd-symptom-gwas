@@ -41,3 +41,4 @@ prs/lib
 Rplots.pdf
 .nextflow/
 .nextflow.log*
+work/

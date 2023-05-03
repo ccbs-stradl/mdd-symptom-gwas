@@ -1,6 +1,5 @@
+#! /usr/bin/env Rscript
 # Create VCF-like PGC sumstats file with header
-
-# Rscript bin/pgc.R --name=MDD1 --daner=../meta/distribution/ALSPAC_UKB.MDD1_depressed/daner_ALSPAC_UKB.MDD1_depressed.gz --basic=../meta/distribution/ALSPAC_UKB.MDD1_depressed/basic.ALSPAC_UKB.MDD1_depressed.num.xls --analyst="Mark James Adams, UoE" --fai=human_g1k_v37.fasta.fai --cff=../CITATION.CFF --template=pgc.glue --out=pgc-mdd1-comm --name="MDD symptom: low mood (MDD1)" --pop=EUR
 
 library(dplyr)
 library(readr)
