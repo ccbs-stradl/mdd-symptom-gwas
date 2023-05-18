@@ -131,3 +131,8 @@ write.table(MDD_pheno, file.path(output_dir, paste0(i,"_CasesOnly_PGCMDD2_final.
 
 #COMPLETE
 
+# all cases
+for symptom in MDD1 MDD2 MDD3a MDD3b MDD4a MDD4b MDD5a MDD5b MDD6 MDD7 MDD8 MDD9; do
+	cat ${symptom}_CasesOnly_PGCMDD2_final.tsv > ${symptom}_CasesAllCohorts_PGCMDD2_final.tsv
+	cat ${symptom}_CasesControls_PGCMDD2_final.tsv | grep cas_mdd >> ${symptom}_CasesAllCohorts_PGCMDD2_final.tsv
+done

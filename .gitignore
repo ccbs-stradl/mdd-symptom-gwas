@@ -14,7 +14,7 @@ fields.ukb
 sumstats/UKB/*.r
 sumstats/**/*.png
 sumstats/reference
-sumstats/aligned
+**/aligned
 *_cache/
 meta/pcaer_sub
 meta/pi_sub
@@ -33,3 +33,6 @@ meta/distribution/*
 pheno/*
 *.RData
 mtag/mtag/
+.nextflow*
+**/work/
+HRC_reference.r1-1
