@@ -36,3 +36,4 @@ mtag/mtag/
 .nextflow*
 **/work/
 HRC_reference.r1-1
+pgc_gwas/
