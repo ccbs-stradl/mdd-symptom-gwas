@@ -63,9 +63,9 @@ MDD3b;Weight⇈;Weight⇉;AppInc
 MDD4;Sleep⇅;Sleep⇆;Sle
 MDD4a;Sleep⇊;Sleep⇇;SleDec
 MDD4b;Sleep⇈;Sleep⇉;SleInc
-MDD5;Motor⇅;Motor⇆;Psyc
-MDD5a;Motor⇈;Motor⇉;PsycInc
-MDD5b;Motor⇊;Motor⇇;PsycDec
+MDD5;Motor⇅;Motor⇆;Moto
+MDD5a;Motor⇈;Motor⇉;MotoInc
+MDD5b;Motor⇊;Motor⇇;MotoDec
 MDD6;Fatigue;Fatigue;Fatig
 MDD7;Guilt;Guilt;Guilt
 MDD8;Concentrate;Concentrate;Conc
@@ -84,7 +84,7 @@ MDD4a;Insomnia nearly every day
 MDD4b;Hypersomnia nearly every day
 MDD5;Changes in speed/amount of moving or speaking
 MDD5a;Psychomotor agitation nearly every day
-MDD5b;Psychomotor retardation nearly every day
+MDD5b;Psychomotor slowing nearly every day
 MDD6;Fatigue or loss of energy nearly every day
 MDD7;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;Diminished ability to think or concentrate, or indecisiveness
@@ -111,7 +111,7 @@ sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 't
 
 ```
 
-Rename samples: AGDS/PGC is the **Clin**ical sample (`Clin`) and ALSPAC/UKB is the **Pop**ulation sample (`Pop`); and rename symptoms numbers (`MDD1`, `MDD2`) to abbreviations (`Dep`, `Anh`) 
+Rename samples: AGDS/PGC is the **Clin**ical meta-analysis sample (`Clin`) and ALSPAC/UKB is the **Comm**unity meta-analysis sample (`Comm`); and rename symptoms numbers (`MDD1`, `MDD2`) to abbreviations (`Dep`, `Anh`). There are also extra measures of `MDD1` and `MDD2` from **UKB** Baseline data. 
 
 ```{r sem_labels}
 
@@ -120,7 +120,8 @@ sumstats_prevs %>%
 left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
 select(cohorts, symptom, trait_name, abbv) %>%
 mutate(Sample=case_when(cohorts %in% 'AGDS_PGC' ~ 'Clin',
-                        cohorts %in% 'ALSPAC_UKB' ~ 'Pop',
+                        cohorts %in% 'ALSPAC_UKB' ~ 'Comm',
+                        cohorts %in% 'UKBt' ~ 'Ukb',
                         TRUE ~ NA_character_)) %>%
 mutate(sample_symptom=paste0(Sample, abbv))
 
@@ -148,534 +149,500 @@ symptoms_S_var[which(symptoms_S_var > 0)]
 
 ## Common factor
 
-Common factor across symptoms from both cohorts
+Common factor across symptoms from both cohorts, as a general MDD factor
 
 ```{r commonfactor, cache=TRUE}
 
 commonfactor.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
-A1 ~~ 1*A1
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+
+MDD ~~ 1*MDD
 "
 
-commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor.model)
+commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor.model, imp_cov=TRUE)
 
 commonfactor.fit$modelfit
-commonfactor.fit$results[c(1,2,3,6,7)]
+commonfactor.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs == 'MDD') %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
-Correlation among directional symptoms
+## Directional symptoms
 
-```{r commonfactor_dir, cache=TRUE}
+Common factor with residual correlations among paired directional symptoms.
 
-commonfactor_dir.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui + PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc +  PopFatig + PopGuilt + PopConc + PopSui
-A1 ~~ 1*A1
+```{r common_dir, cache=TRUE}
+
+common_dir.model <- "
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+
 ClinAppDec ~~ ClinAppInc
 ClinSleDec ~~ ClinSleInc
-PopDep ~~ PopAnh
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
+ClinMotoInc ~~ ClinMotoDec
+CommAppDec ~~ CommAppInc
+CommSleDec ~~ CommSleInc
+
+MDD ~~ 1*MDD
 "
 
-commonfactor_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commonfactor_dir.model)
+common_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=common_dir.model, imp_cov=TRUE)
 
-commonfactor_dir.fit$modelfit
-commonfactor_dir.fit$results[c(1,2,3,6,7,9)]
+common_dir.fit$modelfit
+common_dir.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs == 'MDD' | (lhs != 'MDD' & lhs != rhs)) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
-## ADGS-PGC (Clinical)
+## Ascertainment-specific factors
 
-### Common factor
+### Clinical-Community
 
-Common factor model. Allow residual negative correlation between directional symptoms
+Symptoms were assessed in Clinical and Community samples. Make factors representing sample type.
 
-```{r clin_commonfactor, cache=TRUE}
+```{r clin_comm, cache=TRUE}
 
-clin_commonfactor.model <- "
-A1 =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
-A1 ~~ 1*A1
-c3a3b > -1
-ClinAppDec ~~ c3a3b*ClinAppInc
+clin_comm.model <- "
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+COMM =~ NA*CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+
+CLIN ~~ 1*CLIN
+COMM ~~ 1*COMM
+
 "
-clin_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_commonfactor.model)
 
-clin_commonfactor.fit$modelfit
-clin_commonfactor.fit$results[c(1,2,3,6,7)]
+clin_comm.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_comm.model, imp_cov=TRUE)
 
-
-fit_graph <- function(results, ...) {
-
-  results_sort <- results %>% arrange(lhs, rhs)
-
-  node_names <- unique(c(results_sort$lhs, results_sort$rhs))
-  
-  node_idx <- seq_along(node_names)
-  names(node_idx) <- node_names
-  
-  graph <- create_graph(
-    nodes_df=create_node_df(n=length(node_names),
-                            label=node_labels[node_names], 
-                            shape='oval', width=1,
-                            fillcolor=node_colors[node_names],
-                            fontcolor='black'),
-    edges_df=create_edge_df(from=node_idx[results_sort$lhs],
-                            to=node_idx[results_sort$rhs],
-                            label=round(results_sort$STD_Genotype, 2),
-                            penwidth=0.3+abs(2*results_sort$STD_Genotype),
-                            dir=edge_dir[results_sort$op]),
-    attr_theme="tb")
-  
-  return(graph)
-
-}
-
-# render_fit <- function(results) render_graph(fit_graph(results))
-
-# render_fit(pgc_commonfactor.fit$results)
-
-# pgc_commonfactor.graph <- fit_graph(pgc_commonfactor.fit$results)
-
-add_rank_same <- function(gv, top, bottom) {
-
-  # add in block to specify node ranks
-  gv.list <- str_split(gv, '\n\n')[[1]]
-  
-  # move the nodes/edges element to the end
-  gv.list[6] <- gv.list[5]
-  
-  # add manually made ranks
-  gv.list[5] <- paste("{rank=same",
-  paste(paste0("'", top, "'"), collapse=' '),
-  "}\n{rank=same",
-  paste(paste0("'", bottom, "'"), collapse=' '),
-  "}")
-  
-  rank.gv <- paste(gv.list, collapse='\n\n')
-
-}
-
-
-# pgc_commonfactor.gv <- add_rank_same(generate_dot(pgc_commonfactor.graph), 1, 2:5)
-# grViz(pgc_commonfactor.gv)
-
-# # output as a GraphViz dot file. Replace single quotes with double quotes 
-# # as that's what the command line utility expects
-# cat(str_replace_all(pgc_commonfactor_rank.gv, "'", '"'), file='mdd-symptom-gsem_files/pgc_commonfactor.gv')
+clin_comm.fit$modelfit
+clin_comm.fit$results[c(1,2,3,6,7,9)] %>%
+     filter(lhs %in% c('CLIN', 'COMM'), rhs %in% c('CLIN', 'COMM'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
+### Gating symptoms
 
-## ALSPAC-UKB (Population)
+Then consider the community cardinal symptoms (Depression and Anhedonia), which are gating items to the rest of the community-sample symptoms.
 
-### Common factor
+```{r gate, cache=TRUE}
 
-Common factor model
+gate.model <- "
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
-```{r pop_commonfactor, cache=TRUE}
-
-pop_commonfactor.model <- "
-A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
-A1 ~~ 1*A1
+MDD ~~ 1*MDD
+GATE ~~ 1*GATE
+MDD ~~ 0*GATE
 "
-pop_commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor.model)
 
-pop_commonfactor.fit$modelfit
-pop_commonfactor.fit$results[c(1, 2, 3, 6, 7)]
+gate.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gate.model, imp_cov=TRUE)
+
+gate.fit$modelfit
+gate.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('GATE')) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
-Remove common variance shared between the gating items (Mood: `UKB_CIDI1`, Interest: `UKB_CIDI2`) that is uncorrelated with the common factor variance, to recover the genetic structure among gated items
+### Gate-Community-Clinical (Spectrum)
 
-```{r pop_commonfactor_gating, cache=TRUE}
+Comparison of ascertainment and measurement. Gating symptoms from community sample (distinguish controls from subthreshold), symptoms from community sample symptoms (subthreshold from cases), and clinical cohort symptoms (distinguish cases from each other)
 
-pop_commonfactor_gating.model <- "
-A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
-A1 ~~ 1*A1
-PopDep ~~ PopAnh
+```{r measure, cache=TRUE}
+
+measure.model <- "
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+CLIN ~~ 1*CLIN
+GATE ~~ 1*GATE
+COMM ~~ 1*COMM
+GATE ~~ 0*COMM + 0*CLIN
 "
-pop_commonfactor_gating.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor_gating.model)
 
-pop_commonfactor_gating.fit$modelfit
-pop_commonfactor_gating.fit$results[c(1, 2, 3, 6, 7)]
+measure.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure.model, imp_cov=TRUE)
+
+measure.fit$modelfit
+measure.fit$results[c(1,2,3,6,7, 9)] %>%
+     filter(lhs %in% c('CLIN', 'COMM', 'GATE'), rhs %in% c('CLIN', 'COMM', 'GATE'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
-Check if model is improved by allowing residual correlations between the directional symptoms.
+### MDD Subtypes
 
-```{r pop_commonfactor_app, cache=TRUE}
+Group symptoms from the clinical cohorts (that had positive genetic variance) together with the same symptoms from the community cohorts (to create a dimension of MDD subtypes), then a separate factor for all other community cohort symptoms (that separates cases from controls) 
 
-pop_commonfactor_app.model <- "
-A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
-A1 ~~ 1*A1
-PopDep ~~ PopAnh
-PopAppDec ~~ PopAppInc
+```{r subtype, cache=TRUE}
+
+subtype.model <- "
+SUBTYPE =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommSui
+MDD =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommFatig + CommGuilt + CommConc 
+
+SUBTYPE ~~ 1*SUBTYPE
+MDD ~~ 1*MDD
 "
-pop_commonfactor_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor_app.model)
 
-pop_commonfactor_app.fit$modelfit
+subtype.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=subtype.model, imp_cov=TRUE)
+
+subtype.fit$modelfit
+subtype.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('SUBTYPE', 'MDD'), rhs %in% c('SUBTYPE', 'MDD'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
-```{r pop_commonfactor_sle, cache=TRUE}
-
-pop_commonfactor_sle.model <- "
-A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
-A1 ~~ 1*A1
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
-"
-pop_commonfactor_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor_sle.model)
-
-pop_commonfactor_sle.fit$modelfit
-
-```
-
-
-```{r pop_commonfactor_app_sle, cache=TRUE}
-
-pop_commonfactor_app_sle.model <- "
-A1 =~ NA*PopDep + PopAnh + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopGuilt + PopConc + PopSui
-A1 ~~ 1*A1
-PopDep ~~ PopAnh
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
-c2 > 0.001
-PopAnh ~~ c2*PopAnh
-"
-pop_commonfactor_app_sle.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_commonfactor_app_sle.model)
-
-pop_commonfactor_app_sle.fit$modelfit
-
-```
-
-### Cognitive-Mood-Neuroveg (Kendler Neale) model
-
-```{r pop_cog_mood_neuroveg, cache=TRUE}
-
-pop_cog_mood_neuroveg.model <- "
-A1 =~ NA*PopGuilt + PopConc + PopSui
-A2 =~ NA*PopDep + PopAnh + PopGuilt
-A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
-"
-pop_cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg.model)
-
-```
-
-Add constraints to prevent variances from being negative and correlations from going out of bounds.
-```{r pop_cog_mood_neuroveg_constr, cache=TRUE}
-
-pop_cog_mood_neuroveg_constr.model <- "
-A1 =~ NA*PopGuilt + PopConc + PopSui
-A2 =~ NA*PopDep + PopAnh + PopGuilt
-A3 =~ NA*PopSleDec + PopSleInc + PopFatig + PopAppDec + PopAppInc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A3 ~~ 1*A3
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
-c2 > 0.001
-PopAnh ~~ c2*PopAnh
-a13 > -1.0
-A1 ~~ a13*A3
-"
-pop_cog_mood_neuroveg_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_cog_mood_neuroveg_constr.model, fix_resid=FALSE)
-
-pop_cog_mood_neuroveg_constr.fit$modelfit
-pop_cog_mood_neuroveg_constr.fit$results[c(1, 2, 3, 6, 7)]
-
-```
-
-### Two-factor models
+## Two-factor models
 
 [Elhai Psychiat Res 2012](https://www.sciencedirect.com/science/article/pii/S0165178112002685) compared 3 two-factor models
 
 ### Psychological-Somatic (Elhai Model 2a)
 
-[Kruse Rehab Psychol 2008](https://psycnet.apa.org/record/2008-17022-011), [Kruse Arch Psys Med Rehab 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
+[Krause Rehab Psychol 2008](https://psycnet.apa.org/record/2008-17022-011), [Krause Arch Psys Med Rehab 2010](https://www.sciencedirect.com/science/article/pii/S0003999310002443):
 
-> the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor retardation as a fourth somatic item
+> the 2-factor solution with 3 somatic items (sleep disturbance, poor energy, appetite change) was a better solution than either a unidimensional model or 2-factor model that included psychomotor slowing as a fourth somatic item
 
-```{r pop_psych_soma, cache=TRUE}
 
-pop_psych_soma.model <- "
-A1 =~ NA*PopDep + PopAnh + PopGuilt + PopConc + PopSui 
-A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-PopDep ~~ PopAnh
+```{r psych_soma, cache=TRUE}
+
+psych_soma.model <- "
+PSYCH =~ NA*ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+SOMA =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
+
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+PSYCH ~~ 1*PSYCH
+SOMA ~~ 1*SOMA
+GATE ~~ 1*GATE
+GATE ~~ 0*PSYCH + 0*SOMA
 "
-pop_psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_soma.model)
 
-```
+psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_soma.model, imp_cov=TRUE)
 
-
-```{r pop_psych_soma_constr, cache=TRUE}
-
-pop_psych_soma_constr.model <- "
-A1 =~ NA*PopDep + PopAnh + PopGuilt + PopConc + PopSui 
-A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-PopDep ~~ PopAnh
-a12 < 1
-A1 ~~ a12*A2
-"
-pop_psych_soma_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_soma_constr.model)
-
-pop_psych_soma_constr.fit$modelfit
-pop_psych_soma_constr.fit$results[c(1,2,3,6,7)]
-
-```
-
-
-Bifactor model
-
-
-```{r pop_psych_soma_bif, cache=TRUE}
-
-pop_psych_soma_bif.model <- "
-A1 =~ NA*PopDep + PopAnh + PopGuilt + PopConc + PopSui
-A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig
-A  =~ NA*PopDep + PopAnh + PopGuilt + PopConc + PopSui + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A  ~~ 0*A1
-A  ~~ 0*A2
-A1 ~~ 0*A2
-PopDep ~~ PopAnh
-"
-pop_psych_soma_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_soma_bif.model)
-
-pop_psych_soma_bif.fit$model
-pop_psych_soma_bif.fit$results[c(1,2,3,6,7)]
+psych_soma.fit$modelfit
+psych_soma.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('PSYCH', 'SOMA'), rhs %in% c('PSYCH', 'SOMA'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
 ### Psychological-Neurovegetative (Elhai Model 2b)
 
-```{r pop_psych_veg, cache=TRUE}
+```{r psych_veg, cache=TRUE}
 
-pop_psych_veg.model <- "
-A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
-A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-PopDep ~~ PopAnh
+psych_veg.model <- "
+PSYCH =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
+
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+PSYCH ~~ 1*PSYCH
+VEG ~~ 1*VEG
+GATE ~~ 1*GATE
+GATE ~~ 0*PSYCH + 0*VEG
 "
-pop_psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg.model)
+psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_veg.model, imp_cov=TRUE)
 
-pop_psych_veg.fit$modelfit
-pop_psych_veg.fit$results[c(1,2,3,6,7)]
+psych_veg.fit$modelfit
+psych_veg.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('PSYCH', 'VEG'), rhs %in% c('PSYCH', 'VEG'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
-
-```{r ukb_cidi_psych_veg_bif, cache=TRUE}
-
-pop_psych_veg_bif.model <- "
-A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
-A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
-A  =~ NA*PopDep + PopAnh + PopGuilt + PopSui + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A ~~ 0*A1
-A ~~ 0*A2
-A1 ~~ 0*A2
-PopDep ~~ PopAnh
-PopSleDec ~~ PopSleInc
-"
-pop_psych_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg_bif.model)
-
-pop_psych_veg_bif.fit$modelfit
-pop_psych_veg_bif.fit$results[c(1,2,3,6,7)]
-
-```
 
 ### Affective-Neurovegetative (Elhai Model 2c)
 
-```{r pop_affect_veg, cache=TRUE}
+```{r affect_neuroveg, cache=TRUE}
 
-pop_affect_veg.model <- "
-A1 =~ NA*PopDep + PopGuilt + PopSui
-A2 =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-PopDep ~~ PopAnh
+affect_neuroveg.model <- "
+AFFECT =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
+NEUROVEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommConc
+
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+AFFECT ~~ 1*AFFECT
+NEUROVEG ~~ 1*NEUROVEG
+GATE ~~ 1*GATE
+GATE ~~ 0*AFFECT + 0*NEUROVEG
 "
-pop_affect_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_affect_veg.model)
+affect_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=affect_neuroveg.model, imp_cov=TRUE)
 
-pop_affect_veg.fit$modelfit
-pop_affect_veg.fit$results[c(1,2,3,6,7)]
+affect_neuroveg.fit$modelfit
+affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('AFFECT', 'NEUROVEG'), rhs %in% c('AFFECT', 'NEUROVEG'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
 
-Bifactor model
-```{r pop_affect_veg_bif, cache=TRUE}
+## Three factor models
 
-pop_affect_veg_bif.model <- "
-A1 =~ NA*PopDep + PopGuilt + PopSui
-A2 =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-A =~ NA*PopDep + PopGuilt + PopSui + PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A ~~ 0*A1
-A ~~ 0*A2
-A1 ~~ 0*A2
-PopDep ~~ PopAnh
+### Cognitive-Mood-Neuroveg (Kendler Neale) model
+
+```{r cog_mood_neuroveg, cache=TRUE}
+
+cog_mood_neuroveg.model <- "
+COG =~ NA*ClinSui + CommGuilt + CommConc + CommSui
+MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
+VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
+
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+COG ~~ 1*COG
+MOOD ~~ 1*MOOD
+VEG ~~ 1*VEG
+GATE ~~ 1*GATE
+GATE ~~ 0*COG + 0*MOOD + 0*VEG
 "
-pop_affect_veg_bif.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_affect_veg_bif.model)
+cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_neuroveg.model, imp_cov=TRUE)
+
+cog_mood_neuroveg.fit$modelfit
+cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs %in% c('COG', 'MOOD', 'VEG'), rhs %in% c('COG', 'MOOD', 'VEG'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 
 ```
 
+### Cognitive-Appetite-Vegetative (van Loo)
 
-```{r pop_affect_veg_bif_constr, cache=TRUE}
 
-pop_affect_veg_bif_constr.model <- "
-a2 < 1
-A1 =~ NA*PopDep + PopGuilt + PopSui
-A2 =~ NA*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-A =~ NA*PopDep + PopGuilt + PopSui + a2*PopAnh + PopAppInc + PopAppDec + PopSleInc + PopSleDec + PopFatig + PopConc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A ~~ 0*A1
-A ~~ 0*A2
-A1 ~~ 0*A2
-PopDep ~~ PopAnh
-c4a > 0.001
-PopSleDec ~~ c4a*PopSleDec
-c4b > 0.001
-PopSleInc ~~ c4b*PopSleInc
+```{r cog_app_veg, cache=TRUE}
+
+cog_app_veg.model <- "
+COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
+APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
+VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+app_co3b < 1.0
+
+COG ~~ 1*COG
+APP ~~ 1*APP
+VEG ~~ 1*VEG
+GATE ~~ 1*GATE
+GATE ~~ 0*COG + 0*APP + 0*VEG
+
+u1 > 0.001
+UkbDep ~~ u1*UkbDep
+co3b > 0.001
+CommAppInc ~~ co3b*CommAppInc
 "
-pop_affect_veg_bif_constr.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_affect_veg_bif_constr.model, fix_resid=FALSE)
+cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg.model, imp_cov=TRUE)
 
-pop_affect_veg_bif_constr.fit$modelfit
-pop_affect_veg_bif_constr.fit$results[c(1,2,3,6,7)]
+cog_app_veg.fit$modelfit
+cog_app_veg.fit$results[c(1,2,3,6,7, 9)] %>%
+	 filter(lhs %in% c('COG', 'APP', 'VEG'), rhs %in% c('COG', 'APP', 'VEG'), lhs != rhs) %>%
+	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+	 print(digits=2)
 
 ```
 
+## Melancholic and atypical
+
+Account for directionality of symptoms using melancholic and atypical classifications, plus remaining affective/cognitive symptoms
+
+```{r mel_aty_afc, cache=TRUE}
+
+mel_aty_afc.model <- "
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+MEL ~~ 1*MEL
+ATY ~~ 1*ATY
+AFC ~~ 1*AFC
+GATE ~~ 1*GATE
+GATE ~~ 0*AFC + 0*MEL + 0*ATY
+"
+
+mel_aty_afc.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty_afc.model, imp_cov=TRUE)
+
+mel_aty_afc.fit$modelfit
+mel_aty_afc.fit$results[c(1,2,3,6,7,9)] %>%
+	 filter(rhs %in% c('MEL', 'ATY', 'AFC'), lhs != rhs) %>%
+	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+	 print(digits=2)
+
+```
 
 ### Model comparisons
 
-```{r}
+```{r model_list}
 
-pop_model_list=
-list("1a"=list(name="Common", model=pop_commonfactor.fit),
-     "1b"=list(name="Common (gating)", model=pop_commonfactor_gating.fit),
-     "1c"=list(name="Common (App)", model=pop_commonfactor_app.fit),
-     "1d"=list(name="Common (Sle)", model=pop_commonfactor_sle.fit),
-     "1er"=list(name="Common (App,Sle)", model=pop_commonfactor_app_sle.fit),
-     "2a(i)"=list(name="Psych-Somatic", model=pop_psych_soma_constr.fit),
-     "2a(ii)"=list(name="Psych-Somatic (BiF)", model=pop_psych_soma_bif.fit),
-     "2b(i)"=list(name="Psych-Neuroveg", model=pop_psych_veg.fit),
-     "2b(ii)"=list(name="Psych-Neuroveg (BiF)", model=pop_psych_veg_bif.fit),
-     "2c(i)"=list(name="Affect-Neuroveg", model=pop_affect_veg.fit),
-     "2c(ii)"=list(name="Affect-Neuroveg (BiF)", model=pop_affect_veg_bif_constr.fit)
+model_list=
+list("A"=list(name="Common", model=commonfactor.fit),
+     "B"=list(name="Clinical-Community", model=clin_comm.fit),
+     "C"=list(name="Common-Gating", model=gate.fit),
+     "D"=list(name="Clinical-Community-Gating", model=measure.fit),
+     "E"=list(name="Psych-Somatic", model=psych_soma.fit),
+     "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
+     "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
+     "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
+	 "I"=list(name="Appetite-Vegetative-Cog/Mood", model=cog_app_veg.fit),
+	 "J"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit)
      )
 
-pop_model_fits <- 
-data.frame(Model=names(pop_model_list),
-           Name=sapply(pop_model_list, function(m) m$name)) %>%
+model_fits <- 
+data.frame(Model=names(model_list),
+           Name=sapply(model_list, function(m) m$name)) %>%
 bind_cols(
 bind_rows(
-lapply(pop_model_list, function(m) m$model$modelfit)
+lapply(model_list, function(m) m$model$modelfit)
 ))
-rownames(pop_model_fits) <- NULL
+rownames(model_fits) <- NULL
 
-pop_model_fits %>%
-select(-chisq, -df) %>%
+knitr::kable(
+model_fits %>%
 mutate(dAIC=AIC-min(AIC)) %>%
-mutate_if(is.numeric, ~round(., 3))
-
-
+mutate_if(is.numeric, ~signif(., 3))
+)
 ```
-       
-# Regression models
 
-Regress clinical symptoms on the population symptom factors
+The Mood-Appetite-Vegetative model is the best, SRMR is high across all the models, indicating that there are high residual correlations. 
 
-```{r clin_pop_reg, cache=TRUE}
+## Modifications
 
-pop_psych_veg_bif_clin_reg_a.model <- "
-A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
-A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
-A  =~ NA*PopDep + PopAnh + PopGuilt + PopSui + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A ~~ 0*A1
-A ~~ 0*A2
-A1 ~~ 0*A2
-A ~ ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
-c1 > 0.001
-PopDep ~~ c1*PopDep
+Add residual correlations between same-item symptoms across cohorts.
+
+```{r cog_app_mod, cache=TRUE}
+
+cog_app_veg_mod.model <- "
+COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
+APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + app_co3b*CommAppInc
+VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+app_co3b > -1.0
+
+COG ~~ 1*COG
+APP ~~ 1*APP
+VEG ~~ 1*VEG
+GATE ~~ 1*GATE
+GATE ~~ 0*COG + 0*APP + 0*VEG
+
+u1 > 0.001
+UkbDep ~~ u1*UkbDep
+co3b > 0.001
+CommAppInc ~~ co3b*CommAppInc
+
+ClinAppDec ~~ CommAppDec
+ClinAppInc ~~ CommAppInc
+ClinSleDec ~~ CommSleDec
+ClinSleInc ~~ CommSleInc
+ClinSui ~~ CommSui
 "
-pop_psych_veg_bif_clin_reg_a.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg_bif_clin_reg_a.model)
 
-pop_psych_veg_bif_clin_reg_a.fit$modelfit
-pop_psych_veg_bif_clin_reg_a.fit$results[c(1:3,6,7,9)] %>%
-filter(op == '~')
+cog_app_veg_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg_mod.model, imp_cov=TRUE)
+
+cog_app_veg_mod.fit$modelfit
+cog_app_veg_mod.fit$results[c(1,2,3,6,7,9)] %>%
+	 filter(rhs %in% c('COG', 'APP', 'VEG'), lhs != rhs) %>%
+	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+	 print(digits=2)
+```
+
+#### Model coefficients
+
+Add modified model to list
+```{r mod_list}
+mod_list <- model_list
+mod_list[["M"]] <- list(name="Modified", model=cog_app_veg_mod.fit)
+```
+
+Check that all symptoms have been included in each model
+
+```{r model_check}
+sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
+```
+
+```{r model_coefs}
+
+model_coefs <- bind_rows(lapply(mod_list, function(m) m$model$results), .id='model')
 
 ```
 
 
-```{r clin_pop_reg_a1, cache=TRUE, results=FALSE}
+#### Model Implied and residual genetic correlations
 
-pop_psych_veg_bif_clin_reg_a1.model <- "
-A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
-A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
-A  =~ NA*PopDep + PopAnh + PopGuilt + PopSui + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A ~~ 0*A1
-A ~~ 0*A2
-A1 ~~ 0*A2
-A1 ~ ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
-c1 > 0.001
-PopDep ~~ c1*PopDep
-"
-pop_psych_veg_bif_clin_reg_a1.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg_bif_clin_reg_a1.model)
+Plot the implied genetic and residual correlations, but scaled by the total genetic correlation.
+
+```{r}
+
+fit_cor <- function(fit) {
+	# get the implied and residual covariances
+	cov_imp <-fit$resid_cov$`Model Implied Covariance Matrix`
+	cov_res <- fit$resid_cov$`Residual Covariance Matrix: Calculated as Observed Cov - Model Implied Cov`
+	
+	# get the residual variances from the model
+	symp <- fit$results %>% filter(lhs == rhs) %>% pull(lhs)
+	res <- fit$results %>% filter(lhs == rhs) %>% pull(Unstand_Est)
+	names(res) <- symp
+	
+	# convert the implied covariance matrix to a correlation matrix
+	cor_imp_var <- cov2cor(cov_imp)
+	
+	# subtract proportion of residual variance from the
+	# correlation matrix
+	highpass1 <- function(x) if_else(x > 1, true=1, false=x)
+	cov_var <- diag(cov_imp)
+	diag(cor_imp_var) <- highpass1((cov_var - res[names(cov_var)]) / cov_var)
+	
+	# do same for residual matrix
+	cov_res_var <- cov_res
+	diag(cov_res_var) <- diag(cov_imp)
+	
+	# convert to correlation matrix
+	cor_res_var <- cov2cor(cov_res_var)
+	
+	# replace diagonals
+	diag(cor_res_var) <- res[names(cov_var)] / cov_var
+	
+	return(list(imp_cor=cor_imp_var, res_cor=cor_res_var))
+}
+
+```{r mdd_symptoms_d_imp, dpi=300}
+
+d_fit_cor <- fit_cor(measure.fit)
+
+corrplot(d_fit_cor$imp_cor, is.corr=FALSE, col.lim=c(-1, 1))
 
 ```
 
-```{r clin_pop_reg_a2, cache=TRUE, results=FALSE}
+```{r mdd_symptoms_d_resid, dpi=300}
 
-pop_psych_veg_bif_clin_reg_a2.model <- "
-A1 =~ NA*PopDep + PopAnh + PopGuilt + PopSui
-A2 =~ NA*PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
-A  =~ NA*PopDep + PopAnh + PopGuilt + PopSui + PopAppDec + PopAppInc + PopSleDec + PopSleInc + PopFatig + PopConc
-A1 ~~ 1*A1
-A2 ~~ 1*A2
-A  ~~ 1*A
-A ~~ 0*A1
-A ~~ 0*A2
-A1 ~~ 0*A2
-A2 ~ ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinPsycInc + ClinSui
-PopAppDec ~~ PopAppInc
-PopSleDec ~~ PopSleInc
-c1 > 0.001
-PopDep ~~ c1*PopDep
-"
-pop_psych_veg_bif_clin_reg_a2.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=pop_psych_veg_bif_clin_reg_a2.model)
+corrplot(d_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
 
 ```
 
+```{r mdd_symptoms_i_imp, dpi=300}
+
+i_fit_cor <- fit_cor(cog_app_veg.fit)
+
+corrplot(i_fit_cor$imp_cor, is.corr=FALSE, col.lim=c(-1, 1))
+
+```
+
+```{r mdd_symptoms_i_resid, dpi=300}
+
+corrplot(i_fit_cor$res_cor, is.corr=FALSE, col.lim=c(-1, 1))
+
+```
+
+      
 # Exploratory factor analysis
 
 Get the genetic covariance matrix for symptoms with a positive heritability
@@ -696,127 +663,28 @@ symptoms_cov_pos <- symptoms_cov[symptoms_cov_keep,symptoms_cov_keep]
 ```
 
 Smooth the genetic covariance matrix so that it is positive definite
-```{r mdd_symptom_gsem_efa_pd}
+```{r mdd_symptom_gsem_efa_pd, dpi=300}
 
 # smooth the covariance matrix
-symptoms_cov_pd <- as.matrix(Matrix::nearPD(symptoms_cov_pos, corr=FALSE)$mat)
+symptoms_cov_pd <- as.matrix(Matrix::nearPD(symptoms_covstruct$S, corr=FALSE)$mat)
 
 corrplot(cov2cor(symptoms_cov_pd))
 
 ```
 
-## PGC/AGDS
-
-
-Check eigen values of the correlation matrix
-```{r mdd_symptom_gsem_clin_efa_eigen}
-
-symptoms_clin_idx <- which(str_detect(dimnames(symptoms_cov_pd)[[1]], 'Clin'))
-
-symptoms_clin_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_clin_idx,symptoms_clin_idx])) 
-
-plot(symptoms_clin_eigen$values, ylab='Eigenvalue')
-lines(symptoms_clin_eigen$values)
-abline(1, 0, col='red')
-
-symptoms_clin_efa <- factanal(covmat=symptoms_cov_pd[symptoms_clin_idx,symptoms_clin_idx], factors=3, rotation='varimax')
-symptoms_clin_efa
-
-```
-
-## ALSPAC/UKB
-
-Check eigen values of the correlation matrix
-```{r mdd_symptom_gsem_pop_efa_eigen}
-
-symptoms_pop_idx <- which(str_detect(dimnames(symptoms_cov_pd)[[1]], 'Pop'))
-
-symptoms_pop_eigen <- eigen(cov2cor(symptoms_cov_pd[symptoms_pop_idx,symptoms_pop_idx])) 
-
-plot(symptoms_pop_eigen$values, ylab='Eigenvalue')
-lines(symptoms_pop_eigen$values)
-abline(1, 0, col='red')
-
-symptoms_pop_efa <- factanal(covmat=symptoms_cov_pd[symptoms_pop_idx,symptoms_pop_idx], factors=3, rotation='varimax')
-symptoms_pop_efa
-
-```
-
-
-## All symptoms
 
 Check eigen values of the correlation matrix
 ```{r mdd_symptom_gsem_efa_eigen}
 
-symptoms_cov_pd.eigen <- eigen(cov2cor(symptoms_cov_pd))
+symptoms_eigen <- eigen(cov2cor(symptoms_cov_pd)) 
 
-signif(symptoms_cov_pd.eigen$values, 3)
-
-plot(eigen(cov2cor(symptoms_cov_pd))$values, ylab='Eigenvalue')
-lines(eigen(cov2cor(symptoms_cov_pd))$values)
+plot(symptoms_eigen$values, ylab='Eigenvalue')
+lines(symptoms_eigen$values)
 abline(1, 0, col='red')
 
-```
-
-Simulate uncertainty in $\mathbf{S}$ using the $\mathbf{V}$ matrix
-
-```{r}
-
-# replicates
-m <- 100
-
-# simulate with S as the mean and V as the variance
-S_lowertri_sim = mvtnorm::rmvnorm(m,
-	mean=symptoms_covstruct$S[lower.tri(symptoms_covstruct$S, diag=TRUE)],
-	sigma=symptoms_covstruct$V)
-	
-# reshape into a 24x24xm array
-S_sim <- plyr::aaply(S_lowertri_sim, 1, function(x, k=nrow(symptoms_covstruct$S)){
-	S <- matrix(NA, ncol=k, nrow=k)
-	S[lower.tri(S, diag=T)] <- x
-	S[upper.tri(S, diag=T)] <- t(S)[upper.tri(S, diag=T)]
-	return(S)
-})
-dimnames(S_sim) <- list(1:m, colnames(symptoms_cov), colnames(symptoms_cov))
-
-# find which symptoms have positive variances across all replicates
-sim_cov_keep <- which(colSums(plyr::aaply(S_sim, 1, diag) > 0) == m)
-
-eigen(cov2cor(symptoms_covstruct$S[sim_cov_keep,sim_cov_keep]))$values
-
-S_sim_pos <- S_sim[,sim_cov_keep,sim_cov_keep]
-
-S_sim_pos_ev <- plyr::aaply(S_sim_pos, 1, function(x) eigen(cov2cor(x))$values)
-
-summary(S_sim_pos_ev)
+symptoms_efa <- factanal(covmat=symptoms_cov_pd, factors=3, rotation='varimax')
+print(symptoms_efa, cut=0.4)
 
 ```
 
 
-```{r symptoms_efa3}
-
-symptoms_efa3 <- factanal(covmat=symptoms_cov_pd, factors=3, rotation='varimax')
-
-symptoms_efa3
-
-
-```
-
-```{r symptoms_efa4}
-
-symptoms_efa4 <- factanal(covmat=symptoms_cov_pd, factors=4, rotation='varimax')
-
-symptoms_efa4
-
-
-```
-
-
-```{r symptoms_efa6}
-
-symptoms_efa6 <- factanal(covmat=symptoms_cov_pd, factors=6, rotation='varimax')
-
-symptoms_efa6
-
-
-```

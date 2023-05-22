@@ -5,6 +5,8 @@ config.yaml
 *.info
 *.csv
 *.txt
+*.gz
+!*.prevs.txt
 *.enc
 *.enc_ukb
 *.xlsx
@@ -15,6 +17,8 @@ sumstats/UKB/*.r
 sumstats/**/*.png
 sumstats/reference
 **/aligned
+sumstats/aligned
+sumstats/UKB/Touchscreen
 *_cache/
 meta/pcaer_sub
 meta/pi_sub
@@ -29,6 +33,8 @@ meta/empty_info
 *.meta
 *.done
 meta/distribution/*
+meta/distribution
+meta/munged
 **/logs/*
 pheno/*
 *.RData
@@ -37,3 +43,15 @@ mtag/mtag/
 **/work/
 HRC_reference.r1-1
 pgc_gwas/
+ext/sumstats
+prs/genscot
+prs/lib
+*.best
+*.mismatch
+*.prsice
+*.summary
+*.score
+Rplots.pdf
+.nextflow/
+.nextflow.log*
+work/

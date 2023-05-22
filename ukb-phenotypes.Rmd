@@ -342,7 +342,7 @@ cidi_phq_cor <- mixedCor(cidi_phq, p=13:21, d=1:12)
 
 corrplot(cidi_phq_cor$rho, 'square')
 
-dput(cidi_phq_cor, 'sumstats/UKB/ukb_cidi_phq_mixed_cor.deparse.R', control=c('all', 'digits17'))
+dput(cidi_phq_cor, 'sumstats/UKB/ukb_cidi_phq_mixed_cor.deparse.R', control=c('exact'))
 
 
 ```

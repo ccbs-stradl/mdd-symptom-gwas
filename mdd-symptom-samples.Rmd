@@ -1,0 +1,113 @@
+---
+title: GenomicSEM of MDD symptoms sample counts
+author: Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard 
+output:
+  github_document
+---
+
+Make table of counts of sypmtom presence/absence used in final analyses
+
+```{r}
+
+library(readxl)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+```
+
+File for aligning sumstats filenames to cohort/symptom
+```{r}
+
+cohort_alignment <- read_tsv('meta/cohort_alignment.txt')
+
+```
+
+List of `basic.xls` files from Ricopili with sample counts
+
+```{r}
+
+basic_xls_list <- list.files('meta/distribution', pattern='basic.*.xls', full.names=TRUE, recursive=TRUE)
+
+names(basic_xls_list) <- str_match(basename(basic_xls_list), "basic\\.([A-Z_]+\\.MDD[0-9A-Za-z_]+)")[,2]
+
+basics <- bind_rows(lapply(basic_xls_list, read_excel), .id='meta')
+
+basics_datasets <- basics %>%
+	filter(Dataset != 'SUM') %>%
+	select(-meta) |>
+	distinct()
+	
+basics_meta <-
+basics %>%
+	filter(Dataset == 'SUM') %>%
+	mutate(Dataset=meta) %>%
+	select(-meta)
+
+```
+
+Merge and reformat
+
+```{r}
+
+basics_aligned <- 
+cohort_alignment %>%
+filter(!reference %in% c('MDD3', 'MDD4')) %>%
+mutate(Dataset=str_replace(str_remove(filename, pattern='daner_'), 'gz', 'aligned.gz')) %>%
+left_join(basics_datasets, by='Dataset') 
+
+
+presence_absence <- basics_aligned %>% str_glue_data("{N_cases}:{N_controls} {round(100*N_cases/(N_cases + N_controls))}")
+
+basics_aligned %>%
+mutate(PresenceAbsence=as.character(presence_absence)) %>%
+select(cohort, reference, PresenceAbsence) %>%
+pivot_wider(names_from=cohort, values_from=PresenceAbsence)
+
+basics_sum <-
+basics_aligned %>%
+mutate(sample=if_else(cohort %in% c('AGDS', 'PGC'), true='enriched', false='unselected')) %>%
+group_by(sample, reference) %>%
+summarise(N_cases=sum(N_cases), N_controls=sum(N_controls)) 
+
+basics_sum %>%
+group_by(sample) %>%
+summarise(minCa=min(N_cases, na.rm=T), maxCa=max(N_cases, na.rm=T), minCo=min(N_controls, na.rm=T), maxCo=max(N_controls, na.rm=T))
+
+```
+
+Sample prevalences
+
+```{r}
+
+basics_sum %>% 
+transmute(sample, reference, P=N_cases / (N_controls + N_cases)) %>% 
+mutate(d50=abs(0.5-P)) %>%
+arrange(sample, d50) %>%
+print(n=Inf)
+
+basics_sum %>% 
+transmute(sample, reference, P=N_cases / (N_controls + N_cases)) %>% 
+mutate(d50=abs(0.5-P)) %>%
+arrange(sample, P) %>%
+print(n=Inf)
+
+```
+
+Datasets
+
+```{r}
+
+meta_aligned <-
+basics_meta %>%
+	mutate(cohort=str_match(Dataset, "([A-Z_]+)")[,2],
+	       reference=str_match(Dataset, "(MDD[0-9a-b]+)")[,2])
+		   
+meta <-
+bind_rows(basics_aligned, meta_aligned) %>%
+select(-filename)
+
+write_csv(meta, "meta/meta.csv")
+
+```
