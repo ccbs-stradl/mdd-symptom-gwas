@@ -466,7 +466,6 @@ pre code {
 <li><a href="#covariates"><span class="toc-section-number">3.3</span> Covariates</a></li>
 <li><a href="#cases-cohorts"><span class="toc-section-number">3.4</span> Cases cohorts</a></li>
 <li><a href="#ukb-overlap"><span class="toc-section-number">3.5</span> UKB Overlap</a></li>
-<li><a href="#qc-phenotypes"><span class="toc-section-number">3.6</span> QC phenotypes</a></li>
 </ul></li>
 <li><a href="#gwas-pipeline"><span class="toc-section-number">4</span> GWAS Pipeline</a></li>
 </ul>
@@ -513,16 +512,8 @@ R
 library(readxl)
 library(readr)
 library(stringr)
-library(dplyr)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(tidyr)
+library(dplyr)
+library(tidyr)
 
 # load configuration file (see config-example.yaml&#39;)
 config &lt;- yaml.load_file(&#39;config.yaml&#39;)
@@ -701,7 +692,8 @@ phenotypes |&gt; mutate(across(MDD1:MDD9, ~ case_when(.x == 1 ~ 2L,
                                              TRUE ~ NA_integer_))) |&gt;
 mutate(dataset = sapply(str_split(ID1, pattern = &quot;_&quot;, n = 4), function(id) id[3]))
 
-write_tsv(pheno_au, file.path(output_dir, &quot;mddw2_symptoms.pheno&quot;), na=&quot;-9&quot;)</code></pre>
+write_tsv(pheno_au, file.path(output_dir, &quot;mddw2_symptoms.txt&quot;))
+write_tsv(select(pheno_au, FID=ID1, IID=ID2, starts_with(&quot;MDD&quot;)), file.path(output_dir, &quot;mddw2_symptoms.pheno&quot;), na=&quot;-9&quot;)</code></pre>
 </div>
 <div id="covariates" class="section level2" number="3.3">
 <h2 number="3.3"><span class="header-section-number">3.3</span> Covariates</h2>
@@ -738,19 +730,20 @@ cohorts_with_case_symptoms &lt;-
 cases |&gt;
 pivot_longer(cols=MDD1:MDD9, names_to = &quot;symptom&quot;, values_to = &quot;status&quot;) |&gt;
 filter(status %in% 1:2) |&gt;
-distinct(dataset, status) |&gt;
-count(dataset) |&gt;
-filter(n == 2)
+distinct(dataset, symptom, status) |&gt;
+count(dataset, symptom) |&gt;
+filter(n == 2) |&gt;
+distinct(dataset)
 
 cases_ids &lt;- cases |&gt;
 filter(dataset %in% pull(cohorts_with_case_symptoms, dataset)) |&gt;
 select(FID=ID1, IID=ID2)
 
-write_tsv(cases_ids, file.path(output_dir, &quot;cases.id&quot;))</code></pre>
+write_tsv(cases_ids, file.path(output_dir, &quot;cases.id&quot;))
+write_tsv(cohorts_with_case_symptoms, file.path(output_dir, &quot;cohorts.keep&quot;), col_names=F)</code></pre>
 </div>
 <div id="ukb-overlap" class="section level2" number="3.5">
 <h2 number="3.5"><span class="header-section-number">3.5</span> UKB Overlap</h2>
-<p>Remove overlap with UKB</p>
 <pre class="r"><code>ukb &lt;- read_table(&quot;pgc_gwas/959_PGC_UKB_overlap.id&quot;, col_names=c(&quot;FID&quot;, &quot;IID&quot;))</code></pre>
 <pre><code>## 
 ## -- Column specification ---------------------------------------------------------------------------------------------------------------------------
@@ -758,40 +751,6 @@ write_tsv(cases_ids, file.path(output_dir, &quot;cases.id&quot;))</code></pre>
 ##   FID = col_character(),
 ##   IID = col_character()
 ## )</code></pre>
-</div>
-<div id="qc-phenotypes" class="section level2" number="3.6">
-<h2 number="3.6"><span class="header-section-number">3.6</span> QC phenotypes</h2>
-<p>Set phenotypes to missing if there are fewer than 80 (10x number of GWAS predictors)) symptom present/absent cases.</p>
-<pre class="r"><code>pheno_long &lt;-
-pheno_au |&gt;
-filter(ID1 %in% pull(cases_ids, FID)) |&gt;
-filter(!ID1 %in% pull(ukb, FID)) |&gt;
-pivot_longer(cols=MDD1:MDD9, names_to = &quot;symptom&quot;, values_to = &quot;status&quot;)
-
-keep_symptoms &lt;- 
-pheno_long |&gt;
-filter(!is.na(status)) |&gt;
-group_by(dataset, symptom, status) |&gt;
-tally() |&gt;
-group_by(dataset, symptom) |&gt;
-summarize(samples=min(n), responses=n()) |&gt;
-filter(samples &gt;= 80, responses == 2)</code></pre>
-<pre><code>## `summarise()` has grouped output by &#39;dataset&#39;. You can override using the
-## `.groups` argument.</code></pre>
-<pre class="r"><code>keep_cohorts &lt;- keep_symptoms |&gt;
-distinct(dataset)
-
-pheno &lt;-
-pheno_long |&gt;
-inner_join(keep_symptoms, by=c(&quot;dataset&quot;, &quot;symptom&quot;)) |&gt;
-select(-samples, responses) |&gt;
-arrange(symptom) |&gt;
-pivot_wider(names_from=symptom, values_from=status) |&gt;
-arrange(ID1) |&gt;
-select(FID=ID1, IID=ID2, starts_with(&quot;MDD&quot;))
-
-write_tsv(pheno, file.path(output_dir, &quot;mddw2_symptoms_cases.pheno&quot;), na=&quot;-9&quot;)
-write_tsv(keep_cohorts, file.path(output_dir, &quot;cohorts.keep&quot;), col_names=F)</code></pre>
 </div>
 </div>
 <div id="gwas-pipeline" class="section level1" number="4">
@@ -801,6 +760,10 @@ write_tsv(keep_cohorts, file.path(output_dir, &quot;cohorts.keep&quot;), col_nam
 # symlink hardcall filenames
 
 mkdir -p pgc_gwas/cobg_dir_genome_wide
+
+V1=$(cat config.yaml | grep &quot;v1: /&quot; | awk &#39;{print $2}&#39;)
+V2=$(cat config.yaml | grep &quot;v2: /&quot; | awk &#39;{print $2}&#39;)
+
 while read cohort; do
   if [ -f $V1/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
     echo Linked $cohort
@@ -816,8 +779,8 @@ while read cohort; do
   fi
 done&lt;pgc_gwas/cohorts.keep
 
-# patch in rau2 (raus)
-for cohort in rau2; do
+# patch in cof3 (cof2) rau2 (raus)
+for cohort in cof3 rau2; do
   if [ -f $V1/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
     echo Linked $cohort
     ln -sf $V1/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/

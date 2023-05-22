@@ -70,26 +70,6 @@ library(readxl)
 library(readr)
 library(stringr)
 library(dplyr)
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 library(tidyr)
 
 # load configuration file (see config-example.yaml')
@@ -541,7 +521,8 @@ phenotypes |> mutate(across(MDD1:MDD9, ~ case_when(.x == 1 ~ 2L,
                                              TRUE ~ NA_integer_))) |>
 mutate(dataset = sapply(str_split(ID1, pattern = "_", n = 4), function(id) id[3]))
 
-write_tsv(pheno_au, file.path(output_dir, "mddw2_symptoms.pheno"), na="-9")
+write_tsv(pheno_au, file.path(output_dir, "mddw2_symptoms.txt"))
+write_tsv(select(pheno_au, FID=ID1, IID=ID2, starts_with("MDD")), file.path(output_dir, "mddw2_symptoms.pheno"), na="-9")
 ```
 
 ## Covariates
@@ -597,20 +578,20 @@ cohorts_with_case_symptoms <-
 cases |>
 pivot_longer(cols=MDD1:MDD9, names_to = "symptom", values_to = "status") |>
 filter(status %in% 1:2) |>
-distinct(dataset, status) |>
-count(dataset) |>
-filter(n == 2)
+distinct(dataset, symptom, status) |>
+count(dataset, symptom) |>
+filter(n == 2) |>
+distinct(dataset)
 
 cases_ids <- cases |>
 filter(dataset %in% pull(cohorts_with_case_symptoms, dataset)) |>
 select(FID=ID1, IID=ID2)
 
 write_tsv(cases_ids, file.path(output_dir, "cases.id"))
+write_tsv(cohorts_with_case_symptoms, file.path(output_dir, "cohorts.keep"), col_names=F)
 ```
 
 ## UKB Overlap
-
-Remove overlap with UKB
 
 
 ```r
@@ -626,50 +607,6 @@ ukb <- read_table("pgc_gwas/959_PGC_UKB_overlap.id", col_names=c("FID", "IID"))
 ## )
 ```
 
-## QC phenotypes
-
-Set phenotypes to missing if there are fewer than 80 (10x number of GWAS predictors)) symptom present/absent cases.
-
-
-```r
-pheno_long <-
-pheno_au |>
-filter(ID1 %in% pull(cases_ids, FID)) |>
-filter(!ID1 %in% pull(ukb, FID)) |>
-pivot_longer(cols=MDD1:MDD9, names_to = "symptom", values_to = "status")
-
-keep_symptoms <- 
-pheno_long |>
-filter(!is.na(status)) |>
-group_by(dataset, symptom, status) |>
-tally() |>
-group_by(dataset, symptom) |>
-summarize(samples=min(n), responses=n()) |>
-filter(samples >= 80, responses == 2)
-```
-
-```
-## `summarise()` has grouped output by 'dataset'. You can override using the
-## `.groups` argument.
-```
-
-```r
-keep_cohorts <- keep_symptoms |>
-distinct(dataset)
-
-pheno <-
-pheno_long |>
-inner_join(keep_symptoms, by=c("dataset", "symptom")) |>
-select(-samples, responses) |>
-arrange(symptom) |>
-pivot_wider(names_from=symptom, values_from=status) |>
-arrange(ID1) |>
-select(FID=ID1, IID=ID2, starts_with("MDD"))
-
-write_tsv(pheno, file.path(output_dir, "mddw2_symptoms_cases.pheno"), na="-9")
-write_tsv(keep_cohorts, file.path(output_dir, "cohorts.keep"), col_names=F)
-```
-
 # GWAS Pipeline
 
 Run GWAS across all symptoms for just cases
@@ -680,6 +617,10 @@ Run GWAS across all symptoms for just cases
 # symlink hardcall filenames
 
 mkdir -p pgc_gwas/cobg_dir_genome_wide
+
+V1=$(cat config.yaml | grep "v1: /" | awk '{print $2}')
+V2=$(cat config.yaml | grep "v2: /" | awk '{print $2}')
+
 while read cohort; do
   if [ -f $V1/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
     echo Linked $cohort
@@ -695,8 +636,8 @@ while read cohort; do
   fi
 done<pgc_gwas/cohorts.keep
 
-# patch in rau2 (raus)
-for cohort in rau2; do
+# patch in cof3 (cof2) rau2 (raus)
+for cohort in cof3 rau2; do
   if [ -f $V1/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
     echo Linked $cohort
     ln -sf $V1/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
