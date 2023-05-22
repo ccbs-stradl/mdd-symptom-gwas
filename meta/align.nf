@@ -1,6 +1,6 @@
 /* align sumstats to reference panel */
 
-params.out = "results"
+params.out = "meta/aligned"
 params.frq = "*.frq2.gz"
 params.daner = "daner*.gz"
 
@@ -21,6 +21,10 @@ workflow {
 }
 
 process REF {
+
+	scratch true
+	stageInMode 'copy'
+	stageOutMode 'copy'
 
     cpus = 1
     memory = 16.GB
@@ -66,8 +70,12 @@ process REF {
 
 process ALIGN {
     tag "${daner}"
+	
+	scratch true
+	stageInMode 'copy'
+	stageOutMode 'copy'
 
-    publishDir params.out
+    publishDir params.out, mode: 'copy'
 
     cpus = 1
     memory = 16.GB
