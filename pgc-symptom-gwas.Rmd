@@ -82,7 +82,7 @@ output_dir = "pgc_gwas"
 
 Extract 12 MDD symptoms
 
-```{r, eval=FALSE}
+```{r}
 
 #Extract 12 symptoms
 symptoms <- c("MDD1", "MDD2", "MDD3a", "MDD3b", "MDD4a", "MDD4b", "MDD5a", "MDD5b", "MDD6", "MDD7", "MDD8", "MDD9")
@@ -115,13 +115,13 @@ separate(filename, into=c('file', 'update'))
 ## Code phenotypes
 
 ```{r}
-pheno <- 
+pheno_au <- 
 phenotypes |> mutate(across(MDD1:MDD9, ~ case_when(.x == 1 ~ 2L,
                                              .x == 0 ~ 1L,
-                                             TRUE ~ -9L))) |>
-select(FID=ID1, IID=ID2, MDD1:MDD9)
+                                             TRUE ~ NA_integer_))) |>
+mutate(dataset = sapply(str_split(ID1, pattern = "_", n = 4), function(id) id[3]))
 
-write_tsv(pheno, file.path(output_dir, "mddw2_symptoms.pheno"))
+write_tsv(pheno_au, file.path(output_dir, "mddw2_symptoms.pheno"), na="-9")
 ```
 
 ## Covariates
@@ -142,23 +142,68 @@ Identify cohorts with cases that vary in symptoms.
 
 ```{r}
 
-cases <- pheno |>
-filter(str_detect(FID, "^cas_mdd")) |>
-mutate(dataset = sapply(str_split(FID, pattern = "_", n = 4), function(id) id[3]))
+cases <- pheno_au |>
+filter(str_detect(ID1, "^cas_mdd"))
 
 cohorts_with_case_symptoms <- 
 cases |>
 pivot_longer(cols=MDD1:MDD9, names_to = "symptom", values_to = "status") |>
 filter(status %in% 1:2) |>
-distinct(dataset, status) |>
-count(dataset) |>
-filter(n == 2)
+distinct(dataset, symptom, status) |>
+count(dataset, symptom) |>
+filter(n == 2) |>
+distinct(dataset)
 
 cases_ids <- cases |>
 filter(dataset %in% pull(cohorts_with_case_symptoms, dataset)) |>
-select(FID, IID)
+select(FID=ID1, IID=ID2)
 
 write_tsv(cases_ids, file.path(output_dir, "cases.id"))
+write_tsv(cohorts_with_case_symptoms, file.path(output_dir, "cohorts.keep"), col_names=F)
+```
+
+## UKB Overlap
+
+Remove overlap with UKB
+
+```{r}
+ukb <- read_table("pgc_gwas/959_PGC_UKB_overlap.id", col_names=c("FID", "IID"))
+```
+
+## QC phenotypes
+
+Set phenotypes to missing if there are fewer than 80 (10x number of GWAS predictors)) symptom present/absent cases.
+
+```{r}
+pheno_long <-
+pheno_au |>
+filter(ID1 %in% pull(cases_ids, FID)) |>
+filter(!ID1 %in% pull(ukb, FID)) |>
+pivot_longer(cols=MDD1:MDD9, names_to = "symptom", values_to = "status")
+
+keep_symptoms <- 
+pheno_long |>
+filter(!is.na(status)) |>
+group_by(dataset, symptom, status) |>
+tally() |>
+group_by(dataset, symptom) |>
+summarize(samples=min(n), responses=n()) |>
+filter(samples >= 80, responses == 2)
+
+keep_cohorts <- keep_symptoms |>
+distinct(dataset)
+
+pheno <-
+pheno_long |>
+inner_join(keep_symptoms, by=c("dataset", "symptom")) |>
+select(-samples, responses) |>
+arrange(symptom) |>
+pivot_wider(names_from=symptom, values_from=status) |>
+arrange(ID1) |>
+select(FID=ID1, IID=ID2, starts_with("MDD"))
+
+write_tsv(pheno, file.path(output_dir, "mddw2_symptoms_cases.pheno"), na="-9")
+write_tsv(keep_cohorts, file.path(output_dir, "cohorts.keep"), col_names=F)
 ```
 
 # GWAS Pipeline
@@ -168,27 +213,28 @@ Run GWAS across all symptoms for just cases
 ```{sh, eval=FALSE}
 
 # symlink hardcall filenames
-cohorts=$(cat pgc_gwas/cases.id | awk '{print $1}' | awk -F_ '{print $3}' | sort | uniq)
-echo $cohorts
 
 mkdir -p pgc_gwas/cobg_dir_genome_wide
-for cohort in $cohorts; do
+while read cohort; do
   if [ -f $V1/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
     echo Linked $cohort
-    ln -sf $V1/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.* pgc_gwas/cobg_dir_genome_wide/
+    ln -sf $V1/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
+ elif [ -f $V1/genred_case_only/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.cases.bed ]; then
+ 	echo Linked $cohort
+ 	ln -sf $V1/genred_case_only/mdd_${cohort}_*.bgn.cases.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
   elif [ -f $V2/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc2.hg19.ch.fl.bgn.bed ]; then
     echo Linked $cohort
-    ln -sf $V2/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.* pgc_gwas/cobg_dir_genome_wide/
+    ln -sf $V2/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
   else
     echo Did not link $cohort
   fi
-done
+done<pgc_gwas/cohorts.keep
 
-# patch in cof3 (cof2) and rau2 (raus)
-for cohort in cof3 rau2; do
+# patch in rau2 (raus)
+for cohort in rau2; do
   if [ -f $V1/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
     echo Linked $cohort
-    ln -sf $V1/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.* pgc_gwas/cobg_dir_genome_wide/
+    ln -sf $V1/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
   else
     echo Did not link $cohort
   fi
@@ -200,6 +246,6 @@ done
 nextflow run pgc-symptom-gwas.nf \
 -config lisa.config \
 -resume \
---bfile="pgc_gwas/cobg_dir_genome_wide/mdd_*.bgn.{bed,bim,fam}"
+--bfile="pgc_gwas/cobg_dir_genome_wide/mdd_*.bgn*{bed,bim,fam}"
 
 ```
