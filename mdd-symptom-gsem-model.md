@@ -81,6 +81,9 @@ require(ggplot2)
 
     ## Loading required package: ggplot2
 
+    ## Want to understand how all the pieces fit together? Read R for Data
+    ## Science: https://r4ds.had.co.nz/
+
 ``` r
 require(corrplot)
 ```
@@ -1090,7 +1093,7 @@ list("A"=list(name="Common", model=commonfactor.fit),
      "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
      "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
      "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-     "I"=list(name="Mood-Appetite-Vegetative", model=cog_app_veg.fit),
+     "I"=list(name="Appetite-Vegetative-Cog/Mood", model=cog_app_veg.fit),
      "J"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit)
      )
 
@@ -1120,7 +1123,7 @@ mutate_if(is.numeric, ~signif(., 3))
 | F     | Psych-Neuroveg                  |  1080 | 147 |       0 | 1170 | 0.961 | 0.161 |  216 |
 | G     | Affect-Neuroveg                 |  1150 | 147 |       0 | 1230 | 0.958 | 0.161 |  283 |
 | H     | Cog-Mood-Neuroveg               |  1090 | 144 |       0 | 1180 | 0.961 | 0.162 |  228 |
-| I     | Mood-Appetite-Vegetative        |   862 | 145 |       0 |  952 | 0.970 | 0.153 |    0 |
+| I     | Appetite-Vegetative-Cog/Mood    |   862 | 145 |       0 |  952 | 0.970 | 0.153 |    0 |
 | J     | Depression-Melancholic-Atypical |  1040 | 145 |       0 | 1130 | 0.963 | 0.159 |  182 |
 
 The Mood-Appetite-Vegetative model is the best, SRMR is high across all
@@ -1128,7 +1131,7 @@ the models, indicating that there are high residual correlations.
 
 ## Modifications
 
-Add residual correlations betwee same-item symptoms across cohorts.
+Add residual correlations between same-item symptoms across cohorts.
 
 ``` r
 cog_app_veg_mod.model <- "
@@ -1165,7 +1168,7 @@ cog_app_veg_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=co
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   8.687 
+    ##   5.912 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =

@@ -1,4 +1,4 @@
----
+--
 title: PGC Symptom GWAS 
 author: Bradley Jermy, Mark Adams 
 output:

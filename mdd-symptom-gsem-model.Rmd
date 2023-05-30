@@ -276,6 +276,33 @@ measure.fit$results[c(1,2,3,6,7, 9)] %>%
 
 ```
 
+Pathway from Gating factor to Community factor
+
+```{r measure_dep, cache=TRUE}
+
+measure_dep.model <- "
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CIDI =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+CIDI ~ GATE
+
+CLIN ~~ 1*CLIN
+GATE ~~ 1*GATE
+
+uk1 > 0.001
+UkbDep ~~ uk1*UkbDep
+"
+
+measure_dep.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure_dep.model, imp_cov=TRUE)
+
+measure_dep.fit$modelfit
+measure_dep.fit$results[c(1,2,3,6,7, 9)] %>%
+	 filter(lhs %in% c('CLIN', 'COMM', 'GATE'), rhs %in% c('CLIN', 'COMM', 'GATE'), lhs != rhs) %>%
+	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+	 print(digits=2)
+
+```
+
 ### MDD Subtypes
 
 Group symptoms from the clinical cohorts (that had positive genetic variance) together with the same symptoms from the community cohorts (to create a dimension of MDD subtypes), then a separate factor for all other community cohort symptoms (that separates cases from controls) 

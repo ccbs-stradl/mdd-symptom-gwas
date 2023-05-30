@@ -9,7 +9,7 @@ output:
     df_print: kable
     keep_md: true
   md_document:
-    variant: markdown_github
+    variant: gfm
 ---
 
 
@@ -135,12 +135,12 @@ First we need to prepare files for the MDD5 symptoms for the population samples 
 
 ```{bash, eval=FALSE}
 
-mkdir -p meta/distribution/ALSPAC_UKB.MDD5a_psychomotorFast
-mkdir -p meta/distribution/ALSPAC_UKB.MDD5b_psychomotorSlow
+mkdir -p meta/distribution/Comm.MDD5a_psychomotorFast
+mkdir -p meta/distribution/Comm_UKB.MDD5b_psychomotorSlow
 
-gunzip -c sumstats/aligned/daner_MDD5a_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print "CHR", "SNP", "BP", "A1", "A2", "FRQ_A_113", "FRQ_U_3181", "INFO", "OR", "SE", "P", "Nca", "Nco", "Neff_half"} else {print $0, 113, 3181, 218.247}}' | gzip -c > meta/distribution/ALSPAC_UKB.MDD5a_psychomotorFast/daner_ALSPAC_UKB.MDD5a_psychomotorFast.gz
+gunzip -c sumstats/aligned/daner_MDD5a_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print "CHR", "SNP", "BP", "A1", "A2", "FRQ_A_113", "FRQ_U_3181", "INFO", "OR", "SE", "P", "Nca", "Nco", "Neff_half"} else {print $0, 113, 3181, 218.247}}' | gzip -c > meta/distribution/Comm.MDD5a_psychomotorFast/daner_Comm.MDD5a_psychomotorFast.gz
 
-gunzip -c sumstats/aligned/daner_MDD5b_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print "CHR", "SNP", "BP", "A1", "A2", "FRQ_A_299", "FRQ_U_2995", "INFO", "OR", "SE", "P", "Nca", "Nco", "Neff_half"} else {print $0, 299, 2995, 425.468}}' | gzip -c > meta/distribution/ALSPAC_UKB.MDD5b_psychomotorSlow/daner_ALSPAC_UKB.MDD5b_psychomotorSlow.gz
+gunzip -c sumstats/aligned/daner_MDD5b_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print "CHR", "SNP", "BP", "A1", "A2", "FRQ_A_299", "FRQ_U_2995", "INFO", "OR", "SE", "P", "Nca", "Nco", "Neff_half"} else {print $0, 299, 2995, 425.468}}' | gzip -c > meta/distribution/Comm.MDD5b_psychomotorSlow/daner_Comm.MDD5b_psychomotorSlow.gz
 
 ```
 
@@ -150,7 +150,7 @@ We find all daner files in the meta-analysis directory and loop them through the
 # Munge sumstats for all cohorts symptom GWASs
 
 # find meta-analysed daner sumstats files for format daner_[COHORTS].MDD[N]_[SYMPTOM].gz
-meta_daner_files <- list.files("meta/distribution", pattern="^daner_[A-Z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
+meta_daner_files <- list.files("meta/distribution", pattern="^daner_[A-Za-z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
 
 # non-meta-analysed files
 other_daner_files <- list.files("sumstats/UKB/Touchscreen", pattern="^daner_[A-Za-z_]+\\.MDD[1-9][a-z]*_[A-Za-z]+\\.gz$", full.name=TRUE, recursive=TRUE)
@@ -339,12 +339,12 @@ symptoms_sample_prev %>%
   select(cohorts, samp_prev, h) %>%
   pivot_wider(names_from=cohorts, values_from=samp_prev)
 
-ggplot(cohorts_sample_prev, aes(x=AGDS_PGC, y=ALSPAC_UKB)) +
+ggplot(cohorts_sample_prev, aes(x=AGDS_PGC, y=Comm)) +
 geom_abline(col='red') +
 geom_point() +
 geom_text(aes(label=h), hjust=-0.1) +
-scale_x_continuous('AGDS/PGC sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
-scale_y_continuous('ALSPAC/UKB sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
+scale_x_continuous('Community sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
+scale_y_continuous('Clinical sample prevalence', breaks=c(0, 0.25, 0.5, 0.75, 1), limits=c(0, 1)) +
 coord_fixed(clip='off') +
 theme_bw() +
 theme(plot.margin=unit(c(1, 1, 1, 1), 'cm'))
@@ -357,7 +357,7 @@ Correlation (Spearman's rho) between sample prevalences in UKB CIDI and PGC DSM:
 
 ```{r}
 
-with(cohorts_sample_prev, cor.test(AGDS_PGC, ALSPAC_UKB, method='spearman', use='pair'))
+with(cohorts_sample_prev, cor.test(AGDS_PGC, Comm, method='spearman', use='pair'))
 
 ```
 
@@ -369,7 +369,7 @@ Combine the sample prevalences weighted by assuming 15% population prevalence of
 
 pop_prevs_w <-
 symptoms_sample_prev %>%
-filter(cohorts %in% c('AGDS_PGC', 'ALSPAC_UKB')) |>
+filter(cohorts %in% c('AGDS_PGC', 'Comm')) |>
 mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
                    symptom %in% c('MDD1', 'MDD2') ~ 1.0,
                    TRUE ~ 0.57)) %>%
@@ -377,7 +377,7 @@ mutate(pop_prev=samp_prev*w) %>%
 select(symptom, cohorts, pop_prev) %>%
 pivot_wider(names_from=cohorts, values_from=pop_prev) %>%
 group_by(symptom) %>%
-mutate(pop_prev=mean(c(AGDS_PGC, ALSPAC_UKB))) %>%
+mutate(pop_prev=mean(c(AGDS_PGC, Comm))) %>%
 select(symptom, pop_prev)
 
 pop_prevs_w
@@ -392,7 +392,7 @@ We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with 
 AGDS+PGC and ALSPAC+UKB sumstats
 ```{r covstruc, results='hide'}
 
-covstruct_prefix <- 'agds_pgc.alspac_ukb.covstruct'
+covstruct_prefix <- 'agds_pgc.comm.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
@@ -414,7 +414,7 @@ if(!file.exists(covstruct_r)) {
     mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev))
     
   sumstats_prevs_keep <- sumstats_prevs |>
-    filter(cohorts %in% c('AGDS_PGC', 'ALSPAC_UKB', 'UKBt')) |>
+    filter(cohorts %in% c('AGDS_PGC', 'Comm', 'UKBt')) |>
     filter(!sumstats %in% c("AGDS_PGC.MDD1_depressed", "AGDS_PGC.MDD2_anhedonia", "AGDS_PGC.MDD6_fatigue", 
     "AGDS_PGC.MDD7_worthless", "AGDS_PGC.MDD8_concentration", "ALSPAC_UKB.MDD5a_psychomotorFast", "ALSPAC_UKB.MDD5b_psychomotorSlow"))
 
@@ -500,12 +500,12 @@ if(!file.exists(sumstats_h2_txt)) {
   sumstats_h2 %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
   mutate(sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clin',
-                        cohorts == 'ALSPAC_UKB' ~ 'Comm',
+                        cohorts == 'Comm' ~ 'Comm',
                         cohorts == 'UKBt' ~ 'Ukb',
                         cohorts == 'ALL' ~ 'All',
                         TRUE ~ NA_character_),
       Sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clinical',
-                       cohorts == 'ALSPAC_UKB' ~ 'Community',
+                       cohorts == 'Comm' ~ 'Community',
                        cohorts == 'UKBt' ~ 'UK Biobank',
                        cohorts == 'ALL' ~ 'All',
                        TRUE ~ NA_character_)) %>%
@@ -531,7 +531,7 @@ if(!file.exists(sumstats_h2_txt)) {
 ```{r mdd_symptom_gsem_h2}
 
 mdd_symptom_gsem_h2.gg <-
-ggplot(sumstats_h2_table  %>% filter(4*Nca*Nco/(Nca+Nco) > 5000, h2 > 0),
+ggplot(sumstats_h2_table  %>% filter(4*Nca*Nco/(Nca+Nco) > 5000, h2 > -0.01),
         aes(x=abbv,
             y=h2,
             ymin=h2+se*qnorm(0.025),

@@ -649,7 +649,10 @@ Nivard</p>
 ## 
 ##     intersect, setdiff, setequal, union</code></pre>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">require</span>(ggplot2)</span></code></pre></div>
-<pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Loading required package: ggplot2
+
+## Want to understand how all the pieces fit together? Read R for Data
+## Science: https://r4ds.had.co.nz/</code></pre>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">require</span>(corrplot)</span></code></pre></div>
 <pre><code>## Loading required package: corrplot
 
@@ -1458,7 +1461,7 @@ classifications, plus remaining affective/cognitive symptoms</p>
 <span id="cb103-7"><a href="#cb103-7" tabindex="-1"></a>     <span class="st">&quot;F&quot;</span><span class="ot">=</span><span class="fu">list</span>(<span class="at">name=</span><span class="st">&quot;Psych-Neuroveg&quot;</span>, <span class="at">model=</span>psych_veg.fit),</span>
 <span id="cb103-8"><a href="#cb103-8" tabindex="-1"></a>     <span class="st">&quot;G&quot;</span><span class="ot">=</span><span class="fu">list</span>(<span class="at">name=</span><span class="st">&quot;Affect-Neuroveg&quot;</span>, <span class="at">model=</span>affect_neuroveg.fit),</span>
 <span id="cb103-9"><a href="#cb103-9" tabindex="-1"></a>     <span class="st">&quot;H&quot;</span><span class="ot">=</span><span class="fu">list</span>(<span class="at">name=</span><span class="st">&quot;Cog-Mood-Neuroveg&quot;</span>, <span class="at">model=</span>cog_mood_neuroveg.fit),</span>
-<span id="cb103-10"><a href="#cb103-10" tabindex="-1"></a>     <span class="st">&quot;I&quot;</span><span class="ot">=</span><span class="fu">list</span>(<span class="at">name=</span><span class="st">&quot;Mood-Appetite-Vegetative&quot;</span>, <span class="at">model=</span>cog_app_veg.fit),</span>
+<span id="cb103-10"><a href="#cb103-10" tabindex="-1"></a>     <span class="st">&quot;I&quot;</span><span class="ot">=</span><span class="fu">list</span>(<span class="at">name=</span><span class="st">&quot;Appetite-Vegetative-Cog/Mood&quot;</span>, <span class="at">model=</span>cog_app_veg.fit),</span>
 <span id="cb103-11"><a href="#cb103-11" tabindex="-1"></a>     <span class="st">&quot;J&quot;</span><span class="ot">=</span><span class="fu">list</span>(<span class="at">name=</span><span class="st">&quot;Depression-Melancholic-Atypical&quot;</span>, <span class="at">model=</span>mel_aty_afc.fit)</span>
 <span id="cb103-12"><a href="#cb103-12" tabindex="-1"></a>     )</span>
 <span id="cb103-13"><a href="#cb103-13" tabindex="-1"></a></span>
@@ -1581,7 +1584,7 @@ classifications, plus remaining affective/cognitive symptoms</p>
 </tr>
 <tr class="odd">
 <td align="left">I</td>
-<td align="left">Mood-Appetite-Vegetative</td>
+<td align="left">Appetite-Vegetative-Cog/Mood</td>
 <td align="right">862</td>
 <td align="right">145</td>
 <td align="right">0</td>
@@ -1607,7 +1610,7 @@ classifications, plus remaining affective/cognitive symptoms</p>
 all the models, indicating that there are high residual
 correlations.</p>
 <h2 id="modifications">Modifications</h2>
-<p>Add residual correlations betwee same-item symptoms across
+<p>Add residual correlations between same-item symptoms across
 cohorts.</p>
 <div class="sourceCode" id="cb104"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" tabindex="-1"></a>cog_app_veg_mod.model <span class="ot">&lt;-</span> <span class="st">&quot;</span></span>
 <span id="cb104-2"><a href="#cb104-2" tabindex="-1"></a><span class="st">COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui</span></span>
@@ -1641,7 +1644,7 @@ cohorts.</p>
 ## [1] &quot;Calculating Standardized Results&quot;
 ## [1] &quot;Calculating SRMR&quot;
 ## elapsed 
-##   8.687 
+##   5.912 
 ## [1] &quot;The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS.&quot;
 
 ## Warning in usermodel(symptoms_covstruct, estimation = &quot;DWLS&quot;, model =
