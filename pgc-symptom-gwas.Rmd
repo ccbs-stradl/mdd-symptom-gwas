@@ -192,6 +192,10 @@ while read cohort; do
   elif [ -f $V2/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc2.hg19.ch.fl.bgn.bed ]; then
     echo Linked $cohort
     ln -sf $V2/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
+  elif [ -f ${V1}_boma/cobg_dir_genome_wide_boma/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
+  	ln -sf ${V1}_boma/cobg_dir_genome_wide_boma/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
+  elif [ -f  ${V1}_shp/cobg_dir_genome_sho/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
+  	ln -sf ${V1}_shp/cobg_dir_genome_sho/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
   else
     echo Did not link $cohort
   fi
@@ -212,7 +216,7 @@ done
 
 nextflow run pgc-symptom-gwas.nf \
 -config lisa.config \
--work /nfs/scratch/nfx-qqZbmwsao3qBufyNACW/work
+-work-dir /nfs/scratch/nfx-qqZbmwsao3qBufyNACW/work \
 -resume \
 --bfile="pgc_gwas/cobg_dir_genome_wide/mdd_*.bgn*{bed,bim,fam}"
 
