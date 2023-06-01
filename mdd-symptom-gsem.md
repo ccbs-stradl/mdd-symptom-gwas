@@ -463,7 +463,7 @@ if(!file.exists(symptoms_sample_prev_file)) {
 }
 ```
 
-    ## Rows: 38 Columns: 6
+    ## Rows: 26 Columns: 6
     ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (3): cohorts, symptom, sumstats
@@ -478,20 +478,20 @@ symptoms_sample_prev %>%
   select(Cohorts=cohorts, Ref=symptom, Symptom=h, Cases=Nca, Controls=Nco, `Sample prevalence`=samp_prev)
 ```
 
-    ## # A tibble: 38 × 6
-    ##    Cohorts  Ref   Symptom  Cases Controls `Sample prevalence`
-    ##    <chr>    <chr> <chr>    <dbl>    <dbl>               <dbl>
-    ##  1 AGDS_PGC MDD1  Mood     25820     1623               0.941
-    ##  2 AGDS_PGC MDD2  Interest 24488     2421               0.910
-    ##  3 AGDS_PGC MDD3a Weight⇊   9007    13960               0.392
-    ##  4 AGDS_PGC MDD3b Weight⇈   7510    14436               0.342
-    ##  5 AGDS_PGC MDD4a Sleep⇊   19368     6310               0.754
-    ##  6 AGDS_PGC MDD4b Sleep⇈   10559    13011               0.448
-    ##  7 AGDS_PGC MDD5a Motor⇈   10686    12570               0.459
-    ##  8 AGDS_PGC MDD5b Motor⇊   12511    11838               0.514
-    ##  9 AGDS_PGC MDD6  Fatigue  23523     2179               0.915
-    ## 10 AGDS_PGC MDD7  Guilt    21633     3727               0.853
-    ## # … with 28 more rows
+    ## # A tibble: 26 × 6
+    ##    Cohorts Ref   Symptom  Cases Controls `Sample prevalence`
+    ##    <chr>   <chr> <chr>    <dbl>    <dbl>               <dbl>
+    ##  1 Clin    MDD1  Mood     29741     1798               0.943
+    ##  2 Clin    MDD2  Interest 28272     2730               0.912
+    ##  3 Clin    MDD3a Weight⇊  10366    14807               0.412
+    ##  4 Clin    MDD3b Weight⇈   7941    14946               0.347
+    ##  5 Clin    MDD4a Sleep⇊   21239     6664               0.761
+    ##  6 Clin    MDD4b Sleep⇈   10918    13300               0.451
+    ##  7 Clin    MDD5a Motor⇈   11354    13117               0.464
+    ##  8 Clin    MDD5b Motor⇊   13732    12433               0.525
+    ##  9 Clin    MDD6  Fatigue  26688     2388               0.918
+    ## 10 Clin    MDD7  Guilt    24941     4389               0.850
+    ## # … with 16 more rows
 
 ``` r
 cohorts_sample_prev <-
@@ -500,7 +500,7 @@ symptoms_sample_prev %>%
   select(cohorts, samp_prev, h) %>%
   pivot_wider(names_from=cohorts, values_from=samp_prev)
 
-ggplot(cohorts_sample_prev, aes(x=AGDS_PGC, y=Comm)) +
+ggplot(cohorts_sample_prev, aes(x=Clin, y=Comm)) +
 geom_abline(col='red') +
 geom_point() +
 geom_text(aes(label=h), hjust=-0.1) +
@@ -521,18 +521,18 @@ Correlation (Spearman’s rho) between sample prevalences in UKB CIDI and
 PGC DSM:
 
 ``` r
-with(cohorts_sample_prev, cor.test(AGDS_PGC, Comm, method='spearman', use='pair'))
+with(cohorts_sample_prev, cor.test(Clin, Comm, method='spearman', use='pair'))
 ```
 
     ## 
     ##  Spearman's rank correlation rho
     ## 
-    ## data:  AGDS_PGC and Comm
-    ## S = 120, p-value = 0.05209
+    ## data:  Clin and Comm
+    ## S = 116, p-value = 0.04575
     ## alternative hypothesis: true rho is not equal to 0
     ## sample estimates:
     ##       rho 
-    ## 0.5804196
+    ## 0.5944056
 
 ## Population prevalences
 
@@ -543,15 +543,15 @@ mood or anhedonia.
 ``` r
 pop_prevs_w <-
 symptoms_sample_prev %>%
-filter(cohorts %in% c('AGDS_PGC', 'Comm')) |>
-mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
+filter(cohorts %in% c('Clin', 'Comm')) |>
+mutate(w=case_when(cohorts == 'Clin' ~ 0.15,
                    symptom %in% c('MDD1', 'MDD2') ~ 1.0,
                    TRUE ~ 0.57)) %>%
 mutate(pop_prev=samp_prev*w) %>%
 select(symptom, cohorts, pop_prev) %>%
 pivot_wider(names_from=cohorts, values_from=pop_prev) %>%
 group_by(symptom) %>%
-mutate(pop_prev=mean(c(AGDS_PGC, Comm))) %>%
+mutate(pop_prev=mean(c(Clin, Comm))) %>%
 select(symptom, pop_prev)
 
 pop_prevs_w
@@ -563,16 +563,16 @@ pop_prevs_w
     ##    <chr>      <dbl>
     ##  1 MDD1      0.331 
     ##  2 MDD2      0.264 
-    ##  3 MDD3a     0.177 
+    ##  3 MDD3a     0.179 
     ##  4 MDD3b     0.135 
     ##  5 MDD4a     0.281 
-    ##  6 MDD4b     0.176 
-    ##  7 MDD5a     0.0442
-    ##  8 MDD5b     0.0644
+    ##  6 MDD4b     0.177 
+    ##  7 MDD5a     0.0446
+    ##  8 MDD5b     0.0652
     ##  9 MDD6      0.307 
     ## 10 MDD7      0.231 
     ## 11 MDD8      0.286 
-    ## 12 MDD9      0.177
+    ## 12 MDD9      0.176
 
 # Multivariable LDSC estimation
 
@@ -592,7 +592,7 @@ re-running the LD score calculation.
 AGDS+PGC and ALSPAC+UKB sumstats
 
 ``` r
-covstruct_prefix <- 'agds_pgc.comm.covstruct'
+covstruct_prefix <- 'clin.comm.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
@@ -602,7 +602,7 @@ if(!file.exists(covstruct_r)) {
   sumstats_files <- list.files(file.path('meta', 'munged'), '.+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
+  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Za-z_]+).(MDD[:digit:](a|b)?)')[,1]
 
   sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
 
@@ -614,9 +614,9 @@ if(!file.exists(covstruct_r)) {
     mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev))
     
   sumstats_prevs_keep <- sumstats_prevs |>
-    filter(cohorts %in% c('AGDS_PGC', 'Comm', 'UKBt')) |>
-    filter(!sumstats %in% c("AGDS_PGC.MDD1_depressed", "AGDS_PGC.MDD2_anhedonia", "AGDS_PGC.MDD6_fatigue", 
-    "AGDS_PGC.MDD7_worthless", "AGDS_PGC.MDD8_concentration", "ALSPAC_UKB.MDD5a_psychomotorFast", "ALSPAC_UKB.MDD5b_psychomotorSlow"))
+    filter(cohorts %in% c('Clin', 'Comm', 'UKBt')) |>
+    filter(!sumstats %in% c("Clin.MDD1_depressed", "Clin.MDD2_anhedonia", "Clin.MDD5b_psychomotorSlow", "Clin.MDD6_fatigue", 
+    "Clin.MDD7_worthless", "Clin.MDD8_concentration", "Comm.MDD5a_psychomotorFast", "Comm.MDD5b_psychomotorSlow"))
 
   write_tsv(sumstats_prevs, file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 
@@ -642,7 +642,7 @@ if(!file.exists(covstruct_r)) {
 }
 ```
 
-    ## Rows: 38 Columns: 9
+    ## Rows: 26 Columns: 9
     ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
@@ -710,12 +710,12 @@ if(!file.exists(sumstats_h2_txt)) {
   sumstats_h2_table <-
   sumstats_h2 %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
-  mutate(sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clin',
+  mutate(sample=case_when(cohorts == 'Clin' ~ 'Clin',
                         cohorts == 'Comm' ~ 'Comm',
                         cohorts == 'UKBt' ~ 'Ukb',
                         cohorts == 'ALL' ~ 'All',
                         TRUE ~ NA_character_),
-      Sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clinical',
+      Sample=case_when(cohorts == 'Clin' ~ 'Clinical',
                        cohorts == 'Comm' ~ 'Community',
                        cohorts == 'UKBt' ~ 'UK Biobank',
                        cohorts == 'ALL' ~ 'All',
@@ -735,7 +735,7 @@ if(!file.exists(sumstats_h2_txt)) {
 }
 ```
 
-    ## Rows: 38 Columns: 17
+    ## Rows: 26 Columns: 17
     ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr  (7): Sample, sample_symptom, ref, cohorts, abbv, sumstats, filename
@@ -746,7 +746,7 @@ if(!file.exists(sumstats_h2_txt)) {
 
 ``` r
 mdd_symptom_gsem_h2.gg <-
-ggplot(sumstats_h2_table  %>% filter(4*Nca*Nco/(Nca+Nco) > 5000, h2 > -0.01),
+ggplot(sumstats_h2_table  %>% filter(4*Nca*Nco/(Nca+Nco) > 5000, h2 > -0.1, h2 < 1),
         aes(x=abbv,
             y=h2,
             ymin=h2+se*qnorm(0.025),

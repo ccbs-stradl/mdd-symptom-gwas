@@ -339,7 +339,7 @@ symptoms_sample_prev %>%
   select(cohorts, samp_prev, h) %>%
   pivot_wider(names_from=cohorts, values_from=samp_prev)
 
-ggplot(cohorts_sample_prev, aes(x=AGDS_PGC, y=Comm)) +
+ggplot(cohorts_sample_prev, aes(x=Clin, y=Comm)) +
 geom_abline(col='red') +
 geom_point() +
 geom_text(aes(label=h), hjust=-0.1) +
@@ -357,7 +357,7 @@ Correlation (Spearman's rho) between sample prevalences in UKB CIDI and PGC DSM:
 
 ```{r}
 
-with(cohorts_sample_prev, cor.test(AGDS_PGC, Comm, method='spearman', use='pair'))
+with(cohorts_sample_prev, cor.test(Clin, Comm, method='spearman', use='pair'))
 
 ```
 
@@ -369,15 +369,15 @@ Combine the sample prevalences weighted by assuming 15% population prevalence of
 
 pop_prevs_w <-
 symptoms_sample_prev %>%
-filter(cohorts %in% c('AGDS_PGC', 'Comm')) |>
-mutate(w=case_when(cohorts == 'AGDS_PGC' ~ 0.15,
+filter(cohorts %in% c('Clin', 'Comm')) |>
+mutate(w=case_when(cohorts == 'Clin' ~ 0.15,
                    symptom %in% c('MDD1', 'MDD2') ~ 1.0,
                    TRUE ~ 0.57)) %>%
 mutate(pop_prev=samp_prev*w) %>%
 select(symptom, cohorts, pop_prev) %>%
 pivot_wider(names_from=cohorts, values_from=pop_prev) %>%
 group_by(symptom) %>%
-mutate(pop_prev=mean(c(AGDS_PGC, Comm))) %>%
+mutate(pop_prev=mean(c(Clin, Comm))) %>%
 select(symptom, pop_prev)
 
 pop_prevs_w
@@ -392,7 +392,7 @@ We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with 
 AGDS+PGC and ALSPAC+UKB sumstats
 ```{r covstruc, results='hide'}
 
-covstruct_prefix <- 'agds_pgc.comm.covstruct'
+covstruct_prefix <- 'clin.comm.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
@@ -402,7 +402,7 @@ if(!file.exists(covstruct_r)) {
   sumstats_files <- list.files(file.path('meta', 'munged'), '.+sumstats\\.gz$', full.names=TRUE)
 
   # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Z_]+).(MDD[:digit:](a|b)?)')[,1]
+  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Za-z_]+).(MDD[:digit:](a|b)?)')[,1]
 
   sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
 
@@ -414,9 +414,9 @@ if(!file.exists(covstruct_r)) {
     mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev))
     
   sumstats_prevs_keep <- sumstats_prevs |>
-    filter(cohorts %in% c('AGDS_PGC', 'Comm', 'UKBt')) |>
-    filter(!sumstats %in% c("AGDS_PGC.MDD1_depressed", "AGDS_PGC.MDD2_anhedonia", "AGDS_PGC.MDD6_fatigue", 
-    "AGDS_PGC.MDD7_worthless", "AGDS_PGC.MDD8_concentration", "ALSPAC_UKB.MDD5a_psychomotorFast", "ALSPAC_UKB.MDD5b_psychomotorSlow"))
+    filter(cohorts %in% c('Clin', 'Comm', 'UKBt')) |>
+    filter(!sumstats %in% c("Clin.MDD1_depressed", "Clin.MDD2_anhedonia", "Clin.MDD5b_psychomotorSlow", "Clin.MDD6_fatigue", 
+    "Clin.MDD7_worthless", "Clin.MDD8_concentration", "Comm.MDD5a_psychomotorFast", "Comm.MDD5b_psychomotorSlow"))
 
   write_tsv(sumstats_prevs, file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 
@@ -499,12 +499,12 @@ if(!file.exists(sumstats_h2_txt)) {
   sumstats_h2_table <-
   sumstats_h2 %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
-  mutate(sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clin',
+  mutate(sample=case_when(cohorts == 'Clin' ~ 'Clin',
                         cohorts == 'Comm' ~ 'Comm',
                         cohorts == 'UKBt' ~ 'Ukb',
                         cohorts == 'ALL' ~ 'All',
                         TRUE ~ NA_character_),
-      Sample=case_when(cohorts == 'AGDS_PGC' ~ 'Clinical',
+      Sample=case_when(cohorts == 'Clin' ~ 'Clinical',
                        cohorts == 'Comm' ~ 'Community',
                        cohorts == 'UKBt' ~ 'UK Biobank',
                        cohorts == 'ALL' ~ 'All',
@@ -531,7 +531,7 @@ if(!file.exists(sumstats_h2_txt)) {
 ```{r mdd_symptom_gsem_h2}
 
 mdd_symptom_gsem_h2.gg <-
-ggplot(sumstats_h2_table  %>% filter(4*Nca*Nco/(Nca+Nco) > 5000, h2 > -0.01),
+ggplot(sumstats_h2_table  %>% filter(4*Nca*Nco/(Nca+Nco) > 5000, h2 > -0.1, h2 < 1),
         aes(x=abbv,
             y=h2,
             ymin=h2+se*qnorm(0.025),
