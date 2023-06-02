@@ -30,7 +30,7 @@ List of `basic.xls` files from Ricopili with sample counts
 
 basic_xls_list <- list.files('meta/distribution', pattern='basic.*.xls', full.names=TRUE, recursive=TRUE)
 
-names(basic_xls_list) <- str_match(basename(basic_xls_list), "basic\\.([A-Z_]+\\.MDD[0-9A-Za-z_]+)")[,2]
+names(basic_xls_list) <- str_match(basename(basic_xls_list), "basic\\.([A-Za-z_]+\\.MDD[0-9A-Za-z_]+)")[,2]
 
 basics <- bind_rows(lapply(basic_xls_list, read_excel), .id='meta')
 
@@ -54,20 +54,30 @@ Merge and reformat
 basics_aligned <- 
 cohort_alignment %>%
 filter(!reference %in% c('MDD3', 'MDD4')) %>%
-mutate(Dataset=str_replace(str_remove(filename, pattern='daner_'), 'gz', 'aligned.gz')) %>%
-left_join(basics_datasets, by='Dataset') 
-
+mutate(Dataset=str_replace(str_remove(filename, pattern='daner_'), 'gz', 'align.gz')) %>%
+left_join(basics_datasets, by='Dataset') |>
+mutate(cohort = if_else(cohort == "janpy", true = "PGC", false=cohort)) |>
+group_by(cohort, reference) |>
+summarize(N_cases=sum(N_cases, na.rm=T), N_controls=sum(N_controls, na.rm=T), N_eff_half=sum(N_eff_half, na.rm=T)) |>
+ungroup()
 
 presence_absence <- basics_aligned %>% str_glue_data("{N_cases}:{N_controls} {round(100*N_cases/(N_cases + N_controls))}")
 
+basics_formatted <- 
 basics_aligned %>%
 mutate(PresenceAbsence=as.character(presence_absence)) %>%
 select(cohort, reference, PresenceAbsence) %>%
 pivot_wider(names_from=cohort, values_from=PresenceAbsence)
 
+knitr::kable(basics_formatted)
+
+```
+
+```{r}
+
 basics_sum <-
 basics_aligned %>%
-mutate(sample=if_else(cohort %in% c('AGDS', 'PGC'), true='enriched', false='unselected')) %>%
+mutate(sample=if_else(cohort %in% c('AGDS', 'PGC', 'GenScot'), true='enriched', false='unselected')) %>%
 group_by(sample, reference) %>%
 summarise(N_cases=sum(N_cases), N_controls=sum(N_controls)) 
 
@@ -87,12 +97,6 @@ mutate(d50=abs(0.5-P)) %>%
 arrange(sample, d50) %>%
 print(n=Inf)
 
-basics_sum %>% 
-transmute(sample, reference, P=N_cases / (N_controls + N_cases)) %>% 
-mutate(d50=abs(0.5-P)) %>%
-arrange(sample, P) %>%
-print(n=Inf)
-
 ```
 
 Datasets
@@ -104,10 +108,6 @@ basics_meta %>%
 	mutate(cohort=str_match(Dataset, "([A-Z_]+)")[,2],
 	       reference=str_match(Dataset, "(MDD[0-9a-b]+)")[,2])
 		   
-meta <-
-bind_rows(basics_aligned, meta_aligned) %>%
-select(-filename)
-
-write_csv(meta, "meta/meta.csv")
+write_csv(meta_aligned, "meta/meta.csv")
 
 ```
