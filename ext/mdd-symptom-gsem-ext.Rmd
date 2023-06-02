@@ -238,7 +238,7 @@ Load previously calculated symptom prevalences:
 
 ```{r prevs}
 
-all_covstruct_prefix <- 'agds_pgc.alspac_ukb.covstruct'
+all_covstruct_prefix <- 'clin.comm.covstruct'
 all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.'))) 
 
 ```
@@ -259,8 +259,8 @@ if(!file.exists(covstruct_r)) {
   symptoms_sumstats_prevs <- all_sumstats_prevs %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
   mutate(samp_prev=0.5,
-         cohort=case_when(str_detect(filename, 'AGDS_PGC') ~ 'Clin',
-                          str_detect(filename, 'ALSPAC_UKB') ~ 'Comm',
+         cohort=case_when(str_detect(filename, 'Clin') ~ 'Clin',
+                          str_detect(filename, 'Comm') ~ 'Comm',
                           str_detect(filename, 'UKBt') ~ 'Ukb')) %>%
   transmute(filename=here::here(filename), samp_prev, pop_prev, trait_name=paste0(cohort, abbv))
 
@@ -305,7 +305,7 @@ Base model of symptom factors, with merged Cognitive/Vegeative and Appetite.
 ```{r symptom_model, cache=TRUE}
 
 model <- "
-DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -313,11 +313,6 @@ DEP ~~ 1*DEP
 APP ~~ 1*APP
 GATE ~~ 1*GATE
 GATE ~~ 0*DEP + 0*APP
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 "
 fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRUE)
 
@@ -330,7 +325,7 @@ Base model of Clinical and Community sample factors.
 ```{r sample_model, cache=TRUE}
 
 model <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -352,7 +347,7 @@ Compare symptom factors against each external phenotype. Single regression of ea
 ```{r ext_glue, cache=TRUE}
 
 ext_symp.glue <- "
-DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -360,11 +355,6 @@ DEP ~~ 1*DEP
 APP ~~ 1*APP
 GATE ~~ 1*GATE
 GATE ~~ 0*DEP + 0*APP
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 
 AlcDep ~ {symptom}
 Anxiety ~  {symptom}
@@ -391,7 +381,7 @@ ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(sympt
 ```{r ext_samp_glue, cache=TRUE}
 
 ext_samp.glue <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -441,7 +431,7 @@ Multiple regression of each phenotype on symptom factors, to estimate relationsh
 ```{r ext_mult, cache=TRUE}
 
 ext_mult_symp.model <- "
-DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -449,11 +439,6 @@ DEP ~~ 1*DEP
 APP ~~ 1*APP
 GATE ~~ 1*GATE
 GATE ~~ 0*DEP + 0*APP
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 
 AlcDep ~ DEP + APP + GATE
 Anxiety ~  DEP + APP + GATE
@@ -478,7 +463,7 @@ ext_mult_symp.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_
 ```{r ext_samp_mult, cache=TRUE}
 
 ext_samp_mult.model <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
