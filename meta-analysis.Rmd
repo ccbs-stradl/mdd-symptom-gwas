@@ -11,6 +11,7 @@ Meta analyze MDD Symptom GWASs for the following sets of cohorts:
 1. Clinical/Enriched:
   - [PGC MDD](pgc-symptom-gwas.html) cases
   - [Australian of Depression Study](https://www.geneticsofdepression.org.au/)
+  - Jannsen
   - [Generation Scotland](http://generationscotland.org) MDD cases
 2. Community cohorts:
   - [ALSPAC](http://www.bristol.ac.uk/alspac/)
@@ -22,6 +23,7 @@ Meta analyze MDD Symptom GWASs for the following sets of cohorts:
 
 library(readr)
 library(dplyr)
+library(stringr)
 
 dsm_mdd_symptoms_reference <-
 read_delim("
@@ -35,7 +37,7 @@ MDD4a;sleepProb;Insomnia nearly every day
 MDD4b;sleepMore;Hypersomnia nearly every day
 MDD5;psychomotor;Changes in speed/amount of moving or speaking
 MDD5a;psychomotorFast;Psychomotor agitation nearly every day
-MDD5b;psychomotorSlow;Psychomotor slowing nearly every day
+MDD5b;psychomotorSlow;Psychomotor retardation nearly every day
 MDD6;fatigue;Fatigue or loss of energy nearly every day
 MDD7;worthless;Feelings of worthlessness or excessive or inappropriate guilt
 MDD8;concentration;Diminished ability to think or concentrate, or indecisiveness
@@ -76,7 +78,7 @@ nextflow run meta/align.nf -resume \
 Number of SNPs pre- and post-alignment
 ```{r aligned}
 
-aligned_count_files <- list.files('meta/aligned', pattern='aligned_snpcount', full.names=TRUE)
+aligned_count_files <- list.files('meta/aligned', pattern='snpcount', full.names=TRUE)
 
 bind_rows(lapply(aligned_count_files, read_tsv, col_types=cols(gwas = col_character(), pre_align = col_integer(), post_align = col_integer())))
 
@@ -86,9 +88,9 @@ bind_rows(lapply(aligned_count_files, read_tsv, col_types=cols(gwas = col_charac
 
 Set up dataset lists for meta-analysis. First, create symlinks to all of the aligned sumstats files in the `meta` directory
 
-```{bash symlink}
+```{bash symlink, eval=FALSE}
 
-for gz in sumstats/aligned/*.gz; do
+for gz in meta/aligned/*.gz; do
         ln -sr $gz meta/$(basename $gz);
 done
 
@@ -101,15 +103,18 @@ Open mapping between sumstats filenames and MDD symptom reference numbers. Meta-
 # open file
 cohorts <- read_tsv('meta/cohort_alignment.txt')
 
+aligned_daner_files <- list.files('meta/aligned', pattern='gz', full.names=TRUE)
+
 # create aligned filenames
 cohorts_reference <-
 cohorts %>%
 left_join(dsm_mdd_symptoms_reference, by=c('reference'='Reference')) %>%
-mutate(metagroup=case_when(cohort %in% c('AGDS', 'PGC') ~ 'AGDS_PGC',
-                           cohort %in% c('ALSPAC', 'UKBB') ~ 'ALSPAC_UKB',
+mutate(metagroup=case_when(cohort %in% c('AGDS', 'PGC', 'GenScot', 'janpy') ~ 'Clin',
+                           cohort %in% c('ALSPAC', 'UKBB', 'EstBB') ~ 'Comm',
                            TRUE ~ NA_character_)) %>%
 mutate(meta=paste0(metagroup, '.', reference, '_', `Symptom Abbrev.`, '.meta')) %>%
-mutate(aligned_gz=str_replace(filename, 'gz', 'aligned.gz')) %>%
+mutate(aligned_gz=str_replace(filename, 'gz', 'align.gz')) %>%
+filter(aligned_gz %in% basename(aligned_daner_files)) %>%
 # discard non-directional symptoms
 filter(!reference %in% c('MDD3', 'MDD4')) %>%
 # select meta-analyses where there are at least two sumstats
@@ -118,8 +123,12 @@ group_by(meta) %>%
 ungroup()
 
 for(metafile in unique(cohorts_reference$meta)) {
+	
+	meta_cohorts <- cohorts_reference %>%
+	  filter(meta == metafile) %>%
+	  select(aligned_gz)
 
-  write_tsv(cohorts_reference %>% filter(meta == metafile) %>% select(aligned_gz), path=file.path('meta', metafile), col_names=F)
+ 	 write_tsv(meta_cohorts, file=file.path('meta', metafile), col_names=F)
 
 }
 
@@ -134,7 +143,7 @@ cd meta
 for metafile in *.meta; do
        outname=$(basename $metafile .meta)
        if [ ! -f j._pi_${outname} -a ! -f distribution/${outname}/daner_${outname}.gz ]; then
-         postimp_navi --result $metafile --nolahunt --popname EUR  --out $outname 
+         echo postimp_navi --result $metafile --nolahunt --noldsc --popname EUR  --out $outname 
        fi
 done
 

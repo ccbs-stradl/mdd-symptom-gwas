@@ -98,16 +98,27 @@ process ALIGN {
 
     daner <- read_table("${daner}")
     impute_frq2 <- readRDS("${ref}")
+	
+	# Flip alleles. handle arbitrary allele length
+	flip <- function(allele) {
+		allele_lower <- tolower(allele)
+		stringi::stri_replace_all_fixed(allele_lower, c('a', 'c', 'g', 't'), c('T', 'G', 'C', 'A'), vectorise_all=FALSE)
+	}
+
 
     # merge on chromosome and position
     daner_ref <- daner |>
     left_join(impute_frq2 ,
             by=c('CHR'='CHR', 'BP'='POS'), suffix=c('', '.ref')) |>
+	mutate(A1.flip = flip(A1), A2.flip = flip(A2)) |>
     # keep SNPs where alleles match
-    filter((A1 == A1.ref & A2 == A2.ref) | (A1 == A2.ref & A2 == A1.ref)) |>
+    filter((A1 == A1.ref & A2 == A2.ref) |
+		   (A1 == A2.ref & A2 == A1.ref) |
+		   (A1.flip == A1.ref & A2.flip == A2.ref) |
+		   (A1.flip == A2.ref & A2.flip == A1.ref)) |>
     # user ref markername
     mutate(SNP=SNP.ref) |>
-    select(-ends_with('.ref')) |>
+    select(-ends_with('.ref'), -ends_with('.flip')) |>
     arrange(CHR, BP)
 
     write_tsv(daner_ref, "${daner.baseName}.align.gz")

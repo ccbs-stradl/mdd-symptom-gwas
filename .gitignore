@@ -30,6 +30,9 @@ meta/resdaner
 meta/emptyinfo
 meta/datasets_info*
 meta/empty_info
+meta/dameta*
+meta/danerjobdir*
+meta/report*
 *.meta
 *.done
 meta/distribution/*
