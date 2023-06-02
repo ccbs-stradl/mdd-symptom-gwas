@@ -95,7 +95,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -124,7 +124,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -464,7 +464,7 @@ if(!file.exists(symptoms_sample_prev_file)) {
 ```
 
     ## Rows: 26 Columns: 6
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (3): cohorts, symptom, sumstats
     ## dbl (3): Nca, Nco, samp_prev
@@ -481,16 +481,16 @@ symptoms_sample_prev %>%
     ## # A tibble: 26 × 6
     ##    Cohorts Ref   Symptom  Cases Controls `Sample prevalence`
     ##    <chr>   <chr> <chr>    <dbl>    <dbl>               <dbl>
-    ##  1 Clin    MDD1  Mood     29741     1798               0.943
-    ##  2 Clin    MDD2  Interest 28272     2730               0.912
-    ##  3 Clin    MDD3a Weight⇊  10366    14807               0.412
-    ##  4 Clin    MDD3b Weight⇈   7941    14946               0.347
-    ##  5 Clin    MDD4a Sleep⇊   21239     6664               0.761
-    ##  6 Clin    MDD4b Sleep⇈   10918    13300               0.451
-    ##  7 Clin    MDD5a Motor⇈   11354    13117               0.464
-    ##  8 Clin    MDD5b Motor⇊   13732    12433               0.525
-    ##  9 Clin    MDD6  Fatigue  26688     2388               0.918
-    ## 10 Clin    MDD7  Guilt    24941     4389               0.850
+    ##  1 Clin    MDD1  Mood     21681     1748               0.925
+    ##  2 Clin    MDD2  Interest 24732     2801               0.898
+    ##  3 Clin    MDD3a Weight⇊   9265    14594               0.388
+    ##  4 Clin    MDD3b Weight⇈   7902    13167               0.375
+    ##  5 Clin    MDD4a Sleep⇊   18917     6573               0.742
+    ##  6 Clin    MDD4b Sleep⇈   10586    11050               0.489
+    ##  7 Clin    MDD5a Motor⇈   10447    12372               0.458
+    ##  8 Clin    MDD5b Motor⇊   12701    11214               0.531
+    ##  9 Clin    MDD6  Fatigue  23941     2497               0.906
+    ## 10 Clin    MDD7  Guilt    21921     3888               0.849
     ## # … with 16 more rows
 
 ``` r
@@ -528,11 +528,11 @@ with(cohorts_sample_prev, cor.test(Clin, Comm, method='spearman', use='pair'))
     ##  Spearman's rank correlation rho
     ## 
     ## data:  Clin and Comm
-    ## S = 116, p-value = 0.04575
+    ## S = 110, p-value = 0.03733
     ## alternative hypothesis: true rho is not equal to 0
     ## sample estimates:
     ##       rho 
-    ## 0.5944056
+    ## 0.6153846
 
 ## Population prevalences
 
@@ -561,15 +561,15 @@ pop_prevs_w
     ## # Groups:   symptom [12]
     ##    symptom pop_prev
     ##    <chr>      <dbl>
-    ##  1 MDD1      0.331 
-    ##  2 MDD2      0.264 
-    ##  3 MDD3a     0.179 
-    ##  4 MDD3b     0.135 
-    ##  5 MDD4a     0.281 
-    ##  6 MDD4b     0.177 
-    ##  7 MDD5a     0.0446
-    ##  8 MDD5b     0.0652
-    ##  9 MDD6      0.307 
+    ##  1 MDD1      0.330 
+    ##  2 MDD2      0.263 
+    ##  3 MDD3a     0.177 
+    ##  4 MDD3b     0.137 
+    ##  5 MDD4a     0.280 
+    ##  6 MDD4b     0.179 
+    ##  7 MDD5a     0.0441
+    ##  8 MDD5b     0.0657
+    ##  9 MDD6      0.306 
     ## 10 MDD7      0.231 
     ## 11 MDD8      0.286 
     ## 12 MDD9      0.176
@@ -589,37 +589,35 @@ system. A simple caching strategy is employed to check whether the
 covariance structure already exists and, if so, to parse it rather than
 re-running the LD score calculation.
 
-AGDS+PGC and ALSPAC+UKB sumstats
+Clinical and Community sumstats
 
 ``` r
 covstruct_prefix <- 'clin.comm.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
+# list sumstats distribution directories
+sumstats_files <- list.files(file.path('meta', 'munged'), '.+sumstats\\.gz$', full.names=TRUE)
+
+# pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
+cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Za-z_]+).(MDD[:digit:](a|b)?)')[,1]
+
+sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
+
+sumstats_prevs <- 
+symptoms_sample_prev %>%
+inner_join(sumstats_paths, by='sumstats') %>%
+left_join(pop_prevs_w, by='symptom') %>%
+mutate(trait_name=paste(cohorts, symptom, sep='.')) |>
+mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev))
+
+sumstats_prevs_keep <- sumstats_prevs |>
+filter(cohorts %in% c('Clin', 'Comm', 'UKBt')) |>
+filter(!sumstats %in% c("Clin.MDD1_depressed", "Clin.MDD2_anhedonia", "Clin.MDD6_fatigue", "Clin.MDD8_concentration", "Comm.MDD5a_psychomotorFast", "Comm.MDD5b_psychomotorSlow"))
+
+write_tsv(sumstats_prevs, file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
+  
 if(!file.exists(covstruct_r)) {
-
-  # list sumstats distribution directories
-  sumstats_files <- list.files(file.path('meta', 'munged'), '.+sumstats\\.gz$', full.names=TRUE)
-
-  # pull out which cohorts and symptom 'x' this is from the filename (COHORTS_MDDx_*)
-  cohorts_symptoms <- str_match(basename(sumstats_files), '([A-Za-z_]+).(MDD[:digit:](a|b)?)')[,1]
-
-  sumstats_paths <- data.frame(filename=sumstats_files, sumstats=str_remove(basename(sumstats_files), '.sumstats.gz'))
-
-  sumstats_prevs <- 
-    symptoms_sample_prev %>%
-    inner_join(sumstats_paths, by='sumstats') %>%
-    left_join(pop_prevs_w, by='symptom') %>%
-    mutate(trait_name=paste(cohorts, symptom, sep='.')) |>
-    mutate(pop_prev=if_else(cohorts=='UKBt', true=samp_prev, false=pop_prev))
-    
-  sumstats_prevs_keep <- sumstats_prevs |>
-    filter(cohorts %in% c('Clin', 'Comm', 'UKBt')) |>
-    filter(!sumstats %in% c("Clin.MDD1_depressed", "Clin.MDD2_anhedonia", "Clin.MDD5b_psychomotorSlow", "Clin.MDD6_fatigue", 
-    "Clin.MDD7_worthless", "Clin.MDD8_concentration", "Comm.MDD5a_psychomotorFast", "Comm.MDD5b_psychomotorSlow"))
-
-  write_tsv(sumstats_prevs, file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
-
   symptoms_covstruct <- ldsc(traits=sumstats_prevs_keep$filename,
                              sample.prev=rep(0.5, times=length(sumstats_prevs_keep$samp_prev)),
                              population.prev=sumstats_prevs_keep$pop_prev,
@@ -643,7 +641,7 @@ if(!file.exists(covstruct_r)) {
 ```
 
     ## Rows: 26 Columns: 9
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -736,7 +734,7 @@ if(!file.exists(sumstats_h2_txt)) {
 ```
 
     ## Rows: 26 Columns: 17
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr  (7): Sample, sample_symptom, ref, cohorts, abbv, sumstats, filename
     ## dbl (10): h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE, Nca, Nco, sam...
@@ -746,7 +744,7 @@ if(!file.exists(sumstats_h2_txt)) {
 
 ``` r
 mdd_symptom_gsem_h2.gg <-
-ggplot(sumstats_h2_table  %>% filter(4*Nca*Nco/(Nca+Nco) > 5000, h2 > -0.1, h2 < 1),
+ggplot(sumstats_h2_table  %>% filter(4*Nca*Nco/(Nca+Nco) > 5000, h2 > 0, h2 < 1),
         aes(x=abbv,
             y=h2,
             ymin=h2+se*qnorm(0.025),
