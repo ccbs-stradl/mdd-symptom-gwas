@@ -16,6 +16,7 @@ fields.ukb
 sumstats/UKB/*.r
 sumstats/**/*.png
 sumstats/reference
+**/aligned
 sumstats/aligned
 sumstats/UKB/Touchscreen
 *_cache/
@@ -23,6 +24,14 @@ meta/pcaer_sub
 meta/pi_sub
 meta/reference_info
 meta/refiex_templ
+meta/j._*
+meta/errandout
+meta/resdaner
+meta/emptyinfo
+meta/datasets_info*
+meta/empty_info
+*.meta
+*.done
 meta/distribution/*
 meta/distribution
 meta/munged
@@ -30,6 +39,10 @@ meta/munged
 pheno/*
 *.RData
 mtag/mtag/
+.nextflow*
+**/work/
+HRC_reference.r1-1
+pgc_gwas/
 ext/sumstats
 prs/genscot
 prs/lib

@@ -51,9 +51,8 @@ srun -n 16 -t 1:00:00 --pty bash -il
 
 #Load R
 
-module load pre2019
-
-module load R/3.4.3
+module load 2022
+module load R/4.2.1-foss-2022a
 
 R
 
@@ -61,12 +60,11 @@ R
 
 Load libraries and configure input directories
 
-```{r, eval=FALSE}
-
+```{r}
 library(yaml)
-library(gdata)
+library(readxl)
+library(readr)
 library(stringr)
-library(plyr)
 library(dplyr)
 library(tidyr)
 
@@ -75,257 +73,147 @@ config <- yaml.load_file('config.yaml')
 
 # input and output directories and files
 mdd_v1_dir <- config$data$pgc$mdd$v1
-output_dir <- config$data$pgc$mdd$output
-ukb_remove <- config$data$pgc$mdd$ukb_remove
+mdd_v2_dir <- config$data$pgc$mdd$v2
 
+output_dir = "pgc_gwas"
 ```
 
 ## Phenotype files 
 
-Extract 9 pheno files - One for each symptom.
+Extract 12 MDD symptoms
 
-```{r, eval=FALSE}
+```{r}
+
+#Extract 12 symptoms
 symptoms <- c("MDD1", "MDD2", "MDD3a", "MDD3b", "MDD4a", "MDD4b", "MDD5a", "MDD5b", "MDD6", "MDD7", "MDD8", "MDD9")
-studies <- c("RADIANT", "STR", "ROTTERDAM", "QIMR", "NESDANTR", "GSK", "GENRED", "GENRED2", "EDINBURGH", "CoLaus", "COFAMS", "BonnMH")
-study_noupdate <- c("STARD", "SHIP0", "MARS", "Janssen", "GENPOD")
+studies <- c("RADIANT", "STR", "ROTTERDAM", "QIMR", "NESDANTR", "GSK", "GENRED", "GENRED2", "CoLaus", "COFAMS", "BonnMH")
+studies_v2 <- c("BiDirect")
+study_noupdate <- c("STARD", "SHIP0", "MARS", "GENPOD")
 
 dir.create(output_dir, recursive=TRUE)
 
+pheno_xls <- c(
+  list.files(file.path(mdd_v1_dir, "secondary_phenotypes", "1216_update"), ".xls", full.names=TRUE),
+  list.files(file.path(mdd_v2_dir, "phenotype"), ".xls", full.names=TRUE)
+)
 
-updated <- data.frame()
-for (i in studies) {
-mdd <- read.xls(file.path(mdd_v1_dir, paste0("secondary_phenotypes/1216_update/",i,"_PGC2updated.xls")), header=T)
-updated <- rbind.fill(updated, mdd)
-}
+names(pheno_xls) <- basename(pheno_xls)
 
-noupdate <- data.frame()
-for (j in study_noupdate) {
-mdd <- read.xls(file.path(mdd_v1_dir, paste0("secondary_phenotypes/1216_update/",j,"_PGC2.xls")), header=T)
-noupdate <- rbind.fill(noupdate, mdd)
-}
-
-for (i in symptoms){
-full <- rbind.fill(updated,noupdate)
-full <- full[,c("ID1","ID2","Study","Sub.study", i)]
-write.table(full,file.path(output_dir, paste0(i,"_PGCMDD2.tsv", sep="")), sep="\t", row.names=F, quote=F)
-}
+phenotypes <- 
+bind_rows(
+lapply(pheno_xls, 
+  function(xls) read_excel(xls) |>
+                       mutate(across(ID2:Sub.study, .fns=as.character)) |>
+                       select(ID1, ID2, Study, Sub.study, MDD1:MDD9) |> 
+                       mutate(across(MDD1:MDD9, as.numeric))
+),
+.id="filename"
+) |>
+separate(filename, into=c('file', 'update'))
 ```
 
-## Cases and controls symptom data 
+## Code phenotypes
 
-Subset by studies that have symptom data for cases and controls
+```{r}
+pheno_au <- 
+phenotypes |> mutate(across(MDD1:MDD9, ~ case_when(.x == 1 ~ 2L,
+                                             .x == 0 ~ 1L,
+                                             TRUE ~ NA_integer_))) |>
+mutate(dataset = sapply(str_split(ID1, pattern = "_", n = 4), function(id) id[3]))
 
-```{r, eval=FALSE}
-for (i in symptoms) {
-MDD <-read.table(file.path(output_dir, paste0(i,'_PGCMDD2.tsv', sep="")), sep="\t", header=T)
-keepStudy <- c("COF", "Colaus", "NESDA/NTR", "ROTTERDAM", "SHIP-0", "RS")
-#Change pheno file for 1=controls, 2=cases and -9=unknowns as stated on RICOPILI
-MDD[,i][!MDD$Study %in% keepStudy] <- -9 #Remove cases and controls not in the correct cohort
-MDD[,i][is.na(MDD[,i])] <- -9  #Recode NAs to -9
-MDD[,i][!MDD[,i] %in% c(0, 1)] <- -9  #Recode values that are not 0 or 1 to -9
-MDD[,i][MDD[,i]==1] <- 2 
-MDD[,i][MDD[,i]==0] <- 1
-print(table(MDD[[i]]))
-write.table(MDD, file.path(output_dir, paste0(i,"_CasesControls_PGCMDD2_recoded.tsv", sep="")), sep="\t", row.names=F, quote=F)
-}
+write_tsv(pheno_au, file.path(output_dir, "mddw2_symptoms.txt"))
+write_tsv(select(pheno_au, FID=ID1, IID=ID2, starts_with("MDD")), file.path(output_dir, "mddw2_symptoms.pheno"), na="-9")
 ```
 
-## Cases-only symptom data
+## Covariates
 
-Subset by studies that have symptom data for cases only 
+```{r}
 
-```{r, eval=FALSE}
-for (i in symptoms) {
-MDD <-read.table(file.path(output_dir, paste0(i,'_PGCMDD2.tsv', sep="")), sep="\t", header=T)
-keepStudy <- c("STARD", "RADIANT", "STR", "QIMR_317370K", "QIMR_610660K", "QIMR_Omni", "MARS", "GSK", "genpod", "1", "2", NA)
-#Change pheno file for 1=controls, 2=cases and -9=unknowns as stated on RICOPILI
-MDD[,i][!MDD$Study %in% keepStudy] <- -9 #Remove cases and controls not in the correct cohort
-MDD[,i][is.na(MDD[,i])] <- -9  #Recode NAs to -9
-MDD[,i][!MDD[,i] %in% c(0, 1)] <- -9  #Recode values that are not 0 or 1 to -9
-MDD[,i][MDD[,i]==1] <- 2 
-MDD[,i][MDD[,i]==0] <- 1 
-print(table(MDD[[i]]))
-write.table(MDD, file.path(output_dir, paste0(i,"_CasesOnly_PGCMDD2_recoded.tsv", sep="")), sep="\t", row.names=F, quote=F)
-}
+# extract covariates
+v1_cov <- read_table(file.path(mdd_v1_dir, "MDD29.0515.nproj.menv.mds_cov"))
+v2_cov <- read_table(file.path(mdd_v2_dir, "cobg_gw.Bidirect.menv.mds_cov"))
+covar <- bind_rows(v1_cov, v2_cov)
 
+write_tsv(covar, file.path(output_dir, "mddw2.covar"))
 ```
 
-## Overlap with UK Biobank 
+## Cases cohorts
 
-Remove overlapping samples with UKB - remove according to ID1 and ID2 
+Identify cohorts with cases that vary in symptoms.
 
-```{r, eval=FALSE}
-UKB <- read.table(ukb_remove, sep="\t", header=F)
-UKB$ID1adj <- gsub("\\*.*","",UKB$V2) #Recode ID1 to remove IID component as there may be inconsistency between two datasets
-for (i in symptoms) {
-MDD <-read.table(file.path(output_dir, paste0(i,"_CasesControls_PGCMDD2_recoded.tsv", sep="")), sep="\t", header=T)
-MDD$ID1adj <- gsub("\\*.*","",MDD$ID1) #Recode ID1 to remove IID component as there may be inconsistency between two datasets
-print(dim(MDD))
-#filter MDD for IDs not in the UKB sample
-MDD2 <- MDD %>%
-filter(!MDD$ID2 %in% UKB$V3 & !MDD$ID1adj %in% UKB$V2)
-print(dim(MDD2))
-# check how many overlapped that had phenotypes
-MDD %>%
-  filter(MDD$ID2 %in% UKB$V3 & MDD$ID1adj %in% UKB$ID1adj) %>%
-  filter_at(i, any_vars(. != -9)) %>%
-  group_by(Study) %>%
-  tally()
-#293 removed due to overlap with UKB - 205 from RADIANT which makes sense
-MDD_pheno <- MDD2[,c(1,2,5)]
-write.table(MDD_pheno, file.path(output_dir, paste0(i,"_CasesControls_PGCMDD2_final.tsv", sep="")), sep="\t", row.names=F, col.names=F, quote=F)
-}
+```{r}
 
-for (i in symptoms) {
-MDD <-read.table(file.path(output_dir, paste0(i,"_CasesOnly_PGCMDD2_recoded.tsv", sep="")), sep="\t", header=T)
-MDD$ID1adj <- gsub("\\*.*","",MDD$ID1) #Recode ID1 to remove IID component as there may be inconsistency between two datasets
-print(dim(MDD))
-#filter MDD for IDs not in the UKB sample
-MDD2 <- MDD %>%
-filter(!MDD$ID2 %in% UKB$V3 & !MDD$ID1adj %in% UKB$V2)
-print(dim(MDD2))
-MDD %>%
-  filter(MDD$ID2 %in% UKB$V3 & MDD$ID1adj %in% UKB$ID1adj) %>%
-  filter_at(i, any_vars(. != -9)) %>%
-  group_by(Study) %>%
-  tally()
-#293 removed due to overlap with UKB - 205 from RADIANT which makes sense
-MDD_pheno <- MDD2[,c(1,2,5)]
-write.table(MDD_pheno, file.path(output_dir, paste0(i,"_CasesOnly_PGCMDD2_final.tsv", sep="")), sep="\t", row.names=F, col.names=F, quote=F)
-}
+cases <- pheno_au |>
+filter(str_detect(ID1, "^cas_mdd"))
 
+cohorts_with_case_symptoms <- 
+cases |>
+pivot_longer(cols=MDD1:MDD9, names_to = "symptom", values_to = "status") |>
+filter(status %in% 1:2) |>
+distinct(dataset, symptom, status) |>
+count(dataset, symptom) |>
+filter(n == 2) |>
+distinct(dataset)
+
+cases_ids <- cases |>
+filter(dataset %in% pull(cohorts_with_case_symptoms, dataset)) |>
+select(FID=ID1, IID=ID2)
+
+write_tsv(cases_ids, file.path(output_dir, "cases.id"))
+write_tsv(cohorts_with_case_symptoms, file.path(output_dir, "cohorts.keep"), col_names=F)
+```
+
+## UKB Overlap
+
+```{r}
+ukb <- read_table("pgc_gwas/959_PGC_UKB_overlap.id", col_names=c("FID", "IID"))
 ```
 
 # GWAS Pipeline
 
-Run Ricopoli
+Run GWAS across all symptoms for just cases
 
-## Cohorts with symptom data 
+```{sh, eval=FALSE}
 
-Symptom presence/absence among cases
+# symlink hardcall filenames
 
-```{bash, eval=FALSE}
+mkdir -p pgc_gwas/cobg_dir_genome_wide
 
-cat > datasets_info << EOF
-mdd_boma_eur_sr-qc.hg19.ch.fl
-mdd_cof3_eur_sr-qc.hg19.ch.fl
-mdd_col3_eur_sr-qc.hg19.ch.fl
-mdd_gens_eur_sr-qc.hg19.ch.fl
-mdd_gep3_eur_sr-qc.hg19.ch.fl
-mdd_grnd_eur_sr-qc.hg19.ch.fl
-mdd_gsk2_eur_sr-qc.hg19.ch.fl
-mdd_mmi2_eur_sr-qc.hg19.ch.fl
-mdd_mmo4_eur_sr-qc.hg19.ch.fl
-mdd_nes1_eur_sr-qc2.hg19.ch.fl
-mdd_qi3c_eur_sr-qc.hg19.ch.fl
-mdd_qi6c_eur_sr-qc.hg19.ch.fl
-mdd_qio2_eur_sr-qc.hg19.ch.fl
-mdd_rad3_eur_sr-qc.hg19.ch.fl
-mdd_rage_eur_sr-qc.hg19.ch.fl
-mdd_rai2_eur_sr-qc.hg19.ch.fl
-mdd_rau2_eur_sr-qc.hg19.ch.fl
-mdd_rde4_eur_sr-qc2.hg19.ch.fl
-mdd_rot4_eur_sr-qc.hg19.ch.fl
-mdd_shp0_eur_sr-qc.hg19.ch.fl
-mdd_stm2_eur_sr-qc.hg19.ch.fl
-mdd_twg2_eur_sr-qc.hg19.ch.fl
-EOF
+V1=$(cat config.yaml | grep "v1: /" | awk '{print $2}')
+V2=$(cat config.yaml | grep "v2: /" | awk '{print $2}')
 
-#Run analysis
-postimp_navi --out MDD1_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD1_PGCMDD2_final.txt #Done
-postimp_navi --out MDD2_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD2_PGCMDD2_final.txt #Done
-postimp_navi --out MDD3a_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD3a_PGCMDD2_final.txt #Done
-postimp_navi --out MDD3b_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD3b_PGCMDD2_final.txt
-postimp_navi --out MDD4a_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD4a_PGCMDD2_final.txt
-postimp_navi --out MDD4b_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD4b_PGCMDD2_final.txt
-postimp_navi --out MDD5a_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD5a_PGCMDD2_final.txt
-postimp_navi --out MDD5b_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD5b_PGCMDD2_final.txt
-postimp_navi --out MDD6_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD6_PGCMDD2_final.txt
-postimp_navi --out MDD7_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD7_PGCMDD2_final.txt
-postimp_navi --out MDD8_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD8_PGCMDD2_final.txt
-postimp_navi --out MDD9_CasesAllCohorts.1909 --mds MDD29.0515.nproj.menv.mds_cov --coco 1,2,3,4,5,6 --popname eur --pheno MDD9_PGCMDD2_final.txt
+while read cohort; do
+  if [ -f $V1/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
+    echo Linked $cohort
+    ln -sf $V1/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
+ elif [ -f $V1/genred_case_only/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.cases.bed ]; then
+ 	echo Linked $cohort
+ 	ln -sf $V1/genred_case_only/mdd_${cohort}_*.bgn.cases.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
+  elif [ -f $V2/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc2.hg19.ch.fl.bgn.bed ]; then
+    echo Linked $cohort
+    ln -sf $V2/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
+  else
+    echo Did not link $cohort
+  fi
+done<pgc_gwas/cohorts.keep
 
+# patch in cof3 (cof2) rau2 (raus)
+for cohort in cof3 rau2; do
+  if [ -f $V1/cobg_dir_genome_wide/mdd_${cohort}_eur_sr-qc*.hg19.ch.fl.bgn.bed ]; then
+    echo Linked $cohort
+    ln -sf $V1/cobg_dir_genome_wide/mdd_${cohort}_*.bgn.{bed,bim,fam} pgc_gwas/cobg_dir_genome_wide/
+  else
+    echo Did not link $cohort
+  fi
+done
 ```
 
-## Cohorts without symptom data
+```{sh, eval=FALSE}
 
-MDD case/control GWAS on all other cohorts. Replace `PATH` with path to single dataset summary statistics.
-
-```{bash, eval=FALSE}
-
-mkdir ~/mdd0
-
-cd mdd0
-
-ln -s /home/PATH/single_dataset/* .
-ln -s /home/PATH/single_dataset/additional_datasets/ * .
-ln -s /home/PATH/daner_23andMe_v5_170227_pgc_aligned_.assoc.gz
-ln -s /home/PATH/v1/reference_info 
-
-```
-
-### PGC anchor cohorts
-
-Run the [post-imputation module on just summary statistics](https://docs.google.com/document/d/1o4bN_uLK4IEItXCSdeQkXfZwEpLuSCWlveJevRogi08/). First, PGC anchor cohorts that were not included in the GWAS of symptoms
-
-```{bash, eval=FALSE}
-
-cat > pgc_mdd0_datasets << EOF
-daner_mdd_edi2_eur_sr-qc.hg19.ch.fl.gz
-daner_mdd_i2b3_eur_sr-qc.hg19.ch.fl.gz
-daner_mdd_jjp2_eur_sr-qc2.hg19.ch.fl.gz
-daner_mdd_pfm2_eur_sr-qc2.hg19.ch.fl.gz
-daner_mdd_roc3_eur_sr-qc.hg19.ch.fl.gz
-EOF
-
-postimp_navi --result pgc_mdd0_datasets --out pgc_mdd0.1019
-
-```
-
-### Additional Datasets
-
-```{bash, eval=FALSE}
-
-ln -s report_pgc_mdd0.1019/daner_pgc_mdd0.1019.gz .
-
-cat > mdd0_datasets << EOF
-daner_pgc_mdd0.1019.gz
-daner_GERA.euro.depress.0915a_mds5.id.gz
-daner_mdd_decode_160211.gz
-daner_mdd_genscot_1215a.gz
-daner_mddGWAS_new_ipsych_170220.meta.gz
-daner_23andMe_v5_170227_pgc_aligned_.assoc.gz
-EOF
-
-postimp_navi --result mdd0_datasets --out pgc_mdd0_meta.1019
-
-cat > mdd0_datasets_noiPsych << EOF
-daner_pgc_mdd0.1019.gz
-daner_GERA.euro.depress.0915a_mds5.id.gz
-daner_mdd_decode_160211.gz
-daner_mdd_genscot_1215a.gz
-daner_23andMe_v5_170227_pgc_aligned_.assoc.gz
-EOF
-
-postimp_navi --result mdd0_datasets_noiPsych --out pgc_mdd0_meta_noiPsych.1019
-
-cat > mdd0_datasets_noiPsych_no23andMe << EOF
-daner_pgc_mdd0.1019.gz
-daner_GERA.euro.depress.0915a_mds5.id.gz
-daner_mdd_decode_160211.gz
-daner_mdd_genscot_1215a.gz
-EOF
-
-postimp_navi --result mdd0_datasets_noiPsych_no23andMe --out pgc_mdd0_meta_noiPsych_no23andMe.1019
-
-cat > mdd0_datasets_no23andMe << EOF
-daner_pgc_mdd0.1019.gz
-daner_GERA.euro.depress.0915a_mds5.id.gz
-daner_mdd_decode_160211.gz
-daner_mdd_genscot_1215a.gz
-daner_mddGWAS_new_ipsych_170220.meta.gz
-EOF
-
-postimp_navi --result mdd0_datasets_no23andMe --out pgc_mdd0_meta_no23andMe.1019
+nextflow run pgc-symptom-gwas.nf \
+-config lisa.config \
+-work /nfs/scratch/nfx-qqZbmwsao3qBufyNACW/work
+-resume \
+--bfile="pgc_gwas/cobg_dir_genome_wide/mdd_*.bgn*{bed,bim,fam}"
 
 ```

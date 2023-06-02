@@ -6,10 +6,17 @@ output:
     df_print: kable
 ---
 
-Meta analyze MDD Symptom GWASs for the following two sets of cohorts:
+Meta analyze MDD Symptom GWASs for the following sets of cohorts:
 
-1. [PGC MDD clinical cohorts](pgc-symptom-gwas.html) and the [Australian of Depression Study](https://www.geneticsofdepression.org.au/)
-2. [UK Biobank](https://www.ukbiobank.ac.uk) and [ALSPAC](http://www.bristol.ac.uk/alspac/)
+1. Clinical/Enriched:
+  - [PGC MDD](pgc-symptom-gwas.html) cases
+  - [Australian of Depression Study](https://www.geneticsofdepression.org.au/)
+  - [Generation Scotland](http://generationscotland.org) MDD cases
+2. Community cohorts:
+  - [ALSPAC](http://www.bristol.ac.uk/alspac/)
+  - [Estonian Biobank](https://genomics.ut.ee/en/content/estonian-biobank)
+  - [UK Biobank](https://www.ukbiobank.ac.uk)
+3. All cohorts together
 
 ```{r symptoms}
 
@@ -50,104 +57,26 @@ Set up imputation reference directory
 
 cd meta
 
-impute_dirsub --refdir /home/pgcdac/imputation_references/pgc-samples/hapmap_ref/impute2_ref/1000GP_Phase3_sr_0517d/ --out meta --reference_info
+impute_dirsub --refdir $(cat $HOME/README.hrcrel11 | grep '^/home/pgcdac/.*/HRC_reference\.r1-1') --out meta --reference_info
 
 ```
 
-Open reference files
-```{r panel, cache=TRUE}
+Alignment workflow
 
-reference_dir <- readLines('meta/reference_info')[[1]]
-
-impute_eur_frq2_files <- list.files(reference_dir, '*.EUR.frq2.gz', full.names=T)
-
-impute_eur_frq2 <-
-bind_rows(
-lapply(impute_eur_frq2_files,
-       function(frq2_file)
-         read_table2(frq2_file,
-                     col_types=cols(SNP = col_character(),
-                                    CHR = col_integer(),
-                                    POS = col_integer(),
-                                    A1 = col_character(),
-                                    A2 = col_character(),
-                                    FA1 = col_double(),
-                                    NCHROBS = col_integer()
-)))) %>%
-select(-FA1, -NCHROBS)
-
-```
-
-Alleles used in reference panel:
-
-```{r panel_alleleles, cache=TRUE}
-
-impute_eur_frq2 %>%
-select(A1) %>%
-distinct()
-
-```
-
-Get list of symptom GWASs
-```{r gwas_files}
-
-gwas_files <- c(
-list.files('sumstats/PGC/CasesAllCohorts', 'daner_MDD', full.names=TRUE),
-list.files('sumstats/AGDS', '*dat_daner.gz', full.names=TRUE),
-list.files('sumstats/ALSPAC', 'daner_MDD*', full.names=TRUE),
-list.files('sumstats/UKB/CIDI', 'daner_MDD*', full.names=TRUE))
-
-```
-
-Read in each GWAS and align its SNP IDs with the imputation panel using CPIDs `CHR_POS_A1_A2` and `CHR_POS_A2_A1`
-
-```{r align}
-
-library(stringr)
-
-dir.create('sumstats/aligned', showWarnings=FALSE)
-
-for(gwas_gz in gwas_files) {
-
-        gwas_basename <- basename(gwas_gz)
-        aligned_gz <- file.path('sumstats/aligned', str_replace(gwas_basename, 'gz', 'aligned.gz'))
-        aligned_snpcount <- file.path('sumstats/aligned', str_replace(gwas_basename, 'gz', 'aligned_snpcount'))
-  
-        if(!file.exists(aligned_gz)) {
-        
-          gwas <- read_table2(gwas_gz)
-
-          # merge on chromosome and position
-          gwas_1kg <-
-          gwas %>%
-          left_join(impute_eur_frq2 ,
-                    by=c('CHR'='CHR', 'BP'='POS'), suffix=c('', '.1kg')) %>%
-          # rewrite insertion/deletion allles to just 'I/D'
-          mutate(across(A1:A2,
-                        ~ case_when(str_detect(.x, pattern='I') ~ 'I',
-                                    str_detect(.x, pattern='D') ~ 'D',
-                                    TRUE ~ .x))) %>%
-          # keep SNPs where alleles match
-          filter((A1 == A1.1kg & A2 == A2.1kg) | (A1 == A2.1kg & A2 == A1.1kg)) %>%
-          # user 1kg markername
-          mutate(SNP=SNP.1kg) %>%
-          select(-ends_with('.1kg'))
-
-          write_tsv(gwas_1kg, aligned_gz)
-
-          aligned_size <- data.frame(gwas=gwas_basename, pre_align=nrow(gwas), post_align=nrow(gwas_1kg))
-
-          write_tsv(aligned_size, aligned_snpcount)
-
-        }
-}
-
+```{sh, eval=FALSE}
+ln -s $(cat $HOME/README.hrcrel11 | grep '^/home/pgcdac/.*/HRC_reference\.r1-1') meta/HRC_reference.r1-1
+nextflow run meta/align.nf -resume \
+-work-dir /nfs/scratch/nfx-Go9q2ZbSjyfQrSXU/work \
+-config lisa.config \
+--out meta/aligned \
+--frq="meta/HRC_reference.r1-1/HRC.r1-1.EGA.GRCh37.chr*.impute.plink.EUR.frq2.gz" \
+--daner="sumstats/**/*daner*gz"
 ```
 
 Number of SNPs pre- and post-alignment
 ```{r aligned}
 
-aligned_count_files <- list.files('sumstats/aligned', pattern='aligned_snpcount', full.names=TRUE)
+aligned_count_files <- list.files('meta/aligned', pattern='aligned_snpcount', full.names=TRUE)
 
 bind_rows(lapply(aligned_count_files, read_tsv, col_types=cols(gwas = col_character(), pre_align = col_integer(), post_align = col_integer())))
 
@@ -207,6 +136,27 @@ for metafile in *.meta; do
        if [ ! -f j._pi_${outname} -a ! -f distribution/${outname}/daner_${outname}.gz ]; then
          postimp_navi --result $metafile --nolahunt --popname EUR  --out $outname 
        fi
+done
+
+```
+
+Concatenate all sets of cohorts together and run meta-analysis
+
+```{bash postimp_navi_all, eval=FALSE}
+
+cd meta
+
+for mdd in MDD1_depressed MDD2_anhedonia MDD3a_weightLoss MDD3b_weightGain MDD4a_sleepProb MDD4b_sleepMore MDD5a_psychomotorFast MDD5b_psychomotorSlow MDD6_fatigue MDD7_worthless MDD8_concentration MDD9_death; do
+
+	cat *.${mdd}.meta > ALL.${mdd}.meta4
+	
+done
+
+for metafile in ALL.*.meta4; do
+	   outname=$(basename $metafile .meta4)
+	   if [ ! -f j._pi_${outname} ]; then
+	   postimp_navi --result $metafile --nolahunt --noldsc --popname EUR  --out $outname
+	   fi
 done
 
 ```
