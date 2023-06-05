@@ -381,7 +381,7 @@ ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(sympt
 ```{r ext_samp_glue, cache=TRUE}
 
 ext_samp.glue <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
+CLIN =~ NA*ClinGuilt + ClinSui + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -432,7 +432,7 @@ Multiple regression of each phenotype on symptom factors, to estimate relationsh
 
 ext_mult_symp.model <- "
 DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
-APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
+APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + CommAppInc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
 DEP ~~ 1*DEP
@@ -463,7 +463,7 @@ ext_mult_symp.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_
 ```{r ext_samp_mult, cache=TRUE}
 
 ext_samp_mult.model <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
+CLIN =~ NA*ClinGuilt + ClinSui + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 

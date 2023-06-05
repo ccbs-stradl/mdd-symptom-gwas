@@ -239,7 +239,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -268,7 +268,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a Multiple p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -280,12 +280,12 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a Multiple p
 Load previously calculated symptom prevalences:
 
 ``` r
-all_covstruct_prefix <- 'agds_pgc.alspac_ukb.covstruct'
+all_covstruct_prefix <- 'clin.comm.covstruct'
 all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'prevs', 'txt', sep='.'))) 
 ```
 
-    ## Rows: 38 Columns: 9
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## Rows: 26 Columns: 9
+    ## ── Column specification ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -308,8 +308,8 @@ if(!file.exists(covstruct_r)) {
   symptoms_sumstats_prevs <- all_sumstats_prevs %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
   mutate(samp_prev=0.5,
-         cohort=case_when(str_detect(filename, 'AGDS_PGC') ~ 'Clin',
-                          str_detect(filename, 'ALSPAC_UKB') ~ 'Comm',
+         cohort=case_when(str_detect(filename, 'Clin') ~ 'Clin',
+                          str_detect(filename, 'Comm') ~ 'Comm',
                           str_detect(filename, 'UKBt') ~ 'Ukb')) %>%
   transmute(filename=here::here(filename), samp_prev, pop_prev, trait_name=paste0(cohort, abbv))
 
@@ -352,7 +352,7 @@ Appetite.
 
 ``` r
 model <- "
-DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -360,11 +360,6 @@ DEP ~~ 1*DEP
 APP ~~ 1*APP
 GATE ~~ 1*GATE
 GATE ~~ 0*DEP + 0*APP
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 "
 fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRUE)
 ```
@@ -374,8 +369,8 @@ fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRU
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   4.697 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355036 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.63713097734562 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.852 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714747 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.17257288534608 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model, :
     ## A difference greater than .025 was observed pre- and post-smoothing in the
@@ -399,7 +394,7 @@ Base model of Clinical and Community sample factors.
 
 ``` r
 model <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -416,8 +411,8 @@ fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRU
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.339 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355036 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.63713097734562 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   2.096 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714747 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.17257288534608 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model, :
     ## A difference greater than .025 was observed pre- and post-smoothing in the
@@ -445,7 +440,7 @@ cluster.
 
 ``` r
 ext_symp.glue <- "
-DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -453,11 +448,6 @@ DEP ~~ 1*DEP
 APP ~~ 1*APP
 GATE ~~ 1*GATE
 GATE ~~ 0*DEP + 0*APP
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 
 AlcDep ~ {symptom}
 Anxiety ~  {symptom}
@@ -483,8 +473,8 @@ ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  54.975 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##  36.425 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0575756285285676 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.47338133387456 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
     ## difference greater than .025 was observed pre- and post-smoothing in the
@@ -507,8 +497,8 @@ ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  58.929 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##  33.801 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0575756285285676 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.47338133387456 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
     ## difference greater than .025 was observed pre- and post-smoothing in the
@@ -531,8 +521,8 @@ ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  69.895 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##  39.627 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0575756285285676 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.47338133387456 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
     ## difference greater than .025 was observed pre- and post-smoothing in the
@@ -554,7 +544,7 @@ ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(sympt
 
 ``` r
 ext_samp.glue <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinGuilt + ClinSui + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -590,8 +580,8 @@ ext_samp.fit_list <- lapply(ext_samp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  82.797 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##  89.235 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0575756285285676 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.47338133387456 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
     ## difference greater than .025 was observed pre- and post-smoothing in the
@@ -614,8 +604,8 @@ ext_samp.fit_list <- lapply(ext_samp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  71.699 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##  80.311 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0575756285285676 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.47338133387456 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
     ## difference greater than .025 was observed pre- and post-smoothing in the
@@ -648,19 +638,14 @@ relationship after condition on each of the other factors.
 
 ``` r
 ext_mult_symp.model <- "
-DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
-APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
+DEP =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + CommAppInc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
 DEP ~~ 1*DEP
 APP ~~ 1*APP
 GATE ~~ 1*GATE
 GATE ~~ 0*DEP + 0*APP
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 
 AlcDep ~ DEP + APP + GATE
 Anxiety ~  DEP + APP + GATE
@@ -683,8 +668,8 @@ ext_mult_symp.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  69.857 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##  39.014 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0575756285285676 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.47338133387456 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## ext_mult_symp.model): A difference greater than .025 was observed pre- and
@@ -708,7 +693,7 @@ ext_mult_symp.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_
 
 ``` r
 ext_samp_mult.model <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinGuilt + ClinSui + ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -738,8 +723,8 @@ ext_samp_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  37.954 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0499086254058032 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.97466132311611 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##  39.292 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0575756285285676 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.47338133387456 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## ext_samp_mult.model): A difference greater than .025 was observed pre- and
@@ -783,247 +768,247 @@ ext_table
 ```
 
     ##     Phenotype          Factor    Model STD_Genotype    STD_Genotype_SE
-    ## 1      AlcDep        Clinical Multiple  0.120842614  0.370476961320492
-    ## 2      AlcDep        Clinical   Single  0.472744390  0.072715189272104
-    ## 3      AlcDep       Community Multiple  0.553998533  0.451475966420007
-    ## 4      AlcDep       Community   Single  0.477097321 0.0822308805109108
-    ## 5      AlcDep          Gating Multiple  0.025083620  0.134302847033415
-    ## 6      AlcDep          Gating   Single  0.567515837  0.132508060276344
-    ## 7      AlcDep Appetite/Weight Multiple  0.109170628  0.112673798240983
-    ## 8      AlcDep Appetite/Weight   Single  0.545975000 0.0942203291541773
-    ## 9      AlcDep      Depression Multiple  0.438410495  0.101255527199284
-    ## 10     AlcDep      Depression   Single  0.472377555 0.0728086169004453
-    ## 11    Anxiety        Clinical Multiple  0.987202049  0.334212763993674
-    ## 12    Anxiety        Clinical   Single  0.706727367 0.0502600320551331
-    ## 13    Anxiety       Community Multiple -0.447304347  0.395788775975659
-    ## 14    Anxiety       Community   Single  0.712958656 0.0791675441466363
-    ## 15    Anxiety          Gating Multiple  0.411125225 0.0846264509973725
-    ## 16    Anxiety          Gating   Single  1.000869392  0.132584660936842
-    ## 17    Anxiety Appetite/Weight Multiple -0.023883790  0.065607169181795
-    ## 18    Anxiety Appetite/Weight   Single  0.814346426 0.0850138040134893
-    ## 19    Anxiety      Depression Multiple  0.532500357 0.0669557071460516
-    ## 20    Anxiety      Depression   Single  0.705947198 0.0503852932048178
-    ## 21        BIP        Clinical Multiple  0.776226448  0.324816025541961
-    ## 22        BIP        Clinical   Single  0.498052986 0.0363035201204751
-    ## 23        BIP       Community Multiple -0.451185853  0.377105431259951
-    ## 24        BIP       Community   Single  0.502497313 0.0558807401700145
-    ## 25        BIP          Gating Multiple  0.220222312 0.0744804689413058
-    ## 26        BIP          Gating   Single  0.678715803 0.0986536175663139
-    ## 27        BIP Appetite/Weight Multiple -0.137367821 0.0630937304552237
-    ## 28        BIP Appetite/Weight   Single  0.572589285 0.0606180054600234
-    ## 29        BIP      Depression Multiple  0.463845830 0.0541942257769026
-    ## 30        BIP      Depression   Single  0.497550876 0.0363816076430194
-    ## 31        BMI        Clinical Multiple -0.512882984  0.722403664125655
-    ## 32        BMI        Clinical   Single  0.209441867  0.027101582747042
-    ## 33        BMI       Community Multiple  1.175474385    0.7937046512339
-    ## 34        BMI       Community   Single  0.211334293 0.0327028634246196
-    ## 35        BMI          Gating Multiple -0.142247842 0.0615964023200802
-    ## 36        BMI          Gating   Single  0.160135633 0.0454357398495868
-    ## 37        BMI Appetite/Weight Multiple  0.869791234  0.108330760647499
-    ## 38        BMI Appetite/Weight   Single  0.246277661 0.0361528417843866
-    ## 39        BMI      Depression Multiple -0.027330562 0.0946403755902889
-    ## 40        BMI      Depression   Single  0.212455921 0.0270988752762927
-    ## 41         EA        Clinical Multiple  0.441755693  0.534646529525153
-    ## 42         EA        Clinical   Single -0.099383064  0.028591720855334
-    ## 43         EA       Community Multiple -0.863433424  0.585694284005175
-    ## 44         EA       Community   Single -0.100385913 0.0291786839273907
-    ## 45         EA          Gating Multiple  0.326132585 0.0757967054732548
-    ## 46         EA          Gating   Single  0.007589984 0.0415863683277659
-    ## 47         EA Appetite/Weight Multiple -0.235869484 0.0504535050811291
-    ## 48         EA Appetite/Weight   Single -0.116513026  0.033805885103372
-    ## 49         EA      Depression Multiple -0.191592998 0.0446507071861614
-    ## 50         EA      Depression   Single -0.098192288 0.0286157176315153
-    ## 51         MD        Clinical Multiple  1.087658449  0.263989857042839
-    ## 52         MD        Clinical   Single  0.883867825 0.0387631464950772
-    ## 53         MD       Community Multiple -0.314768097  0.320838492341552
-    ## 54         MD       Community   Single  0.891635773 0.0842683837826528
-    ## 55         MD          Gating Multiple  0.463276077 0.0759946762718348
-    ## 56         MD          Gating   Single  1.246129949  0.156851523732874
-    ## 57         MD Appetite/Weight Multiple  0.014627641 0.0574259693070218
-    ## 58         MD Appetite/Weight   Single  1.018201005 0.0903256069310309
-    ## 59         MD      Depression Multiple  0.690495206 0.0548803974926601
-    ## 60         MD      Depression   Single  0.885562740 0.0388615688427246
-    ## 61        MDD        Clinical Multiple  1.123048366  0.425872159719764
-    ## 62        MDD        Clinical   Single  0.789450260 0.0721919040779266
-    ## 63        MDD       Community Multiple -0.526449098  0.511747314532823
-    ## 64        MDD       Community   Single  0.796398241 0.0961948348056698
-    ## 65        MDD          Gating Multiple  0.423315057  0.129265396771256
-    ## 66        MDD          Gating   Single  1.114320530  0.169673464033471
-    ## 67        MDD Appetite/Weight Multiple -0.060047145  0.109680953536236
-    ## 68        MDD Appetite/Weight   Single  0.909295326   0.10965139431752
-    ## 69        MDD      Depression Multiple  0.630231849 0.0986172812319723
-    ## 70        MDD      Depression   Single  0.789794785 0.0722070401790363
-    ## 71        Neu        Clinical Multiple  0.716426894  0.141036769670343
-    ## 72        Neu        Clinical   Single  0.658738978  0.036818313492786
-    ## 73        Neu       Community Multiple -0.088114162  0.195992511987339
-    ## 74        Neu       Community   Single  0.664553354 0.0671021281930817
-    ## 75        Neu          Gating Multiple  0.102403731  0.084662161041217
-    ## 76        Neu          Gating   Single  0.827612650  0.113276123056742
-    ## 77        Neu Appetite/Weight Multiple -0.031340100 0.0567111700054539
-    ## 78        Neu Appetite/Weight   Single  0.758034592 0.0723517426867886
-    ## 79        Neu      Depression Multiple  0.652832146 0.0535795529035438
-    ## 80        Neu      Depression   Single  0.659528558 0.0368276099586796
-    ## 81       PTSD        Clinical Multiple  0.891323498  0.252573458582583
-    ## 82       PTSD        Clinical   Single  0.752055722 0.0640070272834876
-    ## 83       PTSD       Community Multiple -0.223412035   0.34801383869207
-    ## 84       PTSD       Community   Single  0.758788916 0.0971739423320513
-    ## 85       PTSD          Gating Multiple  0.318617004  0.116944717792587
-    ## 86       PTSD          Gating   Single  1.012480839  0.152524242400984
-    ## 87       PTSD Appetite/Weight Multiple  0.098013122 0.0931845912364923
-    ## 88       PTSD Appetite/Weight   Single  0.867746159 0.0996557050194647
-    ## 89       PTSD      Depression Multiple  0.580029473 0.0849911270755315
-    ## 90       PTSD      Depression   Single  0.752039330 0.0640123736621122
-    ## 91       Pain        Clinical Multiple  0.326962172  0.250509815204117
-    ## 92       Pain        Clinical   Single  0.569143606 0.0364114685612383
-    ## 93       Pain       Community Multiple  0.394275921  0.294699439656623
-    ## 94       Pain       Community   Single  0.574209271 0.0608871788983916
-    ## 95       Pain          Gating Multiple  0.056295394 0.0773547515830571
-    ## 96       Pain          Gating   Single  0.669143562 0.0942298911977462
-    ## 97       Pain Appetite/Weight Multiple  0.338772773 0.0606096548268192
-    ## 98       Pain Appetite/Weight   Single  0.658746622 0.0653843781286945
-    ## 99       Pain      Depression Multiple  0.429173509 0.0551643309828978
-    ## 100      Pain      Depression   Single  0.570001241  0.036479973769422
-    ## 101     Sleep        Clinical Multiple  0.173362483  0.171980850568423
-    ## 102     Sleep        Clinical   Single  0.287781585 0.0470993019805111
-    ## 103     Sleep       Community Multiple  0.180193731  0.233665669666763
-    ## 104     Sleep       Community   Single  0.290379784 0.0547082088136701
-    ## 105     Sleep          Gating Multiple -0.045536042  0.095224081325654
-    ## 106     Sleep          Gating   Single  0.334094298 0.0805665999122042
-    ## 107     Sleep Appetite/Weight Multiple  0.006266135 0.0694967073394952
-    ## 108     Sleep Appetite/Weight   Single  0.331527678 0.0589492645227232
-    ## 109     Sleep      Depression Multiple  0.324906651 0.0639322418425593
-    ## 110     Sleep      Depression   Single  0.287848652 0.0471608530370599
-    ## 111   Smoking        Clinical Multiple -0.116282319  0.401478185650852
-    ## 112   Smoking        Clinical   Single  0.281604465 0.0362003139181727
-    ## 113   Smoking       Community Multiple  0.643899765  0.447983662807281
-    ## 114   Smoking       Community   Single  0.284173054 0.0440562581722677
-    ## 115   Smoking          Gating Multiple  0.136812166 0.0619620124025219
-    ## 116   Smoking          Gating   Single  0.363746563 0.0665256419220358
-    ## 117   Smoking Appetite/Weight Multiple  0.386104588 0.0676954206242069
-    ## 118   Smoking Appetite/Weight   Single  0.327694288 0.0482979772031205
-    ## 119   Smoking      Depression Multiple  0.067964296  0.058904684035378
-    ## 120   Smoking      Depression   Single  0.283649356 0.0362448904128285
-    ##           p_value           fdr
-    ## 1    7.440459e-01  1.000000e+00
-    ## 2    7.961778e-11  1.046834e-09
-    ## 3    2.197182e-01  1.000000e+00
-    ## 4    6.556328e-09  7.410540e-08
-    ## 5    8.517884e-01  1.000000e+00
-    ## 6    1.845642e-05  1.698687e-04
-    ## 7    3.326445e-01  1.000000e+00
-    ## 8    6.848558e-09  7.607381e-08
-    ## 9    1.545982e-05  1.464737e-04
-    ## 10   8.694747e-11  1.120343e-09
-    ## 11   3.128936e-03  2.458368e-02
-    ## 12   6.557135e-45  6.035039e-43
-    ## 13   2.583376e-01  1.000000e+00
-    ## 14   2.142276e-19  5.520768e-18
-    ## 15   1.184116e-06  1.155884e-05
-    ## 16   4.402059e-14  7.090222e-13
-    ## 17   7.153553e-01  1.000000e+00
-    ## 18   9.812952e-22  2.873697e-20
-    ## 19   1.910333e-15  3.817402e-14
-    ## 20   1.329713e-44  1.070858e-42
-    ## 21   1.682568e-02  1.275316e-01
-    ## 22   7.798552e-43  5.582586e-41
-    ## 23   2.314438e-01  1.000000e+00
-    ## 24   2.419685e-19  5.995833e-18
-    ## 25   3.107414e-03  2.458368e-02
-    ## 26   6.008308e-12  9.002181e-11
-    ## 27   2.954503e-02  2.163046e-01
-    ## 28   3.528660e-21  9.884301e-20
-    ## 29   1.298840e-17  2.988558e-16
-    ## 30   1.410355e-42  9.086414e-41
-    ## 31   4.776757e-01  1.000000e+00
-    ## 32   1.092257e-14  1.804364e-13
-    ## 33   1.385062e-01  1.000000e+00
-    ## 34   1.031454e-10  1.302998e-09
-    ## 35   2.092696e-02  1.567731e-01
-    ## 36   4.244128e-04  3.645786e-03
-    ## 37   1.402735e-15  2.915264e-14
-    ## 38   9.624449e-12  1.377931e-10
-    ## 39   7.597536e-01  1.000000e+00
-    ## 40   4.523839e-15  8.572199e-14
-    ## 41   4.085868e-01  1.000000e+00
-    ## 42   5.090736e-04  4.315499e-03
-    ## 43   1.403267e-01  1.000000e+00
-    ## 44   5.808989e-04  4.798108e-03
-    ## 45   1.686684e-05  1.574884e-04
-    ## 46   8.551816e-01  1.000000e+00
-    ## 47   3.038452e-06  2.921740e-05
-    ## 48   5.677323e-04  4.750255e-03
-    ## 49   1.991607e-05  1.807213e-04
-    ## 50   5.989042e-04  4.884209e-03
-    ## 51   3.764986e-05  3.322802e-04
-    ## 52  4.404833e-115 1.948013e-112
-    ## 53   3.265085e-01  1.000000e+00
-    ## 54   3.650813e-26  1.306715e-24
-    ## 55   1.085036e-09  1.248303e-08
-    ## 56   1.955320e-15  3.817402e-14
-    ## 57   7.993565e-01  1.000000e+00
-    ## 58   1.797678e-29  7.721196e-28
-    ## 59   3.224011e-36  1.888286e-34
-    ## 60  6.047250e-115 1.948013e-112
-    ## 61   8.343708e-03  6.399467e-02
-    ## 62   7.803174e-28  2.957239e-26
-    ## 63   3.035501e-01  1.000000e+00
-    ## 64   1.241822e-16  2.666872e-15
-    ## 65   1.057016e-03  8.512466e-03
-    ## 66   5.126824e-11  6.881310e-10
-    ## 67   5.839453e-01  1.000000e+00
-    ## 68   1.108860e-16  2.463445e-15
-    ## 69   1.734016e-10  2.107858e-09
-    ## 70   7.594224e-28  2.957239e-26
-    ## 71   3.754591e-07  3.779607e-06
-    ## 72   1.370889e-71  2.208037e-69
-    ## 73   6.530585e-01  1.000000e+00
-    ## 74   4.012478e-23  1.230998e-21
-    ## 75   2.263902e-01  1.000000e+00
-    ## 76   2.755753e-13  4.330325e-12
-    ## 77   5.807813e-01  1.000000e+00
-    ## 78   1.103214e-25  3.740850e-24
-    ## 79   4.601470e-34  2.470469e-32
-    ## 80   1.011033e-71  2.171242e-69
-    ## 81   4.156638e-04  3.618883e-03
-    ## 82   7.096399e-32  3.314253e-30
-    ## 83   5.209005e-01  1.000000e+00
-    ## 84   5.783531e-15  1.035034e-13
-    ## 85   6.437279e-03  4.996757e-02
-    ## 86   3.182778e-11  4.362872e-10
-    ## 87   2.931448e-01  1.000000e+00
-    ## 88   3.111297e-18  7.424065e-17
-    ## 89   9.478615e-12  1.377931e-10
-    ## 90   7.201942e-32  3.314253e-30
-    ## 91   1.915965e-01  1.000000e+00
-    ## 92   4.485059e-55  5.263015e-53
-    ## 93   1.808442e-01  1.000000e+00
-    ## 94   4.071119e-21  1.092865e-19
-    ## 95   4.666747e-01  1.000000e+00
-    ## 96   1.240158e-12  1.902356e-11
-    ## 97   2.456360e-08  2.594336e-07
-    ## 98   7.138817e-24  2.299642e-22
-    ## 99   1.014788e-14  1.720505e-13
-    ## 100  4.901419e-55  5.263015e-53
-    ## 101  3.132514e-01  1.000000e+00
-    ## 102  9.956242e-10  1.187861e-08
-    ## 103  4.405708e-01  1.000000e+00
-    ## 104  1.109608e-07  1.134731e-06
-    ## 105  6.325584e-01  1.000000e+00
-    ## 106  3.372804e-05  3.018023e-04
-    ## 107  9.280836e-01  1.000000e+00
-    ## 108  1.866057e-08  2.003722e-07
-    ## 109  3.858509e-07  3.824461e-06
-    ## 110  1.036903e-09  1.214617e-08
-    ## 111  7.721715e-01  1.000000e+00
-    ## 112  7.306202e-15  1.272196e-13
-    ## 113  1.505291e-01  1.000000e+00
-    ## 114  1.116717e-10  1.383578e-09
-    ## 115  2.723915e-02  2.017151e-01
-    ## 116  4.559827e-08  4.738279e-07
-    ## 117  1.276693e-08  1.394115e-07
-    ## 118  1.162986e-11  1.628848e-10
-    ## 119  2.566346e-01  1.000000e+00
-    ## 120  5.049938e-15  9.295698e-14
+    ## 1      AlcDep        Clinical Multiple  0.221005954   0.28166879414501
+    ## 2      AlcDep        Clinical   Single  0.527879417 0.0691420409001757
+    ## 3      AlcDep       Community Multiple  0.451854551  0.341901341595013
+    ## 4      AlcDep       Community   Single  0.532794430 0.0784728741633183
+    ## 5      AlcDep          Gating Multiple  0.084619846  0.112660221149703
+    ## 6      AlcDep          Gating   Single  0.627539347   0.10802064333509
+    ## 7      AlcDep Appetite/Weight Multiple  0.109836028  0.120037571864333
+    ## 8      AlcDep Appetite/Weight   Single  0.549816710 0.0748248779755634
+    ## 9      AlcDep      Depression Multiple  0.437606001  0.120063980968651
+    ## 10     AlcDep      Depression   Single  0.528317382 0.0692496094679777
+    ## 11    Anxiety        Clinical Multiple  1.022107351  0.241756185330013
+    ## 12    Anxiety        Clinical   Single  0.750061780 0.0463288982802832
+    ## 13    Anxiety       Community Multiple -0.403741071  0.279351869447744
+    ## 14    Anxiety       Community   Single  0.756456595 0.0707778491083738
+    ## 15    Anxiety          Gating Multiple  0.413702442 0.0752952990543272
+    ## 16    Anxiety          Gating   Single  1.046097620  0.108595774533154
+    ## 17    Anxiety Appetite/Weight Multiple  0.009849794 0.0729714602982125
+    ## 18    Anxiety Appetite/Weight   Single  0.779940435 0.0580517254927797
+    ## 19    Anxiety      Depression Multiple  0.576804992 0.0815766389147973
+    ## 20    Anxiety      Depression   Single  0.752000496 0.0464902379927342
+    ## 21        BIP        Clinical Multiple  0.680736294  0.197239113098916
+    ## 22        BIP        Clinical   Single  0.481353782 0.0371813077236788
+    ## 23        BIP       Community Multiple -0.297861949  0.233162416565811
+    ## 24        BIP       Community   Single  0.485532210 0.0483638441545052
+    ## 25        BIP          Gating Multiple  0.228374104 0.0637114390766197
+    ## 26        BIP          Gating   Single  0.662792842 0.0710800058973141
+    ## 27        BIP Appetite/Weight Multiple -0.178492021 0.0692856587584068
+    ## 28        BIP Appetite/Weight   Single  0.500024546 0.0437848949655835
+    ## 29        BIP      Depression Multiple  0.504945887  0.068614484927964
+    ## 30        BIP      Depression   Single  0.483052729 0.0373473467703236
+    ## 31        BMI        Clinical Multiple -0.240226878  0.306326503445612
+    ## 32        BMI        Clinical   Single  0.216906663 0.0268404548586458
+    ## 33        BMI       Community Multiple  0.686516510   0.33042281238573
+    ## 34        BMI       Community   Single  0.218771969 0.0295365090534473
+    ## 35        BMI          Gating Multiple -0.162317325 0.0500367044437687
+    ## 36        BMI          Gating   Single  0.109560867 0.0360011164529976
+    ## 37        BMI Appetite/Weight Multiple  0.909912713  0.112283880457386
+    ## 38        BMI Appetite/Weight   Single  0.227951903 0.0293805649519879
+    ## 39        BMI      Depression Multiple -0.231517644  0.108440911369766
+    ## 40        BMI      Depression   Single  0.216229789 0.0268641512446537
+    ## 41         EA        Clinical Multiple  0.351911570   0.31209417661722
+    ## 42         EA        Clinical   Single -0.111169515 0.0281436660903823
+    ## 43         EA       Community Multiple -0.688289577  0.333712241590538
+    ## 44         EA       Community   Single -0.112398741  0.028921259934577
+    ## 45         EA          Gating Multiple  0.291226750  0.052762385775747
+    ## 46         EA          Gating   Single  0.030125096 0.0349050663527246
+    ## 47         EA Appetite/Weight Multiple -0.397574961 0.0600109960353888
+    ## 48         EA Appetite/Weight   Single -0.117151356 0.0298354541936746
+    ## 49         EA      Depression Multiple -0.017144566 0.0611102977120907
+    ## 50         EA      Depression   Single -0.109871185 0.0281870772378247
+    ## 51         MD        Clinical Multiple  1.116470177  0.236835868992616
+    ## 52         MD        Clinical   Single  0.888209248 0.0468303623348629
+    ## 53         MD       Community Multiple -0.335213114  0.273429853563357
+    ## 54         MD       Community   Single  0.895670999 0.0716370929285747
+    ## 55         MD          Gating Multiple  0.441709866 0.0671749206043277
+    ## 56         MD          Gating   Single  1.239562909  0.112262908293816
+    ## 57         MD Appetite/Weight Multiple -0.102758100 0.0758790556444531
+    ## 58         MD Appetite/Weight   Single  0.923016149 0.0617276284381924
+    ## 59         MD      Depression Multiple  0.791039823 0.0768825687543885
+    ## 60         MD      Depression   Single  0.891681288 0.0471145422051163
+    ## 61        MDD        Clinical Multiple  1.006661492  0.279474356522564
+    ## 62        MDD        Clinical   Single  0.804126422 0.0700256110591518
+    ## 63        MDD       Community Multiple -0.299420124   0.34925087463455
+    ## 64        MDD       Community   Single  0.810952201 0.0861035184191237
+    ## 65        MDD          Gating Multiple  0.368326887  0.112836781945077
+    ## 66        MDD          Gating   Single  1.089419331  0.129150038618888
+    ## 67        MDD Appetite/Weight Multiple -0.050854222  0.124280470588989
+    ## 68        MDD Appetite/Weight   Single  0.836260442 0.0815228809362791
+    ## 69        MDD      Depression Multiple  0.688030635  0.118480809188793
+    ## 70        MDD      Depression   Single  0.806546355 0.0702020450188699
+    ## 71        Neu        Clinical Multiple  0.730493967  0.135729985258004
+    ## 72        Neu        Clinical   Single  0.678156126  0.041969223779322
+    ## 73        Neu       Community Multiple -0.078016009  0.172639240645004
+    ## 74        Neu       Community   Single  0.683991168 0.0593926749835981
+    ## 75        Neu          Gating Multiple  0.125715131 0.0708355796032961
+    ## 76        Neu          Gating   Single  0.832043117 0.0821028408766912
+    ## 77        Neu Appetite/Weight Multiple -0.090482389 0.0734637178451148
+    ## 78        Neu Appetite/Weight   Single  0.705010451 0.0535534864813965
+    ## 79        Neu      Depression Multiple  0.701368260 0.0725048430168041
+    ## 80        Neu      Depression   Single  0.680402507 0.0421489579321692
+    ## 81       PTSD        Clinical Multiple  0.910179544  0.221056512543717
+    ## 82       PTSD        Clinical   Single  0.815494190 0.0684349504418707
+    ## 83       PTSD       Community Multiple -0.141557723  0.290248681747059
+    ## 84       PTSD       Community   Single  0.822631144 0.0887028941288432
+    ## 85       PTSD          Gating Multiple  0.246318842  0.113446942509992
+    ## 86       PTSD          Gating   Single  1.027799211  0.127159237484132
+    ## 87       PTSD Appetite/Weight Multiple  0.086513096  0.108876609056638
+    ## 88       PTSD Appetite/Weight   Single  0.848697077 0.0805547717310848
+    ## 89       PTSD      Depression Multiple  0.673552439  0.108903874514058
+    ## 90       PTSD      Depression   Single  0.817770733 0.0685787955604536
+    ## 91       Pain        Clinical Multiple  0.443454308  0.122663823688696
+    ## 92       Pain        Clinical   Single  0.568873516 0.0374217246609121
+    ## 93       Pain       Community Multiple  0.186862789  0.154169755383601
+    ## 94       Pain       Community   Single  0.573801683 0.0509264058162539
+    ## 95       Pain          Gating Multiple  0.068101756  0.062562042363723
+    ## 96       Pain          Gating   Single  0.642848727 0.0715536791592113
+    ## 97       Pain Appetite/Weight Multiple  0.320954264  0.065110851780359
+    ## 98       Pain Appetite/Weight   Single  0.592894281 0.0460703461690548
+    ## 99       Pain      Depression Multiple  0.357965688 0.0682529116909194
+    ## 100      Pain      Depression   Single  0.569689798 0.0375036264314594
+    ## 101     Sleep        Clinical Multiple  0.178461657  0.141538114566595
+    ## 102     Sleep        Clinical   Single  0.283232921 0.0430577815191179
+    ## 103     Sleep       Community Multiple  0.154752031  0.184646518937871
+    ## 104     Sleep       Community   Single  0.285753511 0.0479380300689912
+    ## 105     Sleep          Gating Multiple -0.019881148 0.0710876860975128
+    ## 106     Sleep          Gating   Single  0.310092946 0.0626164267940631
+    ## 107     Sleep Appetite/Weight Multiple  0.073063478  0.075628580535641
+    ## 108     Sleep Appetite/Weight   Single  0.294991409 0.0457427564277283
+    ## 109     Sleep      Depression Multiple  0.258349713 0.0751673364959821
+    ## 110     Sleep      Depression   Single  0.283337895 0.0431554845724002
+    ## 111   Smoking        Clinical Multiple -0.106793863  0.257715990952685
+    ## 112   Smoking        Clinical   Single  0.255952535 0.0353125867053994
+    ## 113   Smoking       Community Multiple  0.542063797   0.27964235772602
+    ## 114   Smoking       Community   Single  0.258318680 0.0396299218796944
+    ## 115   Smoking          Gating Multiple  0.065081157 0.0499442880823935
+    ## 116   Smoking          Gating   Single  0.290405688 0.0543564747177991
+    ## 117   Smoking Appetite/Weight Multiple  0.376114717 0.0735553493506099
+    ## 118   Smoking Appetite/Weight   Single  0.267528548 0.0375569716421921
+    ## 119   Smoking      Depression Multiple  0.005278875 0.0707978207000606
+    ## 120   Smoking      Depression   Single  0.256338853 0.0353758549408574
+    ##          p_value          fdr
+    ## 1   4.325971e-01 1.000000e+00
+    ## 2   2.263308e-14 3.471829e-13
+    ## 3   1.862938e-01 1.000000e+00
+    ## 4   1.125081e-11 1.421274e-10
+    ## 5   4.525887e-01 1.000000e+00
+    ## 6   6.266984e-09 6.711868e-08
+    ## 7   3.601775e-01 1.000000e+00
+    ## 8   2.011325e-13 2.817010e-12
+    ## 9   2.676013e-04 2.239038e-03
+    ## 10  2.362994e-14 3.540448e-13
+    ## 11  2.356086e-05 2.137947e-04
+    ## 12  5.939530e-59 1.210252e-56
+    ## 13  1.483680e-01 1.000000e+00
+    ## 14  1.161479e-26 3.117913e-25
+    ## 15  3.920551e-08 4.009319e-07
+    ## 16  5.793040e-22 1.203951e-20
+    ## 17  8.926107e-01 1.000000e+00
+    ## 18  3.757221e-41 2.420643e-39
+    ## 19  1.541007e-12 1.985632e-11
+    ## 20  7.514009e-59 1.210252e-56
+    ## 21  5.573498e-04 4.433093e-03
+    ## 22  2.471273e-38 1.326794e-36
+    ## 23  2.014212e-01 1.000000e+00
+    ## 24  1.025477e-23 2.278201e-22
+    ## 25  3.377268e-04 2.719816e-03
+    ## 26  1.112234e-20 2.171432e-19
+    ## 27  9.990264e-03 7.484150e-02
+    ## 28  3.321407e-30 1.018983e-28
+    ## 29  1.849887e-13 2.648480e-12
+    ## 30  2.891688e-38 1.433086e-36
+    ## 31  4.329118e-01 1.000000e+00
+    ## 32  6.406561e-16 1.058338e-14
+    ## 33  3.772603e-02 2.730959e-01
+    ## 34  1.293546e-13 1.894057e-12
+    ## 35  1.178765e-03 9.040903e-03
+    ## 36  2.340285e-03 1.773837e-02
+    ## 37  5.326479e-16 9.274756e-15
+    ## 38  8.587103e-15 1.349357e-13
+    ## 39  3.276622e-02 2.398875e-01
+    ## 40  8.346511e-16 1.344340e-14
+    ## 41  2.594817e-01 1.000000e+00
+    ## 42  7.812766e-05 6.895185e-04
+    ## 43  3.914597e-02 2.802261e-01
+    ## 44  1.017559e-04 8.626014e-04
+    ## 45  3.398006e-08 3.530989e-07
+    ## 46  3.880984e-01 1.000000e+00
+    ## 47  3.470283e-11 4.299575e-10
+    ## 48  8.615895e-05 7.501234e-04
+    ## 49  7.790025e-01 1.000000e+00
+    ## 50  9.702099e-05 8.334287e-04
+    ## 51  2.423717e-06 2.230734e-05
+    ## 52  3.225507e-80 2.078078e-77
+    ## 53  2.202059e-01 1.000000e+00
+    ## 54  7.197593e-36 3.091434e-34
+    ## 55  4.848693e-11 5.784888e-10
+    ## 56  2.399043e-28 6.720075e-27
+    ## 57  1.756702e-01 1.000000e+00
+    ## 58  1.487898e-50 1.065110e-48
+    ## 59  7.898328e-25 1.957158e-23
+    ## 60  6.990078e-80 2.251729e-77
+    ## 61  3.155563e-04 2.573439e-03
+    ## 62  1.600214e-30 5.154805e-29
+    ## 63  3.912628e-01 1.000000e+00
+    ## 64  4.583275e-21 9.227625e-20
+    ## 65  1.097588e-03 8.519722e-03
+    ## 66  3.300125e-17 5.905980e-16
+    ## 67  6.824183e-01 1.000000e+00
+    ## 68  1.089700e-24 2.600202e-23
+    ## 69  6.354908e-09 6.711868e-08
+    ## 70  1.499694e-30 5.085260e-29
+    ## 71  7.355706e-08 7.404715e-07
+    ## 72  9.908098e-59 1.276687e-56
+    ## 73  6.513566e-01 1.000000e+00
+    ## 74  1.090400e-30 3.902810e-29
+    ## 75  7.594072e-02 5.318031e-01
+    ## 76  3.887992e-24 8.946051e-23
+    ## 77  2.180846e-01 1.000000e+00
+    ## 78  1.402772e-39 8.215963e-38
+    ## 79  3.909167e-22 8.395120e-21
+    ## 80  1.276143e-58 1.370289e-56
+    ## 81  3.828144e-05 3.425467e-04
+    ## 82  9.729385e-33 3.687232e-31
+    ## 83  6.257487e-01 1.000000e+00
+    ## 84  1.793123e-20 3.397780e-19
+    ## 85  2.991421e-02 2.215248e-01
+    ## 86  6.325189e-16 1.058338e-14
+    ## 87  4.268360e-01 1.000000e+00
+    ## 88  5.917260e-26 1.524912e-24
+    ## 89  6.215277e-10 6.903931e-09
+    ## 90  8.817264e-33 3.550405e-31
+    ## 91  2.997980e-04 2.476271e-03
+    ## 92  3.446331e-52 3.171925e-50
+    ## 93  2.254765e-01 1.000000e+00
+    ## 94  1.903756e-29 5.575098e-28
+    ## 95  2.763549e-01 1.000000e+00
+    ## 96  2.603559e-19 4.792514e-18
+    ## 97  8.248909e-07 7.702140e-06
+    ## 98  6.698399e-38 3.082528e-36
+    ## 99  1.564617e-07 1.527313e-06
+    ## 100 4.103485e-52 3.304661e-50
+    ## 101 2.073126e-01 1.000000e+00
+    ## 102 4.768804e-11 5.784888e-10
+    ## 103 4.019709e-01 1.000000e+00
+    ## 104 2.508722e-09 2.739457e-08
+    ## 105 7.797289e-01 1.000000e+00
+    ## 106 7.334887e-07 6.949419e-06
+    ## 107 3.339948e-01 1.000000e+00
+    ## 108 1.126482e-10 1.273250e-09
+    ## 109 5.881497e-04 4.621022e-03
+    ## 110 5.185292e-11 6.073997e-10
+    ## 111 6.786169e-01 1.000000e+00
+    ## 112 4.223724e-13 5.755541e-12
+    ## 113 5.255971e-02 3.721136e-01
+    ## 114 7.112331e-11 8.182537e-10
+    ## 115 1.925463e-01 1.000000e+00
+    ## 116 9.159773e-08 9.078944e-07
+    ## 117 3.164186e-07 3.042644e-06
+    ## 118 1.053907e-12 1.385703e-11
+    ## 119 9.405303e-01 1.000000e+00
+    ## 120 4.288085e-13 5.755541e-12
 
 ``` r
 ggplot(bind_rows(ext_multiple, ext_single),
@@ -1066,6 +1051,121 @@ labs(color  = "Regression: ", shape = "Regression: ")
 
 ![](mdd-symptom-gsem-ext_files/figure-markdown_github/ex_plot-1.png)
 
+Consistancy of effect direction in single regression
+
+``` r
+ext_table |>
+filter(Model == 'Single') |>
+group_by(Phenotype) |>
+filter(any(sign(STD_Genotype) == 1) & any(sign(STD_Genotype) == -1))
+```
+
+    ## # A tibble: 5 × 7
+    ## # Groups:   Phenotype [1]
+    ##   Phenotype Factor          Model  STD_Genotype STD_Genotype_SE  p_value     fdr
+    ##   <chr>     <fct>           <chr>         <dbl> <chr>              <dbl>   <dbl>
+    ## 1 EA        Clinical        Single      -0.111  0.0281436660903… 7.81e-5 6.90e-4
+    ## 2 EA        Community       Single      -0.112  0.0289212599345… 1.02e-4 8.63e-4
+    ## 3 EA        Gating          Single       0.0301 0.0349050663527… 3.88e-1 1   e+0
+    ## 4 EA        Appetite/Weight Single      -0.117  0.0298354541936… 8.62e-5 7.50e-4
+    ## 5 EA        Depression      Single      -0.110  0.0281870772378… 9.70e-5 8.33e-4
+
+Specific relationship
+
+``` r
+specific_sample <-
+ext_table |>
+filter(Factor %in% c('Clinical', 'Community'), Model == 'Multiple') |>
+group_by(Phenotype) |>
+filter(any(fdr <= 0.05), any(fdr > 0.05))  |>
+filter(fdr <= 0.05)
+specific_sample
+```
+
+    ## # A tibble: 7 × 7
+    ## # Groups:   Phenotype [7]
+    ##   Phenotype Factor   Model    STD_Genotype STD_Genotype_SE       p_value     fdr
+    ##   <chr>     <fct>    <chr>           <dbl> <chr>                   <dbl>   <dbl>
+    ## 1 Anxiety   Clinical Multiple        1.02  0.241756185330013     2.36e-5 2.14e-4
+    ## 2 BIP       Clinical Multiple        0.681 0.197239113098916     5.57e-4 4.43e-3
+    ## 3 MD        Clinical Multiple        1.12  0.236835868992616     2.42e-6 2.23e-5
+    ## 4 MDD       Clinical Multiple        1.01  0.279474356522564     3.16e-4 2.57e-3
+    ## 5 Neu       Clinical Multiple        0.730 0.135729985258004     7.36e-8 7.40e-7
+    ## 6 PTSD      Clinical Multiple        0.910 0.221056512543717     3.83e-5 3.43e-4
+    ## 7 Pain      Clinical Multiple        0.443 0.122663823688696     3.00e-4 2.48e-3
+
+``` r
+ext_table |>
+filter(Factor %in% c('Appetite/Weight', 'Depression', 'Gating'), Model == 'Multiple') |>
+group_by(Phenotype) |>
+filter(any(fdr <= 0.05), any(fdr > 0.05)) |>
+ungroup() |>
+filter(fdr <= 0.05) |>
+arrange(Factor)
+```
+
+    ## # A tibble: 19 × 7
+    ##    Phenotype Factor          Model    STD_Genotype STD_Genot…¹  p_value      fdr
+    ##    <chr>     <fct>           <chr>           <dbl> <chr>          <dbl>    <dbl>
+    ##  1 AlcDep    Depression      Multiple        0.438 0.12006398… 2.68e- 4 2.24e- 3
+    ##  2 Anxiety   Depression      Multiple        0.577 0.08157663… 1.54e-12 1.99e-11
+    ##  3 BIP       Depression      Multiple        0.505 0.06861448… 1.85e-13 2.65e-12
+    ##  4 MD        Depression      Multiple        0.791 0.07688256… 7.90e-25 1.96e-23
+    ##  5 MDD       Depression      Multiple        0.688 0.11848080… 6.35e- 9 6.71e- 8
+    ##  6 Neu       Depression      Multiple        0.701 0.07250484… 3.91e-22 8.40e-21
+    ##  7 PTSD      Depression      Multiple        0.674 0.10890387… 6.22e-10 6.90e- 9
+    ##  8 Pain      Depression      Multiple        0.358 0.06825291… 1.56e- 7 1.53e- 6
+    ##  9 Sleep     Depression      Multiple        0.258 0.07516733… 5.88e- 4 4.62e- 3
+    ## 10 BMI       Appetite/Weight Multiple        0.910 0.11228388… 5.33e-16 9.27e-15
+    ## 11 EA        Appetite/Weight Multiple       -0.398 0.06001099… 3.47e-11 4.30e-10
+    ## 12 Pain      Appetite/Weight Multiple        0.321 0.06511085… 8.25e- 7 7.70e- 6
+    ## 13 Smoking   Appetite/Weight Multiple        0.376 0.07355534… 3.16e- 7 3.04e- 6
+    ## 14 Anxiety   Gating          Multiple        0.414 0.07529529… 3.92e- 8 4.01e- 7
+    ## 15 BIP       Gating          Multiple        0.228 0.06371143… 3.38e- 4 2.72e- 3
+    ## 16 BMI       Gating          Multiple       -0.162 0.05003670… 1.18e- 3 9.04e- 3
+    ## 17 EA        Gating          Multiple        0.291 0.05276238… 3.40e- 8 3.53e- 7
+    ## 18 MD        Gating          Multiple        0.442 0.06717492… 4.85e-11 5.78e-10
+    ## 19 MDD       Gating          Multiple        0.368 0.11283678… 1.10e- 3 8.52e- 3
+    ## # … with abbreviated variable name ¹​STD_Genotype_SE
+
+Shared relationships
+
+``` r
+ext_table |>
+filter(Factor %in% c('Clinical', 'Community')) |>
+group_by(Phenotype) |>
+filter(any(fdr < 0.05)) |>
+filter(Model == 'Multiple') |>
+filter(all(fdr >= 0.05))
+```
+
+    ## # A tibble: 10 × 7
+    ## # Groups:   Phenotype [5]
+    ##    Phenotype Factor    Model    STD_Genotype STD_Genotype_SE   p_value   fdr
+    ##    <chr>     <fct>     <chr>           <dbl> <chr>               <dbl> <dbl>
+    ##  1 AlcDep    Clinical  Multiple        0.221 0.28166879414501   0.433  1    
+    ##  2 AlcDep    Community Multiple        0.452 0.341901341595013  0.186  1    
+    ##  3 BMI       Clinical  Multiple       -0.240 0.306326503445612  0.433  1    
+    ##  4 BMI       Community Multiple        0.687 0.33042281238573   0.0377 0.273
+    ##  5 EA        Clinical  Multiple        0.352 0.31209417661722   0.259  1    
+    ##  6 EA        Community Multiple       -0.688 0.333712241590538  0.0391 0.280
+    ##  7 Sleep     Clinical  Multiple        0.178 0.141538114566595  0.207  1    
+    ##  8 Sleep     Community Multiple        0.155 0.184646518937871  0.402  1    
+    ##  9 Smoking   Clinical  Multiple       -0.107 0.257715990952685  0.679  1    
+    ## 10 Smoking   Community Multiple        0.542 0.27964235772602   0.0526 0.372
+
+``` r
+ext_table |>
+filter(Factor %in% c('Appetite/Weight', 'Depression', 'Gating'), Model == 'Multiple') |>
+group_by(Phenotype) |>
+filter(all(fdr <= 0.05))
+```
+
+    ## # A tibble: 0 × 7
+    ## # Groups:   Phenotype [0]
+    ## # … with 7 variables: Phenotype <chr>, Factor <fct>, Model <chr>,
+    ## #   STD_Genotype <dbl>, STD_Genotype_SE <chr>, p_value <dbl>, fdr <dbl>
+
 Test for attenuation of correlations
 
 ``` r
@@ -1091,63 +1191,63 @@ knitr::kable(ext_attenuation)
 
 | Phenotype | Factor | p_value_Single | p_value_Multiple | attenuation_p |
 |:----------|:-------|---------------:|-----------------:|--------------:|
-| AlcDep    | DEP    |      0.0000000 |        0.0000155 |     0.7853468 |
-| Anxiety   | DEP    |      0.0000000 |        0.0000000 |     0.0384642 |
-| BIP       | DEP    |      0.0000000 |        0.0000000 |     0.6055987 |
-| BMI       | DEP    |      0.0000000 |        0.7597536 |     0.0148600 |
-| EA        | DEP    |      0.0005989 |        0.0000199 |     0.0782102 |
-| MD        | DEP    |      0.0000000 |        0.0000000 |     0.0037223 |
-| MDD       | DEP    |      0.0000000 |        0.0000000 |     0.1917317 |
-| Neu       | DEP    |      0.0000000 |        0.0000000 |     0.9179655 |
-| PTSD      | DEP    |      0.0000000 |        0.0000000 |     0.1059591 |
-| Pain      | DEP    |      0.0000000 |        0.0000000 |     0.0332224 |
-| Sleep     | DEP    |      0.0000000 |        0.0000004 |     0.6408847 |
-| Smoking   | DEP    |      0.0000000 |        0.2566346 |     0.0018176 |
-| AlcDep    | APP    |      0.0000000 |        0.3326445 |     0.0029400 |
-| Anxiety   | APP    |      0.0000000 |        0.7153553 |     0.0000000 |
-| BIP       | APP    |      0.0000000 |        0.0295450 |     0.0000000 |
+| AlcDep    | DEP    |      0.0000000 |        0.0002676 |     0.5128105 |
+| Anxiety   | DEP    |      0.0000000 |        0.0000000 |     0.0620574 |
+| BIP       | DEP    |      0.0000000 |        0.0000000 |     0.7792861 |
+| BMI       | DEP    |      0.0000000 |        0.0327662 |     0.0000613 |
+| EA        | DEP    |      0.0000970 |        0.7790025 |     0.1682474 |
+| MD        | DEP    |      0.0000000 |        0.0000000 |     0.2643687 |
+| MDD       | DEP    |      0.0000000 |        0.0000000 |     0.3894732 |
+| Neu       | DEP    |      0.0000000 |        0.0000000 |     0.8025940 |
+| PTSD      | DEP    |      0.0000000 |        0.0000000 |     0.2624594 |
+| Pain      | DEP    |      0.0000000 |        0.0000002 |     0.0065546 |
+| Sleep     | DEP    |      0.0000000 |        0.0005881 |     0.7731186 |
+| Smoking   | DEP    |      0.0000000 |        0.9405303 |     0.0015129 |
+| AlcDep    | APP    |      0.0000000 |        0.3601775 |     0.0018675 |
+| Anxiety   | APP    |      0.0000000 |        0.8926107 |     0.0000000 |
+| BIP       | APP    |      0.0000000 |        0.0099903 |     0.0000000 |
 | BMI       | APP    |      0.0000000 |        0.0000000 |     0.0000000 |
-| EA        | APP    |      0.0005677 |        0.0000030 |     0.0493804 |
-| MD        | APP    |      0.0000000 |        0.7993565 |     0.0000000 |
-| MDD       | APP    |      0.0000000 |        0.5839453 |     0.0000000 |
-| Neu       | APP    |      0.0000000 |        0.5807813 |     0.0000000 |
-| PTSD      | APP    |      0.0000000 |        0.2931448 |     0.0000000 |
-| Pain      | APP    |      0.0000000 |        0.0000000 |     0.0003320 |
-| Sleep     | APP    |      0.0000000 |        0.9280836 |     0.0003581 |
-| Smoking   | APP    |      0.0000000 |        0.0000000 |     0.4824324 |
-| AlcDep    | GATE   |      0.0000185 |        0.8517884 |     0.0040395 |
-| Anxiety   | GATE   |      0.0000000 |        0.0000012 |     0.0001773 |
-| BIP       | GATE   |      0.0000000 |        0.0031074 |     0.0002080 |
-| BMI       | GATE   |      0.0004244 |        0.0209270 |     0.0000780 |
-| EA        | GATE   |      0.8551816 |        0.0000169 |     0.0002292 |
-| MD        | GATE   |      0.0000000 |        0.0000000 |     0.0000071 |
-| MDD       | GATE   |      0.0000000 |        0.0010570 |     0.0011973 |
-| Neu       | GATE   |      0.0000000 |        0.2263902 |     0.0000003 |
-| PTSD      | GATE   |      0.0000000 |        0.0064373 |     0.0003060 |
-| Pain      | GATE   |      0.0000000 |        0.4666747 |     0.0000005 |
-| Sleep     | GATE   |      0.0000337 |        0.6325584 |     0.0023383 |
-| Smoking   | GATE   |      0.0000000 |        0.0272392 |     0.0125530 |
-| AlcDep    | CLIN   |      0.0000000 |        0.2197182 |     0.8669169 |
-| Anxiety   | CLIN   |      0.0000000 |        0.2583376 |     0.0040457 |
-| BIP       | CLIN   |      0.0000000 |        0.2314438 |     0.0123620 |
-| BMI       | CLIN   |      0.0000000 |        0.1385062 |     0.2248607 |
-| EA        | CLIN   |      0.0005809 |        0.1403267 |     0.1931918 |
-| MD        | CLIN   |      0.0000000 |        0.3265085 |     0.0002760 |
-| MDD       | CLIN   |      0.0000000 |        0.3035501 |     0.0110704 |
-| Neu       | CLIN   |      0.0000000 |        0.6530585 |     0.0002799 |
-| PTSD      | CLIN   |      0.0000000 |        0.5209005 |     0.0065614 |
-| Pain      | CLIN   |      0.0000000 |        0.1808442 |     0.5498820 |
-| Sleep     | CLIN   |      0.0000001 |        0.4405708 |     0.6461351 |
-| Smoking   | CLIN   |      0.0000000 |        0.1505291 |     0.4242118 |
-| AlcDep    | COMM   |      0.0000000 |        0.7440459 |     0.3512964 |
-| Anxiety   | COMM   |      0.0000000 |        0.0031289 |     0.4066075 |
-| BIP       | COMM   |      0.0000000 |        0.0168257 |     0.3947117 |
-| BMI       | COMM   |      0.0000000 |        0.4776757 |     0.3177036 |
-| EA        | COMM   |      0.0005091 |        0.4085868 |     0.3121606 |
-| MD        | COMM   |      0.0000000 |        0.0000376 |     0.4450019 |
-| MDD       | COMM   |      0.0000000 |        0.0083437 |     0.4399300 |
-| Neu       | COMM   |      0.0000000 |        0.0000004 |     0.6922790 |
-| PTSD      | COMM   |      0.0000000 |        0.0004157 |     0.5929963 |
-| Pain      | COMM   |      0.0000000 |        0.1915965 |     0.3387181 |
-| Sleep     | COMM   |      0.0000000 |        0.3132514 |     0.5210853 |
-| Smoking   | COMM   |      0.0000000 |        0.7721715 |     0.3236180 |
+| EA        | APP    |      0.0000862 |        0.0000000 |     0.0000286 |
+| MD        | APP    |      0.0000000 |        0.1756702 |     0.0000000 |
+| MDD       | APP    |      0.0000000 |        0.6824183 |     0.0000000 |
+| Neu       | APP    |      0.0000000 |        0.2180846 |     0.0000000 |
+| PTSD      | APP    |      0.0000000 |        0.4268360 |     0.0000000 |
+| Pain      | APP    |      0.0000000 |        0.0000008 |     0.0006510 |
+| Sleep     | APP    |      0.0000000 |        0.3339948 |     0.0120425 |
+| Smoking   | APP    |      0.0000000 |        0.0000003 |     0.1885838 |
+| AlcDep    | GATE   |      0.0000000 |        0.4525887 |     0.0005043 |
+| Anxiety   | GATE   |      0.0000000 |        0.0000000 |     0.0000017 |
+| BIP       | GATE   |      0.0000000 |        0.0003377 |     0.0000053 |
+| BMI       | GATE   |      0.0023403 |        0.0011788 |     0.0000103 |
+| EA        | GATE   |      0.3880984 |        0.0000000 |     0.0000367 |
+| MD        | GATE   |      0.0000000 |        0.0000000 |     0.0000000 |
+| MDD       | GATE   |      0.0000000 |        0.0010976 |     0.0000261 |
+| Neu       | GATE   |      0.0000000 |        0.0759407 |     0.0000000 |
+| PTSD      | GATE   |      0.0000000 |        0.0299142 |     0.0000045 |
+| Pain      | GATE   |      0.0000000 |        0.2763549 |     0.0000000 |
+| Sleep     | GATE   |      0.0000007 |        0.7797289 |     0.0004954 |
+| Smoking   | GATE   |      0.0000001 |        0.1925463 |     0.0022699 |
+| AlcDep    | CLIN   |      0.0000000 |        0.1862938 |     0.8175206 |
+| Anxiety   | CLIN   |      0.0000000 |        0.1483680 |     0.0000567 |
+| BIP       | CLIN   |      0.0000000 |        0.2014212 |     0.0010025 |
+| BMI       | CLIN   |      0.0000000 |        0.0377260 |     0.1585480 |
+| EA        | CLIN   |      0.0001018 |        0.0391460 |     0.0855659 |
+| MD        | CLIN   |      0.0000000 |        0.2202059 |     0.0000133 |
+| MDD       | CLIN   |      0.0000000 |        0.3912628 |     0.0020228 |
+| Neu       | CLIN   |      0.0000000 |        0.6513566 |     0.0000300 |
+| PTSD      | CLIN   |      0.0000000 |        0.6257487 |     0.0014886 |
+| Pain      | CLIN   |      0.0000000 |        0.2254765 |     0.0171643 |
+| Sleep     | CLIN   |      0.0000000 |        0.4019709 |     0.4922680 |
+| Smoking   | CLIN   |      0.0000000 |        0.0525597 |     0.3150735 |
+| AlcDep    | COMM   |      0.0000000 |        0.4325971 |     0.2900228 |
+| Anxiety   | COMM   |      0.0000000 |        0.0000236 |     0.2690822 |
+| BIP       | COMM   |      0.0000000 |        0.0005573 |     0.3205292 |
+| BMI       | COMM   |      0.0000000 |        0.4329118 |     0.1371172 |
+| EA        | COMM   |      0.0000781 |        0.2594817 |     0.1394640 |
+| MD        | COMM   |      0.0000000 |        0.0000024 |     0.3444101 |
+| MDD       | COMM   |      0.0000000 |        0.0003156 |     0.4820749 |
+| Neu       | COMM   |      0.0000000 |        0.0000001 |     0.7125800 |
+| PTSD      | COMM   |      0.0000000 |        0.0000383 |     0.6824135 |
+| Pain      | COMM   |      0.0000000 |        0.0002998 |     0.3280916 |
+| Sleep     | COMM   |      0.0000000 |        0.2073126 |     0.4788281 |
+| Smoking   | COMM   |      0.0000000 |        0.6786169 |     0.1631627 |
