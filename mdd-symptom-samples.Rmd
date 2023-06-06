@@ -55,19 +55,24 @@ basics_aligned <-
 cohort_alignment %>%
 filter(!reference %in% c('MDD3', 'MDD4')) %>%
 mutate(Dataset=str_replace(str_remove(filename, pattern='daner_'), 'gz', 'align.gz')) %>%
-left_join(basics_datasets, by='Dataset') |>
-mutate(cohort = if_else(cohort == "janpy", true = "PGC", false=cohort)) |>
-group_by(cohort, reference) |>
+left_join(basics_datasets, by='Dataset')
+
+basics_summary <- basics_aligned |>
+mutate(meta=case_when(cohort %in% c('PGC', 'AGDS', 'GenScot', 'janpy') ~ "Clinical",
+                      cohort %in% c('ALSPAC', 'EstBB', 'UKBB') ~ "Community",
+					  TRUE ~ NA_character_)) |>
+group_by(meta, reference) |>
 summarize(N_cases=sum(N_cases, na.rm=T), N_controls=sum(N_controls, na.rm=T), N_eff_half=sum(N_eff_half, na.rm=T)) |>
 ungroup()
 
-presence_absence <- basics_aligned %>% str_glue_data("{N_cases}:{N_controls} {round(100*N_cases/(N_cases + N_controls))}")
+presence_absence <- basics_summary |>
+	str_glue_data("{N_cases} : {N_controls} {round(100*N_cases/(N_cases + N_controls))}")
 
 basics_formatted <- 
-basics_aligned %>%
+basics_summary %>%
 mutate(PresenceAbsence=as.character(presence_absence)) %>%
-select(cohort, reference, PresenceAbsence) %>%
-pivot_wider(names_from=cohort, values_from=PresenceAbsence)
+select(meta, reference, PresenceAbsence) %>%
+pivot_wider(names_from=meta, values_from=PresenceAbsence)
 
 knitr::kable(basics_formatted)
 
@@ -77,7 +82,7 @@ knitr::kable(basics_formatted)
 
 basics_sum <-
 basics_aligned %>%
-mutate(sample=if_else(cohort %in% c('AGDS', 'PGC', 'GenScot'), true='enriched', false='unselected')) %>%
+mutate(sample=if_else(cohort %in% c('AGDS', 'PGC', 'GenScot', 'janpy'), true='enriched', false='unselected')) %>%
 group_by(sample, reference) %>%
 summarise(N_cases=sum(N_cases), N_controls=sum(N_controls)) 
 
@@ -103,11 +108,21 @@ Datasets
 
 ```{r}
 
-meta_aligned <-
+cohort_sumstats <- basics_aligned |>
+	transmute(cohort, reference, dataset=str_match(Dataset, "([A-Za-z0-9_]+)")[,2],
+			  N_cases, N_controls, `N_eff_half`, `LAMBDA-GC`, `N-SNPs`) |>
+	filter(!is.na(N_cases))
+
+meta_sumstats <-
 basics_meta %>%
-	mutate(cohort=str_match(Dataset, "([A-Z_]+)")[,2],
-	       reference=str_match(Dataset, "(MDD[0-9a-b]+)")[,2])
+	mutate(cohort=str_match(Dataset, "([A-Za-z_]+)")[,2],
+	       reference=str_match(Dataset, "(MDD[0-9a-b]+)")[,2]) |>
+	select(cohort, reference, dataset=Dataset,
+		   N_cases, N_controls, `N_eff_half`,
+		   `LAMBDA-GC`, `N-SNPs`)
 		   
-write_csv(meta_aligned, "meta/meta.csv")
+sumstats <- bind_rows(cohort_sumstats, meta_sumstats)
+		   
+write_csv(sumstats, "meta/meta.csv")
 
 ```
