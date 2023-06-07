@@ -14,7 +14,8 @@ output:
 
 Test genetic relationship between [symptom factors](mdd-symptom-gsem-model.md) and a selection of other phenotypes that are genetically correlated with MDD, as well as to MDD itself. Phenotypes to examine:
 
-- Major depressive disorder: Clinical cohorts from [Wray et al](https://www.nature.com/articles/s41588-018-0090-3%5C) and all cohorts from [Howard et al](https://www.nature.com/articles/s41593-018-%200326-7). Download from [PGC](https://www.med.unc.edu/pgc/download-results/) and obtain via [data access](https://www.med.unc.edu/pgc/shared-methods/how-to/).
+- Major depressive disorder: Clinical cohorts from [Wray et al](https://www.nature.com/articles/s41588-018-0090-3%5C) and non-PGC cohorts from . Download from [PGC](https://www.med.unc.edu/pgc/download-results/) and obtain via [data access](https://www.med.unc.edu/pgc/shared-methods/how-to/).
+- Major depression: Non-PGC cohorts from [Als et al](https://www.medrxiv.org/content/10.1101/2022.08.24.22279149v1). Download from [iPsych](https://ipsych.dk/en/research/downloads).
 - bipolar disorder: [Mullins et al](https://pubmed.ncbi.nlm.nih.gov/34002096/). Download from [PGC](https://figshare.com/articles/dataset/PGC3_bipolar_disorder_GWAS_summary_statistics/14102594)
 - anxiety: [meta-analysis](https://drive.google.com/drive/folders/1fguHvz7l2G45sbMI9h_veQun4aXNTy1v) of [UKBB, iPSYCH](https://www.nature.com/articles/s41380-019-0559-1), and [ANGST](https://pubmed.ncbi.nlm.nih.gov/26754954/), from [Grotzinger et al medRxiv](https://www.medrxiv.org/content/10.1101/2020.09.22.20196089v1.full)
 - PTSD: [Nievergelt et al](https://pubmed.ncbi.nlm.nih.gov/31594949/). Download from [PGC](https://figshare.com/articles/dataset/ptsd2019/14672133)
@@ -76,21 +77,18 @@ Format the external sumstats for reading by GenomicSEM with columns `SNP`, `A1` 
 
 ```{r ext2txt, eval=FALSE}
 
-# Major depressive disorder
-mdd <- read_table('sumstats/PGC_UKB_23andMe_depression_genome-wide_info_N.txt.gz')
-mdd_sumstats <- mdd %>%
-    mutate(Nca=UKB_Ncases+PGC_Ncases+X23andMe_Ncases,
-           Nco=UKB_Ncontrols+PGC_Ncontrols+X23andMe_Ncontrols) %>%
-    transmute(SNP=MarkerName, A1=toupper(Allele1), A2=toupper(Allele2),
-              BETA=Effect, SE=StdErr, P=P.value, 
-              FREQ=Freq1, N=4*Nca*Nco/(Nca+Nco))
-write_tsv(mdd_sumstats, 'sumstats/MD.txt')
+# Major depression
+md <- read_table('sumstats/daner_MDDwoBP_20201001_HRC_MDDwoBP_UKBtransformed_FinnGen_MVPaf_2_HRC_MAF01.gz')
+md_sumstats <- mdd %>%
+   transmute(SNP, A1, A2, BETA=log(OR), SE, FREQ=FRQ_U_667123, INFO, P, N=2*Neff_half)
+write_tsv(md_sumstats, 'sumstats/MD.txt')
 
-mdd_clin <- read_tsv('sumstats/daner_MDD29.0515a_mds6.0316.gz')
-mdd_clin_sumstats <- mdd_clin %>%
+# Major depressive disorder
+mdd <- read_tsv('sumstats/daner_MDD29.0515a_mds6.0316.gz')
+mdd_sumstats <- mdd %>%
     transmute(SNP, A1, A2, BETA=log(OR), SE, FREQ=FRQ_U_25632, INFO, P,
               N=4*Nca*Nco/(Nca+Nco))
-write_tsv(mdd_clin_sumstats, 'sumstats/MDD.txt')
+write_tsv(mdd_sumstats, 'sumstats/MDD.txt')
 
 # Bipolar disorder
 bip <- read_tsv('sumstats/pgc-bip2021-all.vcf.tsv.gz', comment='##')
