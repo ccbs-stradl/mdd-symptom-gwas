@@ -10,6 +10,7 @@ config.yaml
 *.enc
 *.enc_ukb
 *.xlsx
+*.xls
 encoding.ukb
 fields.ukb
 *.tab
