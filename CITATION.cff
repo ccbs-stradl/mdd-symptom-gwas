@@ -17,7 +17,7 @@ authors:
     orcid: 'https://orcid.org/0000-0002-3599-6018'
 identifiers:
   - type: doi
-    value: 10.0000/TBD
+    value: 10.1101/2023.07.05.23292214
 repository-code: >-
   https://github.com/psychiatric-genomics-consortium/mdd-symptom-gwas
 url: 'https://pgc.unc.edu/for-researchers/download-results/'
