@@ -78,6 +78,13 @@ process PGC {
 
     daner <- read_tsv("${dataset}.gz")
     basic <- read_excel("${dataset}.xls")
+	
+	if(nrow(problems(daner)) > 0) {
+		daner_qc <- daner |>
+			slice(-problems(daner)\$row)
+	} else {
+		daner_qc <- daner
+	}
 
     filedate <- format(now(), "%Y-%Om-%d") 
 
@@ -106,7 +113,7 @@ process PGC {
     symptom <- str_split_1(dataset, pattern='-')[2]
 
     # variants
-    variants <- nrow(daner)
+    variants <- nrow(daner_qc)
 
     # total sample sizes
     ncase <- basic |> filter(Dataset == "SUM") |> pull(N_cases)
@@ -137,7 +144,7 @@ process PGC {
     processed_by_core  <- basic_cohorts |> pull(core) |> paste(collapse=",")
 
     # format contig
-    daner_chr <- daner %>% select(CHR) |>
+    daner_chr <- daner_qc %>% select(CHR) |>
      distinct(CHR) |>
      mutate(CHR=as.character(CHR)) |>
      pull(CHR)
@@ -158,14 +165,15 @@ process PGC {
     header <- paste(headers, collapse='\\n')
 
     # format sumstats
-    pgc_sumstats <- daner %>%
+    pgc_sumstats <- daner_qc %>%
         arrange(CHR, BP) |>
         select(CHR, BP, SNP, A1, A2, OR, SE,
             FRQ_A=starts_with('FRQ_A'), FRQ_U=starts_with('FRQ_U'), P,
             INFO, Neff_half, Nca, Nco) %>%
         transmute(`#CHROM`=CHR, POS=BP, ID=SNP, A1=A1, A2=A2,
                 BETA=log(OR), SE, PVAL=P, FCAS=FRQ_A, FCON=FRQ_U,
-                IMPINFO=INFO, NEFF=2*Neff_half, NCAS=Nca, NCON=Nco)
+                IMPINFO=INFO, NEFF=2*Neff_half, NCAS=Nca, NCON=Nco) |>
+		na.omit()
 
     out <- "${prefix}-${dataset}.txt"
 

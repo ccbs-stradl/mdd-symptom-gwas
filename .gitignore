@@ -4,7 +4,6 @@ config.yaml
 *.rds
 *.info
 *.csv
-*.txt
 *.gz
 !*.prevs.txt
 *.enc
