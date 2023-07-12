@@ -1,0 +1,138 @@
+GWAS summary statistics for major depressive disorder symptoms
+==============================================================
+
+Analyst: Mark J Adams (mark.adams@ed.ac.uk) for the Psychiatric Genomics Consortium
+
+Contents
+--------
+
+Meta-analysed genome-wide association summary statistics for symptoms of major depressive disorder.
+
+*Cohorts*
+
+- Clin = Clinical and case-enriched cohorts: Psychiatric Genomics Consortium, Australian Genetics of Depression Study and Generation Scotland
+- Community = Community (not selected for diagnosis) cohorts: Avon Longitudinal Study of Parents and Children, Estonian Biobank, and UK Biobank.
+
+*Symptoms*
+
+MDD1: Depressed mood most of the day, nearly every day
+MDD2: Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
+MDD3: Significant change in weight or appetite
+MDD3a: Significant weight loss or decrease in appetite
+MDD3b: Significant weight gain or increase in appetite
+MDD4: Sleeping too much or not sleeping enough
+MDD4a: Insomnia nearly every day
+MDD4b: Hypersomnia nearly every day
+MDD5: Changes in speed/amount of moving or speaking
+MDD5a: Psychomotor agitation nearly every day
+MDD5b: Psychomotor slowing nearly every day
+MDD6: Fatigue or loss of energy nearly every day
+MDD7: Feelings of worthlessness or excessive or inappropriate guilt
+MDD8: Diminished ability to think or concentrate, or indecisiveness
+MDD9: Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide
+
+Using the files
+---------------
+
+Information about the summary statistics can be found in the pre-header, with lines starting with "##". The pre-header lists names of included cohorts, sample sizes, and column descriptions.
+
+The header can be printed to the command line with
+
+	gunzip -c mdd_symptoms_2023-Clin-MDD1_depressed.txt.gz | awk '{if($1 == "#CHROM") {print $0; exit} else {print $0}}'
+
+The summary statistics (starting with the row of column names) can be read out with
+
+	gunzip -c mdd_symptoms_2023-Clin-MDD1_depressed.txt.gz | grep -v '^##'
+
+or read into R with
+
+	library(readr)
+	clin_mdd1 <- read_tsv('mdd_symptoms_2023-Clin-MDD1_depressed.txt.gz', comment='##')
+
+File columns
+------------
+
+CHR: Chromosome
+POS: Base-pair position (GRCh37)
+A1: SNP reference allele for freq and ln(OR) (effect allele)
+A2: SNP alternate allele (non-effect allele)
+BETA: ln(OR) of A1
+SE: standard error of ln(OR)
+PVAL: P-value, uncorrected
+FCAS: frequency of A1 in cases
+FCON: frequency of A1 in controls
+IMPINFO: imputation INFO score
+NEFF: effective sample size
+NCAS: total sample size cases
+NCON: total sample size controls
+
+Terms of use
+------------
+
+- You may not share this data outside of your immediate research group.
+- You may only use this data for scientific research.
+- You may not submit manuscripts or post preprints that use the data before acceptance of the primary manuscript.
+- You may present preliminary results based on these data at academic conferences and talks.
+	
+Reference
+---------
+
+Genetic structure of major depression symptoms across clinical and community cohorts
+Mark J Adams, Jackson G Thorp, Bradley S Jermy, Alex S F Kwong, Kadri Koiv, Andrew D Grotzinger, Michel G Nivard, Sally Marshall, Yuri Milaneschi, Bernhard T Baune, Bertram Mueller-Myhsok, Brenda WJH Penninx, Dorret I Boomsma, Douglas F Levinson, Gerome Breen, Giorgio Pistis, Hans J Grabe, Henning Tiemeier, Klaus Berger, Marcella Rietschel, Patrik K Magnusson, Rudolf Uher, Steven P Hamilton, Susanne Lucae, Kelli Lehto, Qingqin S Li, Enda M Byrne, Ian B Hickie, Nicholas G Martin, Sarah E Medland, Naomi R Wray, Elliot M Tucker-Drob, Estonian Biobank Research Team, Major Depressive Disorder Working Group of the Psychiatric Genomics Consortium, Cathryn M Lewis, Andrew M McIntosh, Eske M Derks
+medRxiv 2023.07.05.23292214; doi: 10.1101/2023.07.05.23292214
+
+File download
+-------------
+
+curl -L "https://ndownloader.figshare.com/files/41498073?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD1_depressed.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41498076?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD2_anhedonia.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41498091?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD4b_sleepMore.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41498784?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD3a_weightLoss.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41506815?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD3b_weightGain.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41506827?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD4a_sleepProb.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41506944?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD5a_psychomotorFast.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41506941?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD5b_psychomotorSlow.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41506956?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD6_fatigue.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41506962?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD7_worthless.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41506968?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD8_concentration.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41506986?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Clin-MDD9_death.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41506992?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD1_depressed.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507001?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD2_anhedonia.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507034?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD3a_weightLoss.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507127?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD3b_weightGain.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507157?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD4a_sleepProb.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507277?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD4b_sleepMore.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507292?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD5a_psychomotorFast.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507298?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD5b_psychomotorSlow.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507304?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD6_fatigue.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507334?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD7_worthless.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507376?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD8_concentration.txt.gz
+curl -L "https://ndownloader.figshare.com/files/41507388?private_link=8f2521376f4ead8ec305" > mdd_symptoms_2023-Comm-MDD9_death.txt.gz
+
+Manifest
+--------
+
+MD5 (mdd_symptoms_2023-Clin-MDD1_depressed.txt.gz) = 4e19613bfb037f4321e71d8a34745d70
+MD5 (mdd_symptoms_2023-Clin-MDD2_anhedonia.txt.gz) = 041233d7462031cf645bd95a0dcf788c
+MD5 (mdd_symptoms_2023-Clin-MDD3a_weightLoss.txt.gz) = 89afb61325c98bacc25fd1b112da9fc8
+MD5 (mdd_symptoms_2023-Clin-MDD3b_weightGain.txt.gz) = 6b144f796625bd1495c586c29df8e4bd
+MD5 (mdd_symptoms_2023-Clin-MDD4a_sleepProb.txt.gz) = b7158a866f186395e5b82f4da7208f1d
+MD5 (mdd_symptoms_2023-Clin-MDD4b_sleepMore.txt.gz) = e28a6b5bf6031e8334d80d9cf862a091
+MD5 (mdd_symptoms_2023-Clin-MDD5a_psychomotorFast.txt.gz) = caf05c0b7ac573e2c2830e7210db1552
+MD5 (mdd_symptoms_2023-Clin-MDD5b_psychomotorSlow.txt.gz) = 5bb934da2dbec2c56b05e5f0cace0e58
+MD5 (mdd_symptoms_2023-Clin-MDD6_fatigue.txt.gz) = e14c0d802d70c5b15458827b63e81315
+MD5 (mdd_symptoms_2023-Clin-MDD7_worthless.txt.gz) = e70663e8c0d7a78ddb0fa0c2ed4f17ba
+MD5 (mdd_symptoms_2023-Clin-MDD8_concentration.txt.gz) = ae8c324bd9b746b808e4a5f6dd91b7e0
+MD5 (mdd_symptoms_2023-Clin-MDD9_death.txt.gz) = 6d67f4d95708312b02220f9dd0bcf117
+MD5 (mdd_symptoms_2023-Comm-MDD1_depressed.txt.gz) = 1a8bf75c174bf8a3be0a7eb4dad9a37d
+MD5 (mdd_symptoms_2023-Comm-MDD2_anhedonia.txt.gz) = e5557fc2e6d343b2b47213cc9ac96ecc
+MD5 (mdd_symptoms_2023-Comm-MDD3a_weightLoss.txt.gz) = 249538a2ed1d1442c4c249838288faef
+MD5 (mdd_symptoms_2023-Comm-MDD3b_weightGain.txt.gz) = 4cbf91dc299aed922bbb40ab775b2575
+MD5 (mdd_symptoms_2023-Comm-MDD4a_sleepProb.txt.gz) = b68a3b7a98c39d3feb3c8b6e1d70f7cd
+MD5 (mdd_symptoms_2023-Comm-MDD4b_sleepMore.txt.gz) = 556414651ff54f37261ef220f9e7a709
+MD5 (mdd_symptoms_2023-Comm-MDD5a_psychomotorFast.txt.gz) = 40b9ab3424ec156e32e021d32b520c66
+MD5 (mdd_symptoms_2023-Comm-MDD5b_psychomotorSlow.txt.gz) = ee10ab5e301b589fbe0d2fcf7b8c922f
+MD5 (mdd_symptoms_2023-Comm-MDD6_fatigue.txt.gz) = d038fb7ca214cd2c4e3b0d2f1970c460
+MD5 (mdd_symptoms_2023-Comm-MDD7_worthless.txt.gz) = 13e570fb9d292d5bfc115bbcd9e38578
+MD5 (mdd_symptoms_2023-Comm-MDD8_concentration.txt.gz) = 424a638256ea92f8ba78df48f417397f
+MD5 (mdd_symptoms_2023-Comm-MDD9_death.txt.gz) = 765aa53b10da5eaa49a5f1ac8faf72a4
