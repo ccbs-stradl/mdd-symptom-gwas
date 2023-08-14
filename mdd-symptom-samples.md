@@ -9,20 +9,6 @@ Make table of counts of sypmtom presence/absence used in final analyses
 library(readxl)
 library(readr)
 library(dplyr)
-```
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-``` r
 library(tidyr)
 library(stringr)
 ```
@@ -34,7 +20,7 @@ cohort_alignment <- read_tsv('meta/cohort_alignment.txt')
 ```
 
     ## Rows: 245 Columns: 3
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (3): filename, cohort, reference
     ## 
@@ -193,3 +179,33 @@ sumstats <- bind_rows(cohort_sumstats, meta_sumstats)
            
 write_csv(sumstats, "meta/meta.csv")
 ```
+
+Totals
+
+``` r
+cohort_sumstats |> filter(cohort %in% c('PGC', 'AGDS', 'GenScot', 'janpy')) |>
+    mutate(N=N_cases+N_controls, cohort=if_else(cohort=='PGC', true=sapply(str_split(dataset, "_"), last), false=cohort)) |>
+    group_by(cohort) |>
+    summarize(N=max(N)) |>
+    ungroup() |>
+    summarize(N=sum(N))
+```
+
+    ## # A tibble: 1 × 1
+    ##       N
+    ##   <dbl>
+    ## 1 30148
+
+``` r
+cohort_sumstats |> filter(cohort %in% c('ALSPAC', 'EstBB', 'UKBB')) |>
+    mutate(N=N_cases+N_controls) |>
+    group_by(cohort) |>
+    summarize(N=max(N)) |>
+    ungroup() |>
+    summarize(N=sum(N))
+```
+
+    ## # A tibble: 1 × 1
+    ##        N
+    ##    <dbl>
+    ## 1 207436

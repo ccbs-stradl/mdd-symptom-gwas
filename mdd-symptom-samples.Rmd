@@ -126,3 +126,20 @@ sumstats <- bind_rows(cohort_sumstats, meta_sumstats)
 write_csv(sumstats, "meta/meta.csv")
 
 ```
+
+Totals
+```{r}
+cohort_sumstats |> filter(cohort %in% c('PGC', 'AGDS', 'GenScot', 'janpy')) |>
+	mutate(N=N_cases+N_controls, cohort=if_else(cohort=='PGC', true=sapply(str_split(dataset, "_"), last), false=cohort)) |>
+	group_by(cohort) |>
+	summarize(N=max(N)) |>
+	ungroup() |>
+	summarize(N=sum(N))
+
+cohort_sumstats |> filter(cohort %in% c('ALSPAC', 'EstBB', 'UKBB')) |>
+	mutate(N=N_cases+N_controls) |>
+	group_by(cohort) |>
+	summarize(N=max(N)) |>
+	ungroup() |>
+	summarize(N=sum(N))
+```
