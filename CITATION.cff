@@ -17,36 +17,12 @@ authors:
     orcid: 'https://orcid.org/0000-0002-3599-6018'
 identifiers:
   - type: doi
-    value: 10.0000/TBD
+    value: 10.1101/2023.07.05.23292214
 repository-code: >-
   https://github.com/psychiatric-genomics-consortium/mdd-symptom-gwas
 url: 'https://pgc.unc.edu/for-researchers/download-results/'
 abstract: >-
-  Diagnostic criteria for major depressive disorder allow
-  for heterogeneous symptom profiles but genetic analysis of
-  major depressive symptoms has the potential to identify
-  clinical and aetiological subtypes. There are several
-  challenges to integrating symptom data from
-  genetically-informative cohorts, such as sample size
-  differences between clinical and community cohorts and
-  various patterns of missing data. We conducted genome-wide
-  association studies of major depressive symptoms in two
-  clinical cohorts that were enriched for affected
-  participants (Psychiatric Genomics Consortium, Australian
-  Genetics of Depression Study) and two community cohorts
-  (UK Biobank, Avon Longitudinal Study of Parents and
-  Children). We fit a series of confirmatory factor models
-  with factors that accounted for how symptom data was
-  sampled and then compared alternative models with
-  different symptom factors. The best fitting model had a
-  distinct factor for Appetite/Weight symptoms and an
-  additional measurement factor that accounted for missing
-  data patterns in one of the community cohorts (use of
-  Depression and Anhedonia as gating symptoms in UK
-  Biobank). The results show the importance of assessing the
-  directionality of symptoms (such as hypersomnia versus
-  insomnia) and of accounting for study and measurement
-  design when meta-analysing genetic association data. 
+  Diagnostic criteria for major depressive disorder allow for heterogeneous symptom profiles but genetic analysis of major depressive symptoms has the potential to identify clinical and aetiological subtypes. There are several challenges to integrating symptom data from genetically-informative cohorts, such as sample size differences between clinical and community cohorts and various patterns of missing data. We conducted genome-wide association studies of major depressive symptoms in three clinical cohorts that were enriched for affected participants (Psychiatric Genomics Consortium, Australian Genetics of Depression Study, Generation Scotland) and three community cohorts (Avon Longitudinal Study of Parents and Children, Estonian Biobank, and UK Biobank). We fit a series of confirmatory factor models with factors that accounted for how symptom data was sampled and then compared alternative models with different symptom factors. The best fitting model had a distinct factor for Appetite/Weight symptoms and an additional measurement factor that accounted for missing data patterns in the community cohorts (use of Depression and Anhedonia as gating symptoms). The results show the importance of assessing the directionality of symptoms (such as hypersomnia versus insomnia) and of accounting for study and measurement design when meta-analysing genetic association data. 
 keywords:
   - major depressive disorder
   - genomic sem

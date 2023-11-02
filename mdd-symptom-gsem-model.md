@@ -129,7 +129,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -158,7 +158,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -193,7 +193,7 @@ select(Reference, Abbreviation=abbv, Label=h, Description)
 # GenomicSEM covariance structure
 
 ``` r
-covstruct_prefix <- 'agds_pgc.alspac_ukb.covstruct'
+covstruct_prefix <- 'clin.comm.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
@@ -202,8 +202,8 @@ symptoms_covstruct <- dget(covstruct_r)
 sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 'txt', sep='.')))
 ```
 
-    ## Rows: 38 Columns: 9
-    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## Rows: 26 Columns: 9
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -222,8 +222,8 @@ cohorts_sample_symptoms <-
 sumstats_prevs %>%
 left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
 select(cohorts, symptom, trait_name, abbv) %>%
-mutate(Sample=case_when(cohorts %in% 'AGDS_PGC' ~ 'Clin',
-                        cohorts %in% 'ALSPAC_UKB' ~ 'Comm',
+mutate(Sample=case_when(cohorts %in% 'Clin' ~ 'Clin',
+                        cohorts %in% 'Comm' ~ 'Comm',
                         cohorts %in% 'UKBt' ~ 'Ukb',
                         TRUE ~ NA_character_)) %>%
 mutate(sample_symptom=paste0(Sample, abbv))
@@ -248,13 +248,13 @@ symptoms_S_var[which(symptoms_S_var > 0)]
 ```
 
     ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc ClinMotoDec 
-    ## 0.128871019 0.051543416 0.013663704 0.013924961 0.039896861 0.002375007 
-    ##     ClinSui     CommDep     CommAnh  CommAppDec  CommAppInc  CommSleDec 
-    ## 0.103892914 0.082198484 0.087343514 0.035741853 0.079200630 0.043111949 
-    ##  CommSleInc   CommFatig   CommGuilt    CommConc     CommSui      UkbDep 
-    ## 0.047553540 0.057539570 0.060012455 0.056887041 0.033166683 0.042463388 
-    ##      UkbAnh 
-    ## 0.047031487
+    ##  0.09257086  0.12274945  0.07289299  0.05265282  0.03653919  0.00105577 
+    ##   ClinGuilt     ClinSui     CommDep     CommAnh  CommAppDec  CommAppInc 
+    ##  0.02345170  0.06410331  0.08366350  0.08445228  0.04481289  0.12878752 
+    ##  CommSleDec  CommSleInc   CommFatig   CommGuilt    CommConc     CommSui 
+    ##  0.05793853  0.08948925  0.06275359  0.06263088  0.04880229  0.03213463 
+    ##      UkbDep      UkbAnh 
+    ##  0.04246339  0.04703149
 
 ## Common factor
 
@@ -262,7 +262,7 @@ Common factor across symptoms from both cohorts, as a general MDD factor
 
 ``` r
 commonfactor.model <- "
-MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 
 MDD ~~ 1*MDD
 "
@@ -275,8 +275,8 @@ commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commo
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.722 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   0.974 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## commonfactor.model, : A difference greater than .025 was observed pre- and
@@ -300,8 +300,8 @@ commonfactor.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=commo
 commonfactor.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC      CFI      SRMR
-    ## df 1336.652 152 1.909226e-188 1412.652 0.950653 0.1751983
+    ##       chisq  df p_chisq      AIC      CFI      SRMR
+    ## df 5275.393 170       0 5355.393 0.932235 0.1687414
 
 ``` r
 commonfactor.fit$results[c(1,2,3,6,7)] %>%
@@ -311,26 +311,27 @@ commonfactor.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##    lhs op         rhs STD_Genotype STD_Genotype_SE
-    ## 1  MDD =~  ClinAppDec        0.031           0.075
-    ## 2  MDD =~  ClinAppInc       -0.056           0.104
-    ## 3  MDD =~  ClinSleDec       -0.095           0.127
-    ## 4  MDD =~  ClinSleInc       -0.135           0.143
-    ## 5  MDD =~ ClinMotoInc       -0.178           0.107
-    ## 6  MDD =~ ClinMotoDec       -0.169           0.165
-    ## 7  MDD =~     ClinSui       -0.483           0.094
-    ## 8  MDD =~     CommDep       -0.903           0.047
-    ## 9  MDD =~     CommAnh       -0.981           0.039
-    ## 10 MDD =~  CommAppDec       -0.161           0.085
-    ## 11 MDD =~  CommAppInc       -0.321           0.076
-    ## 12 MDD =~  CommSleDec       -0.530           0.092
-    ## 13 MDD =~  CommSleInc       -0.463           0.102
-    ## 14 MDD =~   CommFatig       -0.575           0.091
-    ## 15 MDD =~   CommGuilt       -0.584           0.080
-    ## 16 MDD =~    CommConc       -0.682           0.085
-    ## 17 MDD =~     CommSui       -0.550           0.089
-    ## 18 MDD =~      UkbDep       -0.861           0.063
-    ## 19 MDD =~      UkbAnh       -0.889           0.056
-    ## 20 MDD ~~         MDD        1.000              NA
+    ## 1  MDD =~  ClinAppDec        0.037           0.086
+    ## 2  MDD =~  ClinAppInc       -0.201           0.079
+    ## 3  MDD =~  ClinSleDec       -0.138           0.095
+    ## 4  MDD =~  ClinSleInc       -0.214           0.104
+    ## 5  MDD =~ ClinMotoInc       -0.239           0.107
+    ## 6  MDD =~ ClinMotoDec       -0.200           0.142
+    ## 7  MDD =~   ClinGuilt       -0.448           0.133
+    ## 8  MDD =~     ClinSui       -0.506           0.101
+    ## 9  MDD =~     CommDep       -0.866           0.036
+    ## 10 MDD =~     CommAnh       -0.924           0.033
+    ## 11 MDD =~  CommAppDec       -0.427           0.066
+    ## 12 MDD =~  CommAppInc       -0.422           0.051
+    ## 13 MDD =~  CommSleDec       -0.625           0.063
+    ## 14 MDD =~  CommSleInc       -0.708           0.065
+    ## 15 MDD =~   CommFatig       -0.562           0.073
+    ## 16 MDD =~   CommGuilt       -0.586           0.051
+    ## 17 MDD =~    CommConc       -0.732           0.069
+    ## 18 MDD =~     CommSui       -0.598           0.067
+    ## 19 MDD =~      UkbDep       -0.863           0.055
+    ## 20 MDD =~      UkbAnh       -0.884           0.053
+    ## 21 MDD ~~         MDD        1.000              NA
 
 ## Directional symptoms
 
@@ -339,7 +340,7 @@ symptoms.
 
 ``` r
 common_dir.model <- "
-MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 
 ClinAppDec ~~ ClinAppInc
 ClinSleDec ~~ ClinSleInc
@@ -358,8 +359,8 @@ common_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=common_
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.653 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   0.929 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## common_dir.model, : A difference greater than .025 was observed pre- and
@@ -383,8 +384,8 @@ common_dir.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=common_
 common_dir.fit$modelfit
 ```
 
-    ##     chisq  df       p_chisq    AIC       CFI      SRMR
-    ## df 1222.6 147 7.177833e-169 1308.6 0.9551956 0.1664624
+    ##       chisq  df p_chisq      AIC       CFI      SRMR
+    ## df 4768.034 165       0 4858.034 0.9389029 0.1650853
 
 ``` r
 common_dir.fit$results[c(1,2,3,6,7)] %>%
@@ -394,31 +395,32 @@ common_dir.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##            lhs op         rhs STD_Genotype STD_Genotype_SE
-    ## 1          MDD =~  ClinAppDec        0.029           0.075
-    ## 2          MDD =~  ClinAppInc       -0.056           0.104
-    ## 3          MDD =~  ClinSleDec       -0.095           0.126
-    ## 4          MDD =~  ClinSleInc       -0.134           0.143
-    ## 5          MDD =~ ClinMotoInc       -0.180           0.107
-    ## 6          MDD =~ ClinMotoDec       -0.173           0.165
-    ## 7          MDD =~     ClinSui       -0.483           0.094
-    ## 8          MDD =~     CommDep       -0.902           0.047
-    ## 9          MDD =~     CommAnh       -0.980           0.038
-    ## 10         MDD =~  CommAppDec       -0.171           0.085
-    ## 11         MDD =~  CommAppInc       -0.325           0.076
-    ## 12         MDD =~  CommSleDec       -0.542           0.092
-    ## 13         MDD =~  CommSleInc       -0.477           0.102
-    ## 14         MDD =~   CommFatig       -0.575           0.091
-    ## 15         MDD =~   CommGuilt       -0.583           0.080
-    ## 16         MDD =~    CommConc       -0.682           0.085
-    ## 17         MDD =~     CommSui       -0.550           0.089
-    ## 18         MDD =~      UkbDep       -0.860           0.063
-    ## 19         MDD =~      UkbAnh       -0.888           0.056
-    ## 20  ClinAppDec ~~  ClinAppInc       -0.423           0.185
-    ## 21  ClinSleDec ~~  ClinSleInc        0.383           0.459
-    ## 22 ClinMotoInc ~~ ClinMotoDec       -0.340           0.424
-    ## 23  CommAppDec ~~  CommAppInc       -0.191           0.134
-    ## 24  CommSleDec ~~  CommSleInc       -0.275           0.185
-    ## 25         MDD ~~         MDD        1.000              NA
+    ## 1          MDD =~  ClinAppDec      0.03424           0.085
+    ## 2          MDD =~  ClinAppInc     -0.19850           0.079
+    ## 3          MDD =~  ClinSleDec     -0.13649           0.094
+    ## 4          MDD =~  ClinSleInc     -0.21514           0.104
+    ## 5          MDD =~ ClinMotoInc     -0.23774           0.107
+    ## 6          MDD =~ ClinMotoDec     -0.20115           0.142
+    ## 7          MDD =~   ClinGuilt     -0.44735           0.132
+    ## 8          MDD =~     ClinSui     -0.50593           0.101
+    ## 9          MDD =~     CommDep     -0.87025           0.036
+    ## 10         MDD =~     CommAnh     -0.92802           0.033
+    ## 11         MDD =~  CommAppDec     -0.40038           0.066
+    ## 12         MDD =~  CommAppInc     -0.40676           0.050
+    ## 13         MDD =~  CommSleDec     -0.61513           0.063
+    ## 14         MDD =~  CommSleInc     -0.69955           0.065
+    ## 15         MDD =~   CommFatig     -0.56107           0.073
+    ## 16         MDD =~   CommGuilt     -0.58697           0.051
+    ## 17         MDD =~    CommConc     -0.73114           0.069
+    ## 18         MDD =~     CommSui     -0.59835           0.067
+    ## 19         MDD =~      UkbDep     -0.86550           0.055
+    ## 20         MDD =~      UkbAnh     -0.88533           0.053
+    ## 21  ClinAppDec ~~  ClinAppInc     -0.20586           0.186
+    ## 22  ClinSleDec ~~  ClinSleInc      0.00046           0.309
+    ## 23 ClinMotoInc ~~ ClinMotoDec     -0.21217           0.399
+    ## 24  CommAppDec ~~  CommAppInc      0.46313           0.102
+    ## 25  CommSleDec ~~  CommSleInc      0.17751           0.145
+    ## 26         MDD ~~         MDD      1.00000              NA
 
 ## Ascertainment-specific factors
 
@@ -429,7 +431,7 @@ representing sample type.
 
 ``` r
 clin_comm.model <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
 COMM =~ NA*CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 
 CLIN ~~ 1*CLIN
@@ -445,8 +447,8 @@ clin_comm.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_com
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.821 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.004 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## clin_comm.model, : A difference greater than .025 was observed pre- and
@@ -470,8 +472,8 @@ clin_comm.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=clin_com
 clin_comm.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1327.451 151 3.811313e-187 1405.451 0.9509946 0.1749241
+    ##      chisq  df p_chisq     AIC       CFI      SRMR
+    ## df 5286.61 169       0 5368.61 0.9320729 0.1653806
 
 ``` r
 clin_comm.fit$results[c(1,2,3,6,7,9)] %>%
@@ -481,7 +483,7 @@ clin_comm.fit$results[c(1,2,3,6,7,9)] %>%
 ```
 
     ##    lhs op  rhs STD_Genotype STD_Genotype_SE p_value
-    ## 1 CLIN ~~ COMM         0.72            0.37   0.052
+    ## 1 CLIN ~~ COMM        -0.63            0.14 1.3e-05
 
 ### Gating symptoms
 
@@ -491,7 +493,7 @@ symptoms.
 
 ``` r
 gate.model <- "
-MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
 MDD ~~ 1*MDD
@@ -507,8 +509,8 @@ gate.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gate.model, i
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.634 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   0.951 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## gate.model, : A difference greater than .025 was observed pre- and
@@ -532,8 +534,8 @@ gate.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gate.model, i
 gate.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI     SRMR
-    ## df 1150.775 148 9.954511e-155 1234.775 0.9582291 0.162555
+    ##       chisq  df p_chisq      AIC       CFI      SRMR
+    ## df 3228.658 166       0 3316.658 0.9593487 0.1508317
 
 ``` r
 gate.fit$results[c(1,2,3,6,7)] %>%
@@ -543,10 +545,10 @@ gate.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##    lhs op     rhs STD_Genotype STD_Genotype_SE
-    ## 1 GATE =~ CommDep         0.65           0.090
-    ## 2 GATE =~ CommAnh         0.54           0.089
-    ## 3 GATE =~  UkbDep         0.86           0.112
-    ## 4 GATE =~  UkbAnh         0.59           0.110
+    ## 1 GATE =~ CommDep         0.74           0.060
+    ## 2 GATE =~ CommAnh         0.59           0.055
+    ## 3 GATE =~  UkbDep         0.72           0.094
+    ## 4 GATE =~  UkbAnh         0.54           0.096
     ## 5 GATE ~~    GATE         1.00              NA
 
 ### Gate-Community-Clinical (Spectrum)
@@ -558,7 +560,7 @@ symptoms (distinguish cases from each other)
 
 ``` r
 measure.model <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -576,8 +578,8 @@ measure.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure.mo
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.891 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.065 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## measure.model, : A difference greater than .025 was observed pre- and
@@ -601,8 +603,8 @@ measure.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure.mo
 measure.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1142.614 147 1.254613e-153 1228.614 0.9585274 0.1625625
+    ##      chisq  df p_chisq     AIC       CFI      SRMR
+    ## df 3284.96 165       0 3374.96 0.9585881 0.1490734
 
 ``` r
 measure.fit$results[c(1,2,3,6,7, 9)] %>%
@@ -612,9 +614,34 @@ measure.fit$results[c(1,2,3,6,7, 9)] %>%
 ```
 
     ##    lhs op  rhs STD_Genotype STD_Genotype_SE p_value
-    ## 1 CLIN ~~ COMM         0.88            0.41   0.031
+    ## 1 CLIN ~~ COMM        -0.75            0.17 6.9e-06
     ## 2 COMM ~~ GATE         0.00              NA      NA
     ## 3 CLIN ~~ GATE         0.00              NA      NA
+
+Pathway from Gating factor to Community factor
+
+``` r
+measure_dep.model <- "
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
+CIDI =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+CIDI ~ GATE
+
+CLIN ~~ 1*CLIN
+GATE ~~ 1*GATE
+
+uk1 > 0.001
+UkbDep ~~ uk1*UkbDep
+"
+
+measure_dep.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure_dep.model, imp_cov=TRUE)
+
+measure_dep.fit$modelfit
+measure_dep.fit$results[c(1,2,3,6,7, 9)] %>%
+     filter(lhs %in% c('CLIN', 'COMM', 'GATE'), rhs %in% c('CLIN', 'COMM', 'GATE'), lhs != rhs) %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
+```
 
 ### MDD Subtypes
 
@@ -625,7 +652,7 @@ other community cohort symptoms (that separates cases from controls)
 
 ``` r
 subtype.model <- "
-SUBTYPE =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommSui
+SUBTYPE =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommSui
 MDD =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommFatig + CommGuilt + CommConc 
 
 SUBTYPE ~~ 1*SUBTYPE
@@ -640,8 +667,8 @@ subtype.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=subtype.mo
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.759 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.041 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## subtype.model, : A difference greater than .025 was observed pre- and
@@ -665,8 +692,8 @@ subtype.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=subtype.mo
 subtype.fit$modelfit
 ```
 
-    ##      chisq  df      p_chisq     AIC       CFI      SRMR
-    ## df 1324.77 151 1.25306e-186 1402.77 0.9511063 0.1739938
+    ##       chisq  df p_chisq      AIC       CFI      SRMR
+    ## df 5225.169 169       0 5307.169 0.9328884 0.1605923
 
 ``` r
 subtype.fit$results[c(1,2,3,6,7)] %>%
@@ -676,7 +703,7 @@ subtype.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##       lhs op rhs STD_Genotype STD_Genotype_SE
-    ## 1 SUBTYPE ~~ MDD        -0.86           0.099
+    ## 1 SUBTYPE ~~ MDD        -0.73           0.055
 
 ## Two-factor models
 
@@ -698,7 +725,7 @@ Med Rehab
 
 ``` r
 psych_soma.model <- "
-PSYCH =~ NA*ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+PSYCH =~ NA*ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 SOMA =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -717,8 +744,8 @@ psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_s
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.906 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.063 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## psych_soma.model, : A difference greater than .025 was observed pre- and
@@ -742,8 +769,8 @@ psych_soma.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_s
 psych_soma.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1136.492 147 1.815648e-152 1222.492 0.9587824 0.1625163
+    ##       chisq  df p_chisq      AIC      CFI      SRMR
+    ## df 3628.966 165       0 3718.966 0.954022 0.1482829
 
 ``` r
 psych_soma.fit$results[c(1,2,3,6,7)] %>%
@@ -753,13 +780,13 @@ psych_soma.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##     lhs op  rhs STD_Genotype STD_Genotype_SE
-    ## 1 PSYCH ~~ SOMA        -0.98            0.13
+    ## 1 PSYCH ~~ SOMA        -0.75           0.056
 
 ### Psychological-Neurovegetative (Elhai Model 2b)
 
 ``` r
 psych_veg.model <- "
-PSYCH =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+PSYCH =~ NA*ClinGuilt + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -777,8 +804,8 @@ psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_ve
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.792 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.038 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## psych_veg.model, : A difference greater than .025 was observed pre- and
@@ -802,8 +829,8 @@ psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_ve
 psych_veg.fit$modelfit
 ```
 
-    ##       chisq  df      p_chisq      AIC       CFI      SRMR
-    ## df 1081.985 147 3.55372e-142 1167.985 0.9610529 0.1614363
+    ##       chisq  df p_chisq      AIC       CFI      SRMR
+    ## df 3709.728 165       0 3799.728 0.9529501 0.1440514
 
 ``` r
 psych_veg.fit$results[c(1,2,3,6,7)] %>%
@@ -813,13 +840,13 @@ psych_veg.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##     lhs op rhs STD_Genotype STD_Genotype_SE
-    ## 1 PSYCH ~~ VEG         -0.9            0.11
+    ## 1 PSYCH ~~ VEG        -0.73           0.054
 
 ### Affective-Neurovegetative (Elhai Model 2c)
 
 ``` r
 affect_neuroveg.model <- "
-AFFECT =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
+AFFECT =~ NA*ClinGuilt + ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
 NEUROVEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommConc
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -837,8 +864,8 @@ affect_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=af
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.795 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.097 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## affect_neuroveg.model, : A difference greater than .025 was observed pre- and
@@ -862,8 +889,8 @@ affect_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=af
 affect_neuroveg.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1148.944 147 7.896611e-155 1234.944 0.9582637 0.1608248
+    ##       chisq  df p_chisq      AIC       CFI      SRMR
+    ## df 3332.607 165       0 3422.607 0.9579557 0.1448636
 
 ``` r
 affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
@@ -873,7 +900,7 @@ affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##      lhs op      rhs STD_Genotype STD_Genotype_SE
-    ## 1 AFFECT ~~ NEUROVEG        -0.89             0.1
+    ## 1 AFFECT ~~ NEUROVEG        -0.74           0.061
 
 ## Three factor models
 
@@ -881,7 +908,7 @@ affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 
 ``` r
 cog_mood_neuroveg.model <- "
-COG =~ NA*ClinSui + CommGuilt + CommConc + CommSui
+COG =~ NA*ClinGuilt + ClinSui + CommGuilt + CommConc + CommSui
 MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
 VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
@@ -901,8 +928,8 @@ cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.973 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.092 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## cog_mood_neuroveg.model, : A difference greater than .025 was observed pre- and
@@ -926,8 +953,8 @@ cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
 cog_mood_neuroveg.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1088.313 144 1.104593e-144 1180.313 0.9606644 0.1615334
+    ##       chisq  df p_chisq      AIC     CFI      SRMR
+    ## df 3943.298 162       0 4039.298 0.94981 0.1437876
 
 ``` r
 cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
@@ -937,31 +964,24 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##    lhs op  rhs STD_Genotype STD_Genotype_SE
-    ## 1  COG ~~ MOOD         0.86            0.12
-    ## 2  COG ~~  VEG        -0.87            0.12
-    ## 3 MOOD ~~  VEG        -0.79            0.13
+    ## 1  COG ~~ MOOD         1.03           0.061
+    ## 2  COG ~~  VEG        -0.83           0.102
+    ## 3 MOOD ~~  VEG        -0.74           0.074
 
 ### Cognitive-Appetite-Vegetative (van Loo)
 
 ``` r
 cog_app_veg.model <- "
-COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
-APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
+COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
+APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + CommAppInc
 VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-app_co3b < 1.0
 
 COG ~~ 1*COG
 APP ~~ 1*APP
 VEG ~~ 1*VEG
 GATE ~~ 1*GATE
 GATE ~~ 0*COG + 0*APP + 0*VEG
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 "
 cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg.model, imp_cov=TRUE)
 ```
@@ -971,8 +991,8 @@ cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_ap
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   8.003 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.157 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## cog_app_veg.model, : A difference greater than .025 was observed pre- and
@@ -996,8 +1016,8 @@ cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_ap
 cog_app_veg.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 862.0416 145 2.498191e-102 952.0416 0.9701314 0.1525697
+    ##       chisq  df p_chisq      AIC       CFI      SRMR
+    ## df 2919.591 163       0 3013.591 0.9634112 0.1470383
 
 ``` r
 cog_app_veg.fit$results[c(1,2,3,6,7, 9)] %>%
@@ -1007,9 +1027,9 @@ cog_app_veg.fit$results[c(1,2,3,6,7, 9)] %>%
 ```
 
     ##   lhs op rhs STD_Genotype STD_Genotype_SE p_value
-    ## 1 COG ~~ APP         0.29           0.097 2.9e-03
-    ## 2 COG ~~ VEG         0.88           0.110 1.5e-15
-    ## 3 APP ~~ VEG         0.35           0.143 1.6e-02
+    ## 1 COG ~~ APP         0.48           0.066 3.4e-13
+    ## 2 COG ~~ VEG         0.91           0.069 7.8e-40
+    ## 3 APP ~~ VEG         0.66           0.094 1.4e-12
 
 ## Melancholic and atypical
 
@@ -1018,8 +1038,8 @@ classifications, plus remaining affective/cognitive symptoms
 
 ``` r
 mel_aty_afc.model <- "
-MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + ClinGuilt + CommGuilt
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + ClinMotoDec + CommSleInc + CommFatig
 AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -1028,6 +1048,11 @@ ATY ~~ 1*ATY
 AFC ~~ 1*AFC
 GATE ~~ 1*GATE
 GATE ~~ 0*AFC + 0*MEL + 0*ATY
+
+mat < 0.99
+maf < 0.99
+MEL ~~ mat*ATY
+MEL ~~ maf*AFC
 "
 
 mel_aty_afc.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty_afc.model, imp_cov=TRUE)
@@ -1038,8 +1063,8 @@ mel_aty_afc.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_at
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.856 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   5.339 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## mel_aty_afc.model, : A difference greater than .025 was observed pre- and
@@ -1063,8 +1088,8 @@ mel_aty_afc.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_at
 mel_aty_afc.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC       CFI      SRMR
-    ## df 1044.033 145 6.482037e-136 1134.033 0.9625505 0.1588098
+    ##       chisq  df p_chisq      AIC       CFI      SRMR
+    ## df 3557.395 163       0 3651.395 0.9549455 0.1481511
 
 ``` r
 mel_aty_afc.fit$results[c(1,2,3,6,7,9)] %>%
@@ -1074,9 +1099,9 @@ mel_aty_afc.fit$results[c(1,2,3,6,7,9)] %>%
 ```
 
     ##   lhs op rhs STD_Genotype STD_Genotype_SE  p_value
-    ## 1 MEL ~~ ATY         0.84           0.125  2.2e-11
-    ## 2 MEL ~~ AFC         0.99           0.039 2.5e-141
-    ## 3 ATY ~~ AFC         0.69           0.129  9.4e-08
+    ## 1 MEL ~~ ATY         0.88           0.051  2.2e-68
+    ## 2 MEL ~~ AFC         0.99           0.030 1.6e-237
+    ## 3 ATY ~~ AFC         0.73           0.065  2.0e-29
 
 ### Model comparisons
 
@@ -1090,7 +1115,7 @@ list("A"=list(name="Common", model=commonfactor.fit),
      "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
      "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
      "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-     "I"=list(name="Mood-Appetite-Vegetative", model=cog_app_veg.fit),
+     "I"=list(name="Appetite-Vegetative-Cog/Mood", model=cog_app_veg.fit),
      "J"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit)
      )
 
@@ -1112,43 +1137,36 @@ mutate_if(is.numeric, ~signif(., 3))
 
 | Model | Name                            | chisq |  df | p_chisq |  AIC |   CFI |  SRMR | dAIC |
 |:------|:--------------------------------|------:|----:|--------:|-----:|------:|------:|-----:|
-| A     | Common                          |  1340 | 152 |       0 | 1410 | 0.951 | 0.175 |  461 |
-| B     | Clinical-Community              |  1330 | 151 |       0 | 1410 | 0.951 | 0.175 |  453 |
-| C     | Common-Gating                   |  1150 | 148 |       0 | 1230 | 0.958 | 0.163 |  283 |
-| D     | Clinical-Community-Gating       |  1140 | 147 |       0 | 1230 | 0.959 | 0.163 |  277 |
-| E     | Psych-Somatic                   |  1140 | 147 |       0 | 1220 | 0.959 | 0.163 |  270 |
-| F     | Psych-Neuroveg                  |  1080 | 147 |       0 | 1170 | 0.961 | 0.161 |  216 |
-| G     | Affect-Neuroveg                 |  1150 | 147 |       0 | 1230 | 0.958 | 0.161 |  283 |
-| H     | Cog-Mood-Neuroveg               |  1090 | 144 |       0 | 1180 | 0.961 | 0.162 |  228 |
-| I     | Mood-Appetite-Vegetative        |   862 | 145 |       0 |  952 | 0.970 | 0.153 |    0 |
-| J     | Depression-Melancholic-Atypical |  1040 | 145 |       0 | 1130 | 0.963 | 0.159 |  182 |
+| A     | Common                          |  5280 | 170 |       0 | 5360 | 0.932 | 0.169 | 2340 |
+| B     | Clinical-Community              |  5290 | 169 |       0 | 5370 | 0.932 | 0.165 | 2360 |
+| C     | Common-Gating                   |  3230 | 166 |       0 | 3320 | 0.959 | 0.151 |  303 |
+| D     | Clinical-Community-Gating       |  3280 | 165 |       0 | 3370 | 0.959 | 0.149 |  361 |
+| E     | Psych-Somatic                   |  3630 | 165 |       0 | 3720 | 0.954 | 0.148 |  705 |
+| F     | Psych-Neuroveg                  |  3710 | 165 |       0 | 3800 | 0.953 | 0.144 |  786 |
+| G     | Affect-Neuroveg                 |  3330 | 165 |       0 | 3420 | 0.958 | 0.145 |  409 |
+| H     | Cog-Mood-Neuroveg               |  3940 | 162 |       0 | 4040 | 0.950 | 0.144 | 1030 |
+| I     | Appetite-Vegetative-Cog/Mood    |  2920 | 163 |       0 | 3010 | 0.963 | 0.147 |    0 |
+| J     | Depression-Melancholic-Atypical |  3560 | 163 |       0 | 3650 | 0.955 | 0.148 |  638 |
 
 The Mood-Appetite-Vegetative model is the best, SRMR is high across all
 the models, indicating that there are high residual correlations.
 
 ## Modifications
 
-Add residual correlations betwee same-item symptoms across cohorts.
+Add residual correlations between same-item symptoms across cohorts.
 
 ``` r
 cog_app_veg_mod.model <- "
-COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + app_co3b*CommAppInc
-VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
+APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
+VEG =~ NA*ClinSleInc + ClinMotoDec + CommSleInc + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-app_co3b > -1.0
 
 COG ~~ 1*COG
 APP ~~ 1*APP
 VEG ~~ 1*VEG
 GATE ~~ 1*GATE
 GATE ~~ 0*COG + 0*APP + 0*VEG
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 
 ClinAppDec ~~ CommAppDec
 ClinAppInc ~~ CommAppInc
@@ -1165,8 +1183,8 @@ cog_app_veg_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=co
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   8.687 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0465162451355012 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.65918051782737 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.147 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## cog_app_veg_mod.model, : A difference greater than .025 was observed pre- and
@@ -1190,8 +1208,8 @@ cog_app_veg_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=co
 cog_app_veg_mod.fit$modelfit
 ```
 
-    ##       chisq  df       p_chisq      AIC      CFI      SRMR
-    ## df 1143.425 140 5.971991e-157 1243.425 0.958202 0.1429939
+    ##       chisq  df p_chisq      AIC       CFI      SRMR
+    ## df 2386.592 158       0 2490.592 0.9704194 0.1397304
 
 ``` r
 cog_app_veg_mod.fit$results[c(1,2,3,6,7,9)] %>%
@@ -1201,9 +1219,9 @@ cog_app_veg_mod.fit$results[c(1,2,3,6,7,9)] %>%
 ```
 
     ##   lhs op rhs STD_Genotype STD_Genotype_SE p_value
-    ## 1 COG ~~ APP        -0.34            0.12 6.9e-03
-    ## 2 COG ~~ VEG         0.89            0.11 1.8e-15
-    ## 3 APP ~~ VEG        -0.39            0.17 2.7e-02
+    ## 1 COG ~~ APP        -0.51           0.068 1.0e-13
+    ## 2 COG ~~ VEG         0.91           0.069 3.2e-40
+    ## 3 APP ~~ VEG        -0.70           0.100 1.9e-12
 
 #### Model coefficients
 
@@ -1346,39 +1364,40 @@ print(symptoms_efa, cut=0.4)
     ## 
     ## Uniquenesses:
     ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc ClinMotoDec 
-    ##       0.082       0.069       0.005       0.831       0.895       0.968 
-    ##     ClinSui     CommDep     CommAnh  CommAppDec  CommAppInc  CommSleDec 
-    ##       0.798       0.112       0.050       0.869       0.290       0.440 
-    ##  CommSleInc   CommFatig   CommGuilt    CommConc     CommSui      UkbDep 
-    ##       0.757       0.646       0.585       0.583       0.712       0.122 
-    ##      UkbAnh 
-    ##       0.168 
+    ##       0.954       0.183       0.799       0.729       0.640       0.819 
+    ##   ClinGuilt     ClinSui     CommDep     CommAnh  CommAppDec  CommAppInc 
+    ##       0.005       0.756       0.100       0.124       0.357       0.422 
+    ##  CommSleDec  CommSleInc   CommFatig   CommGuilt    CommConc     CommSui 
+    ##       0.344       0.348       0.556       0.472       0.372       0.651 
+    ##      UkbDep      UkbAnh 
+    ##       0.086       0.115 
     ## 
     ## Loadings:
     ##             Factor1 Factor2 Factor3
-    ## ClinAppDec           0.567  -0.753 
-    ## ClinAppInc           0.408   0.874 
-    ## ClinSleDec           0.990         
-    ## ClinSleInc           0.402         
-    ## ClinMotoInc                        
+    ## ClinAppDec                         
+    ## ClinAppInc                   0.836 
+    ## ClinSleDec           0.418         
+    ## ClinSleInc                   0.503 
+    ## ClinMotoInc          0.587         
     ## ClinMotoDec                        
-    ## ClinSui      0.439                 
-    ## CommDep      0.910                 
-    ## CommAnh      0.946                 
-    ## CommAppDec                         
-    ## CommAppInc                   0.738 
-    ## CommSleDec           0.641         
-    ## CommSleInc   0.475                 
-    ## CommFatig    0.572                 
-    ## CommGuilt    0.577                 
-    ## CommConc     0.632                 
-    ## CommSui      0.535                 
-    ## UkbDep       0.906                 
-    ## UkbAnh       0.886                 
+    ## ClinGuilt                    0.953 
+    ## ClinSui                            
+    ## CommDep      0.941                 
+    ## CommAnh      0.895                 
+    ## CommAppDec           0.771         
+    ## CommAppInc           0.672         
+    ## CommSleDec   0.406   0.660         
+    ## CommSleInc   0.516   0.614         
+    ## CommFatig            0.576         
+    ## CommGuilt    0.528           0.492 
+    ## CommConc     0.540   0.557         
+    ## CommSui      0.537                 
+    ## UkbDep       0.947                 
+    ## UkbAnh       0.878                 
     ## 
     ##                Factor1 Factor2 Factor3
-    ## SS loadings      5.423   2.371   2.227
-    ## Proportion Var   0.285   0.125   0.117
-    ## Cumulative Var   0.285   0.410   0.527
+    ## SS loadings      5.011   3.477   2.679
+    ## Proportion Var   0.251   0.174   0.134
+    ## Cumulative Var   0.251   0.424   0.558
     ## 
-    ## The degrees of freedom for the model is 117 and the fit was 76.6301
+    ## The degrees of freedom for the model is 133 and the fit was 77.926

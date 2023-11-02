@@ -11,7 +11,6 @@ Meta analyze MDD Symptom GWASs for the following sets of cohorts:
 1. Clinical/Enriched:
   - [PGC MDD](pgc-symptom-gwas.html) cases
   - [Australian of Depression Study](https://www.geneticsofdepression.org.au/)
-  - Jannsen
   - [Generation Scotland](http://generationscotland.org) MDD cases
 2. Community cohorts:
   - [ALSPAC](http://www.bristol.ac.uk/alspac/)
@@ -23,6 +22,7 @@ Meta analyze MDD Symptom GWASs for the following sets of cohorts:
 
 library(readr)
 library(dplyr)
+library(readxl)
 library(stringr)
 
 dsm_mdd_symptoms_reference <-
@@ -183,4 +183,36 @@ for metafile in ALL.*.meta4; do
 	   fi
 done
 
+```
+
+```{r}
+
+daner_xls <- list.files(here::here("meta/distribution"), pattern = "*.p4.clump.areator.sorted.1mhc.xls", full.names = TRUE, recursive = TRUE)
+names(daner_xls) <- str_replace(basename(daner_xls), ".gz.p4.clump.areator.sorted.1mhc.xls", "")
+
+daner_list <- lapply(daner_xls, function(xls) {
+	read_excel(xls) |>
+		mutate(ngt=as.numeric(ngt)) |>
+		rename(FRQ_A=starts_with("FRQ_A"),
+		       FRQ_U=starts_with("FRQ_U"))
+	}
+)
+
+daner_hits <- bind_rows(daner_list, .id="filename") |>
+filter(P <= 5e-8, !str_detect(filename, fixed("het")))
+
+daner_hets <- bind_rows(daner_list, .id="filename") |>
+filter(P <= 5e-8, str_detect(filename, fixed("het")))
+```
+
+Associations:
+
+```{r}
+
+alpha <- 5e-8 / (length(daner_xls) / 2)
+
+daner_hits |>
+	filter(P <= alpha |  gwas_catalog_span.6 != "-" | `genes.6.50kb(dist2index)` != "-") |>
+	select(filename, SNP, P, gwas_catalog_span.6, `genes.6.50kb(dist2index)`) |>
+	arrange(P)
 ```

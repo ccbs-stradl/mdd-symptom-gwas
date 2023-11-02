@@ -9,8 +9,10 @@
 . /etc/profile.d/modules.sh
 module load igmm/apps/R/4.1.0
 
+export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1
+
 Rscript commonfactorgwas.R $1
 
 ## submit as
-# qsub -N all_common commonfactorgwas.sh all.common
-# Rscript commonfactorgwas_merge.R all.common
+# qsub -N all_common commonfactorgwas.sh comm.ukb.common
+# Rscript commonfactorgwas_merge.R comm.ukb.common

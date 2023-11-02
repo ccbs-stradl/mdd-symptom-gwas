@@ -4,12 +4,12 @@ config.yaml
 *.rds
 *.info
 *.csv
-*.txt
 *.gz
 !*.prevs.txt
 *.enc
 *.enc_ukb
 *.xlsx
+*.xls
 encoding.ukb
 fields.ukb
 *.tab

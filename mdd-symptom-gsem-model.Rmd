@@ -101,7 +101,7 @@ select(Reference, Abbreviation=abbv, Label=h, Description)
 
 ```{r covstruct}
 
-covstruct_prefix <- 'agds_pgc.alspac_ukb.covstruct'
+covstruct_prefix <- 'clin.comm.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
 
@@ -119,8 +119,8 @@ cohorts_sample_symptoms <-
 sumstats_prevs %>%
 left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
 select(cohorts, symptom, trait_name, abbv) %>%
-mutate(Sample=case_when(cohorts %in% 'AGDS_PGC' ~ 'Clin',
-                        cohorts %in% 'ALSPAC_UKB' ~ 'Comm',
+mutate(Sample=case_when(cohorts %in% 'Clin' ~ 'Clin',
+                        cohorts %in% 'Comm' ~ 'Comm',
                         cohorts %in% 'UKBt' ~ 'Ukb',
                         TRUE ~ NA_character_)) %>%
 mutate(sample_symptom=paste0(Sample, abbv))
@@ -154,7 +154,7 @@ Common factor across symptoms from both cohorts, as a general MDD factor
 ```{r commonfactor, cache=TRUE}
 
 commonfactor.model <- "
-MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 
 MDD ~~ 1*MDD
 "
@@ -176,7 +176,7 @@ Common factor with residual correlations among paired directional symptoms.
 ```{r common_dir, cache=TRUE}
 
 common_dir.model <- "
-MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 
 ClinAppDec ~~ ClinAppInc
 ClinSleDec ~~ ClinSleInc
@@ -206,7 +206,7 @@ Symptoms were assessed in Clinical and Community samples. Make factors represent
 ```{r clin_comm, cache=TRUE}
 
 clin_comm.model <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
 COMM =~ NA*CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 
 CLIN ~~ 1*CLIN
@@ -231,7 +231,7 @@ Then consider the community cardinal symptoms (Depression and Anhedonia), which 
 ```{r gate, cache=TRUE}
 
 gate.model <- "
-MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+MDD =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommDep + CommAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
 MDD ~~ 1*MDD
@@ -256,7 +256,7 @@ Comparison of ascertainment and measurement. Gating symptoms from community samp
 ```{r measure, cache=TRUE}
 
 measure.model <- "
-CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
 COMM =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -276,6 +276,33 @@ measure.fit$results[c(1,2,3,6,7, 9)] %>%
 
 ```
 
+Pathway from Gating factor to Community factor
+
+```{r measure_dep, eval=FALSE, cache=TRUE}
+
+measure_dep.model <- "
+CLIN =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui
+CIDI =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommGuilt + CommConc + CommSui
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+CIDI ~ GATE
+
+CLIN ~~ 1*CLIN
+GATE ~~ 1*GATE
+
+uk1 > 0.001
+UkbDep ~~ uk1*UkbDep
+"
+
+measure_dep.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=measure_dep.model, imp_cov=TRUE)
+
+measure_dep.fit$modelfit
+measure_dep.fit$results[c(1,2,3,6,7, 9)] %>%
+	 filter(lhs %in% c('CLIN', 'COMM', 'GATE'), rhs %in% c('CLIN', 'COMM', 'GATE'), lhs != rhs) %>%
+	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+	 print(digits=2)
+
+```
+
 ### MDD Subtypes
 
 Group symptoms from the clinical cohorts (that had positive genetic variance) together with the same symptoms from the community cohorts (to create a dimension of MDD subtypes), then a separate factor for all other community cohort symptoms (that separates cases from controls) 
@@ -283,7 +310,7 @@ Group symptoms from the clinical cohorts (that had positive genetic variance) to
 ```{r subtype, cache=TRUE}
 
 subtype.model <- "
-SUBTYPE =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinSui + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommSui
+SUBTYPE =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommSui
 MDD =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + CommFatig + CommGuilt + CommConc 
 
 SUBTYPE ~~ 1*SUBTYPE
@@ -314,7 +341,7 @@ subtype.fit$results[c(1,2,3,6,7)] %>%
 ```{r psych_soma, cache=TRUE}
 
 psych_soma.model <- "
-PSYCH =~ NA*ClinMotoInc + ClinMotoDec + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+PSYCH =~ NA*ClinMotoInc + ClinMotoDec + ClinGuilt + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 SOMA =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -340,7 +367,7 @@ psych_soma.fit$results[c(1,2,3,6,7)] %>%
 ```{r psych_veg, cache=TRUE}
 
 psych_veg.model <- "
-PSYCH =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
+PSYCH =~ NA*ClinGuilt + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
 VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -366,7 +393,7 @@ psych_veg.fit$results[c(1,2,3,6,7)] %>%
 ```{r affect_neuroveg, cache=TRUE}
 
 affect_neuroveg.model <- "
-AFFECT =~ NA*ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
+AFFECT =~ NA*ClinGuilt + ClinSui + CommDep + CommAnh + CommGuilt + CommSui + UkbDep + UkbAnh
 NEUROVEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig + CommConc
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -394,7 +421,7 @@ affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 ```{r cog_mood_neuroveg, cache=TRUE}
 
 cog_mood_neuroveg.model <- "
-COG =~ NA*ClinSui + CommGuilt + CommConc + CommSui
+COG =~ NA*ClinGuilt + ClinSui + CommGuilt + CommConc + CommSui
 MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
 VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
@@ -422,23 +449,16 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 ```{r cog_app_veg, cache=TRUE}
 
 cog_app_veg.model <- "
-COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
-APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + app_co3b*CommAppInc
+COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
+APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + CommAppInc
 VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-app_co3b < 1.0
 
 COG ~~ 1*COG
 APP ~~ 1*APP
 VEG ~~ 1*VEG
 GATE ~~ 1*GATE
 GATE ~~ 0*COG + 0*APP + 0*VEG
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 "
 cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg.model, imp_cov=TRUE)
 
@@ -457,8 +477,8 @@ Account for directionality of symptoms using melancholic and atypical classifica
 ```{r mel_aty_afc, cache=TRUE}
 
 mel_aty_afc.model <- "
-MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + CommGuilt
-ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig
+MEL =~ NA*CommAnh + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinAppDec + CommAppDec + ClinGuilt + CommGuilt
+ATY =~ NA*ClinAppInc + CommAppInc + ClinSleInc + ClinMotoDec + CommSleInc + CommFatig
 AFC =~ NA*CommDep + UkbDep + ClinSui + CommConc + CommSui 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
@@ -467,6 +487,11 @@ ATY ~~ 1*ATY
 AFC ~~ 1*AFC
 GATE ~~ 1*GATE
 GATE ~~ 0*AFC + 0*MEL + 0*ATY
+
+mat < 0.99
+maf < 0.99
+MEL ~~ mat*ATY
+MEL ~~ maf*AFC
 "
 
 mel_aty_afc.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=mel_aty_afc.model, imp_cov=TRUE)
@@ -521,23 +546,16 @@ Add residual correlations between same-item symptoms across cohorts.
 ```{r cog_app_mod, cache=TRUE}
 
 cog_app_veg_mod.model <- "
-COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + CommGuilt + ClinSui + CommSui
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + app_co3b*CommAppInc
-VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
+APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
+VEG =~ NA*ClinSleInc + ClinMotoDec + CommSleInc + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-app_co3b > -1.0
 
 COG ~~ 1*COG
 APP ~~ 1*APP
 VEG ~~ 1*VEG
 GATE ~~ 1*GATE
 GATE ~~ 0*COG + 0*APP + 0*VEG
-
-u1 > 0.001
-UkbDep ~~ u1*UkbDep
-co3b > 0.001
-CommAppInc ~~ co3b*CommAppInc
 
 ClinAppDec ~~ CommAppDec
 ClinAppInc ~~ CommAppInc

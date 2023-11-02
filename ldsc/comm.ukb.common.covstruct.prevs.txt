@@ -1,0 +1,9 @@
+Sample	sample_symptom	ref	samp_prev	pop_prev	filename	daner
+Community	CommDep	MDD1	0.5204303978094449	0.3296195695564788	meta/munged/Comm.MDD1_depressed.sumstats.gz	/Users/mark/Work/mdd-symptom-gwas/meta/distribution//Comm.MDD1_depressed/daner_Comm.MDD1_depressed.gz
+Community	CommSleDec	MDD4a	0.7865369105865907	0.2798230822868919	meta/munged/Comm.MDD4a_sleepProb.sumstats.gz	/Users/mark/Work/mdd-symptom-gwas/meta/distribution//Comm.MDD4a_sleepProb/daner_Comm.MDD4a_sleepProb.gz
+Community	CommSleInc	MDD4b	0.5008710801393729	0.17944404264282718	meta/munged/Comm.MDD4b_sleepMore.sumstats.gz	/Users/mark/Work/mdd-symptom-gwas/meta/distribution//Comm.MDD4b_sleepMore/daner_Comm.MDD4b_sleepMore.gz
+Community	CommFatig	MDD6	0.8359858878871032	0.30617242407248585	meta/munged/Comm.MDD6_fatigue.sumstats.gz	/Users/mark/Work/mdd-symptom-gwas/meta/distribution//Comm.MDD6_fatigue/daner_Comm.MDD6_fatigue.gz
+Community	CommGuilt	MDD7	0.586335887284362	0.23080734359149124	meta/munged/Comm.MDD7_worthless.sumstats.gz	/Users/mark/Work/mdd-symptom-gwas/meta/distribution//Comm.MDD7_worthless/daner_Comm.MDD7_worthless.gz
+Community	CommConc	MDD8	0.7625296635093199	0.28553225910774344	meta/munged/Comm.MDD8_concentration.sumstats.gz	/Users/mark/Work/mdd-symptom-gwas/meta/distribution//Comm.MDD8_concentration/daner_Comm.MDD8_concentration.gz
+Community	CommSui	MDD9	0.4437937451000765	0.17553805885249585	meta/munged/Comm.MDD9_death.sumstats.gz	/Users/mark/Work/mdd-symptom-gwas/meta/distribution//Comm.MDD9_death/daner_Comm.MDD9_death.gz
+UK Biobank	UkbDep	MDD1	0.5574542581374812	0.5574542581374812	meta/munged/UKBt.MDD1_depressed.sumstats.gz	sumstats/UKB/Touchscreen/daner_UKBt.MDD1_depressed.gz
