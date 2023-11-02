@@ -112,7 +112,9 @@ left_join(dsm_mdd_symptoms_reference, by=c('reference'='Reference')) %>%
 mutate(metagroup=case_when(cohort %in% c('AGDS', 'PGC', 'GenScot', 'janpy') ~ 'Clin',
                            cohort %in% c('ALSPAC', 'UKBB', 'EstBB') ~ 'Comm',
                            TRUE ~ NA_character_)) %>%
-mutate(meta=paste0(metagroup, '.', reference, '_', `Symptom Abbrev.`, '.meta')) %>%
+mutate(meta=paste0(metagroup, '.', reference, '_', `Symptom Abbrev.`)) %>%
+# study name for LOO
+mutate(studyname = if_else(cohort == "PGC", true = str_match(filename, "daner_MDD[0-9ab]+_([a-z0-9]+)")[,2], false = cohort)) %>%
 mutate(aligned_gz=str_replace(filename, 'gz', 'align.gz')) %>%
 filter(aligned_gz %in% basename(aligned_daner_files)) %>%
 # discard non-directional symptoms
@@ -125,10 +127,23 @@ ungroup()
 for(metafile in unique(cohorts_reference$meta)) {
 	
 	meta_cohorts <- cohorts_reference %>%
-	  filter(meta == metafile) %>%
+	  filter(meta == metafile)
+  
+  meta_daner <- meta_cohorts %>%
 	  select(aligned_gz)
 
- 	 write_tsv(meta_cohorts, file=file.path('meta', metafile), col_names=F)
+ 	 write_tsv(meta_daner, file=file.path('meta', paste0(metafile, '.meta')), col_names=F)
+
+  for(study in meta_cohorts$studyname) {
+
+    meta_cohorts_loo <- meta_cohorts %>%
+      filter(!study == studyname)
+
+    meta_daner_loo <- meta_cohorts_loo %>%
+	    select(aligned_gz)
+
+ 	 write_tsv(meta_daner_loo, file=file.path('meta', paste0(metafile, '.loo.', study, '.meta')), col_names=F)
+  }
 
 }
 
