@@ -214,9 +214,12 @@ done
 
 ```{sh, eval=FALSE}
 
+module load 2022
+module load Java/13.0.2
+
 nextflow run pgc-symptom-gwas.nf \
--config lisa.config \
--work-dir /nfs/scratch/nfx-qqZbmwsao3qBufyNACW/work \
+-config snellius.config \
+-work-dir /scratch-shared/$USER/mdd-symptoms-gwas/work \
 -resume \
 --bfile="pgc_gwas/cobg_dir_genome_wide/mdd_*.bgn*{bed,bim,fam}"
 
