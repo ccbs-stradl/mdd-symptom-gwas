@@ -114,8 +114,8 @@ process GWAS {
 
     publishDir "sumstats/PGC/cohorts", pattern: "*.log", mode: 'copy'
 
-    cpus = 2
-    memory = 8.GB
+    cpus = 16
+    memory = 28.GB
     time = '30m'
 
     module '2022:PLINK/2.00a3.6-GCC-11.3.0'
@@ -140,7 +140,7 @@ process GWAS {
     --glm 'hide-covar' cols=chrom,pos,ax,a1freqcc,totallelecc,machr2,firth,test,nobs,orbeta,se,p \
     --covar-variance-standardize \
     --out ${cohort}_${symptom} \
-    --threads ${task.cpus} \
+    --threads ${task.cpus - 1} \
     --memory ${task.memory.bytes.intdiv(1000000)}
 	
 	gzip *.hybrid
