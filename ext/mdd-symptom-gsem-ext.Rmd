@@ -540,6 +540,8 @@ theme(axis.text.y=element_text(size=16),
       legend.position='top') +
 labs(color  = "Regression: ", shape = "Regression: ")
 
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf")
+
 ```
 
 Consistancy of effect direction in single regression

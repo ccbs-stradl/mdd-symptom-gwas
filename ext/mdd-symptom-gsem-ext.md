@@ -1049,6 +1049,25 @@ labs(color  = "Regression: ", shape = "Regression: ")
 
 ![](mdd-symptom-gsem-ext_files/figure-markdown_github/ex_plot-1.png)
 
+``` r
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf")
+```
+
+    ## Saving 10 x 6 in image
+
+    ## Warning: `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+    ## `position_dodge()` requires non-overlapping x intervals
+
 Consistancy of effect direction in single regression
 
 ``` r
