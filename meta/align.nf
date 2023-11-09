@@ -78,7 +78,7 @@ process ALIGN {
     publishDir params.out, mode: 'copy'
 
     cpus = 1
-    memory = 16.GB
+    memory = { 16.GB * task.attempt }
     time = '30m'
 
     module '2022:R/4.2.1-foss-2022a'
@@ -98,7 +98,7 @@ process ALIGN {
     library(stringr)
     library(QCGWAS)
 
-    daner <- read_table("${daner}")
+    daner <- read_table("${daner}", na = c("NA", "Inf", "nan"))
     impute_frq2 <- readRDS("${ref}")
 
     frq_a_col <- str_subset(names(daner), "FRQ_A")
@@ -116,11 +116,15 @@ process ALIGN {
 
     # positions that are matchable to the reference
     daner_preharmonise <- daner_n |>
+        na.omit() |>
         mutate(BETA = log(OR)) |>
         # merge on chromosome and position
         inner_join(impute_frq2 ,
-            by=c('CHR'='CHR', 'BP'='POS'), suffix=c('', '.ref')) |>
-        filter((A1 == A1.ref & A2 == A2.ref) | (A1 == A2.ref & A2 == A1.ref))
+            by=c('CHR'='CHR', 'BP'='POS'), suffix=c('', '.ref'),
+            multiple = "all") |>
+        filter((A1 == A1.ref & A2 == A2.ref) | (A1 == A2.ref & A2 == A1.ref)) |>
+        mutate(CPID = str_c(CHR, BP, sep = ":")) |>
+        filter(!duplicated(CPID))
         
     # QC input
     daner_set <- daner_preharmonise |>
