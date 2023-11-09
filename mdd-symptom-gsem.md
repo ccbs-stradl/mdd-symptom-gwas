@@ -95,7 +95,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -124,7 +124,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -464,7 +464,7 @@ if(!file.exists(symptoms_sample_prev_file)) {
 ```
 
     ## Rows: 26 Columns: 6
-    ## ── Column specification ────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (3): cohorts, symptom, sumstats
     ## dbl (3): Nca, Nco, samp_prev
@@ -641,7 +641,7 @@ if(!file.exists(covstruct_r)) {
 ```
 
     ## Rows: 26 Columns: 9
-    ## ── Column specification ────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -734,7 +734,7 @@ if(!file.exists(sumstats_h2_txt)) {
 ```
 
     ## Rows: 26 Columns: 17
-    ## ── Column specification ────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr  (7): Sample, sample_symptom, ref, cohorts, abbv, sumstats, filename
     ## dbl (10): h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE, Nca, Nco, sam...
@@ -774,4 +774,5 @@ scale_y_continuous(expression(h[SNP]^2))
 
 ``` r
 ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=7, height=5)
+ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.pdf', width=7, height=5)
 ```
