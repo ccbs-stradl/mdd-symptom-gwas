@@ -552,5 +552,6 @@ mdd_symptom_gsem_h2.gg + coord_flip() +
 scale_y_continuous(expression(h[SNP]^2))
 
 ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=7, height=5)
+ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.pdf', width=7, height=5)
 
 ```
