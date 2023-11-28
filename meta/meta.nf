@@ -18,10 +18,43 @@ workflow {
         .map { it -> [it, it.readLines()]}
         .transpose()
         .map { it -> [it[1], it[0]]}
-
+        
+    // Line up files listed in datasets with available daner files
+    // Keep files listed in datasets, marking those where the file is not found
+    DATASETS_DANERS_CH =
+    DATASETS_CH
+        .join(DANER_CH, remainder: true)
+        .filter { it[1] != null }
+        .map { it -> [it[1], it[0], it[2]]}
+        .groupTuple()
+        
+    // Check whether any of the listed datasets do not have an associated daner file
+    DATASETS_DANERS_CHECK_CH =
+    DATASETS_DANERS_CH
+        .branch { missing: it[2].contains(null)
+                 complete: true
+                }
+    
+    // Print missing daner files
+    DATASETS_DANERS_CHECK_CH
+        .missing
+        .transpose()
+        .filter { it[2] == null }
+        .subscribe { println "Dataset ${it[0].baseName} missing daner ${it[1]}" }
+        
+    
+    // Unique daner files that are in the datasets
+    DANER_LISTED_CH =
+    DATASETS_DANERS_CHECK_CH
+        .complete
+        .transpose()
+        .map { [it[1], it[2]] }
+        .unique()
+    
     // unzip daner files so they can be streamed
     // harmonise allele frequency column names
-    SUMSTATS_CH = SUMSTATS(DANER_CH)
+    SUMSTATS_CH = SUMSTATS(DANER_LISTED_CH)
+    
     
     // match up datasets with the sumstats files they specify
     DATASETS_SUMSTATS_CH =
