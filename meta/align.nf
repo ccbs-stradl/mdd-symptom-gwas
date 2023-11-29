@@ -30,7 +30,7 @@ process REF {
     memory = 28.GB
     time = '30m'
 
-    module '2022:R/4.2.1-foss-2022a'
+    //module '2022:R/4.2.1-foss-2022a'
 
     input:
     path frq
@@ -81,7 +81,7 @@ process ALIGN {
     memory = { 16.GB * task.attempt }
     time = '30m'
 
-    module '2022:R/4.2.1-foss-2022a'
+    //module '2022:R/4.2.1-foss-2022a'
 
     input:
     each path(daner)
@@ -150,7 +150,7 @@ process ALIGN {
         transmute(CHR, SNP = MARKER, BP, A1 = EFFECT_ALL, A2 = OTHER_ALL,
         !!frq_a_col := if_else(flip, true = 1 - .data[[frq_a_col]], false = .data[[frq_a_col]]),
         !!frq_u_col := if_else(flip, true = 1 - .data[[frq_u_col]], false = .data[[frq_u_col]]),
-        OR = exp(EFFECT), SE, P, NCAS, NCON)
+        INFO, OR = exp(EFFECT), SE, P, NCAS, NCON)
 
     write_tsv(daner_harmonised, "${daner.baseName}.align.gz")
 

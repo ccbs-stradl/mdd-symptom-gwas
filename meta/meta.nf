@@ -3,7 +3,7 @@
 nextflow.enable.dsl = 2
 
 params.sumstats = "aligned/*.gz"
-params.datasets = "*.meta"
+params.datasets = "datasets/*.meta"
 
 workflow {
 
@@ -17,57 +17,58 @@ workflow {
         .fromPath(params.datasets)
         .map { it -> [it, it.readLines()]}
         .transpose()
-        .map { it -> [it[1], it[0]]}
-        
+        .map { it -> [it[1], it[0]] }
+    
+    // List meta analyses that each dataset is specified for
+    DATASETS_META_CH =
+    DATASETS_CH
+        .groupTuple()
+    
     // Line up files listed in datasets with available daner files
     // Keep files listed in datasets, marking those where the file is not found
     DATASETS_DANERS_CH =
-    DATASETS_CH
+    DATASETS_META_CH
         .join(DANER_CH, remainder: true)
         .filter { it[1] != null }
-        .map { it -> [it[1], it[0], it[2]]}
-        .groupTuple()
-        
+    
+    
     // Check whether any of the listed datasets do not have an associated daner file
     DATASETS_DANERS_CHECK_CH =
     DATASETS_DANERS_CH
-        .branch { missing: it[2].contains(null)
+        .branch { missing: it[2] == null
                  complete: true
                 }
-    
+                
     // Print missing daner files
     DATASETS_DANERS_CHECK_CH
         .missing
         .transpose()
-        .filter { it[2] == null }
-        .subscribe { println "Dataset ${it[0].baseName} missing daner ${it[1]}" }
+        .subscribe { println "Meta-analysis ${it[1].baseName} missing input dataset ${it[0]}" }
         
-    
     // Unique daner files that are in the datasets
-    DANER_LISTED_CH =
+    DANER_SETS_CH =
     DATASETS_DANERS_CHECK_CH
         .complete
-        .transpose()
-        .map { [it[1], it[2]] }
-        .unique()
     
     // unzip daner files so they can be streamed
     // harmonise allele frequency column names
-    SUMSTATS_CH = SUMSTATS(DANER_LISTED_CH)
+    SUMSTATS_CH = SUMSTATS(DANER_SETS_CH)
     
-    
-    // match up datasets with the sumstats files they specify
+    // rearrange sumstats back into meta-analyses
     DATASETS_SUMSTATS_CH =
-    DATASETS_CH
-        .join(SUMSTATS_CH)
-        .map { it -> [it[1], it[2]]}
+    SUMSTATS_CH
+        .map { [it[2], it[1]] }
+        .transpose()
+        .map { [it[1], it[0]] }
         .groupTuple()
-
+    
     META_CH = META(DATASETS_SUMSTATS_CH)
-        .view()
+    
+    POST_CH = POST(META_CH)
     
 }
 
+// Prepare danerfiles for input to meta-analysis
 process SUMSTATS {
     tag "${dataset}"
 
@@ -76,10 +77,10 @@ process SUMSTATS {
     time = '10m'
 
     input:
-    tuple val(dataset), path(daner)
+    tuple val(dataset), val(metas), path(daner)
 
     output:
-    tuple val(dataset), path("${daner.baseName}")
+    tuple val(dataset), val(metas), path("${daner.baseName}")
 
     script:
     """
@@ -114,18 +115,19 @@ process SUMSTATS {
     """
 }
 
+// Perform meta analysis
 process META {
-    tag "${dataset.baseName}"
+    tag "${meta.baseName}"
 
     cpus = 4
     memory = 16.GB
     time = '30m'
 
     input:
-    tuple path(dataset), path(sumstats)
+    tuple path(meta), path(sumstats)
 
     output:
-    tuple val(dataset.baseName), path("${dataset.baseName}.tsv")
+    tuple val(meta.baseName), path("${meta.baseName}.tsv")
 
     script:
     """
@@ -171,6 +173,60 @@ process META {
         .collect()
     )
 
-    meta.write_csv("${dataset.baseName}.tsv", separator = "\\t")
+    meta.write_csv("${meta.baseName}.tsv", separator = "\\t")
+    """
+}
+
+// Postprocess meta-analysis
+process POST {
+    tag "${meta}"
+    
+    publishDir "output", mode: "copy" 
+    
+    cpus = 1
+    memory = 16.GB
+    time = '30m'
+    
+    input:
+    tuple val(meta), path(sumstats)
+    
+    output:
+    tuple val(meta), path("${sumstats.baseName}.gz")
+    
+    script:
+    """ 
+    #!Rscript
+    
+    library(dplyr)
+    library(readr)
+    library(plyranges)
+    
+    sumstats <- read_tsv("${sumstats}")
+    
+    # filter based on 80% max(Neff)
+    max_neff <- sumstats |> summarize(neff = max(NEFF)) |> pull(neff)
+    
+    sumstats_neff <- sumstats |>
+        filter(NEFF >= 0.8 * max_neff)
+        
+    # remove duplicate positions
+    sumstats_gr <- sumstats_neff |>
+        transmute(seqnames = CHR, start = BP, width = 1, SNP, index = seq_along(SNP)) |>
+        as_granges()
+    
+    duplicate_positions <- 
+    join_overlap_self(sumstats_gr) |>
+        filter(index != index.overlap) |>
+        as_tibble()
+        
+    duplicate_snps <- c(
+        pull(duplicate_positions, SNP),
+        pull(duplicate_positions, SNP.overlap)    
+    )
+    
+    sumstats_post <- sumstats_neff |> 
+        filter(!SNP %in% duplicate_snps)
+        
+    write_tsv(sumstats_post, "${sumstats.baseName}.gz")
     """
 }
