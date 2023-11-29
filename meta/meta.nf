@@ -49,23 +49,27 @@ workflow {
     DANER_SETS_CH =
     DATASETS_DANERS_CHECK_CH
         .complete
+        .map { it -> [it[0], it[2]] }
     
-    // unzip daner files so they can be streamed
-    // harmonise allele frequency column names
+    // Unzip daner files so they can be streamed
+    // Harmonise allele frequency column names
     SUMSTATS_CH = SUMSTATS(DANER_SETS_CH)
     
-    // rearrange sumstats back into meta-analyses
+    // Match sumstat files back up with meta-analysis dataset lists
+    // Regroup sumstats into meta-analyses
     DATASETS_SUMSTATS_CH =
-    SUMSTATS_CH
+    DATASETS_DANERS_CHECK_CH
+        .complete
+        .map { it -> [it[0], it[1]] }
+        .join(SUMSTATS_CH)
         .map { [it[2], it[1]] }
         .transpose()
         .map { [it[1], it[0]] }
         .groupTuple()
     
+    // Perform meta analysis and post process
     META_CH = META(DATASETS_SUMSTATS_CH)
-    
     POST_CH = POST(META_CH)
-    
 }
 
 // Prepare danerfiles for input to meta-analysis
@@ -77,10 +81,10 @@ process SUMSTATS {
     time = '10m'
 
     input:
-    tuple val(dataset), val(metas), path(daner)
+    tuple val(dataset), path(daner)
 
     output:
-    tuple val(dataset), val(metas), path("${daner.baseName}")
+    tuple val(dataset), path("${daner.baseName}")
 
     script:
     """
