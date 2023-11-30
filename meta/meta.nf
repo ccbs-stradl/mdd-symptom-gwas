@@ -111,8 +111,8 @@ process SUMSTATS {
     }
 
     sumstats <- daner_n |>
-        select(CHR, SNP, BP, A1, A2,
-               FRQ_A = starts_with("FRQ_A"), FRQ_U = starts_with("FRQ_U"),
+        select(CHR, POS = BP, ID = SNP, EA = A1, NEA = A2,
+               AFCAS = starts_with("FRQ_A"), AFCON = starts_with("FRQ_U"),
                INFO, OR, SE, NCAS, NCON)
 
     write_tsv(sumstats, "${daner.baseName}")
@@ -160,13 +160,13 @@ process META {
             pl.col("*"),
             (pl.col("BETA") * pl.col("ivw")).alias("wBETA"),
             (pl.col("INFO") * pl.col("N")).alias("wINFO"),
-            (pl.col("FRQ_A") * pl.col("NCAS")).alias("wAFCAS"),
-            (pl.col("FRQ_U") * pl.col("NCON")).alias("wAFCON")
+            (pl.col("AFCAS") * pl.col("NCAS")).alias("wAFCAS"),
+            (pl.col("AFCON") * pl.col("NCON")).alias("wAFCON")
         )
-        .group_by("CHR", "BP", "SNP", "A1", "A2")
+        .group_by("CHR", "POS", "ID", "EA", "NEA")
         .agg(
             (pl.sum("wBETA") /  pl.sum("ivw")).exp().alias("OR"),
-            (1 / pl.sum("ivw")).sqrt().alias("SE"),
+            (1 / pl.sum("ivw")).sqrt().alias("LOG_OR_SE"),
             (pl.sum("wINFO") / pl.sum("N")).alias("INFO"),
             (pl.sum("wAFCAS") / pl.sum("NCAS")).alias("AFCAS"),
             (pl.sum("wAFCON") / pl.sum("NCON")).alias("AFCON"),
@@ -215,7 +215,7 @@ process POST {
         
     # remove duplicate positions
     sumstats_gr <- sumstats_neff |>
-        transmute(seqnames = CHR, start = BP, width = 1, SNP, index = seq_along(SNP)) |>
+        transmute(seqnames = CHR, start = POS, width = 1, ID, index = seq_along(ID)) |>
         as_granges()
     
     duplicate_positions <- 
@@ -224,13 +224,13 @@ process POST {
         as_tibble()
         
     duplicate_snps <- c(
-        pull(duplicate_positions, SNP),
-        pull(duplicate_positions, SNP.overlap)    
+        pull(duplicate_positions, ID),
+        pull(duplicate_positions, ID.overlap)    
     )
     
     sumstats_post <- sumstats_neff |> 
-        filter(!SNP %in% duplicate_snps) |>
-        mutate(P = pchisq(log(OR)^2 / SE^2, df = 1, lower.tail = FALSE))
+        filter(!ID %in% duplicate_snps) |>
+        mutate(P = pchisq(log(OR)^2 / LOG_OR_SE^2, df = 1, lower.tail = FALSE))
         
     write_tsv(sumstats_post, "${sumstats.baseName}.gz")
     """
