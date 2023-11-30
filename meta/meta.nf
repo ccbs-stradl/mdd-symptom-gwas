@@ -229,7 +229,8 @@ process POST {
     )
     
     sumstats_post <- sumstats_neff |> 
-        filter(!SNP %in% duplicate_snps)
+        filter(!SNP %in% duplicate_snps) |>
+        mutate(P = pchisq(log(OR)^2 / SE^2, df = 1, lower.tail = FALSE))
         
     write_tsv(sumstats_post, "${sumstats.baseName}.gz")
     """
