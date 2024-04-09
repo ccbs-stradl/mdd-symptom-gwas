@@ -24,6 +24,13 @@ cohort_alignment <- read_tsv('meta/cohort_alignment.txt')
 
 ```
 
+Symptom descriptions
+```{r}
+
+mdd_symptoms <- read_tsv('dsm_mdd.tsv')
+
+```
+
 List of `basic.xls` files from Ricopili with sample counts
 
 ```{r}
@@ -66,13 +73,16 @@ summarize(N_cases=sum(N_cases, na.rm=T), N_controls=sum(N_controls, na.rm=T), N_
 ungroup()
 
 presence_absence <- basics_summary |>
-	str_glue_data("{N_cases} : {N_controls} {round(100*N_cases/(N_cases + N_controls))}")
+	str_glue_data("{N_eff_half} ({round(100*N_cases/(N_cases + N_controls))}%)")
 
 basics_formatted <- 
 basics_summary %>%
 mutate(PresenceAbsence=as.character(presence_absence)) %>%
 select(meta, reference, PresenceAbsence) %>%
-pivot_wider(names_from=meta, values_from=PresenceAbsence)
+pivot_wider(names_from=meta, values_from=PresenceAbsence) |>
+left_join(mdd_symptoms, by = c('reference' = 'Reference')) |>
+mutate(Symptom = str_glue("{Ref}. {Symptom}")) |>
+select(Symptom, Abbr. = abbv, Clinical, Community)
 
 knitr::kable(basics_formatted)
 

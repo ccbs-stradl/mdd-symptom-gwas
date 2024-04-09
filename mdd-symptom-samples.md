@@ -20,9 +20,23 @@ cohort_alignment <- read_tsv('meta/cohort_alignment.txt')
 ```
 
     ## Rows: 245 Columns: 3
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (3): filename, cohort, reference
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+Symptom descriptions
+
+``` r
+mdd_symptoms <- read_tsv('dsm_mdd.tsv')
+```
+
+    ## Rows: 15 Columns: 7
+    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (7): Ref, Reference, h, v, abbv, Symptom, Description
     ## 
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
@@ -71,31 +85,34 @@ ungroup()
 
 ``` r
 presence_absence <- basics_summary |>
-    str_glue_data("{N_cases} : {N_controls} {round(100*N_cases/(N_cases + N_controls))}")
+    str_glue_data("{N_eff_half} ({round(100*N_cases/(N_cases + N_controls))}%)")
 
 basics_formatted <- 
 basics_summary %>%
 mutate(PresenceAbsence=as.character(presence_absence)) %>%
 select(meta, reference, PresenceAbsence) %>%
-pivot_wider(names_from=meta, values_from=PresenceAbsence)
+pivot_wider(names_from=meta, values_from=PresenceAbsence) |>
+left_join(mdd_symptoms, by = c('reference' = 'Reference')) |>
+mutate(Symptom = str_glue("{Ref}. {Symptom}")) |>
+select(Symptom, Abbr. = abbv, Clinical, Community)
 
 knitr::kable(basics_formatted)
 ```
 
-| reference | Clinical         | Community         |
-|:----------|:-----------------|:------------------|
-| MDD1      | 21681 : 1748 93  | 107956 : 99480 52 |
-| MDD2      | 24732 : 2801 90  | 81113 : 126167 39 |
-| MDD3a     | 9265 : 14594 39  | 39453 : 36497 52  |
-| MDD3b     | 7902 : 13167 38  | 22612 : 36489 38  |
-| MDD4a     | 18917 : 6573 74  | 73144 : 19851 79  |
-| MDD4b     | 10586 : 11050 49 | 20125 : 20055 50  |
-| MDD5a     | 10447 : 12372 46 | 113 : 3181 3      |
-| MDD5b     | 12701 : 11214 53 | 299 : 2995 9      |
-| MDD6      | 23941 : 2497 91  | 85304 : 16736 84  |
-| MDD7      | 21921 : 3888 85  | 61757 : 43570 59  |
-| MDD8      | 23974 : 2386 91  | 75190 : 23416 76  |
-| MDD9      | 18170 : 9609 65  | 46984 : 58885 44  |
+| Symptom                                    | Abbr.   | Clinical    | Community    |
+|:-------------------------------------------|:--------|:------------|:-------------|
+| 1\. Depressed mood                         | Dep     | 2471 (93%)  | 102071 (52%) |
+| 2\. Anhedonia                              | Anh     | 4494 (90%)  | 98458 (39%)  |
+| 3a. Weight loss / decrease in appetite     | AppDec  | 10119 (39%) | 35837 (52%)  |
+| 3b. Weight gain / increase in appetite     | AppInc  | 9259 (38%)  | 26681 (38%)  |
+| 4a. Insomnia                               | SleDec  | 9418 (74%)  | 28741 (79%)  |
+| 4b. Hypersomnia                            | SleInc  | 10031 (49%) | 18377 (50%)  |
+| 5a. Psychomotor agitation                  | MotoInc | 10380 (46%) | 218 (3%)     |
+| 5b. Psychomotor slowing                    | MotoDec | 11130 (53%) | 543 (9%)     |
+| 6\. Fatigue                                | Fatig   | 3907 (91%)  | 25790 (84%)  |
+| 7\. Feelings of worthlessness / guilt      | Guilt   | 5503 (85%)  | 46694 (59%)  |
+| 8\. Diminished concentration               | Conc    | 3793 (91%)  | 32827 (76%)  |
+| 9\. Recurrent thoughts of death or suicide | Sui     | 10545 (65%) | 50035 (44%)  |
 
 ``` r
 basics_sum <-
