@@ -590,7 +590,7 @@ sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs)
 ```{r model_coefs}
 
 model_coefs <- bind_rows(lapply(mod_list, function(m) m$model$results), .id='model')
-write_csv(model_coefs, "mdd-symptom-gsem_files/model_coefs.csv")
+write_csv(model_coefs, "mdd-symptom-gsem-model_files/model_coefs.csv")
 
 ```
 

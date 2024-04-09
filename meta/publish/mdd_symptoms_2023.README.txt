@@ -10,8 +10,8 @@ Meta-analysed genome-wide association summary statistics for symptoms of major d
 
 *Cohorts*
 
-- Clin = Clinical and case-enriched cohorts: Psychiatric Genomics Consortium, Australian Genetics of Depression Study and Generation Scotland
-- Community = Community (not selected for diagnosis) cohorts: Avon Longitudinal Study of Parents and Children, Estonian Biobank, and UK Biobank.
+- Clin = Clinical, case-only, and case-enriched cohorts: Psychiatric Genomics Consortium, Australian Genetics of Depression Study and Generation Scotland
+- Comm = Community (not selected for diagnosis) cohorts: Avon Longitudinal Study of Parents and Children, Estonian Biobank, and UK Biobank.
 
 *Symptoms*
 
