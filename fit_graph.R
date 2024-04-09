@@ -11,17 +11,20 @@ fit_graph <- function(results, ...) {
   node_idx <- seq_along(node_names)
   names(node_idx) <- node_names
   
+  edge_dir <- c("=~" = "forward", "~~" = "both")
+  
   graph <- create_graph(
     nodes_df=create_node_df(n=length(node_names),
-                            label=node_labels[node_names], 
+                            label=node_names, 
                             shape='oval', width=1,
-                            fillcolor=node_colors[node_names],
+                            #fillcolor=node_colors[node_names],
                             fontcolor='black'),
     edges_df=create_edge_df(from=node_idx[results_sort$lhs],
                             to=node_idx[results_sort$rhs],
                             label=round(results_sort$STD_Genotype, 2),
                             penwidth=0.3+abs(2*results_sort$STD_Genotype),
-                            dir=edge_dir[results_sort$op]),
+                            dir=edge_dir[results_sort$op]
+                            ),
     attr_theme="tb")
   
   return(graph)

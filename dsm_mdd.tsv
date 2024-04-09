@@ -1,0 +1,16 @@
+Ref	Reference	h	v	abbv	Symptom	Description
+1	MDD1	Mood	Mood	Dep	Depressed mood	Depressed mood most of the day, nearly every day
+2	MDD2	Interest	Interest	Anh	Anhedonia	Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day
+3	MDD3	Weight⇅	Weight⇆	App	Weight / appetite change	Significant change in weight or appetite
+3a	MDD3a	Weight⇊	Weight⇇	AppDec	Weight loss / decrease in appetite	Significant weight loss or decrease in appetite
+3b	MDD3b	Weight⇈	Weight⇉	AppInc	Weight gain / increase in appetite	Significant weight gain or increase in appetite
+4	MDD4	Sleep⇅	Sleep⇆	Sle	Sleep change	Sleeping too much or not sleeping enough
+4a	MDD4a	Sleep⇊	Sleep⇇	SleDec	Insomnia	Insomnia nearly every day
+4b	MDD4b	Sleep⇈	Sleep⇉	SleInc	Hypersomnia	Hypersomnia nearly every day
+5	MDD5	Motor⇅	Motor⇆	Moto	Psychomotor change	Changes in speed/amount of moving or speaking
+5a	MDD5a	Motor⇈	Motor⇉	MotoInc	Psychomotor agitation	Psychomotor agitation nearly every day
+5b	MDD5b	Motor⇊	Motor⇇	MotoDec	Psychomotor slowing	Psychomotor slowing nearly every day
+6	MDD6	Fatigue	Fatigue	Fatig	Fatigue	Fatigue or loss of energy nearly every day
+7	MDD7	Guilt	Guilt	Guilt	Feelings of worthlessness / guilt	Feelings of worthlessness or excessive or inappropriate guilt
+8	MDD8	Concentrate	Concentrate	Conc	Diminished concentration	Diminished ability to think or concentrate, or indecisiveness
+9	MDD9	Suicidality	Suicidality	Sui	Recurrent thoughts of death or suicide	Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide

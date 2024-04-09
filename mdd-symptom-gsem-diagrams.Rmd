@@ -1,0 +1,206 @@
+---
+title: GenomicSEM of MDD symptoms diagrams
+author: Mark Adams
+output:
+  html_document
+---
+
+```{r library}
+library(dplyr)
+library(stringr)
+library(readr)
+library(DiagrammeR)
+```
+
+Model coefficients
+
+```{r coefs}
+model_coefs <- read_tsv("mdd-symptom-gsem_files/model_coefs.txt") |>
+  mutate(STD_Genotype = if_else(abs(STD_Genotype) > 1, true = sign(STD_Genotype), false = STD_Genotype))
+```
+
+Get factors versus symptom items. Factors are named with all uppercase letters.
+
+```{r coefs_levels}
+model_coefs_factors <- model_coefs |>
+  filter(lhs == str_to_upper(lhs))
+  
+model_coefs_symptoms <- model_coefs |>
+  filter(lhs != str_to_upper(lhs))
+```
+
+Make separate entries for symptoms and symptom residuals
+
+```{r}
+model_coefs_symptom_residuals <- model_coefs_symptoms |>
+  mutate(lhs = str_glue("u[{lhs}]"), op = "=~",
+         STD_Genotype = 1, STD_Genotype_SE = 0)
+  
+model_coefs_residuals <- model_coefs_symptoms |>
+  mutate(lhs = str_glue("u[{lhs}]"),
+         rhs = str_glue("u[{rhs}]"))
+```
+
+Merge back together, and split into a list
+```{r}
+model_coefs_resid <- bind_rows(model_coefs_factors, model_coefs_symptom_residuals, model_coefs_residuals)
+
+model_coefs_list <- plyr::dlply(model_coefs_resid, .variables = "model", .fun = I)
+```
+
+Make graph for a model
+
+```{r cfa_graph}
+
+cfa_graph <- function(results, ...) {
+
+  results_sort <- arrange(results, lhs, rhs)
+
+  node_names <- unique(c(results_sort$lhs, results_sort$rhs))
+  
+  node_idx <- seq_along(node_names)
+  names(node_idx) <- node_names
+  
+  edge_dir <- c("=~" = "forward", "~~" = "both")
+  
+  graph <- create_graph(
+    nodes_df=create_node_df(n=length(node_names),
+                            label=node_names, 
+                            shape='oval', width=1,
+                            fontcolor='black'),
+    edges_df=create_edge_df(from=node_idx[results_sort$lhs],
+                            to=node_idx[results_sort$rhs],
+                            label=round(results_sort$STD_Genotype, 2),
+                            penwidth=0.3+abs(2*results_sort$STD_Genotype),
+                            dir=edge_dir[results_sort$op]
+                            ),
+    attr_theme="tb")
+  
+  return(graph)
+
+}
+
+```
+
+Make a GraphViz version and places nodes on levels for factors, symptoms, and residuals
+```{r cfa_viz}
+
+cfa_viz <- function(results) {
+  
+  # make graph
+  results.graph <- cfa_graph(results)
+  # get GraphViz representation
+  results.gv <- generate_dot(results.graph)
+  
+  # determine which nodes are factors, symptoms, or residuals based on label name
+  node_idx <- results.graph[['nodes_df']][['id']]
+  node_labels <- results.graph[['nodes_df']][['label']]
+  
+  factor_idx <- node_idx[which(str_to_upper(node_labels) == node_labels)]
+  resid_idx <- node_idx[which(str_detect(node_labels, "u\\["))]
+  symptom_idx <- node_idx[which(!node_idx %in% c(factor_idx, resid_idx))]
+  
+  # split graphviz code into blocks
+  gv.list <- str_split(results.gv, "\n\n")[[1]]
+  
+  # move node list to the end
+  gv.list[6] <- gv.list[5]
+
+  factor_rank <- str_c("{rank=min; ", str_c(factor_idx, collapse = "; "), ";}")
+  symptom_rank <- str_c("{rank=same; ", str_c(symptom_idx, collapse = "; "), ";}")
+  resid_rank <- str_c("{rank=max; ", str_c(resid_idx, collapse = "; "), ";}")
+  
+  ranks <- str_c("rankdir = TB;", factor_rank, symptom_rank, resid_rank, sep = "\n")
+  gv.list[5] <- ranks
+  
+  rank.gv <- str_c(gv.list, collapse='\n\n')
+  
+  return(rank.gv)
+}
+
+```
+
+```{r dots}
+
+# # output as a GraphViz dot file. Replace single quotes with double quotes 
+# # as that's what the command line utility expects
+for(model_letter in names(model_coefs_list)) {
+  model.gv <- cfa_viz(model_coefs_list[[model_letter]])
+  cat(str_replace_all(model.gv, "'", '"'),
+      file=str_glue('mdd-symptom-gsem-diagrams_files/{model_letter}.gv'))
+}
+
+```
+
+```{sh dot_images}
+for DOT in mdd-symptom-gsem-diagrams_files/*.gv; do
+  dot -Tpdf -o$(dirname $DOT)/$(basename $DOT .gv).pdf $DOT
+  dot -Tpng -Gdpi=300 -o$(dirname $DOT)/$(basename $DOT .gv).png $DOT
+done
+```
+
+```{r cfa_a}
+
+grViz(cfa_viz(model_coefs_list[["A"]]))
+
+```
+
+```{r cfa_b}
+
+grViz(cfa_viz(model_coefs_list[["B"]]))
+
+```
+
+```{r cfa_c}
+
+grViz(cfa_viz(model_coefs_list[["C"]]))
+
+```
+
+```{r cfa_d}
+
+grViz(cfa_viz(model_coefs_list[["D"]]))
+
+```
+
+```{r cfa_e}
+
+grViz(cfa_viz(model_coefs_list[["E"]]))
+
+```
+
+```{r cfa_f}
+
+grViz(cfa_viz(model_coefs_list[["F"]]))
+
+```
+
+```{r cfa_g}
+
+grViz(cfa_viz(model_coefs_list[["G"]]))
+
+```
+
+```{r cfa_h}
+
+grViz(cfa_viz(model_coefs_list[["H"]]))
+
+```
+
+```{r cfa_i}
+
+grViz(cfa_viz(model_coefs_list[["I"]]))
+
+```
+
+```{r cfa_j}
+
+grViz(cfa_viz(model_coefs_list[["J"]]))
+
+```
+
+```{r cfa_m}
+
+grViz(cfa_viz(model_coefs_list[["M"]]))
+
+```

@@ -20,14 +20,14 @@ R.version
     ## system         aarch64, darwin20           
     ## status                                     
     ## major          4                           
-    ## minor          2.2                         
-    ## year           2022                        
+    ## minor          3.2                         
+    ## year           2023                        
     ## month          10                          
     ## day            31                          
-    ## svn rev        83211                       
+    ## svn rev        85441                       
     ## language       R                           
-    ## version.string R version 4.2.2 (2022-10-31)
-    ## nickname       Innocent and Trusting
+    ## version.string R version 4.3.2 (2023-10-31)
+    ## nickname       Eye Holes
 
 Package installation
 
@@ -42,60 +42,13 @@ GenomicSEM version
 
 ``` r
 require(readr)
-```
-
-    ## Loading required package: readr
-
-``` r
 require(tidyr)
-```
-
-    ## Loading required package: tidyr
-
-``` r
 require(stringr)
-```
-
-    ## Loading required package: stringr
-
-``` r
 require(dplyr)
-```
-
-    ## Loading required package: dplyr
-
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-``` r
 require(ggplot2)
-```
-
-    ## Loading required package: ggplot2
-
-``` r
 require(corrplot)
-```
-
-    ## Loading required package: corrplot
-
-    ## corrplot 0.92 loaded
-
-``` r
 require(GenomicSEM)
-```
 
-    ## Loading required package: GenomicSEM
-
-``` r
 packageVersion("GenomicSEM")
 ```
 
@@ -129,7 +82,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -158,7 +111,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -203,7 +156,7 @@ sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 't
 ```
 
     ## Rows: 26 Columns: 9
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -909,7 +862,7 @@ affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 ``` r
 cog_mood_neuroveg.model <- "
 COG =~ NA*ClinGuilt + ClinSui + CommGuilt + CommConc + CommSui
-MOOD =~ NA*CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
+MOOD =~ NA*ClinGuilt + CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
 VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -928,8 +881,8 @@ cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.092 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   2.559 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714834 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## cog_mood_neuroveg.model, : A difference greater than .025 was observed pre- and
@@ -949,12 +902,16 @@ cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
     ## strongly recommend setting the smooth_check argument to true to check smoothing
     ## for each SNP.
 
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = cog_mood_neuroveg.model, : The standardized model produced the following warning: lavaan WARNING: covariance matrix of latent variables
+    ##                 is not positive definite;
+    ##                 use lavInspect(fit, "cov.lv") to investigate.
+
 ``` r
 cog_mood_neuroveg.fit$modelfit
 ```
 
-    ##       chisq  df p_chisq      AIC     CFI      SRMR
-    ## df 3943.298 162       0 4039.298 0.94981 0.1437876
+    ##      chisq  df p_chisq     AIC       CFI      SRMR
+    ## df 3902.94 161       0 4000.94 0.9503324 0.1435788
 
 ``` r
 cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
@@ -964,24 +921,24 @@ cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 ```
 
     ##    lhs op  rhs STD_Genotype STD_Genotype_SE
-    ## 1  COG ~~ MOOD         1.03           0.061
-    ## 2  COG ~~  VEG        -0.83           0.102
-    ## 3 MOOD ~~  VEG        -0.74           0.074
+    ## 1  COG ~~ MOOD         1.00           0.013
+    ## 2  COG ~~  VEG        -0.78           0.061
+    ## 3 MOOD ~~  VEG        -0.76           0.061
 
 ### Cognitive-Appetite-Vegetative (van Loo)
 
 ``` r
 cog_app_veg.model <- "
-COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
+COGMOOD =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
 APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + CommAppInc
 VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
-COG ~~ 1*COG
+COGMOOD ~~ 1*COGMOOD
 APP ~~ 1*APP
 VEG ~~ 1*VEG
 GATE ~~ 1*GATE
-GATE ~~ 0*COG + 0*APP + 0*VEG
+GATE ~~ 0*COGMOOD + 0*APP + 0*VEG
 "
 cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg.model, imp_cov=TRUE)
 ```
@@ -991,8 +948,8 @@ cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_ap
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.157 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##    2.48 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714834 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## cog_app_veg.model, : A difference greater than .025 was observed pre- and
@@ -1017,19 +974,19 @@ cog_app_veg.fit$modelfit
 ```
 
     ##       chisq  df p_chisq      AIC       CFI      SRMR
-    ## df 2919.591 163       0 3013.591 0.9634112 0.1470383
+    ## df 2919.594 163       0 3013.594 0.9634111 0.1470383
 
 ``` r
 cog_app_veg.fit$results[c(1,2,3,6,7, 9)] %>%
-     filter(lhs %in% c('COG', 'APP', 'VEG'), rhs %in% c('COG', 'APP', 'VEG'), lhs != rhs) %>%
+     filter(lhs %in% c('COGMOOD', 'APP', 'VEG'), rhs %in% c('COGMOOD', 'APP', 'VEG'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
 ```
 
-    ##   lhs op rhs STD_Genotype STD_Genotype_SE p_value
-    ## 1 COG ~~ APP         0.48           0.066 3.4e-13
-    ## 2 COG ~~ VEG         0.91           0.069 7.8e-40
-    ## 3 APP ~~ VEG         0.66           0.094 1.4e-12
+    ##       lhs op rhs STD_Genotype STD_Genotype_SE p_value
+    ## 1 COGMOOD ~~ APP         0.48           0.066 3.4e-13
+    ## 2 COGMOOD ~~ VEG         0.91           0.069 7.8e-40
+    ## 3     APP ~~ VEG         0.66           0.094 1.4e-12
 
 ## Melancholic and atypical
 
@@ -1144,7 +1101,7 @@ mutate_if(is.numeric, ~signif(., 3))
 | E     | Psych-Somatic                   |  3630 | 165 |       0 | 3720 | 0.954 | 0.148 |  705 |
 | F     | Psych-Neuroveg                  |  3710 | 165 |       0 | 3800 | 0.953 | 0.144 |  786 |
 | G     | Affect-Neuroveg                 |  3330 | 165 |       0 | 3420 | 0.958 | 0.145 |  409 |
-| H     | Cog-Mood-Neuroveg               |  3940 | 162 |       0 | 4040 | 0.950 | 0.144 | 1030 |
+| H     | Cog-Mood-Neuroveg               |  3900 | 161 |       0 | 4000 | 0.950 | 0.144 |  987 |
 | I     | Appetite-Vegetative-Cog/Mood    |  2920 | 163 |       0 | 3010 | 0.963 | 0.147 |    0 |
 | J     | Depression-Melancholic-Atypical |  3560 | 163 |       0 | 3650 | 0.955 | 0.148 |  638 |
 
@@ -1244,6 +1201,63 @@ sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs)
 ``` r
 model_coefs <- bind_rows(lapply(mod_list, function(m) m$model$results), .id='model')
 ```
+
+#### Coefficient plots
+
+Heatmap of how often symptoms load on the same factor in symptoms models
+
+``` r
+symptom_model_connectivity <- model_coefs |>
+  filter(! lhs %in% c('MDD', 'CLIN', 'COMM', 'GATE'), model != "M") |>
+  transmute(factor=str_c(model, lhs, sep = "_"), rhs, value = 1) |>
+  pivot_wider(names_from = factor, values_from = value, values_fill = 0)
+
+symptom_model_connectivity_matrix <- as.matrix(symptom_model_connectivity[,-1])
+rownames(symptom_model_connectivity_matrix) <- symptom_model_connectivity$rhs
+
+heatmap(symptom_model_connectivity_matrix %*% t(symptom_model_connectivity_matrix))
+```
+
+![](mdd-symptom-gsem-model_files/figure-gfm/symptom_loadings_heatmap-1.png)<!-- -->
+
+Plot structure of symptom-focused models
+
+``` r
+symptom_model_structure <- model_coefs |>
+  filter(op == "=~",
+         !lhs %in% c("MDD", "COMM", "CLIN", "GATE"),
+         model != "M") |>
+  mutate(cohort = case_when(str_detect(rhs, "Clin") ~ "Diagnosed",
+                            str_detect(rhs, "Comm") ~ "Screened",
+                            str_detect(rhs, "Ukb") ~ "UKB Baseline"),
+         symptom = str_remove(rhs, "(Clin|Comm|Ukb)"),
+         loading = if_else(abs(STD_Genotype) > 1, true = 1 * sign(STD_Genotype), false = STD_Genotype),
+         Model = str_c("Model: ", model),
+         Factor = case_match(lhs,
+                            "PSYCH" ~ "Psychological",
+                            "SOMA" ~ "Somatic",
+                            "VEG" ~ "Vegetative",
+                            "AFFECT" ~ "Affective",
+                            "NEUROVEG" ~ "Neurovegetative",
+                            "COG" ~ "Cognitive",
+                            "MOOD" ~ "Mood", 
+                            "COGMOOD" ~ "Cognitive/Mood",
+                            "APP" ~ "Appetite/Weight",
+                            "MEL" ~ "Melancholic",
+                            "ATY" ~ "Atypical",
+                            "AFC" ~ "Affective/Cognitive"))
+         
+ggplot(symptom_model_structure, aes(x = symptom, y = Factor, colour = cohort, group = cohort, size = abs(loading))) +
+  geom_point(position = position_dodge(width = 0.4)) +
+  facet_grid(rows = vars(Model), scales = "free", space = "free") +
+  scale_x_discrete("Symptom", limits = c("Sui", "Dep", "Anh", "Guilt", "Conc", "MotoInc", "SleDec", "AppDec", "AppInc", "MotoDec", "Fatig", "SleInc")) +
+  scale_y_discrete() +
+  scale_size("|Loading|") +
+  scale_colour_discrete("Cohorts") +
+  theme(strip.text.y = element_text(angle = 0))
+```
+
+![](mdd-symptom-gsem-model_files/figure-gfm/model_loadings-1.png)<!-- -->
 
 #### Model Implied and residual genetic correlations
 
@@ -1364,7 +1378,7 @@ print(symptoms_efa, cut=0.4)
     ## 
     ## Uniquenesses:
     ##  ClinAppDec  ClinAppInc  ClinSleDec  ClinSleInc ClinMotoInc ClinMotoDec 
-    ##       0.954       0.183       0.799       0.729       0.640       0.819 
+    ##       0.954       0.183       0.800       0.729       0.640       0.819 
     ##   ClinGuilt     ClinSui     CommDep     CommAnh  CommAppDec  CommAppInc 
     ##       0.005       0.756       0.100       0.124       0.357       0.422 
     ##  CommSleDec  CommSleInc   CommFatig   CommGuilt    CommConc     CommSui 

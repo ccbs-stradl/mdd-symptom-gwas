@@ -1,0 +1,131 @@
+digraph {
+
+graph [layout = "dot",
+       rankdir = "TB",
+       outputorder = "edgesfirst",
+       bgcolor = "white"]
+
+node [fontname = "Helvetica",
+      fontsize = "10",
+      shape = "circle",
+      fixedsize = "true",
+      width = "0.5",
+      style = "filled",
+      fillcolor = "aliceblue",
+      color = "gray70",
+      fontcolor = "gray50"]
+
+edge [fontname = "Helvetica",
+     fontsize = "8",
+     len = "1.5",
+     color = "gray80",
+     arrowsize = "0.5"]
+
+rankdir = TB;
+{rank=min; 1;}
+{rank=same; 22; 23; 24; 25; 26; 27; 28; 29; 30; 31; 32; 33; 34; 35; 36; 37; 38; 39; 40; 41;}
+{rank=max; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19; 20; 21;}
+
+  "1" [label = "MDD", shape = "oval", width = "1", fontcolor = "black"] 
+  "2" [label = "u[ClinAppDec]", shape = "oval", width = "1", fontcolor = "black"] 
+  "3" [label = "u[ClinAppInc]", shape = "oval", width = "1", fontcolor = "black"] 
+  "4" [label = "u[ClinGuilt]", shape = "oval", width = "1", fontcolor = "black"] 
+  "5" [label = "u[ClinMotoDec]", shape = "oval", width = "1", fontcolor = "black"] 
+  "6" [label = "u[ClinMotoInc]", shape = "oval", width = "1", fontcolor = "black"] 
+  "7" [label = "u[ClinSleDec]", shape = "oval", width = "1", fontcolor = "black"] 
+  "8" [label = "u[ClinSleInc]", shape = "oval", width = "1", fontcolor = "black"] 
+  "9" [label = "u[ClinSui]", shape = "oval", width = "1", fontcolor = "black"] 
+  "10" [label = "u[CommAnh]", shape = "oval", width = "1", fontcolor = "black"] 
+  "11" [label = "u[CommAppDec]", shape = "oval", width = "1", fontcolor = "black"] 
+  "12" [label = "u[CommAppInc]", shape = "oval", width = "1", fontcolor = "black"] 
+  "13" [label = "u[CommConc]", shape = "oval", width = "1", fontcolor = "black"] 
+  "14" [label = "u[CommDep]", shape = "oval", width = "1", fontcolor = "black"] 
+  "15" [label = "u[CommFatig]", shape = "oval", width = "1", fontcolor = "black"] 
+  "16" [label = "u[CommGuilt]", shape = "oval", width = "1", fontcolor = "black"] 
+  "17" [label = "u[CommSleDec]", shape = "oval", width = "1", fontcolor = "black"] 
+  "18" [label = "u[CommSleInc]", shape = "oval", width = "1", fontcolor = "black"] 
+  "19" [label = "u[CommSui]", shape = "oval", width = "1", fontcolor = "black"] 
+  "20" [label = "u[UkbAnh]", shape = "oval", width = "1", fontcolor = "black"] 
+  "21" [label = "u[UkbDep]", shape = "oval", width = "1", fontcolor = "black"] 
+  "22" [label = "ClinAppDec", shape = "oval", width = "1", fontcolor = "black"] 
+  "23" [label = "ClinAppInc", shape = "oval", width = "1", fontcolor = "black"] 
+  "24" [label = "ClinGuilt", shape = "oval", width = "1", fontcolor = "black"] 
+  "25" [label = "ClinMotoDec", shape = "oval", width = "1", fontcolor = "black"] 
+  "26" [label = "ClinMotoInc", shape = "oval", width = "1", fontcolor = "black"] 
+  "27" [label = "ClinSleDec", shape = "oval", width = "1", fontcolor = "black"] 
+  "28" [label = "ClinSleInc", shape = "oval", width = "1", fontcolor = "black"] 
+  "29" [label = "ClinSui", shape = "oval", width = "1", fontcolor = "black"] 
+  "30" [label = "CommAnh", shape = "oval", width = "1", fontcolor = "black"] 
+  "31" [label = "CommAppDec", shape = "oval", width = "1", fontcolor = "black"] 
+  "32" [label = "CommAppInc", shape = "oval", width = "1", fontcolor = "black"] 
+  "33" [label = "CommConc", shape = "oval", width = "1", fontcolor = "black"] 
+  "34" [label = "CommDep", shape = "oval", width = "1", fontcolor = "black"] 
+  "35" [label = "CommFatig", shape = "oval", width = "1", fontcolor = "black"] 
+  "36" [label = "CommGuilt", shape = "oval", width = "1", fontcolor = "black"] 
+  "37" [label = "CommSleDec", shape = "oval", width = "1", fontcolor = "black"] 
+  "38" [label = "CommSleInc", shape = "oval", width = "1", fontcolor = "black"] 
+  "39" [label = "CommSui", shape = "oval", width = "1", fontcolor = "black"] 
+  "40" [label = "UkbAnh", shape = "oval", width = "1", fontcolor = "black"] 
+  "41" [label = "UkbDep", shape = "oval", width = "1", fontcolor = "black"] 
+"1"->"22" [label = "0.04", penwidth = "0.374676860737622", dir = "forward"] 
+"1"->"23" [label = "-0.2", penwidth = "0.701664963659801", dir = "forward"] 
+"1"->"24" [label = "-0.45", penwidth = "1.1951499036712", dir = "forward"] 
+"1"->"25" [label = "-0.2", penwidth = "0.700390561823368", dir = "forward"] 
+"1"->"26" [label = "-0.24", penwidth = "0.777940830039762", dir = "forward"] 
+"1"->"27" [label = "-0.14", penwidth = "0.576872988826383", dir = "forward"] 
+"1"->"28" [label = "-0.21", penwidth = "0.728909952081891", dir = "forward"] 
+"1"->"29" [label = "-0.51", penwidth = "1.31290298325359", dir = "forward"] 
+"1"->"30" [label = "-0.92", penwidth = "2.14755272007653", dir = "forward"] 
+"1"->"31" [label = "-0.43", penwidth = "1.15451531676942", dir = "forward"] 
+"1"->"32" [label = "-0.42", penwidth = "1.14441222238935", dir = "forward"] 
+"1"->"33" [label = "-0.73", penwidth = "1.76434976720733", dir = "forward"] 
+"1"->"34" [label = "-0.87", penwidth = "2.03184450159132", dir = "forward"] 
+"1"->"35" [label = "-0.56", penwidth = "1.42470231898729", dir = "forward"] 
+"1"->"36" [label = "-0.59", penwidth = "1.47212251615227", dir = "forward"] 
+"1"->"37" [label = "-0.62", penwidth = "1.54921484120851", dir = "forward"] 
+"1"->"38" [label = "-0.71", penwidth = "1.71661021052464", dir = "forward"] 
+"1"->"39" [label = "-0.6", penwidth = "1.49580891435361", dir = "forward"] 
+"1"->"1" [label = "1", penwidth = "2.3", dir = "both"] 
+"1"->"40" [label = "-0.88", penwidth = "2.06874241485197", dir = "forward"] 
+"1"->"41" [label = "-0.86", penwidth = "2.02616233954276", dir = "forward"] 
+"2"->"22" [label = "1", penwidth = "2.3", dir = "forward"] 
+"2"->"2" [label = "1", penwidth = "2.29720936039923", dir = "both"] 
+"3"->"23" [label = "1", penwidth = "2.3", dir = "forward"] 
+"3"->"3" [label = "0.96", penwidth = "2.219322955487", dir = "both"] 
+"4"->"24" [label = "1", penwidth = "2.3", dir = "forward"] 
+"4"->"4" [label = "0.8", penwidth = "1.89936309860004", dir = "both"] 
+"5"->"25" [label = "1", penwidth = "2.3", dir = "forward"] 
+"5"->"5" [label = "0.96", penwidth = "2.21986650108074", dir = "both"] 
+"6"->"26" [label = "1", penwidth = "2.3", dir = "forward"] 
+"6"->"6" [label = "0.94", penwidth = "2.1857913435436", dir = "both"] 
+"7"->"27" [label = "1", penwidth = "2.3", dir = "forward"] 
+"7"->"7" [label = "0.98", penwidth = "2.26167482595405", dir = "both"] 
+"8"->"28" [label = "1", penwidth = "2.3", dir = "forward"] 
+"8"->"8" [label = "0.95", penwidth = "2.20802404302341", dir = "both"] 
+"9"->"29" [label = "1", penwidth = "2.3", dir = "forward"] 
+"9"->"9" [label = "0.74", penwidth = "1.78701264346698", dir = "both"] 
+"10"->"30" [label = "1", penwidth = "2.3", dir = "forward"] 
+"10"->"10" [label = "0.15", penwidth = "0.593274044835234", dir = "both"] 
+"11"->"31" [label = "1", penwidth = "2.3", dir = "forward"] 
+"11"->"11" [label = "0.82", penwidth = "1.93490882473382", dir = "both"] 
+"12"->"32" [label = "1", penwidth = "2.3", dir = "forward"] 
+"12"->"12" [label = "0.82", penwidth = "1.94348385388006", dir = "both"] 
+"13"->"33" [label = "1", penwidth = "2.3", dir = "forward"] 
+"13"->"13" [label = "0.46", penwidth = "1.22784175732125", dir = "both"] 
+"14"->"34" [label = "1", penwidth = "2.3", dir = "forward"] 
+"14"->"14" [label = "0.25", penwidth = "0.800357637746471", dir = "both"] 
+"15"->"35" [label = "1", penwidth = "2.3", dir = "forward"] 
+"15"->"15" [label = "0.68", penwidth = "1.66752298191567", dir = "both"] 
+"16"->"36" [label = "1", penwidth = "2.3", dir = "forward"] 
+"16"->"16" [label = "0.66", penwidth = "1.61306416047343", dir = "both"] 
+"17"->"37" [label = "1", penwidth = "2.3", dir = "forward"] 
+"17"->"17" [label = "0.61", penwidth = "1.51972946680632", dir = "both"] 
+"18"->"38" [label = "1", penwidth = "2.3", dir = "forward"] 
+"18"->"18" [label = "0.5", penwidth = "1.29661332414864", dir = "both"] 
+"19"->"39" [label = "1", penwidth = "2.3", dir = "forward"] 
+"19"->"19" [label = "0.64", penwidth = "1.58502218917481", dir = "both"] 
+"20"->"40" [label = "1", penwidth = "2.3", dir = "forward"] 
+"20"->"20" [label = "0.22", penwidth = "0.735775718637078", dir = "both"] 
+"21"->"41" [label = "1", penwidth = "2.3", dir = "forward"] 
+"21"->"21" [label = "0.26", penwidth = "0.810175793189214", dir = "both"] 
+}
