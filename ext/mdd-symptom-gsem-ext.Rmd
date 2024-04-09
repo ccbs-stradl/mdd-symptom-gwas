@@ -9,7 +9,7 @@ output:
     df_print: kable
     keep_md: true
   md_document:
-    variant: markdown_github
+    variant: gfm
 ---
 
 Test genetic relationship between [symptom factors](mdd-symptom-gsem-model.md) and a selection of other phenotypes that are genetically correlated with MDD, as well as to MDD itself. Phenotypes to examine:
@@ -504,8 +504,8 @@ ext_table <-
 bind_rows(ext_single, ext_multiple) %>%
 transmute(Phenotype,
           Factor=factor(Factor,
-	    				levels=c('DEP', 'APP', 'GATE', 'CLIN', 'COMM'),
-						labels=c("Depression", "Appetite/Weight", "Gating", "Community", "Clinical")),
+	    			levels=c('GATE', 'DEP', 'APP', 'CLIN', 'COMM'),
+						labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Community", "Clinical")),
 		  Model=Beta, STD_Genotype, STD_Genotype_SE, p_value) %>%
 mutate(fdr=p.adjust(p_value, 'BY')) |>
 arrange(Phenotype, desc(Factor), Model)
@@ -518,8 +518,8 @@ ext_table
 
 ggplot(bind_rows(ext_multiple, ext_single),
        aes(x=factor(Factor,
-	   				levels=c('DEP', 'APP', 'GATE', 'CLIN', 'COMM'),
-					   labels=c("Depression", "Appetite/Weight", "Gating", "Community", "Clinical")),
+	   				levels=c('GATE','DEP', 'APP', 'CLIN', 'COMM'),
+					   labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Community", "Clinical")),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Single', 'Multiple')),
            shape=factor(Beta, levels=c('Single', 'Multiple')),
@@ -540,7 +540,7 @@ theme(axis.text.y=element_text(size=16),
       legend.position='top') +
 labs(color  = "Regression: ", shape = "Regression: ")
 
-ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf")
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 10, height = 7, units = "in")
 
 ```
 

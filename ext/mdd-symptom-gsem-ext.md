@@ -3,49 +3,48 @@ factors](mdd-symptom-gsem-model.md) and a selection of other phenotypes
 that are genetically correlated with MDD, as well as to MDD itself.
 Phenotypes to examine:
 
--   Major depressive disorder: Clinical cohorts from [Wray et
-    al](https://www.nature.com/articles/s41588-018-0090-3%5C) and
-    non-PGC cohorts from . Download from
-    [PGC](https://www.med.unc.edu/pgc/download-results/) and obtain via
-    [data access](https://www.med.unc.edu/pgc/shared-methods/how-to/).
--   Major depression: Non-PGC cohorts from [Als et
-    al](https://www.medrxiv.org/content/10.1101/2022.08.24.22279149v1).
-    Download from [iPsych](https://ipsych.dk/en/research/downloads).
--   bipolar disorder: [Mullins et
-    al](https://pubmed.ncbi.nlm.nih.gov/34002096/). Download from
-    [PGC](https://figshare.com/articles/dataset/PGC3_bipolar_disorder_GWAS_summary_statistics/14102594)
--   anxiety:
-    [meta-analysis](https://drive.google.com/drive/folders/1fguHvz7l2G45sbMI9h_veQun4aXNTy1v)
-    of [UKBB,
-    iPSYCH](https://www.nature.com/articles/s41380-019-0559-1), and
-    [ANGST](https://pubmed.ncbi.nlm.nih.gov/26754954/), from [Grotzinger
-    et al
-    medRxiv](https://www.medrxiv.org/content/10.1101/2020.09.22.20196089v1.full)
--   PTSD: [Nievergelt et al](https://pubmed.ncbi.nlm.nih.gov/31594949/).
-    Download from
-    [PGC](https://figshare.com/articles/dataset/ptsd2019/14672133)
--   tobacco use. Cigarettes per day [Liu et
-    al](https://www.nature.com/articles/s41588-018-0307-5). Download
-    from [UofM](https://conservancy.umn.edu/handle/11299/201564)
--   alcohol dependence. [Walters et
-    al](https://www.nature.com/articles/s41593-018-0275-1). Download
-    from [PGC](https://doi.org/10.6084/m9.figshare.14672187)
--   educational attainment. [Okbay et.
-    al](https://www.nature.com/articles/s41588-022-01016-z). Download
-    from [SSGAC Data Portal](https://thessgac.com).
--   BMI, sex combined [Pulit et
-    al](https://academic.oup.com/hmg/article/28/1/166/5098227). Download
-    from
-    [GIANT/Broad](https://portals.broadinstitute.org/collaboration/giant/index.php/GIANT_consortium_data_files#2018_GIANT_and_UK_BioBank_Meta-analysis).
--   neuroticism: [Nagel et
-    al](https://www.nature.com/articles/s41588-018-0151-7). Download
-    from [CNCR](https://ctg.cncr.nl/software/summary_statistics)
--   pain: multisite chronic pain [Johnston et
-    al](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1008164).
-    Download from [UoG](https://researchdata.gla.ac.uk/822/)
--   chronotype: long sleep duration. [Dashti et
-    al](https://www.ncbi.nlm.nih.gov/pubmed/30846698). Download from
-    [SDKP](https://sleep.hugeamp.org/downloads.html).
+- Major depressive disorder: Clinical cohorts from [Wray et
+  al](https://www.nature.com/articles/s41588-018-0090-3%5C) and non-PGC
+  cohorts from . Download from
+  [PGC](https://www.med.unc.edu/pgc/download-results/) and obtain via
+  [data access](https://www.med.unc.edu/pgc/shared-methods/how-to/).
+- Major depression: Non-PGC cohorts from [Als et
+  al](https://www.medrxiv.org/content/10.1101/2022.08.24.22279149v1).
+  Download from [iPsych](https://ipsych.dk/en/research/downloads).
+- bipolar disorder: [Mullins et
+  al](https://pubmed.ncbi.nlm.nih.gov/34002096/). Download from
+  [PGC](https://figshare.com/articles/dataset/PGC3_bipolar_disorder_GWAS_summary_statistics/14102594)
+- anxiety:
+  [meta-analysis](https://drive.google.com/drive/folders/1fguHvz7l2G45sbMI9h_veQun4aXNTy1v)
+  of [UKBB, iPSYCH](https://www.nature.com/articles/s41380-019-0559-1),
+  and [ANGST](https://pubmed.ncbi.nlm.nih.gov/26754954/), from
+  [Grotzinger et al
+  medRxiv](https://www.medrxiv.org/content/10.1101/2020.09.22.20196089v1.full)
+- PTSD: [Nievergelt et al](https://pubmed.ncbi.nlm.nih.gov/31594949/).
+  Download from
+  [PGC](https://figshare.com/articles/dataset/ptsd2019/14672133)
+- tobacco use. Cigarettes per day [Liu et
+  al](https://www.nature.com/articles/s41588-018-0307-5). Download from
+  [UofM](https://conservancy.umn.edu/handle/11299/201564)
+- alcohol dependence. [Walters et
+  al](https://www.nature.com/articles/s41593-018-0275-1). Download from
+  [PGC](https://doi.org/10.6084/m9.figshare.14672187)
+- educational attainment. [Okbay et.
+  al](https://www.nature.com/articles/s41588-022-01016-z). Download from
+  [SSGAC Data Portal](https://thessgac.com).
+- BMI, sex combined [Pulit et
+  al](https://academic.oup.com/hmg/article/28/1/166/5098227). Download
+  from
+  [GIANT/Broad](https://portals.broadinstitute.org/collaboration/giant/index.php/GIANT_consortium_data_files#2018_GIANT_and_UK_BioBank_Meta-analysis).
+- neuroticism: [Nagel et
+  al](https://www.nature.com/articles/s41588-018-0151-7). Download from
+  [CNCR](https://ctg.cncr.nl/software/summary_statistics)
+- pain: multisite chronic pain [Johnston et
+  al](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1008164).
+  Download from [UoG](https://researchdata.gla.ac.uk/822/)
+- chronotype: long sleep duration. [Dashti et
+  al](https://www.ncbi.nlm.nih.gov/pubmed/30846698). Download from
+  [SDKP](https://sleep.hugeamp.org/downloads.html).
 
 # Setup
 
@@ -237,7 +236,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -266,7 +265,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a Multiple p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -283,7 +282,7 @@ all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'p
 ```
 
     ## Rows: 26 Columns: 9
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -367,7 +366,7 @@ fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRU
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.324 
+    ##    2.51 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714747 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.17257288534608 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model, :
@@ -409,7 +408,7 @@ fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=model, CFIcalc=TRU
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.662 
+    ##   1.968 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714747 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.17257288534608 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model, :
@@ -471,7 +470,7 @@ ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  28.043 
+    ##  45.685 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0576161416152574 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.46841854745071 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
@@ -495,7 +494,7 @@ ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  25.944 
+    ##  40.047 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0576161416152574 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.46841854745071 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
@@ -519,7 +518,7 @@ ext_symp.fit_list <- lapply(ext_symp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   30.34 
+    ##  44.981 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0576161416152574 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.46841854745071 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
@@ -578,7 +577,7 @@ ext_samp.fit_list <- lapply(ext_samp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   77.88 
+    ## 102.723 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0576161416152574 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.46841854745071 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
@@ -602,7 +601,7 @@ ext_samp.fit_list <- lapply(ext_samp.model_list, function(model) usermodel(sympt
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  67.883 
+    ##  88.002 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0576161416152574 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.46841854745071 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model = model): A
@@ -666,7 +665,7 @@ ext_mult_symp.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  33.915 
+    ##  46.429 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0576161416152574 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.46841854745071 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -721,7 +720,7 @@ ext_samp_mult.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=ext_
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##  32.788 
+    ##  48.673 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0576161416152574 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.46841854745071 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -756,8 +755,8 @@ ext_table <-
 bind_rows(ext_single, ext_multiple) %>%
 transmute(Phenotype,
           Factor=factor(Factor,
-                        levels=c('DEP', 'APP', 'GATE', 'CLIN', 'COMM'),
-                        labels=c("Depression", "Appetite/Weight", "Gating", "Community", "Clinical")),
+                    levels=c('GATE', 'DEP', 'APP', 'CLIN', 'COMM'),
+                        labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Community", "Clinical")),
           Model=Beta, STD_Genotype, STD_Genotype_SE, p_value) %>%
 mutate(fdr=p.adjust(p_value, 'BY')) |>
 arrange(Phenotype, desc(Factor), Model)
@@ -770,249 +769,249 @@ ext_table
     ## 2      AlcDep        Clinical   Single  0.532780777 0.0695890033530825
     ## 3      AlcDep       Community Multiple  0.445816163   0.35250871390173
     ## 4      AlcDep       Community   Single  0.537703868  0.077892636963081
-    ## 5      AlcDep          Gating Multiple  0.083675864  0.112380334461399
-    ## 6      AlcDep          Gating   Single  0.627948915  0.108105533328542
-    ## 7      AlcDep Appetite/Weight Multiple  0.109685864  0.120188626807943
-    ## 8      AlcDep Appetite/Weight   Single  0.565247937  0.075903641945665
-    ## 9      AlcDep      Depression Multiple  0.438540157  0.120028276636872
-    ## 10     AlcDep      Depression   Single  0.533448116 0.0697136062054994
+    ## 5      AlcDep Appetite/Weight Multiple  0.109685864  0.120188626807943
+    ## 6      AlcDep Appetite/Weight   Single  0.565247937  0.075903641945665
+    ## 7      AlcDep    Veg/Cog/Mood Multiple  0.438540157  0.120028276636872
+    ## 8      AlcDep    Veg/Cog/Mood   Single  0.533448116 0.0697136062054994
+    ## 9      AlcDep          Gating Multiple  0.083675864  0.112380334461399
+    ## 10     AlcDep          Gating   Single  0.627948915  0.108105533328542
     ## 11    Anxiety        Clinical Multiple  1.050085203   0.26607407922922
     ## 12    Anxiety        Clinical   Single  0.751876755 0.0465292301764595
     ## 13    Anxiety       Community Multiple -0.434142077  0.303266811577734
     ## 14    Anxiety       Community   Single  0.758241737 0.0683543546251365
-    ## 15    Anxiety          Gating Multiple  0.411356507 0.0753474339204204
-    ## 16    Anxiety          Gating   Single  1.046285229  0.108738985221118
-    ## 17    Anxiety Appetite/Weight Multiple  0.009717746 0.0732045283088427
-    ## 18    Anxiety Appetite/Weight   Single  0.795905437 0.0574613137032865
-    ## 19    Anxiety      Depression Multiple  0.578270045  0.081659736425248
-    ## 20    Anxiety      Depression   Single  0.754101956 0.0467032496502194
+    ## 15    Anxiety Appetite/Weight Multiple  0.009717746 0.0732045283088427
+    ## 16    Anxiety Appetite/Weight   Single  0.795905437 0.0574613137032865
+    ## 17    Anxiety    Veg/Cog/Mood Multiple  0.578270045  0.081659736425248
+    ## 18    Anxiety    Veg/Cog/Mood   Single  0.754101956 0.0467032496502194
+    ## 19    Anxiety          Gating Multiple  0.411356507 0.0753474339204204
+    ## 20    Anxiety          Gating   Single  1.046285229  0.108738985221118
     ## 21        BIP        Clinical Multiple  0.699035302  0.214770269408549
     ## 22        BIP        Clinical   Single  0.481923986 0.0373689676683766
     ## 23        BIP       Community Multiple -0.318027549  0.250184429867306
     ## 24        BIP       Community   Single  0.486075187 0.0467197782931644
-    ## 25        BIP          Gating Multiple  0.228519473 0.0634680013627106
-    ## 26        BIP          Gating   Single  0.662955934 0.0711418794992003
-    ## 27        BIP Appetite/Weight Multiple -0.178431593 0.0694551284584618
-    ## 28        BIP Appetite/Weight   Single  0.509333733 0.0440438620781618
-    ## 29        BIP      Depression Multiple  0.505207383 0.0686306967877668
-    ## 30        BIP      Depression   Single  0.483815805 0.0375477179197763
+    ## 25        BIP Appetite/Weight Multiple -0.178431593 0.0694551284584618
+    ## 26        BIP Appetite/Weight   Single  0.509333733 0.0440438620781618
+    ## 27        BIP    Veg/Cog/Mood Multiple  0.505207383 0.0686306967877668
+    ## 28        BIP    Veg/Cog/Mood   Single  0.483815805 0.0375477179197763
+    ## 29        BIP          Gating Multiple  0.228519473 0.0634680013627106
+    ## 30        BIP          Gating   Single  0.662955934 0.0711418794992003
     ## 31        BMI        Clinical Multiple -0.243654945  0.322632558905034
     ## 32        BMI        Clinical   Single  0.223891333 0.0271838348787043
     ## 33        BMI       Community Multiple  0.688981292  0.345726695424247
     ## 34        BMI       Community   Single  0.225821094 0.0296103206045522
-    ## 35        BMI          Gating Multiple -0.162612078 0.0498740124573413
-    ## 36        BMI          Gating   Single  0.109909716 0.0360284399614011
-    ## 37        BMI Appetite/Weight Multiple  0.907036576  0.112105787746715
-    ## 38        BMI Appetite/Weight   Single  0.240811039 0.0301763486246527
-    ## 39        BMI      Depression Multiple -0.230550899  0.108273490883442
-    ## 40        BMI      Depression   Single  0.223195791  0.027216658834216
+    ## 35        BMI Appetite/Weight Multiple  0.907036576  0.112105787746715
+    ## 36        BMI Appetite/Weight   Single  0.240811039 0.0301763486246527
+    ## 37        BMI    Veg/Cog/Mood Multiple -0.230550899  0.108273490883442
+    ## 38        BMI    Veg/Cog/Mood   Single  0.223195791  0.027216658834216
+    ## 39        BMI          Gating Multiple -0.162612078 0.0498740124573413
+    ## 40        BMI          Gating   Single  0.109909716 0.0360284399614011
     ## 41         EA        Clinical Multiple  0.361148501  0.331884952542997
     ## 42         EA        Clinical   Single -0.117012064 0.0284219882015643
     ## 43         EA       Community Multiple -0.697661177  0.352553481384944
     ## 44         EA       Community   Single -0.118287588 0.0290473447473141
-    ## 45         EA          Gating Multiple  0.292522226 0.0525743076019581
-    ## 46         EA          Gating   Single  0.030112181 0.0349152221396346
-    ## 47         EA Appetite/Weight Multiple -0.397963661 0.0601516237695752
-    ## 48         EA Appetite/Weight   Single -0.126176815 0.0305502505774698
-    ## 49         EA      Depression Multiple -0.017503605 0.0611455287343463
-    ## 50         EA      Depression   Single -0.115755210 0.0284744747904233
+    ## 45         EA Appetite/Weight Multiple -0.397963661 0.0601516237695752
+    ## 46         EA Appetite/Weight   Single -0.126176815 0.0305502505774698
+    ## 47         EA    Veg/Cog/Mood Multiple -0.017503605 0.0611455287343463
+    ## 48         EA    Veg/Cog/Mood   Single -0.115755210 0.0284744747904233
+    ## 49         EA          Gating Multiple  0.292522226 0.0525743076019581
+    ## 50         EA          Gating   Single  0.030112181 0.0349152221396346
     ## 51         MD        Clinical Multiple  1.081442666  0.207773598881208
     ## 52         MD        Clinical   Single  0.887200461 0.0346128597135449
     ## 53         MD       Community Multiple -0.280626133  0.242603533332147
     ## 54         MD       Community   Single  0.894657034  0.062649604320161
-    ## 55         MD          Gating Multiple  0.344018937 0.0640870067647852
-    ## 56         MD          Gating   Single  1.166485513  0.105562729815299
-    ## 57         MD Appetite/Weight Multiple -0.010548128 0.0576909794864581
-    ## 58         MD Appetite/Weight   Single  0.939281112 0.0547299322786408
-    ## 59         MD      Depression Multiple  0.766001387 0.0578233502165252
-    ## 60         MD      Depression   Single  0.890259762 0.0347314646592678
+    ## 55         MD Appetite/Weight Multiple -0.010548128 0.0576909794864581
+    ## 56         MD Appetite/Weight   Single  0.939281112 0.0547299322786408
+    ## 57         MD    Veg/Cog/Mood Multiple  0.766001387 0.0578233502165252
+    ## 58         MD    Veg/Cog/Mood   Single  0.890259762 0.0347314646592678
+    ## 59         MD          Gating Multiple  0.344018937 0.0640870067647852
+    ## 60         MD          Gating   Single  1.166485513  0.105562729815299
     ## 61        MDD        Clinical Multiple  1.036662792  0.304002251989274
     ## 62        MDD        Clinical   Single  0.807311267 0.0705441889706728
     ## 63        MDD       Community Multiple -0.332671886  0.373130185366155
     ## 64        MDD       Community   Single  0.814119235 0.0840410881768543
-    ## 65        MDD          Gating Multiple  0.366751106    0.1123341502703
-    ## 66        MDD          Gating   Single  1.089713958  0.129227721797031
-    ## 67        MDD Appetite/Weight Multiple -0.051964459  0.124626780966716
-    ## 68        MDD Appetite/Weight   Single  0.854805178 0.0828666825706371
-    ## 69        MDD      Depression Multiple  0.689603909  0.118601081157099
-    ## 70        MDD      Depression   Single  0.809984427  0.070742129966017
+    ## 65        MDD Appetite/Weight Multiple -0.051964459  0.124626780966716
+    ## 66        MDD Appetite/Weight   Single  0.854805178 0.0828666825706371
+    ## 67        MDD    Veg/Cog/Mood Multiple  0.689603909  0.118601081157099
+    ## 68        MDD    Veg/Cog/Mood   Single  0.809984427  0.070742129966017
+    ## 69        MDD          Gating Multiple  0.366751106    0.1123341502703
+    ## 70        MDD          Gating   Single  1.089713958  0.129227721797031
     ## 71        Neu        Clinical Multiple  0.747666501  0.147014030184277
     ## 72        Neu        Clinical   Single  0.681081631 0.0420521783500257
     ## 73        Neu       Community Multiple -0.097115834  0.183964205576084
     ## 74        Neu       Community   Single  0.686908955 0.0577424076909882
-    ## 75        Neu          Gating Multiple  0.126522422  0.070416051166998
-    ## 76        Neu          Gating   Single  0.832319129 0.0821243821043781
-    ## 77        Neu Appetite/Weight Multiple -0.090458605 0.0735870644599524
-    ## 78        Neu Appetite/Weight   Single  0.720739634 0.0542476095995377
-    ## 79        Neu      Depression Multiple  0.700715195 0.0724797147852156
-    ## 80        Neu      Depression   Single  0.683537259 0.0422441574366223
+    ## 75        Neu Appetite/Weight Multiple -0.090458605 0.0735870644599524
+    ## 76        Neu Appetite/Weight   Single  0.720739634 0.0542476095995377
+    ## 77        Neu    Veg/Cog/Mood Multiple  0.700715195 0.0724797147852156
+    ## 78        Neu    Veg/Cog/Mood   Single  0.683537259 0.0422441574366223
+    ## 79        Neu          Gating Multiple  0.126522422  0.070416051166998
+    ## 80        Neu          Gating   Single  0.832319129 0.0821243821043781
     ## 81       PTSD        Clinical Multiple  0.932075649  0.236985849099579
     ## 82       PTSD        Clinical   Single  0.817782344 0.0687835319851177
     ## 83       PTSD       Community Multiple -0.167400848  0.305210368971745
     ## 84       PTSD       Community   Single  0.824899216 0.0866396039978251
-    ## 85       PTSD          Gating Multiple  0.244258549   0.11289978288913
-    ## 86       PTSD          Gating   Single  1.024713470  0.126944340784626
-    ## 87       PTSD Appetite/Weight Multiple  0.086899694  0.108833874622065
-    ## 88       PTSD Appetite/Weight   Single  0.866766379 0.0814609323857996
-    ## 89       PTSD      Depression Multiple  0.671770728  0.108654711098117
-    ## 90       PTSD      Depression   Single  0.820255391 0.0689374769876117
+    ## 85       PTSD Appetite/Weight Multiple  0.086899694  0.108833874622065
+    ## 86       PTSD Appetite/Weight   Single  0.866766379 0.0814609323857996
+    ## 87       PTSD    Veg/Cog/Mood Multiple  0.671770728  0.108654711098117
+    ## 88       PTSD    Veg/Cog/Mood   Single  0.820255391 0.0689374769876117
+    ## 89       PTSD          Gating Multiple  0.244258549   0.11289978288913
+    ## 90       PTSD          Gating   Single  1.024713470  0.126944340784626
     ## 91       Pain        Clinical Multiple  0.458139921  0.125009997167626
     ## 92       Pain        Clinical   Single  0.574660244 0.0376060594251327
     ## 93       Pain       Community Multiple  0.170613953  0.157107948952011
     ## 94       Pain       Community   Single  0.579613328 0.0488242339765231
-    ## 95       Pain          Gating Multiple  0.066845781 0.0624362719676788
-    ## 96       Pain          Gating   Single  0.642966541 0.0716527853756348
-    ## 97       Pain Appetite/Weight Multiple  0.320415745 0.0653189319292486
-    ## 98       Pain Appetite/Weight   Single  0.610435914 0.0460975785624394
-    ## 99       Pain      Depression Multiple  0.358819803   0.06833668509286
-    ## 100      Pain      Depression   Single  0.575635990  0.037703284625588
+    ## 95       Pain Appetite/Weight Multiple  0.320415745 0.0653189319292486
+    ## 96       Pain Appetite/Weight   Single  0.610435914 0.0460975785624394
+    ## 97       Pain    Veg/Cog/Mood Multiple  0.358819803   0.06833668509286
+    ## 98       Pain    Veg/Cog/Mood   Single  0.575635990  0.037703284625588
+    ## 99       Pain          Gating Multiple  0.066845781 0.0624362719676788
+    ## 100      Pain          Gating   Single  0.642966541 0.0716527853756348
     ## 101     Sleep        Clinical Multiple  0.186915486  0.146390761375732
     ## 102     Sleep        Clinical   Single  0.286743969   0.04346225802776
     ## 103     Sleep       Community Multiple  0.144806048  0.189383378256927
     ## 104     Sleep       Community   Single  0.289275077 0.0476246488813093
-    ## 105     Sleep          Gating Multiple -0.021327371 0.0708736043112238
-    ## 106     Sleep          Gating   Single  0.310162560 0.0626698026037064
-    ## 107     Sleep Appetite/Weight Multiple  0.073020416   0.07578984555623
-    ## 108     Sleep Appetite/Weight   Single  0.304248899 0.0466210669741548
-    ## 109     Sleep      Depression Multiple  0.259401956  0.075195355765794
-    ## 110     Sleep      Depression   Single  0.286946115 0.0435752155004726
+    ## 105     Sleep Appetite/Weight Multiple  0.073020416   0.07578984555623
+    ## 106     Sleep Appetite/Weight   Single  0.304248899 0.0466210669741548
+    ## 107     Sleep    Veg/Cog/Mood Multiple  0.259401956  0.075195355765794
+    ## 108     Sleep    Veg/Cog/Mood   Single  0.286946115 0.0435752155004726
+    ## 109     Sleep          Gating Multiple -0.021327371 0.0708736043112238
+    ## 110     Sleep          Gating   Single  0.310162560 0.0626698026037064
     ## 111   Smoking        Clinical Multiple -0.114287906   0.27300060991911
     ## 112   Smoking        Clinical   Single  0.259462065 0.0355402132237784
     ## 113   Smoking       Community Multiple  0.548188750   0.29396760579689
     ## 114   Smoking       Community   Single  0.261855177 0.0392616164545943
-    ## 115   Smoking          Gating Multiple  0.063663267 0.0498122419478732
-    ## 116   Smoking          Gating   Single  0.290646265  0.054422662044535
-    ## 117   Smoking Appetite/Weight Multiple  0.374552937 0.0736397000669569
-    ## 118   Smoking Appetite/Weight   Single  0.276771013 0.0382221256804699
-    ## 119   Smoking      Depression Multiple  0.006724170 0.0708370430374214
-    ## 120   Smoking      Depression   Single  0.259880783  0.035612615201055
+    ## 115   Smoking Appetite/Weight Multiple  0.374552937 0.0736397000669569
+    ## 116   Smoking Appetite/Weight   Single  0.276771013 0.0382221256804699
+    ## 117   Smoking    Veg/Cog/Mood Multiple  0.006724170 0.0708370430374214
+    ## 118   Smoking    Veg/Cog/Mood   Single  0.259880783  0.035612615201055
+    ## 119   Smoking          Gating Multiple  0.063663267 0.0498122419478732
+    ## 120   Smoking          Gating   Single  0.290646265  0.054422662044535
     ##           p_value           fdr
     ## 1    4.435700e-01  1.000000e+00
     ## 2    1.916577e-14  2.939956e-13
     ## 3    2.059672e-01  1.000000e+00
     ## 4    5.087131e-12  6.426385e-11
-    ## 5    4.565231e-01  1.000000e+00
-    ## 6    6.297325e-09  6.761902e-08
-    ## 7    3.614354e-01  1.000000e+00
-    ## 8    9.555742e-14  1.368094e-12
-    ## 9    2.585204e-04  2.135326e-03
-    ## 10   1.978976e-14  2.965078e-13
+    ## 5    3.614354e-01  1.000000e+00
+    ## 6    9.555742e-14  1.368094e-12
+    ## 7    2.585204e-04  2.135326e-03
+    ## 8    1.978976e-14  2.965078e-13
+    ## 9    4.565231e-01  1.000000e+00
+    ## 10   6.297325e-09  6.761902e-08
     ## 11   7.916366e-05  6.800308e-04
     ## 12   9.777466e-59  1.049878e-56
     ## 13   1.522570e-01  1.000000e+00
     ## 14   1.359520e-28  3.649542e-27
-    ## 15   4.775945e-08  4.962855e-07
-    ## 16   6.453068e-22  1.299213e-20
-    ## 17   8.943705e-01  1.000000e+00
-    ## 18   1.251836e-43  7.331938e-42
-    ## 19   1.425961e-12  1.837392e-11
-    ## 20   1.198551e-58  1.103119e-56
+    ## 15   8.943705e-01  1.000000e+00
+    ## 16   1.251836e-43  7.331938e-42
+    ## 17   1.425961e-12  1.837392e-11
+    ## 18   1.198551e-58  1.103119e-56
+    ## 19   4.775945e-08  4.962855e-07
+    ## 20   6.453068e-22  1.299213e-20
     ## 21   1.133728e-03  8.695481e-03
     ## 22   4.717979e-38  2.026417e-36
     ## 23   2.036536e-01  1.000000e+00
     ## 24   2.375892e-25  5.669267e-24
-    ## 25   3.175575e-04  2.589759e-03
-    ## 26   1.176218e-20  2.228810e-19
-    ## 27   1.019881e-02  7.640380e-02
-    ## 28   6.253918e-31  1.918655e-29
-    ## 29   1.821135e-13  2.550635e-12
-    ## 30   5.442590e-38  2.191541e-36
+    ## 25   1.019881e-02  7.640380e-02
+    ## 26   6.253918e-31  1.918655e-29
+    ## 27   1.821135e-13  2.550635e-12
+    ## 28   5.442590e-38  2.191541e-36
+    ## 29   3.175575e-04  2.589759e-03
+    ## 30   1.176218e-20  2.228810e-19
     ## 31   4.501236e-01  1.000000e+00
     ## 32   1.777806e-16  3.095614e-15
     ## 33   4.626305e-02  3.348947e-01
     ## 34   2.413337e-14  3.533697e-13
-    ## 35   1.112307e-03  8.633973e-03
-    ## 36   2.283694e-03  1.730944e-02
-    ## 37   5.914378e-16  9.770312e-15
-    ## 38   1.461880e-15  2.297163e-14
-    ## 39   3.322942e-02  2.432787e-01
-    ## 40   2.389638e-16  4.051469e-15
+    ## 35   5.914378e-16  9.770312e-15
+    ## 36   1.461880e-15  2.297163e-14
+    ## 37   3.322942e-02  2.432787e-01
+    ## 38   2.389638e-16  4.051469e-15
+    ## 39   1.112307e-03  8.633973e-03
+    ## 40   2.283694e-03  1.730944e-02
     ## 41   2.765009e-01  1.000000e+00
     ## 42   3.839045e-05  3.435221e-04
     ## 43   4.781449e-02  3.422796e-01
     ## 44   4.656551e-05  4.109656e-04
-    ## 45   2.637035e-08  2.785159e-07
-    ## 46   3.884487e-01  1.000000e+00
-    ## 47   3.688245e-11  4.483404e-10
-    ## 48   3.625477e-05  3.289810e-04
-    ## 49   7.746128e-01  1.000000e+00
-    ## 50   4.798684e-05  4.177865e-04
+    ## 45   3.688245e-11  4.483404e-10
+    ## 46   3.625477e-05  3.289810e-04
+    ## 47   7.746128e-01  1.000000e+00
+    ## 48   4.798684e-05  4.177865e-04
+    ## 49   2.637035e-08  2.785159e-07
+    ## 50   3.884487e-01  1.000000e+00
     ## 51   1.936363e-07  1.890196e-06
     ## 52  6.695808e-145 2.156935e-142
     ## 53   2.473732e-01  1.000000e+00
     ## 54   2.901357e-46  1.869240e-44
-    ## 55   7.962081e-08  8.142355e-07
-    ## 56   2.185914e-28  5.633223e-27
-    ## 57   8.549613e-01  1.000000e+00
-    ## 58   5.101195e-66  1.095506e-63
-    ## 59   4.672791e-40  2.301849e-38
-    ## 60  6.599966e-145 2.156935e-142
+    ## 55   8.549613e-01  1.000000e+00
+    ## 56   5.101195e-66  1.095506e-63
+    ## 57   4.672791e-40  2.301849e-38
+    ## 58  6.599966e-145 2.156935e-142
+    ## 59   7.962081e-08  8.142355e-07
+    ## 60   2.185914e-28  5.633223e-27
     ## 61   6.489676e-04  5.161810e-03
     ## 62   2.518437e-30  7.054518e-29
     ## 63   3.726225e-01  1.000000e+00
     ## 64   3.419466e-22  7.343465e-21
-    ## 65   1.095350e-03  8.606034e-03
-    ## 66   3.382462e-17  6.053331e-16
-    ## 67   6.767269e-01  1.000000e+00
-    ## 68   6.001637e-25  1.380943e-23
-    ## 69   6.080691e-09  6.639952e-08
-    ## 70   2.356658e-30  6.901410e-29
+    ## 65   6.767269e-01  1.000000e+00
+    ## 66   6.001637e-25  1.380943e-23
+    ## 67   6.080691e-09  6.639952e-08
+    ## 68   2.356658e-30  6.901410e-29
+    ## 69   1.095350e-03  8.606034e-03
+    ## 70   3.382462e-17  6.053331e-16
     ## 71   3.656920e-07  3.464739e-06
     ## 72   5.372368e-59  8.653060e-57
     ## 73   5.975764e-01  1.000000e+00
     ## 74   1.240056e-32  4.438465e-31
-    ## 75   7.237112e-02  5.068057e-01
-    ## 76   3.866367e-24  8.589523e-23
-    ## 77   2.189784e-01  1.000000e+00
-    ## 78   2.786703e-40  1.496144e-38
-    ## 79   4.130463e-22  8.584224e-21
-    ## 80   6.907804e-59  8.900901e-57
+    ## 75   2.189784e-01  1.000000e+00
+    ## 76   2.786703e-40  1.496144e-38
+    ## 77   4.130463e-22  8.584224e-21
+    ## 78   6.907804e-59  8.900901e-57
+    ## 79   7.237112e-02  5.068057e-01
+    ## 80   3.866367e-24  8.589523e-23
     ## 81   8.379575e-05  7.103500e-04
     ## 82   1.346515e-32  4.565851e-31
     ## 83   5.833732e-01  1.000000e+00
     ## 84   1.714803e-21  3.347837e-20
-    ## 85   3.050326e-02  2.258869e-01
-    ## 86   6.904897e-16  1.112145e-14
-    ## 87   4.245872e-01  1.000000e+00
-    ## 88   1.935541e-26  4.796153e-25
-    ## 89   6.302735e-10  7.123906e-09
-    ## 90   1.204448e-32  4.438465e-31
+    ## 85   4.245872e-01  1.000000e+00
+    ## 86   1.935541e-26  4.796153e-25
+    ## 87   6.302735e-10  7.123906e-09
+    ## 88   1.204448e-32  4.438465e-31
+    ## 89   3.050326e-02  2.258869e-01
+    ## 90   6.904897e-16  1.112145e-14
     ## 91   2.472165e-04  2.068477e-03
     ## 92   1.022688e-52  8.236016e-51
     ## 93   2.774802e-01  1.000000e+00
     ## 94   1.665872e-32  5.366308e-31
-    ## 95   2.843421e-01  1.000000e+00
-    ## 96   2.874590e-19  5.291415e-18
-    ## 97   9.321533e-07  8.579328e-06
-    ## 98   5.001967e-40  2.301849e-38
-    ## 99   1.513668e-07  1.500311e-06
-    ## 100  1.258586e-52  9.009580e-51
+    ## 95   9.321533e-07  8.579328e-06
+    ## 96   5.001967e-40  2.301849e-38
+    ## 97   1.513668e-07  1.500311e-06
+    ## 98   1.258586e-52  9.009580e-51
+    ## 99   2.843421e-01  1.000000e+00
+    ## 100  2.874590e-19  5.291415e-18
     ## 101  2.016219e-01  1.000000e+00
     ## 102  4.180284e-11  4.987421e-10
     ## 103  4.444912e-01  1.000000e+00
     ## 104  1.247203e-09  1.385393e-08
-    ## 105  7.634746e-01  1.000000e+00
-    ## 106  7.453127e-07  6.959106e-06
-    ## 107  3.353113e-01  1.000000e+00
-    ## 108  6.755294e-11  7.771775e-10
-    ## 109  5.611157e-04  4.518834e-03
-    ## 110  4.546782e-11  5.326052e-10
+    ## 105  3.353113e-01  1.000000e+00
+    ## 106  6.755294e-11  7.771775e-10
+    ## 107  5.611157e-04  4.518834e-03
+    ## 108  4.546782e-11  5.326052e-10
+    ## 109  7.634746e-01  1.000000e+00
+    ## 110  7.453127e-07  6.959106e-06
     ## 111  6.755078e-01  1.000000e+00
     ## 112  2.866510e-13  3.929340e-12
     ## 113  6.219498e-02  4.403296e-01
     ## 114  2.566923e-11  3.180340e-10
-    ## 115  2.012309e-01  1.000000e+00
-    ## 116  9.266731e-08  9.328473e-07
-    ## 117  3.650395e-07  3.464739e-06
-    ## 118  4.449888e-13  5.850823e-12
-    ## 119  9.243244e-01  1.000000e+00
-    ## 120  2.932954e-13  3.936660e-12
+    ## 115  3.650395e-07  3.464739e-06
+    ## 116  4.449888e-13  5.850823e-12
+    ## 117  9.243244e-01  1.000000e+00
+    ## 118  2.932954e-13  3.936660e-12
+    ## 119  2.012309e-01  1.000000e+00
+    ## 120  9.266731e-08  9.328473e-07
 
 ``` r
 ggplot(bind_rows(ext_multiple, ext_single),
        aes(x=factor(Factor,
-                    levels=c('DEP', 'APP', 'GATE', 'CLIN', 'COMM'),
-                       labels=c("Depression", "Appetite/Weight", "Gating", "Community", "Clinical")),
+                    levels=c('GATE','DEP', 'APP', 'CLIN', 'COMM'),
+                       labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Community", "Clinical")),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Single', 'Multiple')),
            shape=factor(Beta, levels=c('Single', 'Multiple')),
@@ -1047,13 +1046,11 @@ labs(color  = "Regression: ", shape = "Regression: ")
     ## `position_dodge()` requires non-overlapping x intervals
     ## `position_dodge()` requires non-overlapping x intervals
 
-![](mdd-symptom-gsem-ext_files/figure-markdown_github/ex_plot-1.png)
+![](mdd-symptom-gsem-ext_files/figure-gfm/ex_plot-1.png)<!-- -->
 
 ``` r
-ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf")
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 10, height = 7, units = "in")
 ```
-
-    ## Saving 10 x 6 in image
 
     ## Warning: `position_dodge()` requires non-overlapping x intervals
     ## `position_dodge()` requires non-overlapping x intervals
@@ -1083,9 +1080,9 @@ filter(any(sign(STD_Genotype) == 1) & any(sign(STD_Genotype) == -1))
     ##   <chr>     <fct>           <chr>         <dbl> <chr>              <dbl>   <dbl>
     ## 1 EA        Clinical        Single      -0.117  0.0284219882015… 3.84e-5 3.44e-4
     ## 2 EA        Community       Single      -0.118  0.0290473447473… 4.66e-5 4.11e-4
-    ## 3 EA        Gating          Single       0.0301 0.0349152221396… 3.88e-1 1   e+0
-    ## 4 EA        Appetite/Weight Single      -0.126  0.0305502505774… 3.63e-5 3.29e-4
-    ## 5 EA        Depression      Single      -0.116  0.0284744747904… 4.80e-5 4.18e-4
+    ## 3 EA        Appetite/Weight Single      -0.126  0.0305502505774… 3.63e-5 3.29e-4
+    ## 4 EA        Veg/Cog/Mood    Single      -0.116  0.0284744747904… 4.80e-5 4.18e-4
+    ## 5 EA        Gating          Single       0.0301 0.0349152221396… 3.88e-1 1   e+0
 
 Specific relationship
 
@@ -1121,29 +1118,15 @@ filter(fdr <= 0.05) |>
 arrange(Factor)
 ```
 
-    ## # A tibble: 19 × 7
-    ##    Phenotype Factor          Model    STD_Genotype STD_Genot…¹  p_value      fdr
-    ##    <chr>     <fct>           <chr>           <dbl> <chr>          <dbl>    <dbl>
-    ##  1 AlcDep    Depression      Multiple        0.439 0.12002827… 2.59e- 4 2.14e- 3
-    ##  2 Anxiety   Depression      Multiple        0.578 0.08165973… 1.43e-12 1.84e-11
-    ##  3 BIP       Depression      Multiple        0.505 0.06863069… 1.82e-13 2.55e-12
-    ##  4 MD        Depression      Multiple        0.766 0.05782335… 4.67e-40 2.30e-38
-    ##  5 MDD       Depression      Multiple        0.690 0.11860108… 6.08e- 9 6.64e- 8
-    ##  6 Neu       Depression      Multiple        0.701 0.07247971… 4.13e-22 8.58e-21
-    ##  7 PTSD      Depression      Multiple        0.672 0.10865471… 6.30e-10 7.12e- 9
-    ##  8 Pain      Depression      Multiple        0.359 0.06833668… 1.51e- 7 1.50e- 6
-    ##  9 Sleep     Depression      Multiple        0.259 0.07519535… 5.61e- 4 4.52e- 3
-    ## 10 BMI       Appetite/Weight Multiple        0.907 0.11210578… 5.91e-16 9.77e-15
-    ## 11 EA        Appetite/Weight Multiple       -0.398 0.06015162… 3.69e-11 4.48e-10
-    ## 12 Pain      Appetite/Weight Multiple        0.320 0.06531893… 9.32e- 7 8.58e- 6
-    ## 13 Smoking   Appetite/Weight Multiple        0.375 0.07363970… 3.65e- 7 3.46e- 6
-    ## 14 Anxiety   Gating          Multiple        0.411 0.07534743… 4.78e- 8 4.96e- 7
-    ## 15 BIP       Gating          Multiple        0.229 0.06346800… 3.18e- 4 2.59e- 3
-    ## 16 BMI       Gating          Multiple       -0.163 0.04987401… 1.11e- 3 8.63e- 3
-    ## 17 EA        Gating          Multiple        0.293 0.05257430… 2.64e- 8 2.79e- 7
-    ## 18 MD        Gating          Multiple        0.344 0.06408700… 7.96e- 8 8.14e- 7
-    ## 19 MDD       Gating          Multiple        0.367 0.11233415… 1.10e- 3 8.61e- 3
-    ## # … with abbreviated variable name ¹​STD_Genotype_SE
+    ## # A tibble: 6 × 7
+    ##   Phenotype Factor          Model   STD_Genotype STD_Genotype_SE p_value     fdr
+    ##   <chr>     <fct>           <chr>          <dbl> <chr>             <dbl>   <dbl>
+    ## 1 Anxiety   Gating          Multip…        0.411 0.075347433920… 4.78e-8 4.96e-7
+    ## 2 BIP       Gating          Multip…        0.229 0.063468001362… 3.18e-4 2.59e-3
+    ## 3 MD        Gating          Multip…        0.344 0.064087006764… 7.96e-8 8.14e-7
+    ## 4 MDD       Gating          Multip…        0.367 0.1123341502703 1.10e-3 8.61e-3
+    ## 5 Pain      Appetite/Weight Multip…        0.320 0.065318931929… 9.32e-7 8.58e-6
+    ## 6 Smoking   Appetite/Weight Multip…        0.375 0.073639700066… 3.65e-7 3.46e-6
 
 Shared relationships
 
@@ -1178,10 +1161,14 @@ group_by(Phenotype) |>
 filter(all(fdr <= 0.05))
 ```
 
-    ## # A tibble: 0 × 7
-    ## # Groups:   Phenotype [0]
-    ## # … with 7 variables: Phenotype <chr>, Factor <fct>, Model <chr>,
-    ## #   STD_Genotype <dbl>, STD_Genotype_SE <chr>, p_value <dbl>, fdr <dbl>
+    ## # A tibble: 4 × 7
+    ## # Groups:   Phenotype [2]
+    ##   Phenotype Factor          Model STD_Genotype STD_Genotype_SE  p_value      fdr
+    ##   <chr>     <fct>           <chr>        <dbl> <chr>              <dbl>    <dbl>
+    ## 1 BMI       Appetite/Weight Mult…        0.907 0.112105787746… 5.91e-16 9.77e-15
+    ## 2 BMI       Gating          Mult…       -0.163 0.049874012457… 1.11e- 3 8.63e- 3
+    ## 3 EA        Appetite/Weight Mult…       -0.398 0.060151623769… 3.69e-11 4.48e-10
+    ## 4 EA        Gating          Mult…        0.293 0.052574307601… 2.64e- 8 2.79e- 7
 
 Test for attenuation of correlations
 
