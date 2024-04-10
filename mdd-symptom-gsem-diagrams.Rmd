@@ -2,7 +2,7 @@
 title: GenomicSEM of MDD symptoms diagrams
 author: Mark Adams
 output:
-  html_document
+  - html_document
 ---
 
 ```{r library}
@@ -15,7 +15,7 @@ library(DiagrammeR)
 Model coefficients
 
 ```{r coefs}
-model_coefs <- read_tsv("mdd-symptom-gsem_files/model_coefs.txt") |>
+model_coefs <- read_tsv("mdd-symptom-gsem-model_files/model_coefs.txt") |>
   mutate(STD_Genotype = if_else(abs(STD_Genotype) > 1, true = sign(STD_Genotype), false = STD_Genotype))
 ```
 
@@ -34,7 +34,7 @@ Make separate entries for symptoms and symptom residuals
 ```{r}
 model_coefs_symptom_residuals <- model_coefs_symptoms |>
   mutate(lhs = str_glue("u[{lhs}]"), op = "=~",
-         STD_Genotype = 1, STD_Genotype_SE = 0)
+         STD_Genotype = 1, STD_Genotype_SE = NA)
   
 model_coefs_residuals <- model_coefs_symptoms |>
   mutate(lhs = str_glue("u[{lhs}]"),
@@ -43,7 +43,10 @@ model_coefs_residuals <- model_coefs_symptoms |>
 
 Merge back together, and split into a list
 ```{r}
-model_coefs_resid <- bind_rows(model_coefs_factors, model_coefs_symptom_residuals, model_coefs_residuals)
+model_coefs_resid <- bind_rows(model_coefs_factors, model_coefs_symptom_residuals, model_coefs_residuals) |>
+  mutate(estimate = if_else(is.na(STD_Genotype_SE),
+                            true = str_glue("{round(STD_Genotype, 2)}"),
+                            false = str_glue("{round(STD_Genotype, 2)} ({round(STD_Genotype_SE, 2)})")))
 
 model_coefs_list <- plyr::dlply(model_coefs_resid, .variables = "model", .fun = I)
 ```
@@ -70,7 +73,7 @@ cfa_graph <- function(results, ...) {
                             fontcolor='black'),
     edges_df=create_edge_df(from=node_idx[results_sort$lhs],
                             to=node_idx[results_sort$rhs],
-                            label=round(results_sort$STD_Genotype, 2),
+                            label=results_sort$estimate,
                             penwidth=0.3+abs(2*results_sort$STD_Genotype),
                             dir=edge_dir[results_sort$op]
                             ),
@@ -127,13 +130,13 @@ cfa_viz <- function(results) {
 for(model_letter in names(model_coefs_list)) {
   model.gv <- cfa_viz(model_coefs_list[[model_letter]])
   cat(str_replace_all(model.gv, "'", '"'),
-      file=str_glue('mdd-symptom-gsem-diagrams_files/{model_letter}.gv'))
+      file=str_glue('dots/{model_letter}.gv'))
 }
 
 ```
 
 ```{sh dot_images}
-for DOT in mdd-symptom-gsem-diagrams_files/*.gv; do
+for DOT in dots/*.gv; do
   dot -Tpdf -o$(dirname $DOT)/$(basename $DOT .gv).pdf $DOT
   dot -Tpng -Gdpi=300 -o$(dirname $DOT)/$(basename $DOT .gv).png $DOT
 done
