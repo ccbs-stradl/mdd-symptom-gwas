@@ -3,7 +3,7 @@
 nextflow.enable.dsl = 2
 
 params.sumstats = "aligned/*.gz"
-params.datasets = "*.meta"
+params.datasets = "datasets/*.meta"
 
 workflow {
 
@@ -17,24 +17,62 @@ workflow {
         .fromPath(params.datasets)
         .map { it -> [it, it.readLines()]}
         .transpose()
-        .map { it -> [it[1], it[0]]}
-
-    // unzip daner files so they can be streamed
-    // harmonise allele frequency column names
-    SUMSTATS_CH = SUMSTATS(DANER_CH)
+        .map { it -> [it[1], it[0]] }
     
-    // match up datasets with the sumstats files they specify
-    DATASETS_SUMSTATS_CH =
+    // List meta analyses that each dataset is specified for
+    DATASETS_META_CH =
     DATASETS_CH
-        .join(SUMSTATS_CH)
-        .map { it -> [it[1], it[2]]}
         .groupTuple()
-
-    META_CH = META(DATASETS_SUMSTATS_CH)
-        .view()
     
+    // Line up files listed in datasets with available daner files
+    // Keep files listed in datasets, marking those where the file is not found
+    DATASETS_DANERS_CH =
+    DATASETS_META_CH
+        .join(DANER_CH, remainder: true)
+        .filter { it[1] != null }
+    
+    
+    // Check whether any of the listed datasets do not have an associated daner file
+    DATASETS_DANERS_CHECK_CH =
+    DATASETS_DANERS_CH
+        .branch { missing: it[2] == null
+                 complete: true
+                }
+                
+    // Print missing daner files
+    DATASETS_DANERS_CHECK_CH
+        .missing
+        .transpose()
+        .subscribe { println "Meta-analysis ${it[1].baseName} missing input dataset ${it[0]}" }
+        
+    // Unique daner files that are in the datasets
+    DANER_SETS_CH =
+    DATASETS_DANERS_CHECK_CH
+        .complete
+        .map { it -> [it[0], it[2]] }
+    
+    // Unzip daner files so they can be streamed
+    // Harmonise allele frequency column names
+    SUMSTATS_CH = SUMSTATS(DANER_SETS_CH)
+    
+    // Match sumstat files back up with meta-analysis dataset lists
+    // Regroup sumstats into meta-analyses
+    DATASETS_SUMSTATS_CH =
+    DATASETS_DANERS_CHECK_CH
+        .complete
+        .map { it -> [it[0], it[1]] }
+        .join(SUMSTATS_CH)
+        .map { [it[2], it[1]] }
+        .transpose()
+        .map { [it[1], it[0]] }
+        .groupTuple()
+    
+    // Perform meta analysis and post process
+    META_CH = META(DATASETS_SUMSTATS_CH)
+    POST_CH = POST(META_CH)
 }
 
+// Prepare danerfiles for input to meta-analysis
 process SUMSTATS {
     tag "${dataset}"
 
@@ -73,26 +111,27 @@ process SUMSTATS {
     }
 
     sumstats <- daner_n |>
-        select(CHR, SNP, BP, A1, A2,
-               FRQ_A = starts_with("FRQ_A"), FRQ_U = starts_with("FRQ_U"),
+        select(CHR, POS = BP, ID = SNP, EA = A1, NEA = A2,
+               AFCAS = starts_with("FRQ_A"), AFCON = starts_with("FRQ_U"),
                INFO, OR, SE, NCAS, NCON)
 
     write_tsv(sumstats, "${daner.baseName}")
     """
 }
 
+// Perform meta analysis
 process META {
-    tag "${dataset.baseName}"
+    tag "${meta.baseName}"
 
     cpus = 4
     memory = 16.GB
     time = '30m'
 
     input:
-    tuple path(dataset), path(sumstats)
+    tuple path(meta), path(sumstats)
 
     output:
-    tuple val(dataset.baseName), path("${dataset.baseName}.tsv")
+    tuple val(meta.baseName), path("${meta.baseName}.tsv")
 
     script:
     """
@@ -121,13 +160,13 @@ process META {
             pl.col("*"),
             (pl.col("BETA") * pl.col("ivw")).alias("wBETA"),
             (pl.col("INFO") * pl.col("N")).alias("wINFO"),
-            (pl.col("FRQ_A") * pl.col("NCAS")).alias("wAFCAS"),
-            (pl.col("FRQ_U") * pl.col("NCON")).alias("wAFCON")
+            (pl.col("AFCAS") * pl.col("NCAS")).alias("wAFCAS"),
+            (pl.col("AFCON") * pl.col("NCON")).alias("wAFCON")
         )
-        .group_by("CHR", "BP", "SNP", "A1", "A2")
+        .group_by("CHR", "POS", "ID", "EA", "NEA")
         .agg(
             (pl.sum("wBETA") /  pl.sum("ivw")).exp().alias("OR"),
-            (1 / pl.sum("ivw")).sqrt().alias("SE"),
+            (1 / pl.sum("ivw")).sqrt().alias("LOG_OR_SE"),
             (pl.sum("wINFO") / pl.sum("N")).alias("INFO"),
             (pl.sum("wAFCAS") / pl.sum("NCAS")).alias("AFCAS"),
             (pl.sum("wAFCON") / pl.sum("NCON")).alias("AFCON"),
@@ -138,6 +177,61 @@ process META {
         .collect()
     )
 
-    meta.write_csv("${dataset.baseName}.tsv", separator = "\\t")
+    meta.write_csv("${meta.baseName}.tsv", separator = "\\t")
+    """
+}
+
+// Postprocess meta-analysis
+process POST {
+    tag "${meta}"
+    
+    publishDir "output", mode: "copy" 
+    
+    cpus = 1
+    memory = 16.GB
+    time = '30m'
+    
+    input:
+    tuple val(meta), path(sumstats)
+    
+    output:
+    tuple val(meta), path("${sumstats.baseName}.gz")
+    
+    script:
+    """ 
+    #!Rscript
+    
+    library(dplyr)
+    library(readr)
+    library(plyranges)
+    
+    sumstats <- read_tsv("${sumstats}")
+    
+    # filter based on 80% max(Neff)
+    max_neff <- sumstats |> summarize(neff = max(NEFF)) |> pull(neff)
+    
+    sumstats_neff <- sumstats |>
+        filter(NEFF >= 0.8 * max_neff)
+        
+    # remove duplicate positions
+    sumstats_gr <- sumstats_neff |>
+        transmute(seqnames = CHR, start = POS, width = 1, ID, index = seq_along(ID)) |>
+        as_granges()
+    
+    duplicate_positions <- 
+    join_overlap_self(sumstats_gr) |>
+        filter(index != index.overlap) |>
+        as_tibble()
+        
+    duplicate_snps <- c(
+        pull(duplicate_positions, ID),
+        pull(duplicate_positions, ID.overlap)    
+    )
+    
+    sumstats_post <- sumstats_neff |> 
+        filter(!ID %in% duplicate_snps) |>
+        mutate(P = pchisq(log(OR)^2 / LOG_OR_SE^2, df = 1, lower.tail = FALSE))
+        
+    write_tsv(sumstats_post, "${sumstats.baseName}.gz")
     """
 }
