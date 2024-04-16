@@ -111,7 +111,7 @@ sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 't
 
 ```
 
-Rename samples: AGDS/PGC is the **Clin**ical meta-analysis sample (`Clin`) and ALSPAC/UKB is the **Comm**unity meta-analysis sample (`Comm`); and rename symptoms numbers (`MDD1`, `MDD2`) to abbreviations (`Dep`, `Anh`). There are also extra measures of `MDD1` and `MDD2` from **UKB** Baseline data. 
+Rename samples: AGDS/GS/PGC is the Case-only **Clin**incal meta-analysis sample (`Clin`) and ALSPAC/EstBB/UKB is the **Comm**unity meta-analysis sample (`Comm`); and rename symptoms numbers (`MDD1`, `MDD2`) to abbreviations (`Dep`, `Anh`). There are also extra measures of `MDD1` and `MDD2` from **UKB** Baseline data. 
 
 ```{r sem_labels}
 
@@ -510,9 +510,9 @@ mel_aty_afc.fit$results[c(1,2,3,6,7,9)] %>%
 
 model_list=
 list("A"=list(name="Common", model=commonfactor.fit),
-     "B"=list(name="Clinical-Community", model=clin_comm.fit),
+     "B"=list(name="Case-Community", model=clin_comm.fit),
      "C"=list(name="Common-Gating", model=gate.fit),
-     "D"=list(name="Clinical-Community-Gating", model=measure.fit),
+     "D"=list(name="Case-Community-Gating", model=measure.fit),
      "E"=list(name="Psych-Somatic", model=psych_soma.fit),
      "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
      "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
@@ -587,9 +587,17 @@ Check that all symptoms have been included in each model
 sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
 ```
 
+Refine naming scheme for publication.
 ```{r model_coefs}
 
-model_coefs <- bind_rows(lapply(mod_list, function(m) m$model$results), .id='model')
+model_coefs <- as_tibble(bind_rows(lapply(mod_list, function(m) m$model$results), .id='model')) |>
+  mutate(lhs = case_when(str_detect(lhs, "Clin") ~ str_replace(lhs, "Clin", "Case"),
+                         lhs == "CLIN" ~ "CASE",
+                         .default = lhs),
+        rhs = case_when(str_detect(rhs, "Clin") ~ str_replace(rhs, "Clin", "Case"),
+                        rhs == "CLIN" ~ "CASE",
+                        .default = rhs))
+
 write_csv(model_coefs, "mdd-symptom-gsem-model_files/model_coefs.csv")
 
 ```
@@ -601,7 +609,7 @@ Heatmap of how often symptoms load on the same factor in symptoms models
 ```{r symptom_loadings_heatmap}
 
 symptom_model_connectivity <- model_coefs |>
-  filter(! lhs %in% c('MDD', 'CLIN', 'COMM', 'GATE'), model != "M") |>
+  filter(! lhs %in% c('MDD', 'CASE', 'COMM', 'GATE'), model != "M") |>
   transmute(factor=str_c(model, lhs, sep = "_"), rhs, value = 1) |>
   pivot_wider(names_from = factor, values_from = value, values_fill = 0)
 
@@ -617,16 +625,18 @@ Plot structure of symptom-focused models
 ```{r model_loadings}
 
 symptom_model_structure <- model_coefs |>
-  filter(op == "=~",
-         !lhs %in% c("MDD", "COMM", "CLIN", "GATE"),
-         model != "M") |>
-  mutate(cohort = case_when(str_detect(rhs, "Clin") ~ "Case-only",
+  filter(op == "=~", model != "M") |>
+  mutate(cohort = case_when(str_detect(rhs, "Case") ~ "Case-only",
                             str_detect(rhs, "Comm") ~ "Community",
                             str_detect(rhs, "Ukb") ~ "UKB Touchscreen"),
-         symptom = str_remove(rhs, "(Clin|Comm|Ukb)"),
+         symptom = str_remove(rhs, "(Case|Comm|Ukb)"),
          loading = if_else(abs(STD_Genotype) > 1, true = 1 * sign(STD_Genotype), false = STD_Genotype),
-         Model = str_c("Model: ", model),
+         Model = str_c("Model ", model, ":"),
          Factor = case_match(lhs,
+                            "MDD" ~ "MDD",
+                            "CASE" ~ "Case-only",
+                            "COMM" ~ "Community",
+                            "GATE" ~ "Gating",
                             "PSYCH" ~ "Psychological",
                             "SOMA" ~ "Somatic",
                             "VEG" ~ "Vegetative",
@@ -638,17 +648,33 @@ symptom_model_structure <- model_coefs |>
                             "APP" ~ "Appetite/Weight",
                             "MEL" ~ "Melancholic",
                             "ATY" ~ "Atypical",
-                            "AFC" ~ "Affective/Cognitive"))
+                            "AFC" ~ "Affective/Cognitive")) |>
+  mutate(Factor_levels = factor(Factor, levels =
+    c("Gating", "Affective/Cognitive", "Atypical", "Melancholic", 
+    "Appetite/Weight", "Cognitive/Mood", "Mood",
+    "Cognitive", "Neurovegetative", "Affective",
+    "Vegetative", "Somatic", "Psychological",
+    "Community", "Case-only", "MDD")))
          
-ggplot(symptom_model_structure, aes(x = symptom, y = Factor, colour = cohort, group = cohort, size = abs(loading))) +
+ggplot(symptom_model_structure, aes(x = symptom, y = Factor_levels, colour = cohort, group = cohort, size = abs(loading))) +
   geom_point(position = position_dodge(width = 0.4)) +
-  facet_grid(rows = vars(Model), scales = "free", space = "free") +
-  scale_x_discrete("Symptom", limits = c("Sui", "Dep", "Anh", "Guilt", "Conc", "MotoInc", "SleDec", "AppDec", "AppInc", "MotoDec", "Fatig", "SleInc")) +
-  scale_y_discrete() +
-  scale_size("|Loading|") +
+  facet_grid(rows = vars(Model), scales = "free", space = "free", switch = "y") +
+  scale_x_discrete("Symptom", limits = c("Sui", "Dep", "Anh", "Guilt", "Conc",
+                                         "MotoInc", "SleDec", "AppDec", "AppInc",
+                                         "MotoDec", "Fatig", "SleInc")) +
+  scale_y_discrete('') +
+  scale_size("|Loading|", breaks = c(0.1, 0.5, 1)) +
   scale_colour_discrete("Cohorts") +
-  theme(strip.text.y = element_text(angle = 0))
+  theme_minimal() +
+  theme(strip.placement = "outside",
+        strip.text.y.left = element_text(angle = 0),
+        legend.position = "top",
+        legend.spacing.x = unit(1, "pt"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = 'black', linewidth=0.2))
 
+ggsave("mdd-symptom-gsem-model_files/model_loadings.png", width=8, height=7, dpi=300)
+ggsave("mdd-symptom-gsem-model_files/model_loadings.pdf", width=8, height=7)
 ```
 
 #### Model Implied and residual genetic correlations
