@@ -63,14 +63,14 @@ R.version
     ## system         aarch64, darwin20           
     ## status                                     
     ## major          4                           
-    ## minor          2.2                         
-    ## year           2022                        
+    ## minor          3.2                         
+    ## year           2023                        
     ## month          10                          
     ## day            31                          
-    ## svn rev        83211                       
+    ## svn rev        85441                       
     ## language       R                           
-    ## version.string R version 4.2.2 (2022-10-31)
-    ## nickname       Innocent and Trusting
+    ## version.string R version 4.3.2 (2023-10-31)
+    ## nickname       Eye Holes
 
 Package installation
 
@@ -236,7 +236,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -265,7 +265,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a Multiple p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -282,7 +282,7 @@ all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'p
 ```
 
     ## Rows: 26 Columns: 9
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -1010,8 +1010,8 @@ ext_table
 ``` r
 ggplot(bind_rows(ext_multiple, ext_single),
        aes(x=factor(Factor,
-                    levels=c('GATE','DEP', 'APP', 'CLIN', 'COMM'),
-                       labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Community", "Clinical")),
+                    levels=c('GATE','DEP', 'APP', 'COMM', 'CLIN'),
+                      labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight",  "Community", "Case-only")),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Single', 'Multiple')),
            shape=factor(Beta, levels=c('Single', 'Multiple')),
@@ -1033,18 +1033,18 @@ theme(axis.text.y=element_text(size=16),
 labs(color  = "Regression: ", shape = "Regression: ")
 ```
 
-    ## Warning: `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
+    ## Warning: `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
 
 ![](mdd-symptom-gsem-ext_files/figure-gfm/ex_plot-1.png)<!-- -->
 
@@ -1052,18 +1052,35 @@ labs(color  = "Regression: ", shape = "Regression: ")
 ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 10, height = 7, units = "in")
 ```
 
-    ## Warning: `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
-    ## `position_dodge()` requires non-overlapping x intervals
+    ## Warning: `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+
+``` r
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.png", width = 10, height = 7, units = "in", dpi = 300)
+```
+
+    ## Warning: `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
+    ## `position_dodge()` requires non-overlapping x intervals.
 
 Consistancy of effect direction in single regression
 

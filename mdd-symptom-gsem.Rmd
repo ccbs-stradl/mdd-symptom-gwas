@@ -517,12 +517,10 @@ if(!file.exists(sumstats_h2_txt)) {
 
 } else {
 
-  sumstats_h2_table <- read_tsv(sumstats_h2_txt)
+  sumstats_h2_table <- read_tsv(sumstats_h2_txt) %>%
+    mutate(Sample = case_match(Sample, "Clinical" ~ "Case-only", .default = Sample))
 
 }
-
-
-
 
 ```
 

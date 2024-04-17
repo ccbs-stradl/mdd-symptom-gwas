@@ -15,14 +15,14 @@ R.version
     ## system         aarch64, darwin20           
     ## status                                     
     ## major          4                           
-    ## minor          2.2                         
-    ## year           2022                        
+    ## minor          3.2                         
+    ## year           2023                        
     ## month          10                          
     ## day            31                          
-    ## svn rev        83211                       
+    ## svn rev        85441                       
     ## language       R                           
-    ## version.string R version 4.2.2 (2022-10-31)
-    ## nickname       Innocent and Trusting
+    ## version.string R version 4.3.2 (2023-10-31)
+    ## nickname       Eye Holes
 
 Package installation
 
@@ -95,7 +95,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -124,7 +124,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -464,7 +464,7 @@ if(!file.exists(symptoms_sample_prev_file)) {
 ```
 
     ## Rows: 26 Columns: 6
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (3): cohorts, symptom, sumstats
     ## dbl (3): Nca, Nco, samp_prev
@@ -491,7 +491,7 @@ symptoms_sample_prev %>%
     ##  8 Clin    MDD5b Motor⇊   12701    11214               0.531
     ##  9 Clin    MDD6  Fatigue  23941     2497               0.906
     ## 10 Clin    MDD7  Guilt    21921     3888               0.849
-    ## # … with 16 more rows
+    ## # ℹ 16 more rows
 
 ``` r
 cohorts_sample_prev <-
@@ -641,7 +641,7 @@ if(!file.exists(covstruct_r)) {
 ```
 
     ## Rows: 26 Columns: 9
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -728,13 +728,14 @@ if(!file.exists(sumstats_h2_txt)) {
 
 } else {
 
-  sumstats_h2_table <- read_tsv(sumstats_h2_txt)
+  sumstats_h2_table <- read_tsv(sumstats_h2_txt) %>%
+    mutate(Sample = case_match(Sample, "Clinical" ~ "Case-only", .default = Sample))
 
 }
 ```
 
     ## Rows: 26 Columns: 17
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr  (7): Sample, sample_symptom, ref, cohorts, abbv, sumstats, filename
     ## dbl (10): h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE, Nca, Nco, sam...

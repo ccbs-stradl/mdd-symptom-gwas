@@ -518,8 +518,8 @@ ext_table
 
 ggplot(bind_rows(ext_multiple, ext_single),
        aes(x=factor(Factor,
-	   				levels=c('GATE','DEP', 'APP', 'CLIN', 'COMM'),
-					   labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Community", "Clinical")),
+	   				levels=c('GATE','DEP', 'APP', 'COMM', 'CLIN'),
+					  labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight",  "Community", "Case-only")),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Single', 'Multiple')),
            shape=factor(Beta, levels=c('Single', 'Multiple')),
@@ -541,6 +541,7 @@ theme(axis.text.y=element_text(size=16),
 labs(color  = "Regression: ", shape = "Regression: ")
 
 ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 10, height = 7, units = "in")
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.png", width = 10, height = 7, units = "in", dpi = 300)
 
 ```
 
