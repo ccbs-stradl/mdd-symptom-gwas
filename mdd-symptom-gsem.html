@@ -494,15 +494,30 @@ library(devtools)
 
 if(!require(GenomicSEM)) install_github(&quot;MichelNivard/GenomicSEM&quot;)</code></pre>
 <p>GenomicSEM version</p>
-<pre class="r"><code>require(readr)
-require(tidyr)
-require(stringr)
-require(dplyr)
-require(ggplot2)
-require(corrplot)
-require(GenomicSEM)
-
-packageVersion(&quot;GenomicSEM&quot;)</code></pre>
+<pre class="r"><code>require(readr)</code></pre>
+<pre><code>## Loading required package: readr</code></pre>
+<pre class="r"><code>require(tidyr)</code></pre>
+<pre><code>## Loading required package: tidyr</code></pre>
+<pre class="r"><code>require(stringr)</code></pre>
+<pre><code>## Loading required package: stringr</code></pre>
+<pre class="r"><code>require(dplyr)</code></pre>
+<pre><code>## Loading required package: dplyr</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>require(ggplot2)</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre class="r"><code>require(corrplot)</code></pre>
+<pre><code>## Loading required package: corrplot</code></pre>
+<pre><code>## corrplot 0.92 loaded</code></pre>
+<pre class="r"><code>require(GenomicSEM)</code></pre>
+<pre><code>## Loading required package: GenomicSEM</code></pre>
+<pre class="r"><code>packageVersion(&quot;GenomicSEM&quot;)</code></pre>
 <pre><code>## [1] &#39;0.0.5&#39;</code></pre>
 </div>
 <div id="ld-score-files" class="section level2" number="1.2">
@@ -779,9 +794,12 @@ estimated.</p>
 prevalences</h2>
 <p>We include a table of counts of symptom presence and absence for PGC
 cohorts</p>
-<pre class="r"><code>pgc_symptom_counts &lt;- read_table2(&#39;sumstats/PGC/CasesAllCohorts/pgc_dsm_symptom_counts.txt&#39;)
-
-pgc_symptom_counts %&gt;%
+<pre class="r"><code>pgc_symptom_counts &lt;- read_table2(&#39;sumstats/PGC/CasesAllCohorts/pgc_dsm_symptom_counts.txt&#39;)</code></pre>
+<pre><code>## Warning: `read_table2()` was deprecated in readr 2.0.0.
+## ℹ Please use `read_table()` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.</code></pre>
+<pre class="r"><code>pgc_symptom_counts %&gt;%
   spread(Status, N) %&gt;%
   unite(AbsentPresent, Absent, Present, sep=&#39;:&#39;) %&gt;%
   mutate(MDD_counts=paste(MDD, &#39;(absent:present)&#39;)) %&gt;%

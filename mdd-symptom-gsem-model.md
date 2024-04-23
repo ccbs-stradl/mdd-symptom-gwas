@@ -988,7 +988,7 @@ cog_app_veg.fit$results[c(1,2,3,6,7, 9)] %>%
     ## 2 COGMOOD ~~ VEG         0.91           0.069 7.8e-40
     ## 3     APP ~~ VEG         0.66           0.094 1.4e-12
 
-## Melancholic and atypical
+### Melancholic and atypical
 
 Account for directionality of symptoms using melancholic and atypical
 classifications, plus remaining affective/cognitive symptoms
@@ -1059,6 +1059,51 @@ mel_aty_afc.fit$results[c(1,2,3,6,7,9)] %>%
     ## 1 MEL ~~ ATY         0.88           0.051  2.2e-68
     ## 2 MEL ~~ AFC         0.99           0.030 1.6e-237
     ## 3 ATY ~~ AFC         0.73           0.065  2.0e-29
+
+### Multivariate GWAS model
+
+Symptoms well-powered enough for multivariate GWAS meta-analysis
+
+``` r
+gwas_meta.model <- "
+META =~ NA*CommDep + CommSleDec + CommFatig + CommGuilt + CommConc + CommSui + UkbDep
+
+META ~~ 1*META
+"
+
+gwas_meta.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gwas_meta.model, imp_cov=TRUE)
+```
+
+    ## [1] "Running primary model"
+    ## [1] "Calculating CFI"
+    ## [1] "Calculating Standardized Results"
+    ## [1] "Calculating SRMR"
+    ## elapsed 
+    ##    0.26
+
+``` r
+gwas_meta.fit$modelfit
+```
+
+    ##       chisq df      p_chisq      AIC       CFI      SRMR
+    ## df 41.31038 14 0.0001589329 69.31038 0.9580869 0.1202371
+
+``` r
+gwas_meta.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs == 'META') %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
+```
+
+    ##    lhs op        rhs STD_Genotype STD_Genotype_SE
+    ## 1 META =~    CommDep         0.88           0.051
+    ## 2 META =~ CommSleDec         0.66           0.075
+    ## 3 META =~  CommFatig         0.56           0.085
+    ## 4 META =~  CommGuilt         0.65           0.059
+    ## 5 META =~   CommConc         0.70           0.079
+    ## 6 META =~    CommSui         0.65           0.078
+    ## 7 META =~     UkbDep         0.93           0.068
+    ## 8 META ~~       META         1.00              NA
 
 ### Model comparisons
 
@@ -1201,6 +1246,8 @@ sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs)
 Refine naming scheme for publication.
 
 ``` r
+mod_list[["Meta"]] <- list(name="Meta-analysis", model=gwas_meta.fit)
+
 model_coefs <- as_tibble(bind_rows(lapply(mod_list, function(m) m$model$results), .id='model')) |>
   mutate(lhs = case_when(str_detect(lhs, "Clin") ~ str_replace(lhs, "Clin", "Case"),
                          lhs == "CLIN" ~ "CASE",
@@ -1218,7 +1265,7 @@ Heatmap of how often symptoms load on the same factor in symptoms models
 
 ``` r
 symptom_model_connectivity <- model_coefs |>
-  filter(! lhs %in% c('MDD', 'CASE', 'COMM', 'GATE'), model != "M") |>
+  filter(! lhs %in% c('MDD', 'CASE', 'COMM', 'GATE'), !model %in% c("M", "Meta")) |>
   transmute(factor=str_c(model, lhs, sep = "_"), rhs, value = 1) |>
   pivot_wider(names_from = factor, values_from = value, values_fill = 0)
 
@@ -1240,7 +1287,7 @@ symptom_model_structure <- model_coefs |>
                             str_detect(rhs, "Ukb") ~ "UKB Touchscreen"),
          symptom = str_remove(rhs, "(Case|Comm|Ukb)"),
          loading = if_else(abs(STD_Genotype) > 1, true = 1 * sign(STD_Genotype), false = STD_Genotype),
-         Model = str_c("Model ", model, ":"),
+         Model = if_else(model == "Meta", true = "Multivariate GWAS:", false = str_c("Model ", model, ":")),
          Factor = case_match(lhs,
                             "MDD" ~ "MDD",
                             "CASE" ~ "Case-only",
@@ -1257,9 +1304,10 @@ symptom_model_structure <- model_coefs |>
                             "APP" ~ "Appetite/Weight",
                             "MEL" ~ "Melancholic",
                             "ATY" ~ "Atypical",
-                            "AFC" ~ "Affective/Cognitive")) |>
+                            "AFC" ~ "Affective/Cognitive",
+                            "META" ~ "F1")) |>
   mutate(Factor_levels = factor(Factor, levels =
-    c("Gating", "Affective/Cognitive", "Atypical", "Melancholic", 
+    c("F1", "Gating", "Affective/Cognitive", "Atypical", "Melancholic", 
     "Appetite/Weight", "Cognitive/Mood", "Mood",
     "Cognitive", "Neurovegetative", "Affective",
     "Vegetative", "Somatic", "Psychological",

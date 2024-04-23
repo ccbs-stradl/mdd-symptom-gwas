@@ -470,7 +470,7 @@ cog_app_veg.fit$results[c(1,2,3,6,7, 9)] %>%
 
 ```
 
-## Melancholic and atypical
+### Melancholic and atypical
 
 Account for directionality of symptoms using melancholic and atypical classifications, plus remaining affective/cognitive symptoms
 
@@ -502,6 +502,26 @@ mel_aty_afc.fit$results[c(1,2,3,6,7,9)] %>%
 	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
 	 print(digits=2)
 
+```
+
+### Multivariate GWAS model
+
+Symptoms well-powered enough for multivariate GWAS meta-analysis
+
+```{r gwas}
+gwas_meta.model <- "
+META =~ NA*CommDep + CommSleDec + CommFatig + CommGuilt + CommConc + CommSui + UkbDep
+
+META ~~ 1*META
+"
+
+gwas_meta.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gwas_meta.model, imp_cov=TRUE)
+
+gwas_meta.fit$modelfit
+gwas_meta.fit$results[c(1,2,3,6,7)] %>%
+     filter(lhs == 'META') %>%
+     mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+     print(digits=2)
 ```
 
 ### Model comparisons
@@ -590,6 +610,8 @@ sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs)
 Refine naming scheme for publication.
 ```{r model_coefs}
 
+mod_list[["Meta"]] <- list(name="Meta-analysis", model=gwas_meta.fit)
+
 model_coefs <- as_tibble(bind_rows(lapply(mod_list, function(m) m$model$results), .id='model')) |>
   mutate(lhs = case_when(str_detect(lhs, "Clin") ~ str_replace(lhs, "Clin", "Case"),
                          lhs == "CLIN" ~ "CASE",
@@ -609,7 +631,7 @@ Heatmap of how often symptoms load on the same factor in symptoms models
 ```{r symptom_loadings_heatmap}
 
 symptom_model_connectivity <- model_coefs |>
-  filter(! lhs %in% c('MDD', 'CASE', 'COMM', 'GATE'), model != "M") |>
+  filter(! lhs %in% c('MDD', 'CASE', 'COMM', 'GATE'), !model %in% c("M", "Meta")) |>
   transmute(factor=str_c(model, lhs, sep = "_"), rhs, value = 1) |>
   pivot_wider(names_from = factor, values_from = value, values_fill = 0)
 
@@ -631,7 +653,7 @@ symptom_model_structure <- model_coefs |>
                             str_detect(rhs, "Ukb") ~ "UKB Touchscreen"),
          symptom = str_remove(rhs, "(Case|Comm|Ukb)"),
          loading = if_else(abs(STD_Genotype) > 1, true = 1 * sign(STD_Genotype), false = STD_Genotype),
-         Model = str_c("Model ", model, ":"),
+         Model = if_else(model == "Meta", true = "Multivariate GWAS:", false = str_c("Model ", model, ":")),
          Factor = case_match(lhs,
                             "MDD" ~ "MDD",
                             "CASE" ~ "Case-only",
@@ -648,9 +670,10 @@ symptom_model_structure <- model_coefs |>
                             "APP" ~ "Appetite/Weight",
                             "MEL" ~ "Melancholic",
                             "ATY" ~ "Atypical",
-                            "AFC" ~ "Affective/Cognitive")) |>
+                            "AFC" ~ "Affective/Cognitive",
+                            "META" ~ "F1")) |>
   mutate(Factor_levels = factor(Factor, levels =
-    c("Gating", "Affective/Cognitive", "Atypical", "Melancholic", 
+    c("F1", "Gating", "Affective/Cognitive", "Atypical", "Melancholic", 
     "Appetite/Weight", "Cognitive/Mood", "Mood",
     "Cognitive", "Neurovegetative", "Affective",
     "Vegetative", "Somatic", "Psychological",
