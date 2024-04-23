@@ -615,7 +615,7 @@ analyses</p>
 <p>File for aligning sumstats filenames to cohort/symptom</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>cohort_alignment <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">&#39;meta/cohort_alignment.txt&#39;</span>)</span></code></pre></div>
 <pre><code>## Rows: 245 Columns: 3
-## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;\t&quot;
 ## chr (3): filename, cohort, reference
 ## 
@@ -624,7 +624,7 @@ analyses</p>
 <p>Symptom descriptions</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>mdd_symptoms <span class="ot">&lt;-</span> <span class="fu">read_tsv</span>(<span class="st">&#39;dsm_mdd.tsv&#39;</span>)</span></code></pre></div>
 <pre><code>## Rows: 15 Columns: 7
-## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;\t&quot;
 ## chr (7): Ref, Reference, h, v, abbv, Symptom, Description
 ## 
@@ -638,21 +638,21 @@ counts</p>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>basics <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(<span class="fu">lapply</span>(basic_xls_list, read_excel), <span class="at">.id=</span><span class="st">&#39;meta&#39;</span>)</span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>basics_datasets <span class="ot">&lt;-</span> basics <span class="sc">%&gt;%</span></span>
-<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>    <span class="fu">filter</span>(Dataset <span class="sc">!=</span> <span class="st">&#39;SUM&#39;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>basics_datasets <span class="ot">&lt;-</span> basics <span class="sc">|&gt;</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>    <span class="fu">filter</span>(Dataset <span class="sc">!=</span> <span class="st">&#39;SUM&#39;</span>) <span class="sc">|&gt;</span></span>
 <span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>meta) <span class="sc">|&gt;</span></span>
 <span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>    <span class="fu">distinct</span>()</span>
 <span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>    </span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>basics_meta <span class="ot">&lt;-</span></span>
-<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>basics <span class="sc">%&gt;%</span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>    <span class="fu">filter</span>(Dataset <span class="sc">==</span> <span class="st">&#39;SUM&#39;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Dataset=</span>meta) <span class="sc">%&gt;%</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>basics <span class="sc">|&gt;</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>    <span class="fu">filter</span>(Dataset <span class="sc">==</span> <span class="st">&#39;SUM&#39;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">Dataset=</span>meta) <span class="sc">|&gt;</span></span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>meta)</span></code></pre></div>
 <p>Merge and reformat</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>basics_aligned <span class="ot">&lt;-</span> </span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>cohort_alignment <span class="sc">%&gt;%</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">filter</span>(<span class="sc">!</span>reference <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;MDD3&#39;</span>, <span class="st">&#39;MDD4&#39;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">Dataset=</span><span class="fu">str_replace</span>(<span class="fu">str_remove</span>(filename, <span class="at">pattern=</span><span class="st">&#39;daner_&#39;</span>), <span class="st">&#39;gz&#39;</span>, <span class="st">&#39;align.gz&#39;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>cohort_alignment <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">filter</span>(<span class="sc">!</span>reference <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;MDD3&#39;</span>, <span class="st">&#39;MDD4&#39;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">Dataset=</span><span class="fu">str_replace</span>(<span class="fu">str_remove</span>(filename, <span class="at">pattern=</span><span class="st">&#39;daner_&#39;</span>), <span class="st">&#39;gz&#39;</span>, <span class="st">&#39;align.gz&#39;</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="fu">left_join</span>(basics_datasets, <span class="at">by=</span><span class="st">&#39;Dataset&#39;</span>)</span>
 <span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>basics_summary <span class="ot">&lt;-</span> basics_aligned <span class="sc">|&gt;</span></span>
@@ -668,9 +668,9 @@ counts</p>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>    <span class="fu">str_glue_data</span>(<span class="st">&quot;{N_eff_half} ({round(100*N_cases/(N_cases + N_controls))}%)&quot;</span>)</span>
 <span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>basics_formatted <span class="ot">&lt;-</span> </span>
-<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>basics_summary <span class="sc">%&gt;%</span></span>
-<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">PresenceAbsence=</span><span class="fu">as.character</span>(presence_absence)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="fu">select</span>(meta, reference, PresenceAbsence) <span class="sc">%&gt;%</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>basics_summary <span class="sc">|&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">PresenceAbsence=</span><span class="fu">as.character</span>(presence_absence)) <span class="sc">|&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="fu">select</span>(meta, reference, PresenceAbsence) <span class="sc">|&gt;</span></span>
 <span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="fu">pivot_wider</span>(<span class="at">names_from=</span>meta, <span class="at">values_from=</span>PresenceAbsence) <span class="sc">|&gt;</span></span>
 <span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="fu">left_join</span>(mdd_symptoms, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&#39;reference&#39;</span> <span class="ot">=</span> <span class="st">&#39;Reference&#39;</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">Symptom =</span> <span class="fu">str_glue</span>(<span class="st">&quot;{Ref}. {Symptom}&quot;</span>)) <span class="sc">|&gt;</span></span>
@@ -761,27 +761,45 @@ counts</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>basics_sum <span class="ot">&lt;-</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>basics_aligned <span class="sc">%&gt;%</span></span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">sample=</span><span class="fu">if_else</span>(cohort <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;AGDS&#39;</span>, <span class="st">&#39;PGC&#39;</span>, <span class="st">&#39;GenScot&#39;</span>, <span class="st">&#39;janpy&#39;</span>), <span class="at">true=</span><span class="st">&#39;enriched&#39;</span>, <span class="at">false=</span><span class="st">&#39;unselected&#39;</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="fu">group_by</span>(sample, reference) <span class="sc">%&gt;%</span></span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="fu">summarise</span>(<span class="at">N_cases=</span><span class="fu">sum</span>(N_cases), <span class="at">N_controls=</span><span class="fu">sum</span>(N_controls)) </span></code></pre></div>
+<p>Proportion of case-only cohorts in models:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>basics_summary <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">left_join</span>(mdd_symptoms, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&#39;reference&#39;</span> <span class="ot">=</span> <span class="st">&#39;Reference&#39;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="fu">filter</span>(abbv <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;AppDec&#39;</span>, <span class="st">&#39;AppInc&#39;</span>, <span class="st">&#39;SleDec&#39;</span>, <span class="st">&#39;SleInc&#39;</span>, <span class="st">&#39;Guilt&#39;</span>, <span class="st">&#39;Sui&#39;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="fu">group_by</span>(reference) <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="fu">transmute</span>(meta, reference, N_eff_half, <span class="at">N_eff_prop =</span> N_eff_half <span class="sc">/</span> <span class="fu">sum</span>(N_eff_half)) <span class="sc">|&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="fu">filter</span>(meta <span class="sc">==</span> <span class="st">&#39;Clinical&#39;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="fu">arrange</span>(N_eff_prop)</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 4
+## # Groups:   reference [6]
+##   meta     reference N_eff_half N_eff_prop
+##   &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt;      &lt;dbl&gt;
+## 1 Clinical MDD7            5503      0.105
+## 2 Clinical MDD9           10545      0.174
+## 3 Clinical MDD3a          10119      0.220
+## 4 Clinical MDD4a           9418      0.247
+## 5 Clinical MDD3b           9259      0.258
+## 6 Clinical MDD4b          10031      0.353</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>basics_sum <span class="ot">&lt;-</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>basics_aligned <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">sample=</span><span class="fu">if_else</span>(cohort <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;AGDS&#39;</span>, <span class="st">&#39;PGC&#39;</span>, <span class="st">&#39;GenScot&#39;</span>, <span class="st">&#39;janpy&#39;</span>), <span class="at">true=</span><span class="st">&#39;enriched&#39;</span>, <span class="at">false=</span><span class="st">&#39;unselected&#39;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="fu">group_by</span>(sample, reference) <span class="sc">|&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="fu">summarise</span>(<span class="at">N_cases=</span><span class="fu">sum</span>(N_cases), <span class="at">N_controls=</span><span class="fu">sum</span>(N_controls)) </span></code></pre></div>
 <pre><code>## `summarise()` has grouped output by &#39;sample&#39;. You can override using the
 ## `.groups` argument.</code></pre>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>basics_sum <span class="sc">%&gt;%</span></span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="fu">group_by</span>(sample) <span class="sc">%&gt;%</span></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="fu">summarise</span>(<span class="at">minCa=</span><span class="fu">min</span>(N_cases, <span class="at">na.rm=</span>T), <span class="at">maxCa=</span><span class="fu">max</span>(N_cases, <span class="at">na.rm=</span>T), <span class="at">minCo=</span><span class="fu">min</span>(N_controls, <span class="at">na.rm=</span>T), <span class="at">maxCo=</span><span class="fu">max</span>(N_controls, <span class="at">na.rm=</span>T))</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>basics_sum <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">group_by</span>(sample) <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">summarise</span>(<span class="at">minCa=</span><span class="fu">min</span>(N_cases, <span class="at">na.rm=</span>T), <span class="at">maxCa=</span><span class="fu">max</span>(N_cases, <span class="at">na.rm=</span>T), <span class="at">minCo=</span><span class="fu">min</span>(N_controls, <span class="at">na.rm=</span>T), <span class="at">maxCo=</span><span class="fu">max</span>(N_controls, <span class="at">na.rm=</span>T))</span></code></pre></div>
 <pre><code>## # A tibble: 2 × 5
 ##   sample     minCa  maxCa minCo  maxCo
 ##   &lt;chr&gt;      &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;
 ## 1 enriched   21681  21681  1748   1748
 ## 2 unselected   113 107956  2995 126167</code></pre>
 <p>Sample prevalences</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>basics_sum <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fu">transmute</span>(sample, reference, <span class="at">P=</span>N_cases <span class="sc">/</span> (N_controls <span class="sc">+</span> N_cases)) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">d50=</span><span class="fu">abs</span>(<span class="fl">0.5</span><span class="sc">-</span>P)) <span class="sc">%&gt;%</span></span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="fu">arrange</span>(sample, d50) <span class="sc">%&gt;%</span></span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fu">print</span>(<span class="at">n=</span><span class="cn">Inf</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>basics_sum <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">transmute</span>(sample, reference, <span class="at">P=</span>N_cases <span class="sc">/</span> (N_controls <span class="sc">+</span> N_cases)) <span class="sc">|&gt;</span> </span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a><span class="fu">mutate</span>(<span class="at">d50=</span><span class="fu">abs</span>(<span class="fl">0.5</span><span class="sc">-</span>P)) <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="fu">arrange</span>(sample, d50) <span class="sc">|&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a><span class="fu">print</span>(<span class="at">n=</span><span class="cn">Inf</span>)</span></code></pre></div>
 <pre><code>## # A tibble: 24 × 4
 ## # Groups:   sample [2]
 ##    sample     reference       P       d50
@@ -811,39 +829,39 @@ counts</p>
 ## 23 unselected MDD5b      0.0908  0.409   
 ## 24 unselected MDD5a      0.0343  0.466</code></pre>
 <p>Datasets</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>cohort_sumstats <span class="ot">&lt;-</span> basics_aligned <span class="sc">|&gt;</span></span>
-<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>    <span class="fu">transmute</span>(cohort, reference, <span class="at">dataset=</span><span class="fu">str_match</span>(Dataset, <span class="st">&quot;([A-Za-z0-9_]+)&quot;</span>)[,<span class="dv">2</span>],</span>
-<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a>              N_cases, N_controls, <span class="st">`</span><span class="at">N_eff_half</span><span class="st">`</span>, <span class="st">`</span><span class="at">LAMBDA-GC</span><span class="st">`</span>, <span class="st">`</span><span class="at">N-SNPs</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
-<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(N_cases))</span>
-<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>meta_sumstats <span class="ot">&lt;-</span></span>
-<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>basics_meta <span class="sc">%&gt;%</span></span>
-<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cohort=</span><span class="fu">str_match</span>(Dataset, <span class="st">&quot;([A-Za-z_]+)&quot;</span>)[,<span class="dv">2</span>],</span>
-<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>           <span class="at">reference=</span><span class="fu">str_match</span>(Dataset, <span class="st">&quot;(MDD[0-9a-b]+)&quot;</span>)[,<span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
-<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>    <span class="fu">select</span>(cohort, reference, <span class="at">dataset=</span>Dataset,</span>
-<span id="cb16-11"><a href="#cb16-11" tabindex="-1"></a>           N_cases, N_controls, <span class="st">`</span><span class="at">N_eff_half</span><span class="st">`</span>,</span>
-<span id="cb16-12"><a href="#cb16-12" tabindex="-1"></a>           <span class="st">`</span><span class="at">LAMBDA-GC</span><span class="st">`</span>, <span class="st">`</span><span class="at">N-SNPs</span><span class="st">`</span>)</span>
-<span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>           </span>
-<span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a>sumstats <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(cohort_sumstats, meta_sumstats)</span>
-<span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a>           </span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="fu">write_csv</span>(sumstats, <span class="st">&quot;meta/meta.csv&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>cohort_sumstats <span class="ot">&lt;-</span> basics_aligned <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>    <span class="fu">transmute</span>(cohort, reference, <span class="at">dataset=</span><span class="fu">str_match</span>(Dataset, <span class="st">&quot;([A-Za-z0-9_]+)&quot;</span>)[,<span class="dv">2</span>],</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>              N_cases, N_controls, <span class="st">`</span><span class="at">N_eff_half</span><span class="st">`</span>, <span class="st">`</span><span class="at">LAMBDA-GC</span><span class="st">`</span>, <span class="st">`</span><span class="at">N-SNPs</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(N_cases))</span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>meta_sumstats <span class="ot">&lt;-</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>basics_meta <span class="sc">|&gt;</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cohort=</span><span class="fu">str_match</span>(Dataset, <span class="st">&quot;([A-Za-z_]+)&quot;</span>)[,<span class="dv">2</span>],</span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>           <span class="at">reference=</span><span class="fu">str_match</span>(Dataset, <span class="st">&quot;(MDD[0-9a-b]+)&quot;</span>)[,<span class="dv">2</span>]) <span class="sc">|&gt;</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>    <span class="fu">select</span>(cohort, reference, <span class="at">dataset=</span>Dataset,</span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>           N_cases, N_controls, <span class="st">`</span><span class="at">N_eff_half</span><span class="st">`</span>,</span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a>           <span class="st">`</span><span class="at">LAMBDA-GC</span><span class="st">`</span>, <span class="st">`</span><span class="at">N-SNPs</span><span class="st">`</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>           </span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>sumstats <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(cohort_sumstats, meta_sumstats)</span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>           </span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a><span class="fu">write_csv</span>(sumstats, <span class="st">&quot;meta/meta.csv&quot;</span>)</span></code></pre></div>
 <p>Totals</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>cohort_sumstats <span class="sc">|&gt;</span> <span class="fu">filter</span>(cohort <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;PGC&#39;</span>, <span class="st">&#39;AGDS&#39;</span>, <span class="st">&#39;GenScot&#39;</span>, <span class="st">&#39;janpy&#39;</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">N=</span>N_cases<span class="sc">+</span>N_controls, <span class="at">cohort=</span><span class="fu">if_else</span>(cohort<span class="sc">==</span><span class="st">&#39;PGC&#39;</span>, <span class="at">true=</span><span class="fu">sapply</span>(<span class="fu">str_split</span>(dataset, <span class="st">&quot;_&quot;</span>), last), <span class="at">false=</span>cohort)) <span class="sc">|&gt;</span></span>
-<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>    <span class="fu">group_by</span>(cohort) <span class="sc">|&gt;</span></span>
-<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">N=</span><span class="fu">max</span>(N)) <span class="sc">|&gt;</span></span>
-<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
-<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">N=</span><span class="fu">sum</span>(N))</span></code></pre></div>
-<pre><code>## # A tibble: 1 × 1
-##       N
-##   &lt;dbl&gt;
-## 1 30148</code></pre>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>cohort_sumstats <span class="sc">|&gt;</span> <span class="fu">filter</span>(cohort <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;ALSPAC&#39;</span>, <span class="st">&#39;EstBB&#39;</span>, <span class="st">&#39;UKBB&#39;</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">N=</span>N_cases<span class="sc">+</span>N_controls) <span class="sc">|&gt;</span></span>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>cohort_sumstats <span class="sc">|&gt;</span> <span class="fu">filter</span>(cohort <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;PGC&#39;</span>, <span class="st">&#39;AGDS&#39;</span>, <span class="st">&#39;GenScot&#39;</span>, <span class="st">&#39;janpy&#39;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">N=</span>N_cases<span class="sc">+</span>N_controls, <span class="at">cohort=</span><span class="fu">if_else</span>(cohort<span class="sc">==</span><span class="st">&#39;PGC&#39;</span>, <span class="at">true=</span><span class="fu">sapply</span>(<span class="fu">str_split</span>(dataset, <span class="st">&quot;_&quot;</span>), last), <span class="at">false=</span>cohort)) <span class="sc">|&gt;</span></span>
 <span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>    <span class="fu">group_by</span>(cohort) <span class="sc">|&gt;</span></span>
 <span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">N=</span><span class="fu">max</span>(N)) <span class="sc">|&gt;</span></span>
 <span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
 <span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">N=</span><span class="fu">sum</span>(N))</span></code></pre></div>
+<pre><code>## # A tibble: 1 × 1
+##       N
+##   &lt;dbl&gt;
+## 1 30148</code></pre>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>cohort_sumstats <span class="sc">|&gt;</span> <span class="fu">filter</span>(cohort <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&#39;ALSPAC&#39;</span>, <span class="st">&#39;EstBB&#39;</span>, <span class="st">&#39;UKBB&#39;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">N=</span>N_cases<span class="sc">+</span>N_controls) <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>    <span class="fu">group_by</span>(cohort) <span class="sc">|&gt;</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">N=</span><span class="fu">max</span>(N)) <span class="sc">|&gt;</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">|&gt;</span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">N=</span><span class="fu">sum</span>(N))</span></code></pre></div>
 <pre><code>## # A tibble: 1 × 1
 ##        N
 ##    &lt;dbl&gt;

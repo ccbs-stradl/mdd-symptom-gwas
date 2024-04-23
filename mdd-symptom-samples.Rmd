@@ -41,15 +41,15 @@ names(basic_xls_list) <- str_match(basename(basic_xls_list), "basic\\.([A-Za-z_]
 
 basics <- bind_rows(lapply(basic_xls_list, read_excel), .id='meta')
 
-basics_datasets <- basics %>%
-	filter(Dataset != 'SUM') %>%
+basics_datasets <- basics |>
+	filter(Dataset != 'SUM') |>
 	select(-meta) |>
 	distinct()
 	
 basics_meta <-
-basics %>%
-	filter(Dataset == 'SUM') %>%
-	mutate(Dataset=meta) %>%
+basics |>
+	filter(Dataset == 'SUM') |>
+	mutate(Dataset=meta) |>
 	select(-meta)
 
 ```
@@ -59,9 +59,9 @@ Merge and reformat
 ```{r}
 
 basics_aligned <- 
-cohort_alignment %>%
-filter(!reference %in% c('MDD3', 'MDD4')) %>%
-mutate(Dataset=str_replace(str_remove(filename, pattern='daner_'), 'gz', 'align.gz')) %>%
+cohort_alignment |>
+filter(!reference %in% c('MDD3', 'MDD4')) |>
+mutate(Dataset=str_replace(str_remove(filename, pattern='daner_'), 'gz', 'align.gz')) |>
 left_join(basics_datasets, by='Dataset')
 
 basics_summary <- basics_aligned |>
@@ -76,9 +76,9 @@ presence_absence <- basics_summary |>
 	str_glue_data("{N_eff_half} ({round(100*N_cases/(N_cases + N_controls))}%)")
 
 basics_formatted <- 
-basics_summary %>%
-mutate(PresenceAbsence=as.character(presence_absence)) %>%
-select(meta, reference, PresenceAbsence) %>%
+basics_summary |>
+mutate(PresenceAbsence=as.character(presence_absence)) |>
+select(meta, reference, PresenceAbsence) |>
 pivot_wider(names_from=meta, values_from=PresenceAbsence) |>
 left_join(mdd_symptoms, by = c('reference' = 'Reference')) |>
 mutate(Symptom = str_glue("{Ref}. {Symptom}")) |>
@@ -88,16 +88,29 @@ knitr::kable(basics_formatted)
 
 ```
 
+Proportion of case-only cohorts in models:
+
+```{r}
+basics_summary |>
+left_join(mdd_symptoms, by = c('reference' = 'Reference')) |>
+filter(abbv %in% c('AppDec', 'AppInc', 'SleDec', 'SleInc', 'Guilt', 'Sui')) |>
+group_by(reference) |>
+transmute(meta, reference, N_eff_half, N_eff_prop = N_eff_half / sum(N_eff_half)) |>
+filter(meta == 'Clinical') |>
+arrange(N_eff_prop)
+
+```
+
 ```{r}
 
 basics_sum <-
-basics_aligned %>%
-mutate(sample=if_else(cohort %in% c('AGDS', 'PGC', 'GenScot', 'janpy'), true='enriched', false='unselected')) %>%
-group_by(sample, reference) %>%
+basics_aligned |>
+mutate(sample=if_else(cohort %in% c('AGDS', 'PGC', 'GenScot', 'janpy'), true='enriched', false='unselected')) |>
+group_by(sample, reference) |>
 summarise(N_cases=sum(N_cases), N_controls=sum(N_controls)) 
 
-basics_sum %>%
-group_by(sample) %>%
+basics_sum |>
+group_by(sample) |>
 summarise(minCa=min(N_cases, na.rm=T), maxCa=max(N_cases, na.rm=T), minCo=min(N_controls, na.rm=T), maxCo=max(N_controls, na.rm=T))
 
 ```
@@ -106,10 +119,10 @@ Sample prevalences
 
 ```{r}
 
-basics_sum %>% 
-transmute(sample, reference, P=N_cases / (N_controls + N_cases)) %>% 
-mutate(d50=abs(0.5-P)) %>%
-arrange(sample, d50) %>%
+basics_sum |> 
+transmute(sample, reference, P=N_cases / (N_controls + N_cases)) |> 
+mutate(d50=abs(0.5-P)) |>
+arrange(sample, d50) |>
 print(n=Inf)
 
 ```
@@ -124,7 +137,7 @@ cohort_sumstats <- basics_aligned |>
 	filter(!is.na(N_cases))
 
 meta_sumstats <-
-basics_meta %>%
+basics_meta |>
 	mutate(cohort=str_match(Dataset, "([A-Za-z_]+)")[,2],
 	       reference=str_match(Dataset, "(MDD[0-9a-b]+)")[,2]) |>
 	select(cohort, reference, dataset=Dataset,
