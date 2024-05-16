@@ -498,16 +498,19 @@ bind_rows(lapply(list(ext_mult_symp.fit, ext_samp_mult.fit),
 
 ```
 
+Focus on symptoms models
 ```{r ext_table}
 
-ext_table <-
-bind_rows(ext_single, ext_multiple) %>%
+ext_fdr <- bind_rows(ext_single, ext_multiple) |>
+  mutate(fdr=p.adjust(p_value, 'BY')) |>
+  filter(Factor %in% c('GATE', 'DEP', 'APP'))
+
+ext_table <- ext_fdr |>
 transmute(Phenotype,
           Factor=factor(Factor,
 	    			levels=c('GATE', 'DEP', 'APP', 'CLIN', 'COMM'),
-						labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Community", "Clinical")),
-		  Model=Beta, STD_Genotype, STD_Genotype_SE, p_value) %>%
-mutate(fdr=p.adjust(p_value, 'BY')) |>
+						labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Clinical", "Community")),
+		  Model=Beta, STD_Genotype, STD_Genotype_SE, p_value, fdr) |>
 arrange(Phenotype, desc(Factor), Model)
 
 ext_table
@@ -516,32 +519,34 @@ ext_table
 
 ```{r ex_plot, fig.width=10, fig.height=6, dpi=300}
 
-ggplot(bind_rows(ext_multiple, ext_single),
+ggplot(ext_fdr,
        aes(x=factor(Factor,
-	   				levels=c('GATE','DEP', 'APP', 'COMM', 'CLIN'),
-					  labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight",  "Community", "Case-only")),
+	   			 levels=c('GATE','DEP', 'APP'),
+					 labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight")),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Single', 'Multiple')),
            shape=factor(Beta, levels=c('Single', 'Multiple')),
-          ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
-          ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
-geom_hline(yintercept=0, col='gray') +
+           alpha = if_else(fdr <= 0.05, true = 'Sig.', false = 'Non-Sig.'),
+           ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
+           ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
+geom_hline(yintercept=0, col='darkgray') +
 geom_pointrange(position=position_dodge(width=-0.5)) +
 facet_wrap(~Phenotype) +
 scale_x_discrete('Factor') +
-scale_y_continuous('Beta') +
+scale_y_continuous('Beta', breaks = seq(-1.5, 1.5, 0.5)) +
 scale_color_discrete('Regression: ') +
-coord_flip(ylim=c(-1.5, 1.5)) +
-theme_bw() +
-theme(axis.text.y=element_text(size=16),
-      strip.text=element_text(size=16),
+scale_alpha_discrete('FDR:', range = c(0.4, 1)) +
+coord_flip() + #ylim=c(-1.5, 1.5)) +
+theme_minimal() +
+theme(axis.text.y=element_text(size=12),
+      strip.text=element_text(size=12),
       legend.title=element_text(size=12),
       legend.text=element_text(size=14),
       legend.position='top') +
 labs(color  = "Regression: ", shape = "Regression: ")
 
-ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 10, height = 7, units = "in")
-ggsave("mdd-symptom-gsem-ext_files/ex_beta.png", width = 10, height = 7, units = "in", dpi = 300)
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 8, height = 4, units = "in")
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.png", width = 8, height = 4, units = "in", dpi = 300)
 
 ```
 
@@ -567,7 +572,7 @@ specific_sample
 
 ```{r specific_symptoms}
 ext_table |>
-filter(Factor %in% c('Appetite/Weight', 'Depression', 'Gating'), Model == 'Multiple') |>
+filter(Factor %in% c('Appetite/Weight', 'Veg/Cog/Mood', 'Gating'), Model == 'Multiple') |>
 group_by(Phenotype) |>
 filter(any(fdr <= 0.05), any(fdr > 0.05)) |>
 ungroup() |>
