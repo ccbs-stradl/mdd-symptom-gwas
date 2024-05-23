@@ -509,11 +509,13 @@ ext_table <- ext_fdr |>
 transmute(Phenotype,
           Factor=factor(Factor,
 	    			levels=c('GATE', 'DEP', 'APP', 'CLIN', 'COMM'),
-						labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Clinical", "Community")),
+						labels=c("Gating", "Cog/Mood/Leth", "Appetite/Weight", "Clinical", "Community")),
 		  Model=Beta, STD_Genotype, STD_Genotype_SE, p_value, fdr) |>
 arrange(Phenotype, desc(Factor), Model)
 
 ext_table
+
+write_tsv(ext_table, "mdd-symptom-gsem-ext_files/ext_coefficients.txt")
 
 ```
 
@@ -522,7 +524,7 @@ ext_table
 ggplot(ext_fdr,
        aes(x=factor(Factor,
 	   			 levels=c('GATE','DEP', 'APP'),
-					 labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight")),
+					 labels=c("Gating", "Cog/Mood/Leth", "Appetite/Weight")),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Single', 'Multiple')),
            shape=factor(Beta, levels=c('Single', 'Multiple')),
@@ -572,7 +574,7 @@ specific_sample
 
 ```{r specific_symptoms}
 ext_table |>
-filter(Factor %in% c('Appetite/Weight', 'Veg/Cog/Mood', 'Gating'), Model == 'Multiple') |>
+filter(Factor %in% c('Appetite/Weight', 'Cog/Mood/Leth', 'Gating'), Model == 'Multiple') |>
 group_by(Phenotype) |>
 filter(any(fdr <= 0.05), any(fdr > 0.05)) |>
 ungroup() |>

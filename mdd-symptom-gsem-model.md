@@ -82,7 +82,7 @@ MDD9;Suicidality;Suicidality;Sui
 ```
 
     ## Rows: 15 Columns: 4
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (4): ref, h, v, abbv
     ## 
@@ -111,7 +111,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ```
 
     ## Rows: 15 Columns: 2
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: ";"
     ## chr (2): Reference, Description
     ## 
@@ -156,7 +156,7 @@ sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 't
 ```
 
     ## Rows: 26 Columns: 9
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## Delimiter: "\t"
     ## chr (5): cohorts, symptom, sumstats, filename, trait_name
     ## dbl (4): Nca, Nco, samp_prev, pop_prev
@@ -735,19 +735,19 @@ psych_soma.fit$results[c(1,2,3,6,7)] %>%
     ##     lhs op  rhs STD_Genotype STD_Genotype_SE
     ## 1 PSYCH ~~ SOMA        -0.75           0.056
 
-### Psychological-Neurovegetative (Elhai Model 2b)
+### Psychological-Vegetative (Elhai Model 2b)
 
 ``` r
 psych_veg.model <- "
 PSYCH =~ NA*ClinGuilt + ClinSui + CommDep + CommAnh + CommGuilt + CommConc + CommSui + UkbDep + UkbAnh
-VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
+NEUROVEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
 PSYCH ~~ 1*PSYCH
-VEG ~~ 1*VEG
+NEUROVEG ~~ 1*NEUROVEG
 GATE ~~ 1*GATE
-GATE ~~ 0*PSYCH + 0*VEG
+GATE ~~ 0*PSYCH + 0*NEUROVEG
 "
 psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_veg.model, imp_cov=TRUE)
 ```
@@ -757,8 +757,8 @@ psych_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=psych_ve
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.038 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.228 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714834 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## psych_veg.model, : A difference greater than .025 was observed pre- and
@@ -787,13 +787,14 @@ psych_veg.fit$modelfit
 
 ``` r
 psych_veg.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('PSYCH', 'VEG'), rhs %in% c('PSYCH', 'VEG'), lhs != rhs) %>%
+     filter(lhs %in% c('PSYCH', 'NEUROEG'), rhs %in% c('PSYCH', 'NEUROEG'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
 ```
 
-    ##     lhs op rhs STD_Genotype STD_Genotype_SE
-    ## 1 PSYCH ~~ VEG        -0.73           0.054
+    ## [1] lhs             op              rhs             STD_Genotype   
+    ## [5] STD_Genotype_SE
+    ## <0 rows> (or 0-length row.names)
 
 ### Affective-Neurovegetative (Elhai Model 2c)
 
@@ -863,15 +864,15 @@ affect_neuroveg.fit$results[c(1,2,3,6,7)] %>%
 cog_mood_neuroveg.model <- "
 COG =~ NA*ClinGuilt + ClinSui + CommGuilt + CommConc + CommSui
 MOOD =~ NA*ClinGuilt + CommDep + CommAnh + CommGuilt + UkbDep + UkbAnh
-VEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
+NEUROVEG =~ NA*ClinAppDec + ClinAppInc + ClinSleDec + ClinSleInc + ClinMotoInc + ClinMotoDec + CommAppDec + CommAppInc + CommSleDec + CommSleInc + CommFatig
 
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
 COG ~~ 1*COG
 MOOD ~~ 1*MOOD
-VEG ~~ 1*VEG
+NEUROVEG ~~ 1*NEUROVEG
 GATE ~~ 1*GATE
-GATE ~~ 0*COG + 0*MOOD + 0*VEG
+GATE ~~ 0*COG + 0*MOOD + 0*NEUROVEG
 "
 cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_mood_neuroveg.model, imp_cov=TRUE)
 ```
@@ -881,7 +882,7 @@ cog_mood_neuroveg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   2.559 
+    ##   1.114 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714834 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -915,30 +916,30 @@ cog_mood_neuroveg.fit$modelfit
 
 ``` r
 cog_mood_neuroveg.fit$results[c(1,2,3,6,7)] %>%
-     filter(lhs %in% c('COG', 'MOOD', 'VEG'), rhs %in% c('COG', 'MOOD', 'VEG'), lhs != rhs) %>%
+     filter(lhs %in% c('COG', 'MOOD', 'NEUROVEG'), rhs %in% c('COG', 'MOOD', 'NEUROVEG'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
 ```
 
-    ##    lhs op  rhs STD_Genotype STD_Genotype_SE
-    ## 1  COG ~~ MOOD         1.00           0.013
-    ## 2  COG ~~  VEG        -0.78           0.061
-    ## 3 MOOD ~~  VEG        -0.76           0.061
+    ##    lhs op      rhs STD_Genotype STD_Genotype_SE
+    ## 1  COG ~~     MOOD         1.00           0.013
+    ## 2  COG ~~ NEUROVEG        -0.78           0.061
+    ## 3 MOOD ~~ NEUROVEG        -0.76           0.061
 
 ### Cognitive-Appetite-Vegetative (van Loo)
 
 ``` r
 cog_app_veg.model <- "
 COGMOOD =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
-APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + CommAppInc
-VEG =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+APP =~ NA*CommAppDec + CommAppInc + ClinAppInc + ClinAppDec
+LETH =~ NA*ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
 COGMOOD ~~ 1*COGMOOD
 APP ~~ 1*APP
-VEG ~~ 1*VEG
+LETH ~~ 1*LETH
 GATE ~~ 1*GATE
-GATE ~~ 0*COGMOOD + 0*APP + 0*VEG
+GATE ~~ 0*COGMOOD + 0*APP + 0*LETH
 "
 cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg.model, imp_cov=TRUE)
 ```
@@ -948,7 +949,7 @@ cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_ap
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##    2.48 
+    ##   1.336 
     ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714834 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
@@ -973,20 +974,20 @@ cog_app_veg.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_ap
 cog_app_veg.fit$modelfit
 ```
 
-    ##       chisq  df p_chisq      AIC       CFI      SRMR
-    ## df 2919.594 163       0 3013.594 0.9634111 0.1470383
+    ##       chisq  df p_chisq      AIC      CFI      SRMR
+    ## df 2919.604 163       0 3013.604 0.963411 0.1470382
 
 ``` r
 cog_app_veg.fit$results[c(1,2,3,6,7, 9)] %>%
-     filter(lhs %in% c('COGMOOD', 'APP', 'VEG'), rhs %in% c('COGMOOD', 'APP', 'VEG'), lhs != rhs) %>%
+     filter(lhs %in% c('COGMOOD', 'APP', 'LETH'), rhs %in% c('COGMOOD', 'APP', 'LETH'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
 ```
 
-    ##       lhs op rhs STD_Genotype STD_Genotype_SE p_value
-    ## 1 COGMOOD ~~ APP         0.48           0.066 3.4e-13
-    ## 2 COGMOOD ~~ VEG         0.91           0.069 7.8e-40
-    ## 3     APP ~~ VEG         0.66           0.094 1.4e-12
+    ##       lhs op  rhs STD_Genotype STD_Genotype_SE p_value
+    ## 1 COGMOOD ~~  APP         0.48           0.066 3.4e-13
+    ## 2 COGMOOD ~~ LETH         0.91           0.069 7.8e-40
+    ## 3     APP ~~ LETH         0.66           0.094 1.4e-12
 
 ### Melancholic and atypical
 
@@ -1079,7 +1080,7 @@ gwas_meta.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gwas_met
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##    0.26
+    ##    0.21
 
 ``` r
 gwas_meta.fit$modelfit
@@ -1109,20 +1110,20 @@ gwas_meta.fit$results[c(1,2,3,6,7)] %>%
 
 ``` r
 model_list=
-list("A"=list(name="Common", model=commonfactor.fit),
-     "B"=list(name="Case-Community", model=clin_comm.fit),
-     "C"=list(name="Common-Gating", model=gate.fit),
-     "D"=list(name="Case-Community-Gating", model=measure.fit),
-     "E"=list(name="Psych-Somatic", model=psych_soma.fit),
-     "F"=list(name="Psych-Neuroveg", model=psych_veg.fit),
-     "G"=list(name="Affect-Neuroveg", model=affect_neuroveg.fit),
-     "H"=list(name="Cog-Mood-Neuroveg", model=cog_mood_neuroveg.fit),
-     "I"=list(name="Appetite-Vegetative-Cog/Mood", model=cog_app_veg.fit),
-     "J"=list(name="Depression-Melancholic-Atypical", model=mel_aty_afc.fit)
+list("A"=list(abbrev="Depr", name="Depression", model=commonfactor.fit),
+     "B"=list(abbrev = "Case-Comm", name="Case-Community", model=clin_comm.fit),
+     "C"=list(abbrev="Depr-Gate", name="Depression-Gating", model=gate.fit),
+     "D"=list(abbrev="Case-Comm-Gate", name="Case-Community-Gating", model=measure.fit),
+     "E"=list(abbrev = "Psyc-Soma", name="Psychological-Somatic", model=psych_soma.fit),
+     "F"=list(abbrev = "Psyc-Neuv", name="Psychological-Neurovegetative", model=psych_veg.fit),
+     "G"=list(abbrev = "Affc-Neuv", name="Affective-Neurovegetative", model=affect_neuroveg.fit),
+     "H"=list(abbrev = "Cog-Mood-Neuv", name="Cognitive-Mood-Neurovegetative", model=cog_mood_neuroveg.fit),
+     "I"=list(abbrev = "CogMood-App-Leth", name="Cognitive/Mood-Appetite-Lethargy", model=cog_app_veg.fit),
+     "J"=list(abbrev = "AffCog-Melc-Atyp", name="Affective/Cognitive-Melancholic-Atypical", model=mel_aty_afc.fit)
      )
 
 model_fits <- 
-data.frame(Model=names(model_list),
+data.frame(Model=sapply(model_list, function(m) m$abbrev),
            Name=sapply(model_list, function(m) m$name)) %>%
 bind_cols(
 bind_rows(
@@ -1133,47 +1134,50 @@ rownames(model_fits) <- NULL
 knitr::kable(
 model_fits %>%
 mutate(dAIC=AIC-min(AIC)) %>%
-mutate_if(is.numeric, ~signif(., 3))
+mutate_if(is.numeric, ~signif(., 4))
 )
 ```
 
-| Model | Name                            | chisq |  df | p_chisq |  AIC |   CFI |  SRMR | dAIC |
-|:------|:--------------------------------|------:|----:|--------:|-----:|------:|------:|-----:|
-| A     | Common                          |  5280 | 170 |       0 | 5360 | 0.932 | 0.169 | 2340 |
-| B     | Case-Community                  |  5290 | 169 |       0 | 5370 | 0.932 | 0.165 | 2360 |
-| C     | Common-Gating                   |  3230 | 166 |       0 | 3320 | 0.959 | 0.151 |  303 |
-| D     | Case-Community-Gating           |  3280 | 165 |       0 | 3370 | 0.959 | 0.149 |  361 |
-| E     | Psych-Somatic                   |  3630 | 165 |       0 | 3720 | 0.954 | 0.148 |  705 |
-| F     | Psych-Neuroveg                  |  3710 | 165 |       0 | 3800 | 0.953 | 0.144 |  786 |
-| G     | Affect-Neuroveg                 |  3330 | 165 |       0 | 3420 | 0.958 | 0.145 |  409 |
-| H     | Cog-Mood-Neuroveg               |  3900 | 161 |       0 | 4000 | 0.950 | 0.144 |  987 |
-| I     | Appetite-Vegetative-Cog/Mood    |  2920 | 163 |       0 | 3010 | 0.963 | 0.147 |    0 |
-| J     | Depression-Melancholic-Atypical |  3560 | 163 |       0 | 3650 | 0.955 | 0.148 |  638 |
+| Model            | Name                                     | chisq |  df | p_chisq |  AIC |    CFI |   SRMR |   dAIC |
+|:-----------------|:-----------------------------------------|------:|----:|--------:|-----:|-------:|-------:|-------:|
+| Depr             | Depression                               |  5275 | 170 |       0 | 5355 | 0.9322 | 0.1687 | 2342.0 |
+| Case-Comm        | Case-Community                           |  5287 | 169 |       0 | 5369 | 0.9321 | 0.1654 | 2355.0 |
+| Depr-Gate        | Depression-Gating                        |  3229 | 166 |       0 | 3317 | 0.9593 | 0.1508 |  303.1 |
+| Case-Comm-Gate   | Case-Community-Gating                    |  3285 | 165 |       0 | 3375 | 0.9586 | 0.1491 |  361.4 |
+| Psyc-Soma        | Psychological-Somatic                    |  3629 | 165 |       0 | 3719 | 0.9540 | 0.1483 |  705.4 |
+| Psyc-Neuv        | Psychological-Neurovegetative            |  3710 | 165 |       0 | 3800 | 0.9530 | 0.1441 |  786.1 |
+| Affc-Neuv        | Affective-Neurovegetative                |  3333 | 165 |       0 | 3423 | 0.9580 | 0.1449 |  409.0 |
+| Cog-Mood-Neuv    | Cognitive-Mood-Neurovegetative           |  3903 | 161 |       0 | 4001 | 0.9503 | 0.1436 |  987.3 |
+| CogMood-App-Leth | Cognitive/Mood-Appetite-Lethargy         |  2920 | 163 |       0 | 3014 | 0.9634 | 0.1470 |    0.0 |
+| AffCog-Melc-Atyp | Affective/Cognitive-Melancholic-Atypical |  3557 | 163 |       0 | 3651 | 0.9549 | 0.1482 |  637.8 |
 
 The Mood-Appetite-Vegetative model is the best, SRMR is high across all
 the models, indicating that there are high residual correlations.
 
 ## Modifications
 
+### Residual correlations
+
 Add residual correlations between same-item symptoms across cohorts.
 
 ``` r
 cog_app_veg_mod.model <- "
-COG =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
-APP =~ NA*ClinAppDec + ClinAppInc + CommAppDec + CommAppInc
-VEG =~ NA*ClinSleInc + ClinMotoDec + CommSleInc + CommFatig + CommConc
+COGMOOD =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
+APP =~ NA*CommAppDec + CommAppInc + ClinAppDec + ClinAppInc
+LETH =~ NA*ClinSleInc + ClinMotoDec + CommSleInc + CommFatig + CommConc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
 
-COG ~~ 1*COG
+COGMOOD ~~ 1*COGMOOD
 APP ~~ 1*APP
-VEG ~~ 1*VEG
+LETH ~~ 1*LETH
 GATE ~~ 1*GATE
-GATE ~~ 0*COG + 0*APP + 0*VEG
+GATE ~~ 0*COGMOOD + 0*APP + 0*LETH
 
 ClinAppDec ~~ CommAppDec
 ClinAppInc ~~ CommAppInc
 ClinSleDec ~~ CommSleDec
 ClinSleInc ~~ CommSleInc
+ClinGuilt ~~ CommGuilt
 ClinSui ~~ CommSui
 "
 
@@ -1185,8 +1189,8 @@ cog_app_veg_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=co
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   1.147 
-    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714835 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+    ##   1.999 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714834 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
 
     ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
     ## cog_app_veg_mod.model, : A difference greater than .025 was observed pre- and
@@ -1211,27 +1215,119 @@ cog_app_veg_mod.fit$modelfit
 ```
 
     ##       chisq  df p_chisq      AIC       CFI      SRMR
-    ## df 2386.592 158       0 2490.592 0.9704194 0.1397304
+    ## df 2480.922 157       0 2586.922 0.9691541 0.1382657
 
 ``` r
 cog_app_veg_mod.fit$results[c(1,2,3,6,7,9)] %>%
-     filter(rhs %in% c('COG', 'APP', 'VEG'), lhs != rhs) %>%
+     filter(rhs %in% c('COGMOOD', 'APP', 'LETH'), lhs != rhs) %>%
      mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
      print(digits=2)
 ```
 
-    ##   lhs op rhs STD_Genotype STD_Genotype_SE p_value
-    ## 1 COG ~~ APP        -0.51           0.068 1.0e-13
-    ## 2 COG ~~ VEG         0.91           0.069 3.2e-40
-    ## 3 APP ~~ VEG        -0.70           0.100 1.9e-12
+    ##       lhs op  rhs STD_Genotype STD_Genotype_SE p_value
+    ## 1 COGMOOD ~~  APP         0.51           0.068 1.1e-13
+    ## 2 COGMOOD ~~ LETH         0.91           0.069 3.4e-40
+    ## 3     APP ~~ LETH         0.70           0.100 1.9e-12
 
-#### Model coefficients
+Check direction of loadings to interpret factor correlations
+
+``` r
+cog_app_veg.fit$results[c(1,2,3,6,7,9)] %>%
+  filter(lhs == 'APP')
+```
+
+    ##   lhs op        rhs STD_Genotype    STD_Genotype_SE      p_value
+    ## 1 APP =~ CommAppDec    0.7790782 0.0929542663703539 5.234057e-17
+    ## 2 APP =~ CommAppInc    0.9002969 0.0897061989935336 1.058025e-23
+    ## 3 APP =~ ClinAppInc    0.4504302  0.110892280115339 4.867723e-05
+    ## 4 APP =~ ClinAppDec   -0.1718020  0.120614370726439 1.543345e-01
+    ## 5 APP ~~       LETH    0.6645786 0.0938177796178353 1.403356e-12
+    ## 6 APP ~~        APP    1.0000000                              NA
+    ## 7 APP ~~       GATE    0.0000000                              NA
+
+``` r
+cog_app_veg_mod.fit$results[c(1,2,3,6,7,9)] %>%
+  filter(lhs == 'APP')
+```
+
+    ##   lhs op        rhs STD_Genotype    STD_Genotype_SE      p_value
+    ## 1 APP =~ CommAppDec    0.7925112 0.0921300744121172 7.827333e-18
+    ## 2 APP =~ CommAppInc    0.8329249 0.0852770960594114 1.555734e-22
+    ## 3 APP =~ ClinAppDec   -0.2125379  0.127116330225079 9.452530e-02
+    ## 4 APP =~ ClinAppInc    0.3324058  0.132513724996027 1.212589e-02
+    ## 5 APP ~~       LETH    0.7044768 0.0999968202495245 1.854784e-12
+    ## 6 APP ~~        APP    1.0000000                              NA
+    ## 7 APP ~~       GATE    0.0000000                              NA
+
+### Combined factors
+
+Combine Mood/Cognitive/Vegetative symptoms into a single factor
+
+``` r
+cogveg_app.model <- "
+COGMOODLETH =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
+APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + CommAppInc
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+COGMOODLETH ~~ 1*COGMOODLETH
+APP ~~ 1*APP
+GATE ~~ 1*GATE
+GATE ~~ 0*COGMOODLETH + 0*APP
+"
+cogveg_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cogveg_app.model, imp_cov=TRUE)
+```
+
+    ## [1] "Running primary model"
+    ## [1] "Calculating CFI"
+    ## [1] "Calculating Standardized Results"
+    ## [1] "Calculating SRMR"
+    ## elapsed 
+    ##   1.008 
+    ## [1] "The S matrix was smoothed prior to model estimation due to a non-positive definite matrix. The largest absolute difference in a cell between the smoothed and non-smoothed matrix was  0.0503268938714834 As a result of the smoothing, the largest Z-statistic change for the genetic covariances was  1.09016893592689 . We recommend setting the smooth_check argument to true if you are going to run a multivariate GWAS."
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## cogveg_app.model, : A difference greater than .025 was observed pre- and
+    ## post-smoothing in the genetic covariance matrix. This reflects a large
+    ## difference and results should be interpreted with caution!! This can often
+    ## result from including low powered traits, and you might consider removing those
+    ## traits from the model. If you are going to run a multivariate GWAS we strongly
+    ## recommend setting the smooth_check argument to true to check smoothing for each
+    ## SNP.
+
+    ## Warning in usermodel(symptoms_covstruct, estimation = "DWLS", model =
+    ## cogveg_app.model, : A difference greater than .025 was observed pre- and
+    ## post-smoothing for Z-statistics in the genetic covariance matrix. This reflects
+    ## a large difference and results should be interpreted with caution!! This can
+    ## often result from including low powered traits, and you might consider removing
+    ## those traits from the model. If you are going to run a multivariate GWAS we
+    ## strongly recommend setting the smooth_check argument to true to check smoothing
+    ## for each SNP.
+
+``` r
+cogveg_app.fit$modelfit
+```
+
+    ##       chisq  df p_chisq      AIC    CFI      SRMR
+    ## df 2598.469 165       0 2688.469 0.9677 0.1477724
+
+``` r
+cogveg_app.fit$results[c(1,2,3,6,7, 9)] %>%
+   filter(lhs %in% c('COGMOODLETH', 'APP'), rhs %in% c('COGMOODLETH', 'APP'), lhs != rhs) %>%
+   mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+   print(digits=2)
+```
+
+    ##           lhs op rhs STD_Genotype STD_Genotype_SE p_value
+    ## 1 COGMOODLETH ~~ APP         0.53           0.065   2e-16
+
+### Model coefficients
 
 Add modified model to list
 
 ``` r
 mod_list <- model_list
-mod_list[["M"]] <- list(name="Modified", model=cog_app_veg_mod.fit)
+mod_list[["M"]] <- list(abbrev = "CogMood-App-Leth [Res]", name="Cog/Mood-Appetite-Lethargy residual correlations", model=cog_app_veg_mod.fit)
+mod_list[["N"]] <- list(abbrev = "CogMoodLeth-App", name="Cog/Mood/Leth-Appetite", model=cogveg_app.fit)
 ```
 
 Check that all symptoms have been included in each model
@@ -1240,15 +1336,21 @@ Check that all symptoms have been included in each model
 sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs))
 ```
 
-    ##    A    B    C    D    E    F    G    H    I    J    M 
-    ## TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+    ##    A    B    C    D    E    F    G    H    I    J    M    N 
+    ## TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
 
 Refine naming scheme for publication.
 
 ``` r
-mod_list[["Meta"]] <- list(name="Meta-analysis", model=gwas_meta.fit)
+mod_list[["Meta"]] <- list(abbrev = "Meta", name="Meta-analysis", model=gwas_meta.fit)
 
-model_coefs <- as_tibble(bind_rows(lapply(mod_list, function(m) m$model$results), .id='model')) |>
+model_abbrevs <- bind_rows(lapply(mod_list, function(m) tibble(abbrev=m$abbrev)), .id='model')
+model_names <- bind_rows(lapply(mod_list, function(m) tibble(name=m$name)), .id='model')
+
+model_coefs <- model_abbrevs |>
+  left_join(model_names, by = 'model') |>
+  left_join(bind_rows(lapply(mod_list, function(m) m$model$results), .id='model'),
+            by = 'model') |>
   mutate(lhs = case_when(str_detect(lhs, "Clin") ~ str_replace(lhs, "Clin", "Case"),
                          lhs == "CLIN" ~ "CASE",
                          .default = lhs),
@@ -1256,7 +1358,24 @@ model_coefs <- as_tibble(bind_rows(lapply(mod_list, function(m) m$model$results)
                         rhs == "CLIN" ~ "CASE",
                         .default = rhs))
 
-write_csv(model_coefs, "mdd-symptom-gsem-model_files/model_coefs.csv")
+write_tsv(model_coefs, "mdd-symptom-gsem-model_files/model_coefs.txt")
+```
+
+Get all model fit statistics
+
+``` r
+model_fits_all <- 
+tibble(Model=sapply(mod_list, function(m) m$abbrev),
+           Name=sapply(mod_list, function(m) m$name)) %>%
+bind_cols(
+bind_rows(
+lapply(mod_list, function(m) m$model$modelfit)
+)) %>%
+mutate(useAIC = if_else(row_number() <= 10, true = AIC, false = NA)) %>%
+mutate(dAIC = useAIC - min(useAIC, na.rm = TRUE)) %>%
+select(-useAIC)
+
+write_tsv(model_fits_all, "mdd-symptom-gsem-model_files/model_fits.txt")
 ```
 
 #### Coefficient plots
@@ -1265,7 +1384,7 @@ Heatmap of how often symptoms load on the same factor in symptoms models
 
 ``` r
 symptom_model_connectivity <- model_coefs |>
-  filter(! lhs %in% c('MDD', 'CASE', 'COMM', 'GATE'), !model %in% c("M", "Meta")) |>
+  filter(! lhs %in% c('MDD', 'CASE', 'COMM', 'GATE'), !model %in% c("M", "N")) |>
   transmute(factor=str_c(model, lhs, sep = "_"), rhs, value = 1) |>
   pivot_wider(names_from = factor, values_from = value, values_fill = 0)
 
@@ -1280,40 +1399,41 @@ heatmap(symptom_model_connectivity_matrix %*% t(symptom_model_connectivity_matri
 Plot structure of symptom-focused models
 
 ``` r
+model_labels <- model_abbrevs |>
+  mutate(model_label = if_else(abbrev == "Meta",
+                               true = "Multivariate GWAS:",
+                               false = str_glue("{abbrev}:")))
+                               
+factor_labels <- rev(c("MDD" = "Depression",
+"CASE" = "Case-only",
+"COMM" = "Community",
+"PSYCH" = "Psychological",
+"COGMOOD" = "Cognitive/Mood",
+"COGMOODLETH" = "Cog/Mood/Leth",
+"COG" = "Cognitive",
+"MOOD" = "Mood", 
+"AFFECT" = "Affective",
+"AFC" = "Affect/Cognitive",
+"SOMA" = "Somatic",
+"APP" = "Appetite/Weight",
+"LETH" = "Lethargy",
+"NEUROVEG" = "Neurovegetative",
+"MEL" = "Melancholic",
+"ATY" = "Atypical",
+"GATE" = "Gating",
+"META" = "F1"))
+
 symptom_model_structure <- model_coefs |>
-  filter(op == "=~", model != "M") |>
+  filter(op == "=~") |>
   mutate(cohort = case_when(str_detect(rhs, "Case") ~ "Case-only",
                             str_detect(rhs, "Comm") ~ "Community",
-                            str_detect(rhs, "Ukb") ~ "UKB Touchscreen"),
+                            str_detect(rhs, "Ukb") ~ "UKB-T"),
          symptom = str_remove(rhs, "(Case|Comm|Ukb)"),
          loading = if_else(abs(STD_Genotype) > 1, true = 1 * sign(STD_Genotype), false = STD_Genotype),
-         Model = if_else(model == "Meta", true = "Multivariate GWAS:", false = str_c("Model ", model, ":")),
-         Factor = case_match(lhs,
-                            "MDD" ~ "MDD",
-                            "CASE" ~ "Case-only",
-                            "COMM" ~ "Community",
-                            "GATE" ~ "Gating",
-                            "PSYCH" ~ "Psychological",
-                            "SOMA" ~ "Somatic",
-                            "VEG" ~ "Vegetative",
-                            "AFFECT" ~ "Affective",
-                            "NEUROVEG" ~ "Neurovegetative",
-                            "COG" ~ "Cognitive",
-                            "MOOD" ~ "Mood", 
-                            "COGMOOD" ~ "Cognitive/Mood",
-                            "APP" ~ "Appetite/Weight",
-                            "MEL" ~ "Melancholic",
-                            "ATY" ~ "Atypical",
-                            "AFC" ~ "Affective/Cognitive",
-                            "META" ~ "F1")) |>
-  mutate(Factor_levels = factor(Factor, levels =
-    c("F1", "Gating", "Affective/Cognitive", "Atypical", "Melancholic", 
-    "Appetite/Weight", "Cognitive/Mood", "Mood",
-    "Cognitive", "Neurovegetative", "Affective",
-    "Vegetative", "Somatic", "Psychological",
-    "Community", "Case-only", "MDD")))
+         Model = factor(model, levels = pull(model_labels, model), labels = pull(model_labels, model_label)),
+         Factor = factor(lhs, levels = names(factor_labels), labels = factor_labels))
          
-ggplot(symptom_model_structure, aes(x = symptom, y = Factor_levels, colour = cohort, group = cohort, size = abs(loading))) +
+ggplot(symptom_model_structure, aes(x = symptom, y = Factor, colour = cohort, group = cohort, size = abs(loading))) +
   geom_point(position = position_dodge(width = 0.4)) +
   facet_grid(rows = vars(Model), scales = "free", space = "free", switch = "y") +
   scale_x_discrete("Symptom", limits = c("Sui", "Dep", "Anh", "Guilt", "Conc",
@@ -1324,7 +1444,7 @@ ggplot(symptom_model_structure, aes(x = symptom, y = Factor_levels, colour = coh
   scale_colour_discrete("Cohorts") +
   theme_minimal() +
   theme(strip.placement = "outside",
-        strip.text.y.left = element_text(angle = 0),
+        strip.text.y.left = element_text(angle = 0, hjust = 1),
         legend.position = "top",
         legend.spacing.x = unit(1, "pt"),
         panel.grid.major.x = element_blank(),
@@ -1334,8 +1454,8 @@ ggplot(symptom_model_structure, aes(x = symptom, y = Factor_levels, colour = coh
 ![](mdd-symptom-gsem-model_files/figure-gfm/model_loadings-1.png)<!-- -->
 
 ``` r
-ggsave("mdd-symptom-gsem-model_files/model_loadings.png", width=8, height=7, dpi=300)
-ggsave("mdd-symptom-gsem-model_files/model_loadings.pdf", width=8, height=7)
+ggsave("mdd-symptom-gsem-model_files/model_loadings.png", width=10, height=8, dpi=300)
+ggsave("mdd-symptom-gsem-model_files/model_loadings.pdf", width=10, height=8)
 ```
 
 #### Model Implied and residual genetic correlations

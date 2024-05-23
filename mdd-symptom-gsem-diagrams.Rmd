@@ -33,6 +33,7 @@ Make separate entries for symptoms and symptom residuals
 
 ```{r}
 model_coefs_symptom_residuals <- model_coefs_symptoms |>
+  filter(lhs == rhs) |>
   mutate(lhs = str_glue("u[{lhs}]"), op = "=~",
          STD_Genotype = 1, STD_Genotype_SE = NA)
   

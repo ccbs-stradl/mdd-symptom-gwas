@@ -813,7 +813,7 @@ ext_table <- ext_fdr |>
 transmute(Phenotype,
           Factor=factor(Factor,
 	    			levels=c('GATE', 'DEP', 'APP', 'CLIN', 'COMM'),
-						labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight", "Clinical", "Community")),
+						labels=c("Gating", "Cog/Mood/Leth", "Appetite/Weight", "Clinical", "Community")),
 		  Model=Beta, STD_Genotype, STD_Genotype_SE, p_value, fdr) |>
 arrange(Phenotype, desc(Factor), Model)
 
@@ -826,85 +826,89 @@ ext_table
 |:---------|:---------------|:--------|------------:|:------------------|---------:|---------:|
 |AlcDep    |Appetite/Weight |Multiple |    0.1096859|0.120188694795222  | 0.3614351| 1.0000000|
 |AlcDep    |Appetite/Weight |Single   |    0.5652479|0.075903641945665  | 0.0000000| 0.0000000|
-|AlcDep    |Veg/Cog/Mood    |Multiple |    0.4385401|0.120028331427671  | 0.0002585| 0.0021352|
-|AlcDep    |Veg/Cog/Mood    |Single   |    0.5334481|0.0697136062054994 | 0.0000000| 0.0000000|
+|AlcDep    |Cog/Mood/Leth   |Multiple |    0.4385401|0.120028331427671  | 0.0002585| 0.0021352|
+|AlcDep    |Cog/Mood/Leth   |Single   |    0.5334481|0.0697136062054994 | 0.0000000| 0.0000000|
 |AlcDep    |Gating          |Multiple |    0.0836763|0.112380289634555  | 0.4565237| 1.0000000|
 |AlcDep    |Gating          |Single   |    0.6279489|0.108105533328542  | 0.0000000| 0.0000001|
 |Anxiety   |Appetite/Weight |Multiple |    0.0097178|0.0732045684172342 | 0.8943640| 1.0000000|
 |Anxiety   |Appetite/Weight |Single   |    0.7959054|0.0574613137032865 | 0.0000000| 0.0000000|
-|Anxiety   |Veg/Cog/Mood    |Multiple |    0.5782698|0.0816597680577615 | 0.0000000| 0.0000000|
-|Anxiety   |Veg/Cog/Mood    |Single   |    0.7541020|0.0467032496502194 | 0.0000000| 0.0000000|
+|Anxiety   |Cog/Mood/Leth   |Multiple |    0.5782698|0.0816597680577615 | 0.0000000| 0.0000000|
+|Anxiety   |Cog/Mood/Leth   |Single   |    0.7541020|0.0467032496502194 | 0.0000000| 0.0000000|
 |Anxiety   |Gating          |Multiple |    0.4113565|0.0753474048535236 | 0.0000000| 0.0000005|
 |Anxiety   |Gating          |Single   |    1.0462852|0.108738985221118  | 0.0000000| 0.0000000|
 |BIP       |Appetite/Weight |Multiple |   -0.1784320|0.0694552109586214 | 0.0101989| 0.0764042|
 |BIP       |Appetite/Weight |Single   |    0.5093337|0.0440438620781618 | 0.0000000| 0.0000000|
-|BIP       |Veg/Cog/Mood    |Multiple |    0.5052079|0.0686307668760079 | 0.0000000| 0.0000000|
-|BIP       |Veg/Cog/Mood    |Single   |    0.4838158|0.0375477179197763 | 0.0000000| 0.0000000|
+|BIP       |Cog/Mood/Leth   |Multiple |    0.5052079|0.0686307668760079 | 0.0000000| 0.0000000|
+|BIP       |Cog/Mood/Leth   |Single   |    0.4838158|0.0375477179197763 | 0.0000000| 0.0000000|
 |BIP       |Gating          |Multiple |    0.2285188|0.0634680062485222 | 0.0003176| 0.0025898|
 |BIP       |Gating          |Single   |    0.6629559|0.0711418794992003 | 0.0000000| 0.0000000|
 |BMI       |Appetite/Weight |Multiple |    0.9070369|0.112105894106029  | 0.0000000| 0.0000000|
 |BMI       |Appetite/Weight |Single   |    0.2408110|0.0301763486246527 | 0.0000000| 0.0000000|
-|BMI       |Veg/Cog/Mood    |Multiple |   -0.2305507|0.108273605013646  | 0.0332302| 0.2432844|
-|BMI       |Veg/Cog/Mood    |Single   |    0.2231958|0.027216658834216  | 0.0000000| 0.0000000|
+|BMI       |Cog/Mood/Leth   |Multiple |   -0.2305507|0.108273605013646  | 0.0332302| 0.2432844|
+|BMI       |Cog/Mood/Leth   |Single   |    0.2231958|0.027216658834216  | 0.0000000| 0.0000000|
 |BMI       |Gating          |Multiple |   -0.1626126|0.0498740531075817 | 0.0011123| 0.0086339|
 |BMI       |Gating          |Single   |    0.1099097|0.0360284399614011 | 0.0022837| 0.0173094|
 |EA        |Appetite/Weight |Multiple |   -0.3979638|0.0601516728402306 | 0.0000000| 0.0000000|
 |EA        |Appetite/Weight |Single   |   -0.1261768|0.0305502505774698 | 0.0000363| 0.0003290|
-|EA        |Veg/Cog/Mood    |Multiple |   -0.0175035|0.0611455771232012 | 0.7745987| 1.0000000|
-|EA        |Veg/Cog/Mood    |Single   |   -0.1157552|0.0284744747904233 | 0.0000480| 0.0004178|
+|EA        |Cog/Mood/Leth   |Multiple |   -0.0175035|0.0611455771232012 | 0.7745987| 1.0000000|
+|EA        |Cog/Mood/Leth   |Single   |   -0.1157552|0.0284744747904233 | 0.0000480| 0.0004178|
 |EA        |Gating          |Multiple |    0.2925221|0.0525742865295086 | 0.0000000| 0.0000003|
 |EA        |Gating          |Single   |    0.0301122|0.0349152221396346 | 0.3884487| 1.0000000|
 |MD        |Appetite/Weight |Multiple |   -0.0105493|0.0576910716374024 | 0.8549666| 1.0000000|
 |MD        |Appetite/Weight |Single   |    0.9392811|0.0547299322786408 | 0.0000000| 0.0000000|
-|MD        |Veg/Cog/Mood    |Multiple |    0.7660022|0.0578234104221499 | 0.0000000| 0.0000000|
-|MD        |Veg/Cog/Mood    |Single   |    0.8902598|0.0347314646592678 | 0.0000000| 0.0000000|
+|MD        |Cog/Mood/Leth   |Multiple |    0.7660022|0.0578234104221499 | 0.0000000| 0.0000000|
+|MD        |Cog/Mood/Leth   |Single   |    0.8902598|0.0347314646592678 | 0.0000000| 0.0000000|
 |MD        |Gating          |Multiple |    0.3440181|0.0640870406501528 | 0.0000001| 0.0000008|
 |MD        |Gating          |Single   |    1.1664855|0.105562729815299  | 0.0000000| 0.0000000|
 |MDD       |Appetite/Weight |Multiple |   -0.0519641|0.124626886240015  | 0.6767345| 1.0000000|
 |MDD       |Appetite/Weight |Single   |    0.8548052|0.0828666825706371 | 0.0000000| 0.0000000|
-|MDD       |Veg/Cog/Mood    |Multiple |    0.6896049|0.11860116622217   | 0.0000000| 0.0000001|
-|MDD       |Veg/Cog/Mood    |Single   |    0.8099844|0.070742129966017  | 0.0000000| 0.0000000|
+|MDD       |Cog/Mood/Leth   |Multiple |    0.6896049|0.11860116622217   | 0.0000000| 0.0000001|
+|MDD       |Cog/Mood/Leth   |Single   |    0.8099844|0.070742129966017  | 0.0000000| 0.0000000|
 |MDD       |Gating          |Multiple |    0.3667491|0.112334183626618  | 0.0010953| 0.0086060|
 |MDD       |Gating          |Single   |    1.0897140|0.129227721797031  | 0.0000000| 0.0000000|
 |Neu       |Appetite/Weight |Multiple |   -0.0904588|0.0735871166649329 | 0.2189820| 1.0000000|
 |Neu       |Appetite/Weight |Single   |    0.7207396|0.0542476095995377 | 0.0000000| 0.0000000|
-|Neu       |Veg/Cog/Mood    |Multiple |    0.7007153|0.072479757422604  | 0.0000000| 0.0000000|
-|Neu       |Veg/Cog/Mood    |Single   |    0.6835373|0.0422441574366223 | 0.0000000| 0.0000000|
+|Neu       |Cog/Mood/Leth   |Multiple |    0.7007153|0.072479757422604  | 0.0000000| 0.0000000|
+|Neu       |Cog/Mood/Leth   |Single   |    0.6835373|0.0422441574366223 | 0.0000000| 0.0000000|
 |Neu       |Gating          |Multiple |    0.1265226|0.0704160198769036 | 0.0723697| 0.5067960|
 |Neu       |Gating          |Single   |    0.8323191|0.0821243821043781 | 0.0000000| 0.0000000|
 |PTSD      |Appetite/Weight |Multiple |    0.0869004|0.108833943514199  | 0.4245837| 1.0000000|
 |PTSD      |Appetite/Weight |Single   |    0.8667664|0.0814609323857996 | 0.0000000| 0.0000000|
-|PTSD      |Veg/Cog/Mood    |Multiple |    0.6717708|0.108654765788171  | 0.0000000| 0.0000000|
-|PTSD      |Veg/Cog/Mood    |Single   |    0.8202554|0.0689374769876117 | 0.0000000| 0.0000000|
+|PTSD      |Cog/Mood/Leth   |Multiple |    0.6717708|0.108654765788171  | 0.0000000| 0.0000000|
+|PTSD      |Cog/Mood/Leth   |Single   |    0.8202554|0.0689374769876117 | 0.0000000| 0.0000000|
 |PTSD      |Gating          |Multiple |    0.2442573|0.112899792614527  | 0.0305033| 0.2258868|
 |PTSD      |Gating          |Single   |    1.0247135|0.126944340784626  | 0.0000000| 0.0000000|
 |Pain      |Appetite/Weight |Multiple |    0.3204153|0.065318950625268  | 0.0000009| 0.0000086|
 |Pain      |Appetite/Weight |Single   |    0.6104359|0.0460975785624394 | 0.0000000| 0.0000000|
-|Pain      |Veg/Cog/Mood    |Multiple |    0.3588201|0.0683367008328796 | 0.0000002| 0.0000015|
-|Pain      |Veg/Cog/Mood    |Single   |    0.5756360|0.037703284625588  | 0.0000000| 0.0000000|
+|Pain      |Cog/Mood/Leth   |Multiple |    0.3588201|0.0683367008328796 | 0.0000002| 0.0000015|
+|Pain      |Cog/Mood/Leth   |Single   |    0.5756360|0.037703284625588  | 0.0000000| 0.0000000|
 |Pain      |Gating          |Multiple |    0.0668457|0.0624362631779806 | 0.2843426| 1.0000000|
 |Pain      |Gating          |Single   |    0.6429665|0.0716527853756348 | 0.0000000| 0.0000000|
 |Sleep     |Appetite/Weight |Multiple |    0.0730203|0.0757898836329139 | 0.3353088| 1.0000000|
 |Sleep     |Appetite/Weight |Single   |    0.3042489|0.0466210669741548 | 0.0000000| 0.0000000|
-|Sleep     |Veg/Cog/Mood    |Multiple |    0.2594016|0.075195387380373  | 0.0005611| 0.0045186|
-|Sleep     |Veg/Cog/Mood    |Single   |    0.2869461|0.0435752155004726 | 0.0000000| 0.0000000|
+|Sleep     |Cog/Mood/Leth   |Multiple |    0.2594016|0.075195387380373  | 0.0005611| 0.0045186|
+|Sleep     |Cog/Mood/Leth   |Single   |    0.2869461|0.0435752155004726 | 0.0000000| 0.0000000|
 |Sleep     |Gating          |Multiple |   -0.0213268|0.0708735548164563 | 0.7634711| 1.0000000|
 |Sleep     |Gating          |Single   |    0.3101626|0.0626698026037064 | 0.0000007| 0.0000070|
 |Smoking   |Appetite/Weight |Multiple |    0.3745528|0.0736397312779802 | 0.0000004| 0.0000035|
 |Smoking   |Appetite/Weight |Single   |    0.2767710|0.0382221256804699 | 0.0000000| 0.0000000|
-|Smoking   |Veg/Cog/Mood    |Multiple |    0.0067245|0.0708370731463606 | 0.9243087| 1.0000000|
-|Smoking   |Veg/Cog/Mood    |Single   |    0.2598808|0.035612615201055  | 0.0000000| 0.0000000|
+|Smoking   |Cog/Mood/Leth   |Multiple |    0.0067245|0.0708370731463606 | 0.9243087| 1.0000000|
+|Smoking   |Cog/Mood/Leth   |Single   |    0.2598808|0.035612615201055  | 0.0000000| 0.0000000|
 |Smoking   |Gating          |Multiple |    0.0636624|0.0498122507659045 | 0.2012327| 1.0000000|
 |Smoking   |Gating          |Single   |    0.2906463|0.054422662044535  | 0.0000001| 0.0000009|
 
 </div>
+
+```r
+write_tsv(ext_table, "mdd-symptom-gsem-ext_files/ext_coefficients.txt")
+```
 
 
 ```r
 ggplot(ext_fdr,
        aes(x=factor(Factor,
 	   			 levels=c('GATE','DEP', 'APP'),
-					 labels=c("Gating", "Veg/Cog/Mood", "Appetite/Weight")),
+					 labels=c("Gating", "Cog/Mood/Leth", "Appetite/Weight")),
            y=STD_Genotype,
            color=factor(Beta, levels=c('Single', 'Multiple')),
            shape=factor(Beta, levels=c('Single', 'Multiple')),
@@ -950,7 +954,7 @@ labs(color  = "Regression: ", shape = "Regression: ")
 ![](mdd-symptom-gsem-ext_files/figure-html/ex_plot-1.png)<!-- -->
 
 ```r
-ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 10, height = 5, units = "in")
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 8, height = 4, units = "in")
 ```
 
 ```
@@ -969,7 +973,7 @@ ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 10, height = 5, units =
 ```
 
 ```r
-ggsave("mdd-symptom-gsem-ext_files/ex_beta.png", width = 10, height = 5, units = "in", dpi = 300)
+ggsave("mdd-symptom-gsem-ext_files/ex_beta.png", width = 8, height = 4, units = "in", dpi = 300)
 ```
 
 ```
@@ -1002,7 +1006,7 @@ filter(any(sign(STD_Genotype) == 1) & any(sign(STD_Genotype) == -1))
 |Phenotype |Factor          |Model  | STD_Genotype|STD_Genotype_SE    |   p_value|       fdr|
 |:---------|:---------------|:------|------------:|:------------------|---------:|---------:|
 |EA        |Appetite/Weight |Single |   -0.1261768|0.0305502505774698 | 0.0000363| 0.0003290|
-|EA        |Veg/Cog/Mood    |Single |   -0.1157552|0.0284744747904233 | 0.0000480| 0.0004178|
+|EA        |Cog/Mood/Leth   |Single |   -0.1157552|0.0284744747904233 | 0.0000480| 0.0004178|
 |EA        |Gating          |Single |    0.0301122|0.0349152221396346 | 0.3884487| 1.0000000|
 
 </div>
@@ -1029,7 +1033,7 @@ specific_sample
 
 ```r
 ext_table |>
-filter(Factor %in% c('Appetite/Weight', 'Veg/Cog/Mood', 'Gating'), Model == 'Multiple') |>
+filter(Factor %in% c('Appetite/Weight', 'Cog/Mood/Leth', 'Gating'), Model == 'Multiple') |>
 group_by(Phenotype) |>
 filter(any(fdr <= 0.05), any(fdr > 0.05)) |>
 ungroup() |>
@@ -1047,15 +1051,15 @@ arrange(Factor)
 |EA        |Gating          |Multiple |    0.2925221|0.0525742865295086 | 0.0000000| 0.0000003|
 |MD        |Gating          |Multiple |    0.3440181|0.0640870406501528 | 0.0000001| 0.0000008|
 |MDD       |Gating          |Multiple |    0.3667491|0.112334183626618  | 0.0010953| 0.0086060|
-|AlcDep    |Veg/Cog/Mood    |Multiple |    0.4385401|0.120028331427671  | 0.0002585| 0.0021352|
-|Anxiety   |Veg/Cog/Mood    |Multiple |    0.5782698|0.0816597680577615 | 0.0000000| 0.0000000|
-|BIP       |Veg/Cog/Mood    |Multiple |    0.5052079|0.0686307668760079 | 0.0000000| 0.0000000|
-|MD        |Veg/Cog/Mood    |Multiple |    0.7660022|0.0578234104221499 | 0.0000000| 0.0000000|
-|MDD       |Veg/Cog/Mood    |Multiple |    0.6896049|0.11860116622217   | 0.0000000| 0.0000001|
-|Neu       |Veg/Cog/Mood    |Multiple |    0.7007153|0.072479757422604  | 0.0000000| 0.0000000|
-|PTSD      |Veg/Cog/Mood    |Multiple |    0.6717708|0.108654765788171  | 0.0000000| 0.0000000|
-|Pain      |Veg/Cog/Mood    |Multiple |    0.3588201|0.0683367008328796 | 0.0000002| 0.0000015|
-|Sleep     |Veg/Cog/Mood    |Multiple |    0.2594016|0.075195387380373  | 0.0005611| 0.0045186|
+|AlcDep    |Cog/Mood/Leth   |Multiple |    0.4385401|0.120028331427671  | 0.0002585| 0.0021352|
+|Anxiety   |Cog/Mood/Leth   |Multiple |    0.5782698|0.0816597680577615 | 0.0000000| 0.0000000|
+|BIP       |Cog/Mood/Leth   |Multiple |    0.5052079|0.0686307668760079 | 0.0000000| 0.0000000|
+|MD        |Cog/Mood/Leth   |Multiple |    0.7660022|0.0578234104221499 | 0.0000000| 0.0000000|
+|MDD       |Cog/Mood/Leth   |Multiple |    0.6896049|0.11860116622217   | 0.0000000| 0.0000001|
+|Neu       |Cog/Mood/Leth   |Multiple |    0.7007153|0.072479757422604  | 0.0000000| 0.0000000|
+|PTSD      |Cog/Mood/Leth   |Multiple |    0.6717708|0.108654765788171  | 0.0000000| 0.0000000|
+|Pain      |Cog/Mood/Leth   |Multiple |    0.3588201|0.0683367008328796 | 0.0000002| 0.0000015|
+|Sleep     |Cog/Mood/Leth   |Multiple |    0.2594016|0.075195387380373  | 0.0005611| 0.0045186|
 |BMI       |Appetite/Weight |Multiple |    0.9070369|0.112105894106029  | 0.0000000| 0.0000000|
 |EA        |Appetite/Weight |Multiple |   -0.3979638|0.0601516728402306 | 0.0000000| 0.0000000|
 |Pain      |Appetite/Weight |Multiple |    0.3204153|0.065318950625268  | 0.0000009| 0.0000086|

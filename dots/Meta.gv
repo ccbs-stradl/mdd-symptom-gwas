@@ -1,0 +1,66 @@
+digraph {
+
+graph [layout = "dot",
+       rankdir = "TB",
+       outputorder = "edgesfirst",
+       bgcolor = "white"]
+
+node [fontname = "Helvetica",
+      fontsize = "10",
+      shape = "circle",
+      fixedsize = "true",
+      width = "0.5",
+      style = "filled",
+      fillcolor = "aliceblue",
+      color = "gray70",
+      fontcolor = "gray50"]
+
+edge [fontname = "Helvetica",
+     fontsize = "8",
+     len = "1.5",
+     color = "gray80",
+     arrowsize = "0.5"]
+
+rankdir = TB;
+{rank=min; 1;}
+{rank=same; 9; 10; 11; 12; 13; 14; 15;}
+{rank=max; 2; 3; 4; 5; 6; 7; 8;}
+
+  "1" [label = "META", shape = "oval", width = "1", fontcolor = "black"] 
+  "2" [label = "u[CommConc]", shape = "oval", width = "1", fontcolor = "black"] 
+  "3" [label = "u[CommDep]", shape = "oval", width = "1", fontcolor = "black"] 
+  "4" [label = "u[CommFatig]", shape = "oval", width = "1", fontcolor = "black"] 
+  "5" [label = "u[CommGuilt]", shape = "oval", width = "1", fontcolor = "black"] 
+  "6" [label = "u[CommSleDec]", shape = "oval", width = "1", fontcolor = "black"] 
+  "7" [label = "u[CommSui]", shape = "oval", width = "1", fontcolor = "black"] 
+  "8" [label = "u[UkbDep]", shape = "oval", width = "1", fontcolor = "black"] 
+  "9" [label = "CommConc", shape = "oval", width = "1", fontcolor = "black"] 
+  "10" [label = "CommDep", shape = "oval", width = "1", fontcolor = "black"] 
+  "11" [label = "CommFatig", shape = "oval", width = "1", fontcolor = "black"] 
+  "12" [label = "CommGuilt", shape = "oval", width = "1", fontcolor = "black"] 
+  "13" [label = "CommSleDec", shape = "oval", width = "1", fontcolor = "black"] 
+  "14" [label = "CommSui", shape = "oval", width = "1", fontcolor = "black"] 
+  "15" [label = "UkbDep", shape = "oval", width = "1", fontcolor = "black"] 
+"1"->"9" [label = "0.7 (0.08)", penwidth = "1.70171552863936", dir = "forward"] 
+"1"->"10" [label = "0.88 (0.05)", penwidth = "2.05903163285691", dir = "forward"] 
+"1"->"11" [label = "0.56 (0.08)", penwidth = "1.41450659763996", dir = "forward"] 
+"1"->"12" [label = "0.65 (0.06)", penwidth = "1.59543060132981", dir = "forward"] 
+"1"->"13" [label = "0.66 (0.07)", penwidth = "1.61815627672135", dir = "forward"] 
+"1"->"14" [label = "0.65 (0.08)", penwidth = "1.59249894654858", dir = "forward"] 
+"1"->"1" [label = "1", penwidth = "2.3", dir = "both"] 
+"1"->"15" [label = "0.93 (0.07)", penwidth = "2.16029078927583", dir = "forward"] 
+"2"->"9" [label = "1", penwidth = "2.3", dir = "forward"] 
+"2"->"2" [label = "0.51 (0.17)", penwidth = "1.3175963843063", dir = "both"] 
+"3"->"10" [label = "1", penwidth = "2.3", dir = "forward"] 
+"3"->"3" [label = "0.23 (0.08)", penwidth = "0.752904132409689", dir = "both"] 
+"4"->"11" [label = "1", penwidth = "2.3", dir = "forward"] 
+"4"->"4" [label = "0.69 (0.22)", penwidth = "1.67893515243629", dir = "both"] 
+"5"->"12" [label = "1", penwidth = "2.3", dir = "forward"] 
+"5"->"5" [label = "0.58 (0.11)", penwidth = "1.46092902240563", dir = "both"] 
+"6"->"13" [label = "1", penwidth = "2.3", dir = "forward"] 
+"6"->"6" [label = "0.57 (0.21)", penwidth = "1.43123359137952", dir = "both"] 
+"7"->"14" [label = "1", penwidth = "2.3", dir = "forward"] 
+"7"->"7" [label = "0.58 (0.17)", penwidth = "1.46473007490442", dir = "both"] 
+"8"->"15" [label = "1", penwidth = "2.3", dir = "forward"] 
+"8"->"8" [label = "0.13 (0.15)", penwidth = "0.56966330928156", dir = "both"] 
+}
