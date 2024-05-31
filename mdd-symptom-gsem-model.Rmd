@@ -561,58 +561,14 @@ The Mood-Appetite-Vegetative model is the best, SRMR is high across all the mode
 
 ## Modifications
 
-### Residual correlations
-
-Add residual correlations between same-item symptoms across cohorts. 
-
-```{r cog_app_mod, cache=TRUE}
-
-cog_app_veg_mod.model <- "
-COGMOOD =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui
-APP =~ NA*CommAppDec + CommAppInc + ClinAppDec + ClinAppInc
-LETH =~ NA*ClinSleInc + ClinMotoDec + CommSleInc + CommFatig + CommConc
-GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
-
-COGMOOD ~~ 1*COGMOOD
-APP ~~ 1*APP
-LETH ~~ 1*LETH
-GATE ~~ 1*GATE
-GATE ~~ 0*COGMOOD + 0*APP + 0*LETH
-
-ClinAppDec ~~ CommAppDec
-ClinAppInc ~~ CommAppInc
-ClinSleDec ~~ CommSleDec
-ClinSleInc ~~ CommSleInc
-ClinGuilt ~~ CommGuilt
-ClinSui ~~ CommSui
-"
-
-cog_app_veg_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cog_app_veg_mod.model, imp_cov=TRUE)
-
-cog_app_veg_mod.fit$modelfit
-cog_app_veg_mod.fit$results[c(1,2,3,6,7,9)] %>%
-	 filter(rhs %in% c('COGMOOD', 'APP', 'LETH'), lhs != rhs) %>%
-	 mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
-	 print(digits=2)
-```
-
-Check direction of loadings to interpret factor correlations
-
-```{r}
-cog_app_veg.fit$results[c(1,2,3,6,7,9)] %>%
-  filter(lhs == 'APP')
-
-cog_app_veg_mod.fit$results[c(1,2,3,6,7,9)] %>%
-  filter(lhs == 'APP')
-```
 
 ### Combined factors
 
 Combine Mood/Cognitive/Vegetative symptoms into a single factor
 
-```{r cogveg_app, cache=TRUE}
+```{r cogmoodleth_app, cache=TRUE}
 
-cogveg_app.model <- "
+cogmoodleth_app.model <- "
 COGMOODLETH =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + CommSleInc + ClinMotoDec + CommFatig + CommConc
 APP =~ NA*ClinAppInc + ClinAppDec + CommAppDec + CommAppInc
 GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
@@ -622,14 +578,58 @@ APP ~~ 1*APP
 GATE ~~ 1*GATE
 GATE ~~ 0*COGMOODLETH + 0*APP
 "
-cogveg_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cogveg_app.model, imp_cov=TRUE)
+cogmoodleth_app.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cogmoodleth_app.model, imp_cov=TRUE)
 
-cogveg_app.fit$modelfit
-cogveg_app.fit$results[c(1,2,3,6,7, 9)] %>%
+cogmoodleth_app.fit$modelfit
+cogmoodleth_app.fit$results[c(1,2,3,6,7, 9)] %>%
    filter(lhs %in% c('COGMOODLETH', 'APP'), rhs %in% c('COGMOODLETH', 'APP'), lhs != rhs) %>%
    mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
    print(digits=2)
 
+```
+
+
+### Residual correlations
+
+Add residual correlations between same-item symptoms across cohorts. 
+
+```{r cogmoodleth_app_mod, cache=TRUE}
+
+cogmoodleth_app_mod.model <- "
+COGMOODLETH =~ NA*CommDep + CommAnh + UkbDep + UkbAnh + ClinSleDec + CommSleDec + ClinMotoInc + ClinGuilt + CommGuilt + ClinSui + CommSui + ClinSleInc + ClinMotoDec + CommSleInc + CommFatig + CommConc
+APP =~ NA*CommAppDec + CommAppInc + ClinAppDec + ClinAppInc
+GATE =~ NA*CommDep + CommAnh + UkbDep + UkbAnh
+
+COGMOODLETH ~~ 1*COGMOODLETH
+APP ~~ 1*APP
+GATE ~~ 1*GATE
+GATE ~~ 0*COGMOODLETH + 0*APP
+
+ClinAppDec ~~ CommAppDec
+ClinAppInc ~~ CommAppInc
+ClinSleDec ~~ CommSleDec
+ClinSleInc ~~ CommSleInc
+ClinGuilt ~~ CommGuilt
+ClinSui ~~ CommSui
+"
+
+cogmoodleth_app_mod.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=cogmoodleth_app_mod.model, imp_cov=TRUE)
+
+cogmoodleth_app_mod.fit$modelfit
+cogmoodleth_app_mod.fit$results[c(1,2,3,6,7,9)] %>%
+   filter(rhs %in% c('COGMOODLETH', 'APP'), lhs != rhs) %>%
+   mutate(STD_Genotype_SE=as.numeric(STD_Genotype_SE)) %>%
+   print(digits=2)
+```
+
+Check direction of loadings to interpret factor correlations
+
+```{r}
+cog_app_veg.fit$results[c(1,2,3,6,7,9)] %>%
+  filter(lhs == 'APP')
+
+cogmoodleth_app_mod.fit$results[c(1,2,3,6,7,9)] %>%
+  filter(lhs == 'APP')
 ```
 
 ### Model coefficients
@@ -637,8 +637,8 @@ cogveg_app.fit$results[c(1,2,3,6,7, 9)] %>%
 Add modified model to list
 ```{r mod_list}
 mod_list <- model_list
-mod_list[["M"]] <- list(abbrev = "CogMood-App-Leth [Res]", name="Cog/Mood-Appetite-Lethargy residual correlations", model=cog_app_veg_mod.fit)
-mod_list[["N"]] <- list(abbrev = "CogMoodLeth-App", name="Cog/Mood/Leth-Appetite", model=cogveg_app.fit)
+mod_list[["M"]] <- list(abbrev = "CogMoodLeth-App", name="Cog/Mood/Leth-Appetite", model=cogmoodleth_app.fit)
+mod_list[["N"]] <- list(abbrev = "CogMoodLeth-App [Res]", name="Cog/Mood-Appetite-Lethargy residual correlations", model=cogmoodleth_app_mod.fit)
 ```
 
 Check that all symptoms have been included in each model
@@ -650,7 +650,7 @@ sapply(mod_list, function(m) all(names(symptoms_S_var) %in% m$model$results$rhs)
 Refine naming scheme for publication.
 ```{r model_coefs}
 
-mod_list[["Meta"]] <- list(abbrev = "Meta", name="Meta-analysis", model=gwas_meta.fit)
+# mod_list[["Meta"]] <- list(abbrev = "Meta", name="Meta-analysis", model=gwas_meta.fit)
 
 model_abbrevs <- bind_rows(lapply(mod_list, function(m) tibble(abbrev=m$abbrev)), .id='model')
 model_names <- bind_rows(lapply(mod_list, function(m) tibble(name=m$name)), .id='model')
@@ -737,6 +737,7 @@ factor_labels <- rev(c("MDD" = "Depression",
 
 symptom_model_structure <- model_coefs |>
   filter(op == "=~") |>
+  filter(!abbrev %in% c("CogMoodLeth-App [Res]", "Meta")) |>
   mutate(cohort = case_when(str_detect(rhs, "Case") ~ "Case-only",
                             str_detect(rhs, "Comm") ~ "Community",
                             str_detect(rhs, "Ukb") ~ "UKB-T"),
