@@ -521,14 +521,13 @@ write_tsv(ext_table, "mdd-symptom-gsem-ext_files/ext_coefficients.txt")
 
 ```{r ex_plot, fig.width=10, fig.height=6, dpi=300}
 
-ggplot(ext_fdr,
+ggplot(mutate(ext_fdr, FDR = if_else(fdr <= 0.05, true = 'Sig.', false = 'Non-Sig.')),
        aes(x=factor(Factor,
 	   			 levels=c('GATE','DEP', 'APP'),
 					 labels=c("Gating", "Cog/Mood/Leth", "Appetite/Weight")),
            y=STD_Genotype,
-           color=factor(Beta, levels=c('Single', 'Multiple')),
-           shape=factor(Beta, levels=c('Single', 'Multiple')),
-           alpha = if_else(fdr <= 0.05, true = 'Sig.', false = 'Non-Sig.'),
+           color=interaction(Beta, FDR, sep = '-'),
+           shape=interaction(Beta, FDR),
            ymin=qnorm(0.025, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)),
            ymax=qnorm(0.975, mean=STD_Genotype, sd=as.numeric(STD_Genotype_SE)))) +
 geom_hline(yintercept=0, col='darkgray') +
@@ -536,16 +535,19 @@ geom_pointrange(position=position_dodge(width=-0.5)) +
 facet_wrap(~Phenotype) +
 scale_x_discrete('Factor') +
 scale_y_continuous('Beta', breaks = seq(-1.5, 1.5, 0.5)) +
-scale_color_discrete('Regression: ') +
-scale_alpha_discrete('FDR:', range = c(0.4, 1)) +
+scale_color_manual('Regression:',
+                    values = c('Single-Sig.' = '#f8766d',
+                               'Single-Non-Sig.' = '#f8766d',
+                               'Multiple-Sig.' = '#609dff',
+                               'Multiple-Non-Sig.' = '#609dff')) +
+scale_shape_manual('FDR:', values = c('Single.Sig.' = 16, 'Single.Non-Sig.' = 21, 'Multiple.Sig.' = 15, 'Multiple.Non-Sig.' = 22)) +
 coord_flip() + #ylim=c(-1.5, 1.5)) +
 theme_minimal() +
 theme(axis.text.y=element_text(size=12),
       strip.text=element_text(size=12),
       legend.title=element_text(size=12),
       legend.text=element_text(size=14),
-      legend.position='top') +
-labs(color  = "Regression: ", shape = "Regression: ")
+      legend.position='top')
 
 ggsave("mdd-symptom-gsem-ext_files/ex_beta.pdf", width = 8, height = 4, units = "in")
 ggsave("mdd-symptom-gsem-ext_files/ex_beta.png", width = 8, height = 4, units = "in", dpi = 300)

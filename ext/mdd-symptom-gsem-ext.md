@@ -74,13 +74,87 @@ GenomicSEM version
 
 ```r
 require(readr)
-require(tidyr)
-require(stringr)
-require(dplyr)
-require(ggplot2)
-require(corrplot)
-require(GenomicSEM)
+```
 
+```
+## Loading required package: readr
+```
+
+```r
+require(tidyr)
+```
+
+```
+## Loading required package: tidyr
+```
+
+```r
+require(stringr)
+```
+
+```
+## Loading required package: stringr
+```
+
+```r
+require(dplyr)
+```
+
+```
+## Loading required package: dplyr
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
+require(ggplot2)
+```
+
+```
+## Loading required package: ggplot2
+```
+
+```
+## Use suppressPackageStartupMessages() to eliminate package startup
+## messages
+```
+
+```r
+require(corrplot)
+```
+
+```
+## Loading required package: corrplot
+```
+
+```
+## corrplot 0.92 loaded
+```
+
+```r
+require(GenomicSEM)
+```
+
+```
+## Loading required package: GenomicSEM
+```
+
+```r
 packageVersion("GenomicSEM")
 ```
 
@@ -226,7 +300,7 @@ MDD9;Suicidality;Suicidality;Sui
 
 ```
 ## Rows: 15 Columns: 4
-## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (4): ref, h, v, abbv
 ## 
@@ -257,7 +331,7 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a Multiple p
 
 ```
 ## Rows: 15 Columns: 2
-## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: ";"
 ## chr (2): Reference, Description
 ## 
@@ -278,7 +352,7 @@ all_sumstats_prevs <- read_tsv(here::here('ldsc', paste(all_covstruct_prefix, 'p
 
 ```
 ## Rows: 26 Columns: 9
-## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: "\t"
 ## chr (5): cohorts, symptom, sumstats, filename, trait_name
 ## dbl (4): Nca, Nco, samp_prev, pop_prev

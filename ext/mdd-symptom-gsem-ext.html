@@ -539,15 +539,32 @@ if(!require(GenomicSEM)) install_github(&quot;MichelNivard/GenomicSEM&quot;)
 
 if(!require(tidySEM)) install_github(&quot;cjvanlissa/tidySEM&quot;)</code></pre>
 <p>GenomicSEM version</p>
-<pre class="r"><code>require(readr)
-require(tidyr)
-require(stringr)
-require(dplyr)
-require(ggplot2)
-require(corrplot)
-require(GenomicSEM)
-
-packageVersion(&quot;GenomicSEM&quot;)</code></pre>
+<pre class="r"><code>require(readr)</code></pre>
+<pre><code>## Loading required package: readr</code></pre>
+<pre class="r"><code>require(tidyr)</code></pre>
+<pre><code>## Loading required package: tidyr</code></pre>
+<pre class="r"><code>require(stringr)</code></pre>
+<pre><code>## Loading required package: stringr</code></pre>
+<pre class="r"><code>require(dplyr)</code></pre>
+<pre><code>## Loading required package: dplyr</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>require(ggplot2)</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<pre><code>## Use suppressPackageStartupMessages() to eliminate package startup
+## messages</code></pre>
+<pre class="r"><code>require(corrplot)</code></pre>
+<pre><code>## Loading required package: corrplot</code></pre>
+<pre><code>## corrplot 0.92 loaded</code></pre>
+<pre class="r"><code>require(GenomicSEM)</code></pre>
+<pre><code>## Loading required package: GenomicSEM</code></pre>
+<pre class="r"><code>packageVersion(&quot;GenomicSEM&quot;)</code></pre>
 <pre><code>## [1] &#39;0.0.5&#39;</code></pre>
 </div>
 </div>
@@ -677,7 +694,7 @@ MDD8;Concentrate;Concentrate;Conc
 MDD9;Suicidality;Suicidality;Sui
 &quot;, col_names=c(&#39;ref&#39;, &#39;h&#39;, &#39;v&#39;, &#39;abbv&#39;), delim=&#39;;&#39;)</code></pre>
 <pre><code>## Rows: 15 Columns: 4
-## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
 ## chr (4): ref, h, v, abbv
 ## 
@@ -702,7 +719,7 @@ MDD8;Diminished ability to think or concentrate, or indecisiveness
 MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a Multiple plan for attempting suicide
 &quot;, col_names=c(&#39;Reference&#39;, &#39;Description&#39;), delim=&#39;;&#39;)</code></pre>
 <pre><code>## Rows: 15 Columns: 2
-## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
 ## chr (2): Reference, Description
 ## 
@@ -716,7 +733,7 @@ prevalences</h1>
 <pre class="r"><code>all_covstruct_prefix &lt;- &#39;clin.comm.covstruct&#39;
 all_sumstats_prevs &lt;- read_tsv(here::here(&#39;ldsc&#39;, paste(all_covstruct_prefix, &#39;prevs&#39;, &#39;txt&#39;, sep=&#39;.&#39;))) </code></pre>
 <pre><code>## Rows: 26 Columns: 9
-## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;\t&quot;
 ## chr (5): cohorts, symptom, sumstats, filename, trait_name
 ## dbl (4): Nca, Nco, samp_prev, pop_prev
