@@ -164,11 +164,11 @@ sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 't
     ## ℹ Use `spec()` to retrieve the full column specification for this data.
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-Rename samples: AGDS/GS/PGC is the Case-only **Clin**incal meta-analysis
-sample (`Clin`) and ALSPAC/EstBB/UKB is the **Comm**unity meta-analysis
-sample (`Comm`); and rename symptoms numbers (`MDD1`, `MDD2`) to
-abbreviations (`Dep`, `Anh`). There are also extra measures of `MDD1`
-and `MDD2` from **UKB** Baseline data.
+Rename samples: AGDS/GS/PGC is the Case-enriched **Clin**incal
+meta-analysis sample (`Clin`) and ALSPAC/EstBB/UKB is the **Comm**unity
+meta-analysis sample (`Comm`); and rename symptoms numbers (`MDD1`,
+`MDD2`) to abbreviations (`Dep`, `Anh`). There are also extra measures
+of `MDD1` and `MDD2` from **UKB** Baseline data.
 
 ``` r
 cohorts_sample_symptoms <-
@@ -1088,7 +1088,7 @@ gwas_meta.fit <- usermodel(symptoms_covstruct, estimation='DWLS', model=gwas_met
     ## [1] "Calculating Standardized Results"
     ## [1] "Calculating SRMR"
     ## elapsed 
-    ##   0.256
+    ##   0.249
 
 ``` r
 gwas_meta.fit$modelfit
@@ -1408,7 +1408,7 @@ model_labels <- model_abbrevs |>
                                false = str_glue("{abbrev}:")))
                                
 factor_labels <- rev(c("MDD" = "Depression",
-"CASE" = "Case-only",
+"CASE" = "Case-enriched",
 "COMM" = "Community",
 "PSYCH" = "Psychological",
 "COGMOOD" = "Cognitive/Mood",
@@ -1429,7 +1429,7 @@ factor_labels <- rev(c("MDD" = "Depression",
 symptom_model_structure <- model_coefs |>
   filter(op == "=~") |>
   filter(!abbrev %in% c("CogMoodLeth-App [Res]", "Meta")) |>
-  mutate(cohort = case_when(str_detect(rhs, "Case") ~ "Case-only",
+  mutate(cohort = case_when(str_detect(rhs, "Case") ~ "Cases",
                             str_detect(rhs, "Comm") ~ "Community",
                             str_detect(rhs, "Ukb") ~ "UKB-T"),
          symptom = str_remove(rhs, "(Case|Comm|Ukb)"),
@@ -1458,8 +1458,8 @@ ggplot(symptom_model_structure, aes(x = symptom, y = Factor, colour = cohort, gr
 ![](mdd-symptom-gsem-model_files/figure-gfm/model_loadings-1.png)<!-- -->
 
 ``` r
-ggsave("mdd-symptom-gsem-model_files/model_loadings.png", width=10, height=8, dpi=300)
-ggsave("mdd-symptom-gsem-model_files/model_loadings.pdf", width=10, height=8)
+ggsave("mdd-symptom-gsem-model_files/model_loadings.png", width=11, height=8, dpi=300)
+ggsave("mdd-symptom-gsem-model_files/model_loadings.pdf", width=11, height=8)
 ```
 
 #### Model Implied and residual genetic correlations

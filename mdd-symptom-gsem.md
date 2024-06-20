@@ -1,51 +1,32 @@
----
-title: GenomicSEM of MDD symptoms setup
-author: Mark Adams, Bradley Jermy, Jackson Thorp, Andrew Grotzinger, Michel Nivard 
-output:
-  html_document:
-    toc: TRUE
-    code_folding: hide
-    number_sections: TRUE
-    df_print: kable
-    keep_md: true
-  md_document:
-    variant: gfm
----
-
-
 # Setup
 
 ## R packages
 
 R version
 
-
-```r
+``` r
 R.version
 ```
 
-```
-##                _                           
-## platform       aarch64-apple-darwin20      
-## arch           aarch64                     
-## os             darwin20                    
-## system         aarch64, darwin20           
-## status                                     
-## major          4                           
-## minor          3.2                         
-## year           2023                        
-## month          10                          
-## day            31                          
-## svn rev        85441                       
-## language       R                           
-## version.string R version 4.3.2 (2023-10-31)
-## nickname       Eye Holes
-```
+    ##                _                           
+    ## platform       aarch64-apple-darwin20      
+    ## arch           aarch64                     
+    ## os             darwin20                    
+    ## system         aarch64, darwin20           
+    ## status                                     
+    ## major          4                           
+    ## minor          3.2                         
+    ## year           2023                        
+    ## month          10                          
+    ## day            31                          
+    ## svn rev        85441                       
+    ## language       R                           
+    ## version.string R version 4.3.2 (2023-10-31)
+    ## nickname       Eye Holes
 
 Package installation
 
-
-```r
+``` r
 required_packages <- c('devtools', 'readr', 'tidyr', 'dplyr', 'ggplot2', 'stringr', 'corrplot')
 for(pack in required_packages) if(!require(pack, character.only=TRUE)) install.packages(pack)
 
@@ -56,97 +37,25 @@ if(!require(GenomicSEM)) install_github("MichelNivard/GenomicSEM")
 
 GenomicSEM version
 
-```r
+``` r
 require(readr)
-```
-
-```
-## Loading required package: readr
-```
-
-```r
 require(tidyr)
-```
-
-```
-## Loading required package: tidyr
-```
-
-```r
 require(stringr)
-```
-
-```
-## Loading required package: stringr
-```
-
-```r
 require(dplyr)
-```
-
-```
-## Loading required package: dplyr
-```
-
-```
-## 
-## Attaching package: 'dplyr'
-```
-
-```
-## The following objects are masked from 'package:stats':
-## 
-##     filter, lag
-```
-
-```
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
-```r
 require(ggplot2)
-```
-
-```
-## Loading required package: ggplot2
-```
-
-```r
 require(corrplot)
-```
-
-```
-## Loading required package: corrplot
-```
-
-```
-## corrplot 0.92 loaded
-```
-
-```r
 require(GenomicSEM)
-```
 
-```
-## Loading required package: GenomicSEM
-```
-
-```r
 packageVersion("GenomicSEM")
 ```
 
-```
-## [1] '0.0.5'
-```
+    ## [1] '0.0.5'
 
 ## LD Score files
 
 The LDSC support files first need to be downloaded and unpacked
 
-
-```bash
+``` bash
 # LD Score reference files
 mkdir -p sumstats/reference
 curl -L https://data.broadinstitute.org/alkesgroup/LDSCORE/eur_w_ld_chr.tar.bz2 > sumstats/reference/eur_w_ld_chr.tar.bz2
@@ -162,8 +71,7 @@ bunzip2 sumstats/reference/w_hm3.snplist.bz2
 
 MDD DSM symptoms are numbered 1-9:
 
-
-```r
+``` r
 # plot labels
 
 dsm_mdd_symptoms_labels <-
@@ -186,17 +94,15 @@ MDD9;Suicidality;Suicidality;Sui
 ", col_names=c('ref', 'h', 'v', 'abbv'), delim=';')
 ```
 
-```
-## Rows: 15 Columns: 4
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-## Delimiter: ";"
-## chr (4): ref, h, v, abbv
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-```
+    ## Rows: 15 Columns: 4
+    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## Delimiter: ";"
+    ## chr (4): ref, h, v, abbv
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-```r
+``` r
 dsm_mdd_symptoms_reference <-
 read_delim("
 MDD1;Depressed mood most of the day, nearly every day
@@ -217,44 +123,38 @@ MDD9;Recurrent thoughts of death or suicide or a suicide attempt or a specific p
 ", col_names=c('Reference', 'Description'), delim=';')
 ```
 
-```
-## Rows: 15 Columns: 2
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-## Delimiter: ";"
-## chr (2): Reference, Description
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-```
+    ## Rows: 15 Columns: 2
+    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## Delimiter: ";"
+    ## chr (2): Reference, Description
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-```r
+``` r
 dsm_mdd_symptoms_reference %>%
 left_join(dsm_mdd_symptoms_labels, by=c('Reference'='ref')) %>%
 select(Reference, Abbreviation=abbv, Label=h, Description)
 ```
 
-<div class="kable-table">
-
-|Reference |Abbreviation |Label       |Description                                                                                                  |
-|:---------|:------------|:-----------|:------------------------------------------------------------------------------------------------------------|
-|MDD1      |Dep          |Mood        |Depressed mood most of the day, nearly every day                                                             |
-|MDD2      |Anh          |Interest    |Markedly diminished interest or pleasure in all, or almost all, activities most of the day, nearly every day |
-|MDD3      |App          |Weight⇅     |Significant change in weight or appetite                                                                     |
-|MDD3a     |AppDec       |Weight⇊     |Significant weight loss or decrease in appetite                                                              |
-|MDD3b     |AppInc       |Weight⇈     |Significant weight gain or increase in appetite                                                              |
-|MDD4      |Sle          |Sleep⇅      |Sleeping too much or not sleeping enough                                                                     |
-|MDD4a     |SleDec       |Sleep⇊      |Insomnia nearly every day                                                                                    |
-|MDD4b     |SleInc       |Sleep⇈      |Hypersomnia nearly every day                                                                                 |
-|MDD5      |Moto         |Motor⇅      |Changes in speed/amount of moving or speaking                                                                |
-|MDD5a     |MotoInc      |Motor⇈      |Psychomotor agitation nearly every day                                                                       |
-|MDD5b     |MotoDec      |Motor⇊      |Psychomotor slowing nearly every day                                                                         |
-|MDD6      |Fatig        |Fatigue     |Fatigue or loss of energy nearly every day                                                                   |
-|MDD7      |Guilt        |Guilt       |Feelings of worthlessness or excessive or inappropriate guilt                                                |
-|MDD8      |Conc         |Concentrate |Diminished ability to think or concentrate, or indecisiveness                                                |
-|MDD9      |Sui          |Suicidality |Recurrent thoughts of death or suicide or a suicide attempt or a specific plan for attempting suicide        |
-
-</div>
-
+    ## # A tibble: 15 × 4
+    ##    Reference Abbreviation Label       Description                               
+    ##    <chr>     <chr>        <chr>       <chr>                                     
+    ##  1 MDD1      Dep          Mood        Depressed mood most of the day, nearly ev…
+    ##  2 MDD2      Anh          Interest    Markedly diminished interest or pleasure …
+    ##  3 MDD3      App          Weight⇅     Significant change in weight or appetite  
+    ##  4 MDD3a     AppDec       Weight⇊     Significant weight loss or decrease in ap…
+    ##  5 MDD3b     AppInc       Weight⇈     Significant weight gain or increase in ap…
+    ##  6 MDD4      Sle          Sleep⇅      Sleeping too much or not sleeping enough  
+    ##  7 MDD4a     SleDec       Sleep⇊      Insomnia nearly every day                 
+    ##  8 MDD4b     SleInc       Sleep⇈      Hypersomnia nearly every day              
+    ##  9 MDD5      Moto         Motor⇅      Changes in speed/amount of moving or spea…
+    ## 10 MDD5a     MotoInc      Motor⇈      Psychomotor agitation nearly every day    
+    ## 11 MDD5b     MotoDec      Motor⇊      Psychomotor slowing nearly every day      
+    ## 12 MDD6      Fatig        Fatigue     Fatigue or loss of energy nearly every day
+    ## 13 MDD7      Guilt        Guilt       Feelings of worthlessness or excessive or…
+    ## 14 MDD8      Conc         Concentrate Diminished ability to think or concentrat…
+    ## 15 MDD9      Sui          Suicidality Recurrent thoughts of death or suicide or…
 
 # Sumstats munging
 
@@ -263,12 +163,18 @@ GWAS of MDD symptoms for two cohorts were meta-analyzed:
 - Population samples: ALSPAC + UK Biobankc
 - Case-enriched samples: AGDS + PGC
 
-Meta-analysis was conducted using the Ricopoli [daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit) so the summary statistics are in the  ("**D**osage **An**alyz**er**) format. These can be munged with `munge_sumstats.py` from the [ldsc](https://github.com/bulik/ldsc) program. 
+Meta-analysis was conducted using the Ricopoli
+[daner](https://docs.google.com/document/d/1TWIhr8-qpCXB13WCXcU1_HDio8lC_MeWoAg2jlggrtU/edit)
+so the summary statistics are in the (“**D**osage **An**alyz**er**)
+format. These can be munged with `munge_sumstats.py` from the
+[ldsc](https://github.com/bulik/ldsc) program.
 
-First we need to prepare files for the MDD5 symptoms for the population samples as these were only available in one cohorts (ALSPAC) and therefore not meta-analyzed. These just need to  be copied with the correct names and have sample size columns added.
+First we need to prepare files for the MDD5 symptoms for the population
+samples as these were only available in one cohorts (ALSPAC) and
+therefore not meta-analyzed. These just need to be copied with the
+correct names and have sample size columns added.
 
-
-```bash
+``` bash
 
 mkdir -p meta/distribution/Comm.MDD5a_psychomotorFast
 mkdir -p meta/distribution/Comm_UKB.MDD5b_psychomotorSlow
@@ -276,13 +182,12 @@ mkdir -p meta/distribution/Comm_UKB.MDD5b_psychomotorSlow
 gunzip -c sumstats/aligned/daner_MDD5a_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print "CHR", "SNP", "BP", "A1", "A2", "FRQ_A_113", "FRQ_U_3181", "INFO", "OR", "SE", "P", "Nca", "Nco", "Neff_half"} else {print $0, 113, 3181, 218.247}}' | gzip -c > meta/distribution/Comm.MDD5a_psychomotorFast/daner_Comm.MDD5a_psychomotorFast.gz
 
 gunzip -c sumstats/aligned/daner_MDD5b_ALSPAC_CISR.txt.aligned.gz | awk 'BEGIN {OFS="\t"}; {if(NR == 1) {print "CHR", "SNP", "BP", "A1", "A2", "FRQ_A_299", "FRQ_U_2995", "INFO", "OR", "SE", "P", "Nca", "Nco", "Neff_half"} else {print $0, 299, 2995, 425.468}}' | gzip -c > meta/distribution/Comm.MDD5b_psychomotorSlow/daner_Comm.MDD5b_psychomotorSlow.gz
-
 ```
 
-We find all daner files in the meta-analysis directory and loop them through the munge step.
+We find all daner files in the meta-analysis directory and loop them
+through the munge step.
 
-
-```r
+``` r
 # Munge sumstats for all cohorts symptom GWASs
 
 # find meta-analysed daner sumstats files for format daner_[COHORTS].MDD[N]_[SYMPTOM].gz
@@ -335,25 +240,20 @@ for(daner in daner_files) {
 
 # Symptom prevalences
 
-Running [multivariable LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects) requires knowing the sample prevalences and population prevalences of each symptom. Sample prevalences can be calculated from the GWAS summary statistics output but population prevalences have to be estimated.
+Running [multivariable
+LDSC](https://github.com/MichelNivard/GenomicSEM/wiki/3.-Models-without-Individual-SNP-effects)
+requires knowing the sample prevalences and population prevalences of
+each symptom. Sample prevalences can be calculated from the GWAS summary
+statistics output but population prevalences have to be estimated.
 
 ## Population prevalences
 
-We include a table of counts of symptom presence and absence for PGC cohorts
+We include a table of counts of symptom presence and absence for PGC
+cohorts
 
-
-```r
+``` r
 pgc_symptom_counts <- read_table2('sumstats/PGC/CasesAllCohorts/pgc_dsm_symptom_counts.txt')
-```
 
-```
-## Warning: `read_table2()` was deprecated in readr 2.0.0.
-## ℹ Please use `read_table()` instead.
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
-```
-
-```r
 pgc_symptom_counts %>%
   spread(Status, N) %>%
   unite(AbsentPresent, Absent, Present, sep=':') %>%
@@ -362,26 +262,23 @@ pgc_symptom_counts %>%
   spread(MDD_counts, AbsentPresent)
 ```
 
-<div class="kable-table">
+    ## # A tibble: 12 × 3
+    ##    Symptom `Case (absent:present)` `Control (absent:present)`
+    ##    <chr>   <chr>                   <chr>                     
+    ##  1 MDD1    914:12689               2809:364                  
+    ##  2 MDD2    1451:11671              2591:234                  
+    ##  3 MDD3a   6370:7060               2742:83                   
+    ##  4 MDD3b   9421:2930               2804:21                   
+    ##  5 MDD4a   3340:10209              2639:186                  
+    ##  6 MDD4b   7859:3440               2793:32                   
+    ##  7 MDD5a   5533:5510               2738:87                   
+    ##  8 MDD5b   6405:5815               2756:69                   
+    ##  9 MDD6    1736:11833              2602:223                  
+    ## 10 MDD7    3072:10113              2703:122                  
+    ## 11 MDD8    1501:11209              2719:106                  
+    ## 12 MDD9    6194:7221               2779:46
 
-|Symptom |Case (absent:present) |Control (absent:present) |
-|:-------|:---------------------|:------------------------|
-|MDD1    |914:12689             |2809:364                 |
-|MDD2    |1451:11671            |2591:234                 |
-|MDD3a   |6370:7060             |2742:83                  |
-|MDD3b   |9421:2930             |2804:21                  |
-|MDD4a   |3340:10209            |2639:186                 |
-|MDD4b   |7859:3440             |2793:32                  |
-|MDD5a   |5533:5510             |2738:87                  |
-|MDD5b   |6405:5815             |2756:69                  |
-|MDD6    |1736:11833            |2602:223                 |
-|MDD7    |3072:10113            |2703:122                 |
-|MDD8    |1501:11209            |2719:106                 |
-|MDD9    |6194:7221             |2779:46                  |
-
-</div>
-
-```r
+``` r
 pgc_symptom_counts %>% 
 spread(Status, N) %>%
 mutate(Total=Absent+Present) %>%
@@ -389,29 +286,25 @@ filter(MDD == 'Case') %>%
 arrange(Total)
 ```
 
-<div class="kable-table">
-
-|MDD  |Symptom | Absent| Present| Total|
-|:----|:-------|------:|-------:|-----:|
-|Case |MDD5a   |   5533|    5510| 11043|
-|Case |MDD4b   |   7859|    3440| 11299|
-|Case |MDD5b   |   6405|    5815| 12220|
-|Case |MDD3b   |   9421|    2930| 12351|
-|Case |MDD8    |   1501|   11209| 12710|
-|Case |MDD2    |   1451|   11671| 13122|
-|Case |MDD7    |   3072|   10113| 13185|
-|Case |MDD9    |   6194|    7221| 13415|
-|Case |MDD3a   |   6370|    7060| 13430|
-|Case |MDD4a   |   3340|   10209| 13549|
-|Case |MDD6    |   1736|   11833| 13569|
-|Case |MDD1    |    914|   12689| 13603|
-
-</div>
+    ## # A tibble: 12 × 5
+    ##    MDD   Symptom Absent Present Total
+    ##    <chr> <chr>    <dbl>   <dbl> <dbl>
+    ##  1 Case  MDD5a     5533    5510 11043
+    ##  2 Case  MDD4b     7859    3440 11299
+    ##  3 Case  MDD5b     6405    5815 12220
+    ##  4 Case  MDD3b     9421    2930 12351
+    ##  5 Case  MDD8      1501   11209 12710
+    ##  6 Case  MDD2      1451   11671 13122
+    ##  7 Case  MDD7      3072   10113 13185
+    ##  8 Case  MDD9      6194    7221 13415
+    ##  9 Case  MDD3a     6370    7060 13430
+    ## 10 Case  MDD4a     3340   10209 13549
+    ## 11 Case  MDD6      1736   11833 13569
+    ## 12 Case  MDD1       914   12689 13603
 
 Calculate symptom prevalences separately for cases and controls:
 
-
-```r
+``` r
 pgc_symptom_prevalences <- 
 pgc_symptom_counts %>%
   spread(Status, N) %>%
@@ -424,36 +317,34 @@ pgc_symptom_prevalences %>%
   select(Symptom=h, Case, Control)
 ```
 
-<div class="kable-table">
+    ## # A tibble: 12 × 3
+    ##    Symptom      Case Control
+    ##    <chr>       <dbl>   <dbl>
+    ##  1 Mood        0.933 0.115  
+    ##  2 Interest    0.889 0.0828 
+    ##  3 Weight⇊     0.526 0.0294 
+    ##  4 Weight⇈     0.237 0.00743
+    ##  5 Sleep⇊      0.753 0.0658 
+    ##  6 Sleep⇈      0.304 0.0113 
+    ##  7 Motor⇈      0.499 0.0308 
+    ##  8 Motor⇊      0.476 0.0244 
+    ##  9 Fatigue     0.872 0.0789 
+    ## 10 Guilt       0.767 0.0432 
+    ## 11 Concentrate 0.882 0.0375 
+    ## 12 Suicidality 0.538 0.0163
 
-|Symptom     |      Case|   Control|
-|:-----------|---------:|---------:|
-|Mood        | 0.9328089| 0.1147179|
-|Interest    | 0.8894223| 0.0828319|
-|Weight⇊     | 0.5256888| 0.0293805|
-|Weight⇈     | 0.2372278| 0.0074336|
-|Sleep⇊      | 0.7534873| 0.0658407|
-|Sleep⇈      | 0.3044517| 0.0113274|
-|Motor⇈      | 0.4989586| 0.0307965|
-|Motor⇊      | 0.4758592| 0.0244248|
-|Fatigue     | 0.8720613| 0.0789381|
-|Guilt       | 0.7670080| 0.0431858|
-|Concentrate | 0.8819040| 0.0375221|
-|Suicidality | 0.5382780| 0.0162832|
-
-</div>
-
-```r
+``` r
 pgc_symptom_sample_sizes <- 
 pgc_symptom_counts %>%
 group_by(Symptom) %>%
 summarize(Ntotal=sum(N))
 ```
 
-Estimation of population prevalence based on average case/control estimates depends on the prevalence of MDD (e.g., [15% in high income countries](https://www.annualreviews.org/doi/10.1146/annurev-publhealth-031912-114409))
+Estimation of population prevalence based on average case/control
+estimates depends on the prevalence of MDD (e.g., [15% in high income
+countries](https://www.annualreviews.org/doi/10.1146/annurev-publhealth-031912-114409))
 
-
-```r
+``` r
 pgc_symptom_prev_size <- pgc_symptom_prevalences %>% 
   left_join(pgc_symptom_sample_sizes, by='Symptom')
 
@@ -463,28 +354,26 @@ lm(Case ~ Control, data=pgc_symptom_prev_size, weights=Ntotal)
 summary(case_control_prev_lm)
 ```
 
-```
-## 
-## Call:
-## lm(formula = Case ~ Control, data = pgc_symptom_prev_size, weights = Ntotal)
-## 
-## Weighted Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -21.833  -8.900  -2.081   4.932  35.727 
-## 
-## Coefficients:
-##             Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)  0.36979    0.06711   5.510 0.000258 ***
-## Control      6.00913    1.18889   5.054 0.000496 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Residual standard error: 16.6 on 10 degrees of freedom
-## Multiple R-squared:  0.7187,	Adjusted R-squared:  0.6906 
-## F-statistic: 25.55 on 1 and 10 DF,  p-value: 0.000496
-```
+    ## 
+    ## Call:
+    ## lm(formula = Case ~ Control, data = pgc_symptom_prev_size, weights = Ntotal)
+    ## 
+    ## Weighted Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -21.833  -8.900  -2.081   4.932  35.727 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  0.36979    0.06711   5.510 0.000258 ***
+    ## Control      6.00913    1.18889   5.054 0.000496 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 16.6 on 10 degrees of freedom
+    ## Multiple R-squared:  0.7187, Adjusted R-squared:  0.6906 
+    ## F-statistic: 25.55 on 1 and 10 DF,  p-value: 0.000496
 
-```r
+``` r
 ggplot(pgc_symptom_prev_size %>% left_join(dsm_mdd_symptoms_labels, by=c('Symptom'='ref')), aes(x=Control, y=Case, weight=Ntotal)) +
   geom_point() +
   stat_smooth(method='lm', fullrange=TRUE) +
@@ -494,16 +383,16 @@ ggplot(pgc_symptom_prev_size %>% left_join(dsm_mdd_symptoms_labels, by=c('Sympto
   coord_cartesian(xlim=c(0, 0.13), ylim=c(0, 1))
 ```
 
-```
-## `geom_smooth()` using formula = 'y ~ x'
-```
+    ## `geom_smooth()` using formula = 'y ~ x'
 
-![](mdd-symptom-gsem_files/figure-html/pgc_symptom_prev-1.png)<!-- -->
+![](mdd-symptom-gsem_files/figure-gfm/pgc_symptom_prev-1.png)<!-- -->
 
-Symptoms are are more likely to be present in MDD cases also have higher prevalence in MDD controls. Calculate symptom population prevalences weighted by MDD prevalence: $k_{\mathrm{MDD}N} = k_\mathrm{MDD} * k_{\mathrm{MDD}N,\mathrm{cases}} + (1 - k_\mathrm{MDD}) * k_{\mathrm{MDD}N,\mathrm{controls}}$.
+Symptoms are are more likely to be present in MDD cases also have higher
+prevalence in MDD controls. Calculate symptom population prevalences
+weighted by MDD prevalence:
+$k_{\mathrm{MDD}N} = k_\mathrm{MDD} * k_{\mathrm{MDD}N,\mathrm{cases}} + (1 - k_\mathrm{MDD}) * k_{\mathrm{MDD}N,\mathrm{controls}}$.
 
-
-```r
+``` r
 k <- 0.15
 pgc_symptoms_pop_prev <- 
 pgc_symptom_prevalences %>%
@@ -514,31 +403,30 @@ pgc_symptoms_pop_prev %>%
   select(Symptom=h, pop_prev)
 ```
 
-<div class="kable-table">
-
-|Symptom     |  pop_prev|
-|:-----------|---------:|
-|Mood        | 0.2374316|
-|Interest    | 0.2038204|
-|Weight⇊     | 0.1038268|
-|Weight⇈     | 0.0419027|
-|Sleep⇊      | 0.1689877|
-|Sleep⇈      | 0.0552961|
-|Motor⇈      | 0.1010208|
-|Motor⇊      | 0.0921399|
-|Fatigue     | 0.1979065|
-|Guilt       | 0.1517592|
-|Concentrate | 0.1641794|
-|Suicidality | 0.0945824|
-
-</div>
+    ## # A tibble: 12 × 2
+    ##    Symptom     pop_prev
+    ##    <chr>          <dbl>
+    ##  1 Mood          0.237 
+    ##  2 Interest      0.204 
+    ##  3 Weight⇊       0.104 
+    ##  4 Weight⇈       0.0419
+    ##  5 Sleep⇊        0.169 
+    ##  6 Sleep⇈        0.0553
+    ##  7 Motor⇈        0.101 
+    ##  8 Motor⇊        0.0921
+    ##  9 Fatigue       0.198 
+    ## 10 Guilt         0.152 
+    ## 11 Concentrate   0.164 
+    ## 12 Suicidality   0.0946
 
 ## Cohort sample prevalences
 
-Read in headers from the daner files. The daner format contains headers for the frequency of the referenec allele in cases (A=Affected) and controls (U=Unaffected) where the column name includes the sample size (`FRQ_A_NNNN`, `FRQ_U_MMMM`)
+Read in headers from the daner files. The daner format contains headers
+for the frequency of the referenec allele in cases (A=Affected) and
+controls (U=Unaffected) where the column name includes the sample size
+(`FRQ_A_NNNN`, `FRQ_U_MMMM`)
 
-
-```r
+``` r
 symptoms_sample_prev_file <- 'meta/symptoms_prev.txt'
 
 if(!file.exists(symptoms_sample_prev_file)) {
@@ -575,58 +463,37 @@ if(!file.exists(symptoms_sample_prev_file)) {
 }
 ```
 
-```
-## Rows: 26 Columns: 6
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-## Delimiter: "\t"
-## chr (3): cohorts, symptom, sumstats
-## dbl (3): Nca, Nco, samp_prev
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-```
+    ## Rows: 26 Columns: 6
+    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (3): cohorts, symptom, sumstats
+    ## dbl (3): Nca, Nco, samp_prev
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-```r
+``` r
 symptoms_sample_prev %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
   select(Cohorts=cohorts, Ref=symptom, Symptom=h, Cases=Nca, Controls=Nco, `Sample prevalence`=samp_prev)
 ```
 
-<div class="kable-table">
+    ## # A tibble: 26 × 6
+    ##    Cohorts Ref   Symptom  Cases Controls `Sample prevalence`
+    ##    <chr>   <chr> <chr>    <dbl>    <dbl>               <dbl>
+    ##  1 Clin    MDD1  Mood     21681     1748               0.925
+    ##  2 Clin    MDD2  Interest 24732     2801               0.898
+    ##  3 Clin    MDD3a Weight⇊   9265    14594               0.388
+    ##  4 Clin    MDD3b Weight⇈   7902    13167               0.375
+    ##  5 Clin    MDD4a Sleep⇊   18917     6573               0.742
+    ##  6 Clin    MDD4b Sleep⇈   10586    11050               0.489
+    ##  7 Clin    MDD5a Motor⇈   10447    12372               0.458
+    ##  8 Clin    MDD5b Motor⇊   12701    11214               0.531
+    ##  9 Clin    MDD6  Fatigue  23941     2497               0.906
+    ## 10 Clin    MDD7  Guilt    21921     3888               0.849
+    ## # ℹ 16 more rows
 
-|Cohorts |Ref   |Symptom     |  Cases| Controls| Sample prevalence|
-|:-------|:-----|:-----------|------:|--------:|-----------------:|
-|Clin    |MDD1  |Mood        |  21681|     1748|         0.9253916|
-|Clin    |MDD2  |Interest    |  24732|     2801|         0.8982675|
-|Clin    |MDD3a |Weight⇊     |   9265|    14594|         0.3883231|
-|Clin    |MDD3b |Weight⇈     |   7902|    13167|         0.3750534|
-|Clin    |MDD4a |Sleep⇊      |  18917|     6573|         0.7421342|
-|Clin    |MDD4b |Sleep⇈      |  10586|    11050|         0.4892771|
-|Clin    |MDD5a |Motor⇈      |  10447|    12372|         0.4578202|
-|Clin    |MDD5b |Motor⇊      |  12701|    11214|         0.5310893|
-|Clin    |MDD6  |Fatigue     |  23941|     2497|         0.9055526|
-|Clin    |MDD7  |Guilt       |  21921|     3888|         0.8493549|
-|Clin    |MDD8  |Concentrate |  23974|     2386|         0.9094841|
-|Clin    |MDD9  |Suicidality |  18170|     9609|         0.6540912|
-|Comm    |MDD1  |Mood        | 107956|    99480|         0.5204304|
-|Comm    |MDD2  |Interest    |  81113|   126167|         0.3913209|
-|Comm    |MDD3a |Weight⇊     |  39453|    36497|         0.5194602|
-|Comm    |MDD3b |Weight⇈     |  22612|    36489|         0.3825993|
-|Comm    |MDD4a |Sleep⇊      |  73144|    19851|         0.7865369|
-|Comm    |MDD4b |Sleep⇈      |  20125|    20055|         0.5008711|
-|Comm    |MDD5a |Motor⇈      |    113|     3181|         0.0343048|
-|Comm    |MDD5b |Motor⇊      |    299|     2995|         0.0907711|
-|Comm    |MDD6  |Fatigue     |  85304|    16736|         0.8359859|
-|Comm    |MDD7  |Guilt       |  61757|    43570|         0.5863359|
-|Comm    |MDD8  |Concentrate |  75190|    23416|         0.7625297|
-|Comm    |MDD9  |Suicidality |  46984|    58885|         0.4437937|
-|UKBt    |MDD1  |Mood        |  71964|    57130|         0.5574543|
-|UKBt    |MDD2  |Interest    |  46952|    80366|         0.3687774|
-
-</div>
-
-
-```r
+``` r
 cohorts_sample_prev <-
 symptoms_sample_prev %>%
   left_join(dsm_mdd_symptoms_labels, by=c('symptom'='ref')) %>%
@@ -644,37 +511,36 @@ theme_bw() +
 theme(plot.margin=unit(c(1, 1, 1, 1), 'cm'))
 ```
 
-![](mdd-symptom-gsem_files/figure-html/cohorts_prevs-1.png)<!-- -->
+![](mdd-symptom-gsem_files/figure-gfm/cohorts_prevs-1.png)<!-- -->
 
-```r
+``` r
 ggsave('mdd-symptom-gsem_files/cohorts_symptoms_prev.png', width=5.5, height=5.5)
 ```
 
-Correlation (Spearman's rho) between sample prevalences in UKB CIDI and PGC DSM:
+Correlation (Spearman’s rho) between sample prevalences in UKB CIDI and
+PGC DSM:
 
-
-```r
+``` r
 with(cohorts_sample_prev, cor.test(Clin, Comm, method='spearman', use='pair'))
 ```
 
-```
-## 
-## 	Spearman's rank correlation rho
-## 
-## data:  Clin and Comm
-## S = 110, p-value = 0.03733
-## alternative hypothesis: true rho is not equal to 0
-## sample estimates:
-##       rho 
-## 0.6153846
-```
+    ## 
+    ##  Spearman's rank correlation rho
+    ## 
+    ## data:  Clin and Comm
+    ## S = 110, p-value = 0.03733
+    ## alternative hypothesis: true rho is not equal to 0
+    ## sample estimates:
+    ##       rho 
+    ## 0.6153846
 
 ## Population prevalences
 
-Combine the sample prevalences weighted by assuming 15% population prevalence of MDD and 57% of UKB participants screening positively for mood or anhedonia.
+Combine the sample prevalences weighted by assuming 15% population
+prevalence of MDD and 57% of UKB participants screening positively for
+mood or anhedonia.
 
-
-```r
+``` r
 pop_prevs_w <-
 symptoms_sample_prev %>%
 filter(cohorts %in% c('Clin', 'Comm')) |>
@@ -691,33 +557,41 @@ select(symptom, pop_prev)
 pop_prevs_w
 ```
 
-<div class="kable-table">
-
-|symptom |  pop_prev|
-|:-------|---------:|
-|MDD1    | 0.3296196|
-|MDD2    | 0.2630305|
-|MDD3a   | 0.1771704|
-|MDD3b   | 0.1371698|
-|MDD4a   | 0.2798231|
-|MDD4b   | 0.1794440|
-|MDD5a   | 0.0441134|
-|MDD5b   | 0.0657015|
-|MDD6    | 0.3061724|
-|MDD7    | 0.2308073|
-|MDD8    | 0.2855323|
-|MDD9    | 0.1755381|
-
-</div>
-
+    ## # A tibble: 12 × 2
+    ## # Groups:   symptom [12]
+    ##    symptom pop_prev
+    ##    <chr>      <dbl>
+    ##  1 MDD1      0.330 
+    ##  2 MDD2      0.263 
+    ##  3 MDD3a     0.177 
+    ##  4 MDD3b     0.137 
+    ##  5 MDD4a     0.280 
+    ##  6 MDD4b     0.179 
+    ##  7 MDD5a     0.0441
+    ##  8 MDD5b     0.0657
+    ##  9 MDD6      0.306 
+    ## 10 MDD7      0.231 
+    ## 11 MDD8      0.286 
+    ## 12 MDD9      0.176
 
 # Multivariable LDSC estimation
 
-We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify them with sample and population prevalences, using the symptom reference from the sumstats filename. Sumstats were munged using effective sample size, so we substitute `0.5` as the sample prevalences. We then calculate the multivariable LDSC genomic covariance matrix and write it out as deparsed R code. We use deparsed code instead of R data object serialization (`save()` or `saveRDS()`) so that the data can be inspected with a text editor to check that it does not contain individual-level data before being committed to the version control system. A simple caching strategy is employed to check whether the covariance structure already exists and, if so, to parse it rather than re-running the LD score calculation.
+We list out the munged sumstats for AGDS/PGC and ALSPAC/UKB and unify
+them with sample and population prevalences, using the symptom reference
+from the sumstats filename. Sumstats were munged using effective sample
+size, so we substitute `0.5` as the sample prevalences. We then
+calculate the multivariable LDSC genomic covariance matrix and write it
+out as deparsed R code. We use deparsed code instead of R data object
+serialization (`save()` or `saveRDS()`) so that the data can be
+inspected with a text editor to check that it does not contain
+individual-level data before being committed to the version control
+system. A simple caching strategy is employed to check whether the
+covariance structure already exists and, if so, to parse it rather than
+re-running the LD score calculation.
 
 Clinical and Community sumstats
 
-```r
+``` r
 covstruct_prefix <- 'clin.comm.covstruct'
 covstruct_r <- file.path('ldsc', paste(covstruct_prefix, 'deparse.R', sep='.'))
 covstruct_rds <- file.path('ldsc', paste(covstruct_prefix, 'rds', sep='.'))
@@ -766,23 +640,23 @@ if(!file.exists(covstruct_r)) {
 }
 ```
 
-```
-## Rows: 26 Columns: 9
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-## Delimiter: "\t"
-## chr (5): cohorts, symptom, sumstats, filename, trait_name
-## dbl (4): Nca, Nco, samp_prev, pop_prev
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-```
+    ## Rows: 26 Columns: 9
+    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr (5): cohorts, symptom, sumstats, filename, trait_name
+    ## dbl (4): Nca, Nco, samp_prev, pop_prev
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 ## Heritabilities
 
-Run LDSC, using sumstats filenames and estimated prevalences to construct command line arguments for `ldsc.py`. Symptoms with negative heritabilities in PGC cohorts are plotted in a separate facet with its own scale.
+Run LDSC, using sumstats filenames and estimated prevalences to
+construct command line arguments for `ldsc.py`. Symptoms with negative
+heritabilities in PGC cohorts are plotted in a separate facet with its
+own scale.
 
-
-```r
+``` r
 sumstats_h2_txt <- 'ldsc/symptoms.h2.txt'
 
 if(!file.exists(sumstats_h2_txt)) {
@@ -855,24 +729,21 @@ if(!file.exists(sumstats_h2_txt)) {
 } else {
 
   sumstats_h2_table <- read_tsv(sumstats_h2_txt) %>%
-    mutate(Sample = case_match(Sample, "Clinical" ~ "Case-only", .default = Sample))
+    mutate(Sample = case_match(Sample, "Clinical" ~ "Case-enriched", .default = Sample))
 
 }
 ```
 
-```
-## Rows: 26 Columns: 17
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-## Delimiter: "\t"
-## chr  (7): Sample, sample_symptom, ref, cohorts, abbv, sumstats, filename
-## dbl (10): h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE, Nca, Nco, sam...
-## 
-## ℹ Use `spec()` to retrieve the full column specification for this data.
-## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
-```
+    ## Rows: 26 Columns: 17
+    ## ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## Delimiter: "\t"
+    ## chr  (7): Sample, sample_symptom, ref, cohorts, abbv, sumstats, filename
+    ## dbl (10): h2, se, LambdaGC, MeanChiSq, Intercept, InterceptSE, Nca, Nco, sam...
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
-
-```r
+``` r
 mdd_symptom_gsem_h2.gg <-
 ggplot(sumstats_h2_table  %>% filter(4*Nca*Nco/(Nca+Nco) > 5000, h2 > 0, h2 < 1),
         aes(x=abbv,
@@ -897,14 +768,12 @@ mdd_symptom_gsem_h2.gg + coord_flip() +
 scale_y_continuous(expression(h[SNP]^2))
 ```
 
-```
-## Scale for y is already present.
-## Adding another scale for y, which will replace the existing scale.
-```
+    ## Scale for y is already present.
+    ## Adding another scale for y, which will replace the existing scale.
 
-![](mdd-symptom-gsem_files/figure-html/mdd_symptom_gsem_h2-1.png)<!-- -->
+![](mdd-symptom-gsem_files/figure-gfm/mdd_symptom_gsem_h2-1.png)<!-- -->
 
-```r
-ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=7, height=5)
+``` r
+ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.png', width=7, height=5, dpi = 300)
 ggsave('mdd-symptom-gsem_files/symptoms_h2_snp.pdf', width=7, height=5)
 ```

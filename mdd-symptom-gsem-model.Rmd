@@ -111,7 +111,7 @@ sumstats_prevs <- read_tsv(file.path('ldsc', paste(covstruct_prefix, 'prevs', 't
 
 ```
 
-Rename samples: AGDS/GS/PGC is the Case-only **Clin**incal meta-analysis sample (`Clin`) and ALSPAC/EstBB/UKB is the **Comm**unity meta-analysis sample (`Comm`); and rename symptoms numbers (`MDD1`, `MDD2`) to abbreviations (`Dep`, `Anh`). There are also extra measures of `MDD1` and `MDD2` from **UKB** Baseline data. 
+Rename samples: AGDS/GS/PGC is the Case-enriched **Clin**incal meta-analysis sample (`Clin`) and ALSPAC/EstBB/UKB is the **Comm**unity meta-analysis sample (`Comm`); and rename symptoms numbers (`MDD1`, `MDD2`) to abbreviations (`Dep`, `Anh`). There are also extra measures of `MDD1` and `MDD2` from **UKB** Baseline data. 
 
 ```{r sem_labels}
 
@@ -717,7 +717,7 @@ model_labels <- model_abbrevs |>
                                false = str_glue("{abbrev}:")))
                                
 factor_labels <- rev(c("MDD" = "Depression",
-"CASE" = "Case-only",
+"CASE" = "Case-enriched",
 "COMM" = "Community",
 "PSYCH" = "Psychological",
 "COGMOOD" = "Cognitive/Mood",
@@ -738,7 +738,7 @@ factor_labels <- rev(c("MDD" = "Depression",
 symptom_model_structure <- model_coefs |>
   filter(op == "=~") |>
   filter(!abbrev %in% c("CogMoodLeth-App [Res]", "Meta")) |>
-  mutate(cohort = case_when(str_detect(rhs, "Case") ~ "Case-only",
+  mutate(cohort = case_when(str_detect(rhs, "Case") ~ "Case-enriched",
                             str_detect(rhs, "Comm") ~ "Community",
                             str_detect(rhs, "Ukb") ~ "UKB-T"),
          symptom = str_remove(rhs, "(Case|Comm|Ukb)"),
