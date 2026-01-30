@@ -7,7 +7,7 @@ params.glue = "pgc.glue"
 params.cff = "../CITATION.cff"
 params.contig = "http://fileserve.mrcieu.ac.uk/ref/2.8/b37/human_g1k_v37.fasta.fai"
 params.cohorts = "cohort_alignment.txt"
-params.prefix = "mdd_symptoms_2023"
+params.prefix = "mdd_symptoms_2024"
 params.acknowledgments = "The PGC has received funding from the US National Institute of Mental Health (5 U01MH109528-04). Statistical analyses were carried out on the Genetic Cluster Computer (http://www.geneticcluster.org) hosted by SURFsara and financially supported by the Netherlands Scientific Organization (NWO 480-05-003) along with a supplement from the Dutch Brain Foundation and the VU University Amsterdam."
 params.analyst = "Mark J Adams"
 
