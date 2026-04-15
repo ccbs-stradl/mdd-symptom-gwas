@@ -1,246 +1,246 @@
-filename	cohort	reference
-daner_MDD1_bidi1.gz	PGC	MDD1
-daner_MDD1_gep3.gz	PGC	MDD1
-daner_MDD1_nes1.gz	PGC	MDD1
-daner_MDD1_rot4.gz	PGC	MDD1
-daner_MDD1_stm2.gz	PGC	MDD1
-daner_MDD1_twg2.gz	PGC	MDD1
-daner_MDD2_bidi1.gz	PGC	MDD2
-daner_MDD2_gens.gz	PGC	MDD2
-daner_MDD2_gep3.gz	PGC	MDD2
-daner_MDD2_grnd.gz	PGC	MDD2
-daner_MDD2_nes1.gz	PGC	MDD2
-daner_MDD2_qi3c.gz	PGC	MDD2
-daner_MDD2_qi6c.gz	PGC	MDD2
-daner_MDD2_rad3.gz	PGC	MDD2
-daner_MDD2_rot4.gz	PGC	MDD2
-daner_MDD2_shp0.gz	PGC	MDD2
-daner_MDD2_stm2.gz	PGC	MDD2
-daner_MDD2_twg2.gz	PGC	MDD2
-daner_MDD3a_bidi1.gz	PGC	MDD3a
-daner_MDD3a_boma.gz	PGC	MDD3a
-daner_MDD3a_col3.gz	PGC	MDD3a
-daner_MDD3a_gens.gz	PGC	MDD3a
-daner_MDD3a_gep3.gz	PGC	MDD3a
-daner_MDD3a_grnd.gz	PGC	MDD3a
-daner_MDD3a_mmi2.gz	PGC	MDD3a
-daner_MDD3a_mmo4.gz	PGC	MDD3a
-daner_MDD3a_nes1.gz	PGC	MDD3a
-daner_MDD3a_qi3c.gz	PGC	MDD3a
-daner_MDD3a_qi6c.gz	PGC	MDD3a
-daner_MDD3a_qio2.gz	PGC	MDD3a
-daner_MDD3a_rad3.gz	PGC	MDD3a
-daner_MDD3a_rage.gz	PGC	MDD3a
-daner_MDD3a_rau2.gz	PGC	MDD3a
-daner_MDD3a_rot4.gz	PGC	MDD3a
-daner_MDD3a_shp0.gz	PGC	MDD3a
-daner_MDD3a_stm2.gz	PGC	MDD3a
-daner_MDD3a_twg2.gz	PGC	MDD3a
-daner_MDD3b_bidi1.gz	PGC	MDD3b
-daner_MDD3b_boma.gz	PGC	MDD3b
-daner_MDD3b_col3.gz	PGC	MDD3b
-daner_MDD3b_gens.gz	PGC	MDD3b
-daner_MDD3b_gep3.gz	PGC	MDD3b
-daner_MDD3b_grnd.gz	PGC	MDD3b
-daner_MDD3b_nes1.gz	PGC	MDD3b
-daner_MDD3b_qi3c.gz	PGC	MDD3b
-daner_MDD3b_qi6c.gz	PGC	MDD3b
-daner_MDD3b_qio2.gz	PGC	MDD3b
-daner_MDD3b_rad3.gz	PGC	MDD3b
-daner_MDD3b_rau2.gz	PGC	MDD3b
-daner_MDD3b_shp0.gz	PGC	MDD3b
-daner_MDD3b_stm2.gz	PGC	MDD3b
-daner_MDD3b_twg2.gz	PGC	MDD3b
-daner_MDD4a_bidi1.gz	PGC	MDD4a
-daner_MDD4a_boma.gz	PGC	MDD4a
-daner_MDD4a_col3.gz	PGC	MDD4a
-daner_MDD4a_gens.gz	PGC	MDD4a
-daner_MDD4a_gep3.gz	PGC	MDD4a
-daner_MDD4a_grnd.gz	PGC	MDD4a
-daner_MDD4a_mmi2.gz	PGC	MDD4a
-daner_MDD4a_mmo4.gz	PGC	MDD4a
-daner_MDD4a_nes1.gz	PGC	MDD4a
-daner_MDD4a_qi3c.gz	PGC	MDD4a
-daner_MDD4a_qi6c.gz	PGC	MDD4a
-daner_MDD4a_qio2.gz	PGC	MDD4a
-daner_MDD4a_rad3.gz	PGC	MDD4a
-daner_MDD4a_rage.gz	PGC	MDD4a
-daner_MDD4a_rau2.gz	PGC	MDD4a
-daner_MDD4a_rde4.gz	PGC	MDD4a
-daner_MDD4a_twg2.gz	PGC	MDD4a
-daner_MDD4b_boma.gz	PGC	MDD4b
-daner_MDD4b_col3.gz	PGC	MDD4b
-daner_MDD4b_gens.gz	PGC	MDD4b
-daner_MDD4b_gep3.gz	PGC	MDD4b
-daner_MDD4b_grnd.gz	PGC	MDD4b
-daner_MDD4b_nes1.gz	PGC	MDD4b
-daner_MDD4b_qi3c.gz	PGC	MDD4b
-daner_MDD4b_qi6c.gz	PGC	MDD4b
-daner_MDD4b_qio2.gz	PGC	MDD4b
-daner_MDD4b_rad3.gz	PGC	MDD4b
-daner_MDD4b_rau2.gz	PGC	MDD4b
-daner_MDD4b_shp0.gz	PGC	MDD4b
-daner_MDD4b_stm2.gz	PGC	MDD4b
-daner_MDD5a_boma.gz	PGC	MDD5a
-daner_MDD5a_cof3.gz	PGC	MDD5a
-daner_MDD5a_col3.gz	PGC	MDD5a
-daner_MDD5a_gens.gz	PGC	MDD5a
-daner_MDD5a_gep3.gz	PGC	MDD5a
-daner_MDD5a_grnd.gz	PGC	MDD5a
-daner_MDD5a_mmi2.gz	PGC	MDD5a
-daner_MDD5a_mmo4.gz	PGC	MDD5a
-daner_MDD5a_nes1.gz	PGC	MDD5a
-daner_MDD5a_qi3c.gz	PGC	MDD5a
-daner_MDD5a_qi6c.gz	PGC	MDD5a
-daner_MDD5a_qio2.gz	PGC	MDD5a
-daner_MDD5a_rad3.gz	PGC	MDD5a
-daner_MDD5a_rau2.gz	PGC	MDD5a
-daner_MDD5a_shp0.gz	PGC	MDD5a
-daner_MDD5a_stm2.gz	PGC	MDD5a
-daner_MDD5b_boma.gz	PGC	MDD5b
-daner_MDD5b_col3.gz	PGC	MDD5b
-daner_MDD5b_gens.gz	PGC	MDD5b
-daner_MDD5b_gep3.gz	PGC	MDD5b
-daner_MDD5b_grnd.gz	PGC	MDD5b
-daner_MDD5b_mmi2.gz	PGC	MDD5b
-daner_MDD5b_mmo4.gz	PGC	MDD5b
-daner_MDD5b_nes1.gz	PGC	MDD5b
-daner_MDD5b_qi3c.gz	PGC	MDD5b
-daner_MDD5b_qi6c.gz	PGC	MDD5b
-daner_MDD5b_qio2.gz	PGC	MDD5b
-daner_MDD5b_rad3.gz	PGC	MDD5b
-daner_MDD5b_rage.gz	PGC	MDD5b
-daner_MDD5b_rau2.gz	PGC	MDD5b
-daner_MDD5b_rde4.gz	PGC	MDD5b
-daner_MDD5b_shp0.gz	PGC	MDD5b
-daner_MDD5b_stm2.gz	PGC	MDD5b
-daner_MDD6_bidi1.gz	PGC	MDD6
-daner_MDD9_shp0.gz	PGC	MDD9
-daner_MDD6_col3.gz	PGC	MDD6
-daner_MDD6_gens.gz	PGC	MDD6
-daner_MDD6_gep3.gz	PGC	MDD6
-daner_MDD6_mmi2.gz	PGC	MDD6
-daner_MDD6_mmo4.gz	PGC	MDD6
-daner_MDD6_nes1.gz	PGC	MDD6
-daner_MDD6_qi3c.gz	PGC	MDD6
-daner_MDD6_qi6c.gz	PGC	MDD6
-daner_MDD6_qio2.gz	PGC	MDD6
-daner_MDD6_rad3.gz	PGC	MDD6
-daner_MDD6_rot4.gz	PGC	MDD6
-daner_MDD6_shp0.gz	PGC	MDD6
-daner_MDD6_stm2.gz	PGC	MDD6
-daner_MDD6_twg2.gz	PGC	MDD6
-daner_MDD7_bidi1.gz	PGC	MDD7
-daner_MDD7_boma.gz	PGC	MDD7
-daner_MDD7_col3.gz	PGC	MDD7
-daner_MDD7_gens.gz	PGC	MDD7
-daner_MDD7_gep3.gz	PGC	MDD7
-daner_MDD7_mmi2.gz	PGC	MDD7
-daner_MDD7_mmo4.gz	PGC	MDD7
-daner_MDD7_nes1.gz	PGC	MDD7
-daner_MDD7_qi3c.gz	PGC	MDD7
-daner_MDD7_qi6c.gz	PGC	MDD7
-daner_MDD7_qio2.gz	PGC	MDD7
-daner_MDD7_rad3.gz	PGC	MDD7
-daner_MDD7_shp0.gz	PGC	MDD7
-daner_MDD7_stm2.gz	PGC	MDD7
-daner_MDD8_bidi1.gz	PGC	MDD8
-daner_MDD8_col3.gz	PGC	MDD8
-daner_MDD8_gens.gz	PGC	MDD8
-daner_MDD8_gep3.gz	PGC	MDD8
-daner_MDD8_grnd.gz	PGC	MDD8
-daner_MDD8_nes1.gz	PGC	MDD8
-daner_MDD8_qi3c.gz	PGC	MDD8
-daner_MDD8_rad3.gz	PGC	MDD8
-daner_MDD8_rot4.gz	PGC	MDD8
-daner_MDD8_shp0.gz	PGC	MDD8
-daner_MDD8_stm2.gz	PGC	MDD8
-daner_MDD8_twg2.gz	PGC	MDD8
-daner_MDD9_bidi1.gz	PGC	MDD9
-daner_MDD9_boma.gz	PGC	MDD9
-daner_MDD9_col3.gz	PGC	MDD9
-daner_MDD9_gens.gz	PGC	MDD9
-daner_MDD9_grnd.gz	PGC	MDD9
-daner_MDD9_mmi2.gz	PGC	MDD9
-daner_MDD9_mmo4.gz	PGC	MDD9
-daner_MDD9_nes1.gz	PGC	MDD9
-daner_MDD9_qi3c.gz	PGC	MDD9
-daner_MDD9_qi6c.gz	PGC	MDD9
-daner_MDD9_qio2.gz	PGC	MDD9
-daner_MDD9_rad3.gz	PGC	MDD9
-daner_MDD9_rage.gz	PGC	MDD9
-daner_MDD9_rau2.gz	PGC	MDD9
-daner_MDD9_rde4.gz	PGC	MDD9
-daner_MDD9_rot4.gz	PGC	MDD9
-daner_MDD9_stm2.gz	PGC	MDD9
-daner_MDD9_twg2.gz	PGC	MDD9
-anhedonia_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD2
-appetite_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD3
-concentration_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD8
-death_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD9
-depressed_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD1
-fatigue_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD6
-psychomotor_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD5b
-restless_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD5a
-sleepChange_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD4
-sleepMore_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD4b
-sleepProb_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD4a
-weightChange_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD3
-weightGain_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD3b
-weightLost_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD3a
-worthless_GWASsumstats_QCed.dat_daner.gz	AGDS	MDD7
-daner_MDD1_ALSPAC_CISR.txt.gz	ALSPAC	MDD1
-daner_MDD2_ALSPAC_CISR.txt.gz	ALSPAC	MDD2
-daner_MDD3a_ALSPAC_CISR.txt.gz	ALSPAC	MDD3a
-daner_MDD3b_ALSPAC_CISR.txt.gz	ALSPAC	MDD3b
-daner_MDD4a_ALSPAC_CISR.txt.gz	ALSPAC	MDD4a
-daner_MDD4b_ALSPAC_CISR.txt.gz	ALSPAC	MDD4b
-daner_MDD5a_ALSPAC_CISR.txt.gz	ALSPAC	MDD5a
-daner_MDD5b_ALSPAC_CISR.txt.gz	ALSPAC	MDD5b
-daner_MDD6_ALSPAC_CISR.txt.gz	ALSPAC	MDD6
-daner_MDD7_ALSPAC_CISR.txt.gz	ALSPAC	MDD7
-daner_MDD8_ALSPAC_CISR.txt.gz	ALSPAC	MDD8
-daner_MDD9_ALSPAC_CISR.txt.gz	ALSPAC	MDD9
-daner_MDD1_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD1
-daner_MDD2_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD2
-daner_MDD3_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD3
-daner_MDD3a_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD3a
-daner_MDD3b_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD3b
-daner_MDD4_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD3
-daner_MDD4a_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD4a
-daner_MDD4b_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD4b
-daner_MDD6_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD6
-daner_MDD7_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD7
-daner_MDD8_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD8
-daner_MDD9_UKBB_CIDI_glm.eur.txt.gz	UKBB	MDD9
-daner_MDD1_Dep_GenScot-MDDCases.gz	GenScot	MDD1
-daner_MDD2_Anh_GenScot-MDDCases.gz	GenScot	MDD2
-daner_MDD3_App_GenScot-MDDCases.gz	GenScot	MDD3
-daner_MDD3a_AppDec_GenScot-MDDCases.gz	GenScot	MDD3a
-daner_MDD3b_AppInc_GenScot-MDDCases.gz	GenScot	MDD3b
-daner_MDD4a_SleDec_GenScot-MDDCases.gz	GenScot	MDD4a
-daner_MDD4b_SleInc_GenScot-MDDCases.gz	GenScot	MDD4b
-daner_MDD5a_MotoInc_GenScot-MDDCases.gz	GenScot	MDD5a
-daner_MDD5b_MotoDec_GenScot-MDDCases.gz	GenScot	MDD5b
-daner_MDD6_Fatig_GenScot-MDDCases.gz	GenScot	MDD6
-daner_MDD7_Guilt_GenScot-MDDCases.gz	GenScot	MDD7
-daner_MDD8_Conc_GenScot-MDDCases.gz	GenScot	MDD8
-daner_MDD9_Sui_GenScot-MDDCases.gz	GenScot	MDD9
-daner_MDD1_DEP_EstBB.gz	EstBB	MDD1
-daner_MDD2_ANH_EstBB.gz	EstBB	MDD2
-daner_MDD3a_APPDEC_EstBB.gz	EstBB	MDD3a
-daner_MDD3b_APPINC_EstBB.gz	EstBB	MDD3b
-daner_MDD4a_SLEDEC_EstBB.gz	EstBB	MDD4a
-daner_MDD4b_SLEINC_EstBB.gz	EstBB	MDD4b
-daner_MDD6_FATIG_EstBB.gz	EstBB	MDD6
-daner_MDD7_GUILT_EstBB.gz	EstBB	MDD7
-daner_MDD8_CONC_EstBB.gz	EstBB	MDD8
-daner_MDD9_SUI_EstBB.gz	EstBB	MDD9
-daner_dichotomized_Concentration_Difficulties_8.meta.gz	janpy	MDD8
-daner_dichotomized_Inability_to_Feel_7.meta.gz	janpy	MDD2
-daner_dichotomized_Lassitude.meta.gz	janpy	MDD5b
-daner_dichotomized_Pessimistic_Thoughts.meta.gz	janpy	MDD7
-daner_dichotomized_Reduced_Appetite.meta.gz	janpy	MDD3a
-daner_dichotomized_Reduced_Sleep_7.meta.gz	janpy	MDD4a
-daner_dichotomized_Sadness_2.meta.gz	janpy	MDD1
-daner_dichotomized_Suicidal_Thoughts_9.meta.gz	janpy	MDD9
+filename	study	cohort	group	reference
+daner_MDD1_bidi1.gz	bidi1	PGC	Clin	MDD1
+daner_MDD1_gep3.gz	gep3	PGC	Clin	MDD1
+daner_MDD1_nes1.gz	nes1	PGC	Clin	MDD1
+daner_MDD1_rot4.gz	rot4	PGC	Clin	MDD1
+daner_MDD1_stm2.gz	stm2	PGC	Clin	MDD1
+daner_MDD1_twg2.gz	twg2	PGC	Clin	MDD1
+daner_MDD2_bidi1.gz	bidi1	PGC	Clin	MDD2
+daner_MDD2_gens.gz	gens	PGC	Clin	MDD2
+daner_MDD2_gep3.gz	gep3	PGC	Clin	MDD2
+daner_MDD2_grnd.gz	grnd	PGC	Clin	MDD2
+daner_MDD2_nes1.gz	nes1	PGC	Clin	MDD2
+daner_MDD2_qi3c.gz	qi3c	PGC	Clin	MDD2
+daner_MDD2_qi6c.gz	qi6c	PGC	Clin	MDD2
+daner_MDD2_rad3.gz	rad3	PGC	Clin	MDD2
+daner_MDD2_rot4.gz	rot4	PGC	Clin	MDD2
+daner_MDD2_shp0.gz	shp0	PGC	Clin	MDD2
+daner_MDD2_stm2.gz	stm2	PGC	Clin	MDD2
+daner_MDD2_twg2.gz	twg2	PGC	Clin	MDD2
+daner_MDD3a_bidi1.gz	bidi1	PGC	Clin	MDD3a
+daner_MDD3a_boma.gz	boma	PGC	Clin	MDD3a
+daner_MDD3a_col3.gz	col3	PGC	Clin	MDD3a
+daner_MDD3a_gens.gz	gens	PGC	Clin	MDD3a
+daner_MDD3a_gep3.gz	gep3	PGC	Clin	MDD3a
+daner_MDD3a_grnd.gz	grnd	PGC	Clin	MDD3a
+daner_MDD3a_mmi2.gz	mmi2	PGC	Clin	MDD3a
+daner_MDD3a_mmo4.gz	mmo4	PGC	Clin	MDD3a
+daner_MDD3a_nes1.gz	nes1	PGC	Clin	MDD3a
+daner_MDD3a_qi3c.gz	qi3c	PGC	Clin	MDD3a
+daner_MDD3a_qi6c.gz	qi6c	PGC	Clin	MDD3a
+daner_MDD3a_qio2.gz	qio2	PGC	Clin	MDD3a
+daner_MDD3a_rad3.gz	rad3	PGC	Clin	MDD3a
+daner_MDD3a_rage.gz	rage	PGC	Clin	MDD3a
+daner_MDD3a_rau2.gz	rau2	PGC	Clin	MDD3a
+daner_MDD3a_rot4.gz	rot4	PGC	Clin	MDD3a
+daner_MDD3a_shp0.gz	shp0	PGC	Clin	MDD3a
+daner_MDD3a_stm2.gz	stm2	PGC	Clin	MDD3a
+daner_MDD3a_twg2.gz	twg2	PGC	Clin	MDD3a
+daner_MDD3b_bidi1.gz	bidi1	PGC	Clin	MDD3b
+daner_MDD3b_boma.gz	boma	PGC	Clin	MDD3b
+daner_MDD3b_col3.gz	col3	PGC	Clin	MDD3b
+daner_MDD3b_gens.gz	gens	PGC	Clin	MDD3b
+daner_MDD3b_gep3.gz	gep3	PGC	Clin	MDD3b
+daner_MDD3b_grnd.gz	grnd	PGC	Clin	MDD3b
+daner_MDD3b_nes1.gz	nes1	PGC	Clin	MDD3b
+daner_MDD3b_qi3c.gz	qi3c	PGC	Clin	MDD3b
+daner_MDD3b_qi6c.gz	qi6c	PGC	Clin	MDD3b
+daner_MDD3b_qio2.gz	qio2	PGC	Clin	MDD3b
+daner_MDD3b_rad3.gz	rad3	PGC	Clin	MDD3b
+daner_MDD3b_rau2.gz	rau2	PGC	Clin	MDD3b
+daner_MDD3b_shp0.gz	shp0	PGC	Clin	MDD3b
+daner_MDD3b_stm2.gz	stm2	PGC	Clin	MDD3b
+daner_MDD3b_twg2.gz	twg2	PGC	Clin	MDD3b
+daner_MDD4a_bidi1.gz	bidi1	PGC	Clin	MDD4a
+daner_MDD4a_boma.gz	boma	PGC	Clin	MDD4a
+daner_MDD4a_col3.gz	col3	PGC	Clin	MDD4a
+daner_MDD4a_gens.gz	gens	PGC	Clin	MDD4a
+daner_MDD4a_gep3.gz	gep3	PGC	Clin	MDD4a
+daner_MDD4a_grnd.gz	grnd	PGC	Clin	MDD4a
+daner_MDD4a_mmi2.gz	mmi2	PGC	Clin	MDD4a
+daner_MDD4a_mmo4.gz	mmo4	PGC	Clin	MDD4a
+daner_MDD4a_nes1.gz	nes1	PGC	Clin	MDD4a
+daner_MDD4a_qi3c.gz	qi3c	PGC	Clin	MDD4a
+daner_MDD4a_qi6c.gz	qi6c	PGC	Clin	MDD4a
+daner_MDD4a_qio2.gz	qio2	PGC	Clin	MDD4a
+daner_MDD4a_rad3.gz	rad3	PGC	Clin	MDD4a
+daner_MDD4a_rage.gz	rage	PGC	Clin	MDD4a
+daner_MDD4a_rau2.gz	rau2	PGC	Clin	MDD4a
+daner_MDD4a_rde4.gz	rde4	PGC	Clin	MDD4a
+daner_MDD4a_twg2.gz	twg2	PGC	Clin	MDD4a
+daner_MDD4b_boma.gz	boma	PGC	Clin	MDD4b
+daner_MDD4b_col3.gz	col3	PGC	Clin	MDD4b
+daner_MDD4b_gens.gz	gens	PGC	Clin	MDD4b
+daner_MDD4b_gep3.gz	gep3	PGC	Clin	MDD4b
+daner_MDD4b_grnd.gz	grnd	PGC	Clin	MDD4b
+daner_MDD4b_nes1.gz	nes1	PGC	Clin	MDD4b
+daner_MDD4b_qi3c.gz	qi3c	PGC	Clin	MDD4b
+daner_MDD4b_qi6c.gz	qi6c	PGC	Clin	MDD4b
+daner_MDD4b_qio2.gz	qio2	PGC	Clin	MDD4b
+daner_MDD4b_rad3.gz	rad3	PGC	Clin	MDD4b
+daner_MDD4b_rau2.gz	rau2	PGC	Clin	MDD4b
+daner_MDD4b_shp0.gz	shp0	PGC	Clin	MDD4b
+daner_MDD4b_stm2.gz	stm2	PGC	Clin	MDD4b
+daner_MDD5a_boma.gz	boma	PGC	Clin	MDD5a
+daner_MDD5a_cof3.gz	cof3	PGC	Clin	MDD5a
+daner_MDD5a_col3.gz	col3	PGC	Clin	MDD5a
+daner_MDD5a_gens.gz	gens	PGC	Clin	MDD5a
+daner_MDD5a_gep3.gz	gep3	PGC	Clin	MDD5a
+daner_MDD5a_grnd.gz	grnd	PGC	Clin	MDD5a
+daner_MDD5a_mmi2.gz	mmi2	PGC	Clin	MDD5a
+daner_MDD5a_mmo4.gz	mmo4	PGC	Clin	MDD5a
+daner_MDD5a_nes1.gz	nes1	PGC	Clin	MDD5a
+daner_MDD5a_qi3c.gz	qi3c	PGC	Clin	MDD5a
+daner_MDD5a_qi6c.gz	qi6c	PGC	Clin	MDD5a
+daner_MDD5a_qio2.gz	qio2	PGC	Clin	MDD5a
+daner_MDD5a_rad3.gz	rad3	PGC	Clin	MDD5a
+daner_MDD5a_rau2.gz	rau2	PGC	Clin	MDD5a
+daner_MDD5a_shp0.gz	shp0	PGC	Clin	MDD5a
+daner_MDD5a_stm2.gz	stm2	PGC	Clin	MDD5a
+daner_MDD5b_boma.gz	boma	PGC	Clin	MDD5b
+daner_MDD5b_col3.gz	col3	PGC	Clin	MDD5b
+daner_MDD5b_gens.gz	gens	PGC	Clin	MDD5b
+daner_MDD5b_gep3.gz	gep3	PGC	Clin	MDD5b
+daner_MDD5b_grnd.gz	grnd	PGC	Clin	MDD5b
+daner_MDD5b_mmi2.gz	mmi2	PGC	Clin	MDD5b
+daner_MDD5b_mmo4.gz	mmo4	PGC	Clin	MDD5b
+daner_MDD5b_nes1.gz	nes1	PGC	Clin	MDD5b
+daner_MDD5b_qi3c.gz	qi3c	PGC	Clin	MDD5b
+daner_MDD5b_qi6c.gz	qi6c	PGC	Clin	MDD5b
+daner_MDD5b_qio2.gz	qio2	PGC	Clin	MDD5b
+daner_MDD5b_rad3.gz	rad3	PGC	Clin	MDD5b
+daner_MDD5b_rage.gz	rage	PGC	Clin	MDD5b
+daner_MDD5b_rau2.gz	rau2	PGC	Clin	MDD5b
+daner_MDD5b_rde4.gz	rde4	PGC	Clin	MDD5b
+daner_MDD5b_shp0.gz	shp0	PGC	Clin	MDD5b
+daner_MDD5b_stm2.gz	stm2	PGC	Clin	MDD5b
+daner_MDD6_bidi1.gz	bidi1	PGC	Clin	MDD6
+daner_MDD9_shp0.gz	shp0	PGC	Clin	MDD9
+daner_MDD6_col3.gz	col3	PGC	Clin	MDD6
+daner_MDD6_gens.gz	gens	PGC	Clin	MDD6
+daner_MDD6_gep3.gz	gep3	PGC	Clin	MDD6
+daner_MDD6_mmi2.gz	mmi2	PGC	Clin	MDD6
+daner_MDD6_mmo4.gz	mmo4	PGC	Clin	MDD6
+daner_MDD6_nes1.gz	nes1	PGC	Clin	MDD6
+daner_MDD6_qi3c.gz	qi3c	PGC	Clin	MDD6
+daner_MDD6_qi6c.gz	qi6c	PGC	Clin	MDD6
+daner_MDD6_qio2.gz	qio2	PGC	Clin	MDD6
+daner_MDD6_rad3.gz	rad3	PGC	Clin	MDD6
+daner_MDD6_rot4.gz	rot4	PGC	Clin	MDD6
+daner_MDD6_shp0.gz	shp0	PGC	Clin	MDD6
+daner_MDD6_stm2.gz	stm2	PGC	Clin	MDD6
+daner_MDD6_twg2.gz	twg2	PGC	Clin	MDD6
+daner_MDD7_bidi1.gz	bidi1	PGC	Clin	MDD7
+daner_MDD7_boma.gz	boma	PGC	Clin	MDD7
+daner_MDD7_col3.gz	col3	PGC	Clin	MDD7
+daner_MDD7_gens.gz	gens	PGC	Clin	MDD7
+daner_MDD7_gep3.gz	gep3	PGC	Clin	MDD7
+daner_MDD7_mmi2.gz	mmi2	PGC	Clin	MDD7
+daner_MDD7_mmo4.gz	mmo4	PGC	Clin	MDD7
+daner_MDD7_nes1.gz	nes1	PGC	Clin	MDD7
+daner_MDD7_qi3c.gz	qi3c	PGC	Clin	MDD7
+daner_MDD7_qi6c.gz	qi6c	PGC	Clin	MDD7
+daner_MDD7_qio2.gz	qio2	PGC	Clin	MDD7
+daner_MDD7_rad3.gz	rad3	PGC	Clin	MDD7
+daner_MDD7_shp0.gz	shp0	PGC	Clin	MDD7
+daner_MDD7_stm2.gz	stm2	PGC	Clin	MDD7
+daner_MDD8_bidi1.gz	bidi1	PGC	Clin	MDD8
+daner_MDD8_col3.gz	col3	PGC	Clin	MDD8
+daner_MDD8_gens.gz	gens	PGC	Clin	MDD8
+daner_MDD8_gep3.gz	gep3	PGC	Clin	MDD8
+daner_MDD8_grnd.gz	grnd	PGC	Clin	MDD8
+daner_MDD8_nes1.gz	nes1	PGC	Clin	MDD8
+daner_MDD8_qi3c.gz	qi3c	PGC	Clin	MDD8
+daner_MDD8_rad3.gz	rad3	PGC	Clin	MDD8
+daner_MDD8_rot4.gz	rot4	PGC	Clin	MDD8
+daner_MDD8_shp0.gz	shp0	PGC	Clin	MDD8
+daner_MDD8_stm2.gz	stm2	PGC	Clin	MDD8
+daner_MDD8_twg2.gz	twg2	PGC	Clin	MDD8
+daner_MDD9_bidi1.gz	bidi1	PGC	Clin	MDD9
+daner_MDD9_boma.gz	boma	PGC	Clin	MDD9
+daner_MDD9_col3.gz	col3	PGC	Clin	MDD9
+daner_MDD9_gens.gz	gens	PGC	Clin	MDD9
+daner_MDD9_grnd.gz	grnd	PGC	Clin	MDD9
+daner_MDD9_mmi2.gz	mmi2	PGC	Clin	MDD9
+daner_MDD9_mmo4.gz	mmo4	PGC	Clin	MDD9
+daner_MDD9_nes1.gz	nes1	PGC	Clin	MDD9
+daner_MDD9_qi3c.gz	qi3c	PGC	Clin	MDD9
+daner_MDD9_qi6c.gz	qi6c	PGC	Clin	MDD9
+daner_MDD9_qio2.gz	qio2	PGC	Clin	MDD9
+daner_MDD9_rad3.gz	rad3	PGC	Clin	MDD9
+daner_MDD9_rage.gz	rage	PGC	Clin	MDD9
+daner_MDD9_rau2.gz	rau2	PGC	Clin	MDD9
+daner_MDD9_rde4.gz	rde4	PGC	Clin	MDD9
+daner_MDD9_rot4.gz	rot4	PGC	Clin	MDD9
+daner_MDD9_stm2.gz	stm2	PGC	Clin	MDD9
+daner_MDD9_twg2.gz	twg2	PGC	Clin	MDD9
+anhedonia_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD2
+appetite_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD3
+concentration_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD8
+death_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD9
+depressed_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD1
+fatigue_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD6
+psychomotor_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD5b
+restless_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD5a
+sleepChange_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD4
+sleepMore_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD4b
+sleepProb_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD4a
+weightChange_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD3
+weightGain_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD3b
+weightLost_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD3a
+worthless_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD7
+daner_MDD1_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD1
+daner_MDD2_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD2
+daner_MDD3a_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD3a
+daner_MDD3b_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD3b
+daner_MDD4a_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD4a
+daner_MDD4b_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD4b
+daner_MDD5a_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD5a
+daner_MDD5b_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD5b
+daner_MDD6_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD6
+daner_MDD7_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD7
+daner_MDD8_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD8
+daner_MDD9_ALSPAC_CISR.txt.gz	ALSPAC	ALSPAC	Comm	MDD9
+daner_MDD1_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD1
+daner_MDD2_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD2
+daner_MDD3_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD3
+daner_MDD3a_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD3a
+daner_MDD3b_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD3b
+daner_MDD4_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD3
+daner_MDD4a_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD4a
+daner_MDD4b_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD4b
+daner_MDD6_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD6
+daner_MDD7_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD7
+daner_MDD8_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD8
+daner_MDD9_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD9
+daner_MDD1_Dep_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD1
+daner_MDD2_Anh_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD2
+daner_MDD3_App_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD3
+daner_MDD3a_AppDec_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD3a
+daner_MDD3b_AppInc_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD3b
+daner_MDD4a_SleDec_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD4a
+daner_MDD4b_SleInc_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD4b
+daner_MDD5a_MotoInc_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD5a
+daner_MDD5b_MotoDec_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD5b
+daner_MDD6_Fatig_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD6
+daner_MDD7_Guilt_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD7
+daner_MDD8_Conc_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD8
+daner_MDD9_Sui_GenScot-MDDCases.gz	GenScot	GenScot	Clin	MDD9
+daner_MDD1_DEP_EstBB.gz	EstBB	EstBB	Comm	MDD1
+daner_MDD2_ANH_EstBB.gz	EstBB	EstBB	Comm	MDD2
+daner_MDD3a_APPDEC_EstBB.gz	EstBB	EstBB	Comm	MDD3a
+daner_MDD3b_APPINC_EstBB.gz	EstBB	EstBB	Comm	MDD3b
+daner_MDD4a_SLEDEC_EstBB.gz	EstBB	EstBB	Comm	MDD4a
+daner_MDD4b_SLEINC_EstBB.gz	EstBB	EstBB	Comm	MDD4b
+daner_MDD6_FATIG_EstBB.gz	EstBB	EstBB	Comm	MDD6
+daner_MDD7_GUILT_EstBB.gz	EstBB	EstBB	Comm	MDD7
+daner_MDD8_CONC_EstBB.gz	EstBB	EstBB	Comm	MDD8
+daner_MDD9_SUI_EstBB.gz	EstBB	EstBB	Comm	MDD9
+daner_dichotomized_Concentration_Difficulties_8.meta.gz	janpy	janpy	Clin	MDD8
+daner_dichotomized_Inability_to_Feel_7.meta.gz	janpy	janpy	Clin	MDD2
+daner_dichotomized_Lassitude.meta.gz	janpy	janpy	Clin	MDD5b
+daner_dichotomized_Pessimistic_Thoughts.meta.gz	janpy	janpy	Clin	MDD7
+daner_dichotomized_Reduced_Appetite.meta.gz	janpy	janpy	Clin	MDD3a
+daner_dichotomized_Reduced_Sleep_7.meta.gz	janpy	janpy	Clin	MDD4a
+daner_dichotomized_Sadness_2.meta.gz	janpy	janpy	Clin	MDD1
+daner_dichotomized_Suicidal_Thoughts_9.meta.gz	janpy	janpy	Clin	MDD9
