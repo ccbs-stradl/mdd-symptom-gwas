@@ -1,0 +1,13 @@
+---
+title: Format sumstats with tidyGWAS
+author: Mark adams
+output:
+  html_document:
+    df_print: kable
+---
+
+Use [tidyGWAS](https://ararder.github.io/tidyGWAS/) to format all summary statistics.
+
+```{sh}
+nextflow run meta/tidy.nf -qs 8 -resume
+```

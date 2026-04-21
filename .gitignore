@@ -16,6 +16,9 @@ fields.ukb
 sumstats/UKB/*.r
 sumstats/**/*.png
 sumstats/reference
+sumstats/cohorts
+sumstats/tidy
+*.parquet
 **/aligned
 sumstats/aligned
 sumstats/UKB/Touchscreen
