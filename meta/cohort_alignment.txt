@@ -185,7 +185,6 @@ restless_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD5a
 sleepChange_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD4
 sleepMore_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD4b
 sleepProb_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD4a
-weightChange_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD3
 weightGain_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD3b
 weightLost_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD3a
 worthless_GWASsumstats_QCed.dat_daner.gz	AGDS	AGDS	Clin	MDD7
@@ -206,7 +205,7 @@ daner_MDD2_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD2
 daner_MDD3_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD3
 daner_MDD3a_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD3a
 daner_MDD3b_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD3b
-daner_MDD4_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD3
+daner_MDD4_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD4
 daner_MDD4a_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD4a
 daner_MDD4b_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD4b
 daner_MDD6_UKBB_CIDI_glm.eur.txt.gz	UKBB	UKBB	Comm	MDD6
